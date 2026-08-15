@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "typecheck": "tsc -b --noEmit",
     "briefs": "node --experimental-strip-types scripts/audit-briefs.mjs",
-    "leviathan": "node --experimental-strip-types scripts/build-leviathan.mjs"
+    "leviathan": "node --experimental-strip-types scripts/build-leviathan.mjs",
+    "gate:verify": "node scripts/make-verify.mjs"
   },
   "dependencies": {
     "marked": "^18.0.9",

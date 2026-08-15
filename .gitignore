@@ -6,3 +6,9 @@ dist-ssr
 .vite
 *.log
 tsconfig.tsbuildinfo
+
+# The gate's verifier is per-deployment. Build it with `npm run gate:verify`
+# and commit it deliberately, or let the Pages workflow write it from the
+# HOME_PASSPHRASE secret at build time. A verifier built from someone's test
+# passphrase is worse than none at all, so it is not tracked by default.
+public/gate/verify.enc

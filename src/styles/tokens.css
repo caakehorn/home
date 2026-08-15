@@ -1,0 +1,191 @@
+/* ==========================================================================
+   月光宿 — DESIGN TOKENS
+   Four palettes, one per grounding reference. Swap with [data-vibe] on <html>.
+   ========================================================================== */
+
+:root {
+  /* -- type -------------------------------------------------------------
+     Three voices, from the three grounding references:
+       #1 wordmark  — Titan One, set as oblique rainbow-band arcade logo
+       #2 subhead   — Archivo Black, heavy wide grotesque, crackled white
+       #3 body      — Archivo, the same grotesque at text weights
+     Everything else is supporting cast: signage, stickers, meta, CRT. */
+  --f-logo: 'Titan One', 'Bungee', cursive;
+  --f-head: 'Archivo Black', 'Archivo', Impact, sans-serif;
+  --f-ui: 'Archivo', 'Segoe UI', system-ui, sans-serif;
+  --f-display: 'Monoton', 'Bungee', cursive;
+  --f-poster: 'Bungee', 'Archivo Black', Impact, sans-serif;
+  --f-shade: 'Bungee Shade', 'Bungee', sans-serif;
+  --f-mono: 'Space Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --f-crt: 'VT323', 'Space Mono', monospace;
+  /* No CJK webfont is shipped — kana leans on whatever the OS has. */
+  --f-jp: 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Noto Sans JP', 'Noto Sans CJK JP',
+    Meiryo, 'MS PGothic', sans-serif;
+
+  --step--1: clamp(0.72rem, 0.68rem + 0.2vw, 0.84rem);
+  --step-0: clamp(0.94rem, 0.9rem + 0.25vw, 1.06rem);
+  --step-1: clamp(1.2rem, 1.1rem + 0.5vw, 1.5rem);
+  --step-2: clamp(1.6rem, 1.35rem + 1.2vw, 2.4rem);
+  --step-3: clamp(2.2rem, 1.6rem + 3vw, 4rem);
+  --step-4: clamp(3rem, 1.6rem + 7vw, 8rem);
+  --step-5: clamp(3.6rem, 1.2rem + 12vw, 14rem);
+
+  /* -- chaos ------------------------------------------------------------
+     0 -> 1, written by the CHAOS DIAL. Everything loud reads from this. */
+  --chaos: 0.55;
+  --tempo: calc(1 - 0.62 * var(--chaos)); /* animation duration multiplier */
+  --tilt: calc(var(--chaos) * 1deg);
+  --glow-r: calc(6px + 34px * var(--chaos));
+  --grain: calc(0.04 + 0.22 * var(--chaos));
+  --scan: calc(0.05 + 0.3 * var(--chaos));
+  --swell: calc(0.3 + 0.7 * var(--chaos));
+
+  /* -- geometry ---------------------------------------------------------- */
+  --rule: 3px;
+  --gutter: clamp(1rem, 3vw, 3rem);
+  --slab: 0px; /* stickers do not get rounded corners */
+  --hard: 8px 8px 0 var(--edge);
+
+  color-scheme: dark;
+}
+
+/* -------------------------------------------------------------------------
+   VIBE 01 — MOONLIGHT INN  (ref: neon Tokyo rooftop, crows, cup ramen)
+   ---------------------------------------------------------------------- */
+:root,
+:root[data-vibe='moonlight'] {
+  --void: #07010e;
+  --void-2: #14032a;
+  --void-3: #240a45;
+  --edge: #05000a;
+
+  --n1: #b026ff; /* violet   */
+  --n2: #ff2bd6; /* magenta  */
+  --n3: #00eaff; /* cyan     */
+  --n4: #7b2fff; /* indigo   */
+  --n5: #ff6ec7; /* pink     */
+
+  --text: #f2e9ff;
+  --text-dim: #a98ecf;
+  --vibe-name: 'MOONLIGHT INN';
+}
+
+/* -------------------------------------------------------------------------
+   VIBE 02 — UNTITLED 1982  (ref: neo-expressionist skulls on black)
+   ---------------------------------------------------------------------- */
+:root[data-vibe='untitled'] {
+  --void: #0a0a09;
+  --void-2: #17150f;
+  --void-3: #262117;
+  --edge: #000000;
+
+  --n1: #ffd400; /* cadmium  */
+  --n2: #ef2b1c; /* red      */
+  --n3: #2a6df5; /* cobalt   */
+  --n4: #f6f2e6; /* bone     */
+  --n5: #8fc0e6; /* pale sky */
+
+  --text: #f8f4e7;
+  --text-dim: #b7ad99;
+  --vibe-name: 'UNTITLED 1982';
+}
+
+/* -------------------------------------------------------------------------
+   VIBE 03 — SLIME DRIP  (ref: dripping graffiti letterforms)
+   ---------------------------------------------------------------------- */
+:root[data-vibe='slime'] {
+  --void: #04202a;
+  --void-2: #073744;
+  --void-3: #0a4c5c;
+  --edge: #011016;
+
+  --n1: #ff2d95; /* hot pink   */
+  --n2: #b4ff1a; /* chartreuse */
+  --n3: #14e6e6; /* turquoise  */
+  --n4: #ffd400; /* yellow     */
+  --n5: #9a4dff; /* purple     */
+
+  --text: #e9fff8;
+  --text-dim: #7fc4bb;
+  --vibe-name: 'SLIME DRIP';
+}
+
+/* -------------------------------------------------------------------------
+   VIBE 04 — KAIJU DREAM  (ref: psychedelic oni + gumball maximalism)
+   ---------------------------------------------------------------------- */
+:root[data-vibe='kaiju'] {
+  --void: #240838;
+  --void-2: #3c0d54;
+  --void-3: #571473;
+  --edge: #12031c;
+
+  --n1: #ff2d78; /* coral pink */
+  --n2: #6ff2d4; /* mint       */
+  --n3: #ffb3c9; /* blush      */
+  --n4: #ffd166; /* gold       */
+  --n5: #a86bff; /* lilac      */
+
+  --text: #fff0f8;
+  --text-dim: #cfa6dd;
+  --vibe-name: 'KAIJU DREAM';
+}
+
+/* ==========================================================================
+   SHARED EFFECT UTILITIES
+   ========================================================================== */
+
+.neon {
+  color: var(--glow, var(--n3));
+  text-shadow:
+    0 0 calc(var(--glow-r) * 0.12) #fff,
+    0 0 calc(var(--glow-r) * 0.4) var(--glow, var(--n3)),
+    0 0 calc(var(--glow-r) * 1) var(--glow, var(--n3)),
+    0 0 calc(var(--glow-r) * 2) var(--glow, var(--n3));
+}
+
+.neon-weak {
+  text-shadow:
+    0 0 calc(var(--glow-r) * 0.25) var(--glow, var(--n3)),
+    0 0 calc(var(--glow-r) * 0.8) var(--glow, var(--n3));
+}
+
+/* Chunky outlined poster type — the sticker/graffiti voice. */
+.outlined {
+  -webkit-text-stroke: calc(2px + 2px * var(--chaos)) var(--edge);
+  paint-order: stroke fill;
+}
+
+.hard-shadow {
+  box-shadow:
+    var(--hard),
+    0 0 var(--glow-r) color-mix(in srgb, var(--glow, var(--n1)) 60%, transparent);
+}
+
+/* A sticker: thick border, hard offset, small rotation. */
+.sticker {
+  border: var(--rule) solid var(--edge);
+  border-radius: var(--slab);
+  box-shadow: var(--hard);
+  transform: rotate(var(--rot, -2deg));
+}
+
+/* Repeating perspective floor, the vaporwave staple. */
+.grid-floor {
+  background-image:
+    linear-gradient(transparent 0 96%, color-mix(in srgb, var(--n3) 70%, transparent) 96% 100%),
+    linear-gradient(90deg, transparent 0 96%, color-mix(in srgb, var(--n2) 70%, transparent) 96% 100%);
+  background-size: 64px 64px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --tempo: 3;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: calc(1s * var(--tempo)) !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 120ms !important;
+  }
+}

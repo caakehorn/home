@@ -1,0 +1,224 @@
+@import './fonts.css';
+@import './tokens.css';
+@import './type.css';
+
+/* ==========================================================================
+   RESET-ISH
+   ========================================================================== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--void);
+  color: var(--text);
+  font-family: var(--f-ui);
+  font-size: var(--step-0);
+  line-height: 1.45;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  transition:
+    background-color 600ms ease,
+    color 600ms ease;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+blockquote,
+ul,
+ol {
+  margin: 0;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+a {
+  color: var(--n3);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+img,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+::selection {
+  background: var(--n2);
+  color: var(--edge);
+}
+
+:focus-visible {
+  outline: 3px dashed var(--n3);
+  outline-offset: 3px;
+}
+
+/* Loud scrollbar. It is part of the furniture. */
+* {
+  scrollbar-color: var(--n2) var(--void-2);
+}
+*::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+*::-webkit-scrollbar-track {
+  background: var(--void-2);
+}
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(var(--n2), var(--n1));
+  border: 2px solid var(--edge);
+}
+
+/* ==========================================================================
+   SCREEN FURNITURE — grain, scanlines, vignette, drifting light
+   Everything here is pointer-events:none and lives above the page.
+   ========================================================================== */
+
+.fx-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9000;
+}
+
+.fx-scanlines {
+  background: repeating-linear-gradient(
+    to bottom,
+    rgb(0 0 0 / 0.55) 0 1px,
+    transparent 1px 3px
+  );
+  opacity: var(--scan);
+  mix-blend-mode: multiply;
+}
+
+.fx-grain {
+  /* feTurbulence grain, inlined so nothing is fetched at runtime */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  opacity: var(--grain);
+  mix-blend-mode: overlay;
+  animation: grain-shift calc(0.9s * var(--tempo)) steps(4) infinite;
+}
+
+.fx-vignette {
+  background: radial-gradient(
+    130% 90% at 50% 45%,
+    transparent 35%,
+    color-mix(in srgb, var(--edge) 85%, transparent) 100%
+  );
+}
+
+.fx-bleed {
+  /* chromatic haze that swims across the viewport */
+  background:
+    radial-gradient(50% 40% at 15% 20%, color-mix(in srgb, var(--n1) 45%, transparent), transparent 70%),
+    radial-gradient(45% 45% at 85% 15%, color-mix(in srgb, var(--n3) 40%, transparent), transparent 70%),
+    radial-gradient(60% 50% at 70% 90%, color-mix(in srgb, var(--n2) 40%, transparent), transparent 70%);
+  filter: blur(40px);
+  opacity: calc(0.18 + 0.42 * var(--chaos));
+  mix-blend-mode: screen;
+  animation: bleed-drift calc(26s * var(--tempo)) ease-in-out infinite alternate;
+}
+
+@keyframes grain-shift {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-3%, 2%); }
+  50% { transform: translate(2%, -3%); }
+  75% { transform: translate(-2%, -2%); }
+  100% { transform: translate(3%, 1%); }
+}
+
+@keyframes bleed-drift {
+  0% { transform: translate3d(-4%, -2%, 0) scale(1.05); }
+  100% { transform: translate3d(5%, 4%, 0) scale(1.25); }
+}
+
+/* ==========================================================================
+   SHARED MOTION
+   ========================================================================== */
+
+@keyframes flicker {
+  0%, 18%, 22%, 25%, 53%, 57%, 100% { opacity: 1; }
+  20%, 24%, 55% { opacity: 0.35; }
+}
+
+@keyframes hue-cycle {
+  to { filter: hue-rotate(360deg); }
+}
+
+@keyframes throb {
+  50% { transform: scale(1.04); }
+}
+
+@keyframes marquee-run {
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+@keyframes jitter {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(calc(-1px * var(--swell) * 2), 1px) rotate(-0.4deg); }
+  50% { transform: translate(1px, calc(-1px * var(--swell) * 2)) rotate(0.4deg); }
+  75% { transform: translate(calc(1px * var(--swell)), 1px) rotate(-0.2deg); }
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(28px) rotate(-1deg); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ==========================================================================
+   LAYOUT PRIMITIVES
+   ========================================================================== */
+
+.wrap {
+  width: min(1440px, 100% - var(--gutter) * 2);
+  margin-inline: auto;
+}
+
+.eyebrow {
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.jp {
+  font-family: var(--f-jp);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}

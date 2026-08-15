@@ -1,0 +1,32 @@
+.marquee {
+  position: relative;
+  overflow: hidden;
+  padding: 0.28em 0;
+  background: var(--glow);
+  border-block: var(--rule) solid var(--edge);
+  color: var(--edge);
+  font-family: var(--f-poster);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: 0 0 var(--glow-r) color-mix(in srgb, var(--glow) 60%, transparent);
+}
+
+.marquee__track {
+  display: flex;
+  width: max-content;
+  animation: marquee-run calc(var(--marquee-dur) * var(--tempo)) linear infinite;
+}
+
+.marquee--rev .marquee__track {
+  animation-direction: reverse;
+}
+
+.marquee:hover .marquee__track {
+  animation-play-state: paused;
+}
+
+.marquee__run {
+  display: block;
+  padding-right: 0;
+}

@@ -1,0 +1,103 @@
+.slab__board {
+  position: relative;
+  height: clamp(220px, 30vh, 300px);
+  overflow: hidden;
+  background: var(--void);
+  border: var(--rule) solid var(--edge);
+  box-shadow: inset 0 0 60px color-mix(in srgb, var(--glow) 22%, transparent);
+  touch-action: none;
+}
+
+.slab__grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--glow) 22%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--glow) 22%, transparent) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+}
+
+.slab__sticker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  gap: 0;
+  padding: 0.4rem 0.7rem;
+  background: var(--tone);
+  color: var(--edge);
+  border: 3px solid var(--edge);
+  box-shadow: 4px 4px 0 var(--edge);
+  cursor: grab;
+  will-change: transform;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.slab__sticker:active {
+  cursor: grabbing;
+  box-shadow: 1px 1px 0 var(--edge);
+}
+
+.slab__sticker--round {
+  border-radius: 999px;
+  padding: 0.55rem 0.85rem;
+}
+
+.slab__sticker--flag {
+  clip-path: polygon(0 0, 100% 0, 92% 50%, 100% 100%, 0 100%);
+  padding-right: 1.2rem;
+}
+
+.slab__label {
+  font-family: var(--f-poster);
+  font-size: var(--step--1);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.slab__kana {
+  font-size: 0.7rem;
+  line-height: 1;
+  opacity: 0.8;
+}
+
+.slab__controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.7rem;
+  flex-wrap: wrap;
+}
+
+.slab__btn {
+  padding: 0.3rem 0.8rem;
+  font-family: var(--f-poster);
+  font-size: var(--step--1);
+  color: var(--edge);
+  background: var(--glow);
+  border: 3px solid var(--edge);
+  box-shadow: 4px 4px 0 var(--edge);
+  transition: transform 120ms ease;
+}
+
+.slab__btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--edge);
+}
+
+.slab__btn:active {
+  transform: translate(3px, 3px);
+  box-shadow: 0 0 0 var(--edge);
+}
+
+.slab__status {
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.14em;
+  color: var(--text-dim);
+}

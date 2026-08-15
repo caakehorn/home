@@ -1,6 +1,14 @@
 /* ==========================================================================
    DAN'S DIALECTICAL DATABASE AND DRUG DEN — DESIGN TOKENS
-   Four palettes, one per grounding reference. Swap with [data-vibe] on <html>.
+
+   The house style is Tokyo neon painted onto a Basquiat canvas: a raw black
+   ground, cadmium and ferrari red and cobalt laid on in slabs, everything
+   hand-ruled and dripping, with the kana signage still burning on top.
+
+   Four palettes, all of them primary-heavy now. Swap with [data-vibe] on
+   <html>. The neon ramp (--n1..--n5) is the SIGNAGE layer; the paint ramp
+   (--p-*) is the CANVAS layer underneath it, and they are deliberately
+   different jobs — neon glows, paint does not.
    ========================================================================== */
 
 :root {
@@ -40,6 +48,23 @@
   --scan: calc(0.05 + 0.3 * var(--chaos));
   --swell: calc(0.3 + 0.7 * var(--chaos));
 
+  /* -- the paint box ------------------------------------------------------
+     Basquiat's actual working palette: cadmium, ferrari red, cobalt, bone,
+     grass, oxblood. These never glow — paint is opaque. Glow belongs to the
+     neon ramp only, which is what keeps the two layers legible as two. */
+  --p-black: #0b0a09;
+  --p-yellow: #f5c400;
+  --p-red: #dd2a17;
+  --p-blue: #1244c4;
+  --p-bone: #f0e9d8;
+  --p-green: #2f9c45;
+  --p-pink: #e8478f;
+  --p-orange: #ef8a1f;
+
+  /* stroke weights for hand-drawn work */
+  --oil: 5px;   /* oil-stick line */
+  --brush: 12px; /* loaded brush */
+
   /* -- geometry ---------------------------------------------------------- */
   --rule: 3px;
   --gutter: clamp(1rem, 3vw, 3rem);
@@ -50,23 +75,24 @@
 }
 
 /* -------------------------------------------------------------------------
-   VIBE 01 — DRUG DEN  (ref: neon Tokyo rooftop, crows, cup ramen at 4am)
+   VIBE 01 — DRUG DEN — the fusion, and the default.
+   Raw black canvas, cadmium and cobalt slabs, Tokyo neon burning on top.
    ---------------------------------------------------------------------- */
 :root,
 :root[data-vibe='den'] {
-  --void: #07010e;
-  --void-2: #14032a;
-  --void-3: #240a45;
-  --edge: #05000a;
+  --void: #0b0a09;
+  --void-2: #17120c;
+  --void-3: #241a10;
+  --edge: #000000;
 
-  --n1: #b026ff; /* violet   */
-  --n2: #ff2bd6; /* magenta  */
-  --n3: #00eaff; /* cyan     */
-  --n4: #7b2fff; /* indigo   */
-  --n5: #ff6ec7; /* pink     */
+  --n1: #f5c400; /* cadmium — the loudest thing in the room */
+  --n2: #ff2bd6; /* magenta — the signage that survived from Tokyo */
+  --n3: #00eaff; /* cyan    — ditto */
+  --n4: #1244c4; /* cobalt  */
+  --n5: #dd2a17; /* ferrari red */
 
-  --text: #f2e9ff;
-  --text-dim: #a98ecf;
+  --text: #f0e9d8;
+  --text-dim: #a89880;
   --vibe-name: 'DRUG DEN';
 }
 
@@ -74,19 +100,19 @@
    VIBE 02 — UNTITLED 1982  (ref: neo-expressionist skulls on black)
    ---------------------------------------------------------------------- */
 :root[data-vibe='untitled'] {
-  --void: #0a0a09;
-  --void-2: #17150f;
-  --void-3: #262117;
+  --void: #080807;
+  --void-2: #141310;
+  --void-3: #221f18;
   --edge: #000000;
 
   --n1: #ffd400; /* cadmium  */
   --n2: #ef2b1c; /* red      */
   --n3: #2a6df5; /* cobalt   */
   --n4: #f6f2e6; /* bone     */
-  --n5: #8fc0e6; /* pale sky */
+  --n5: #2f9c45; /* grass    */
 
   --text: #f8f4e7;
-  --text-dim: #b7ad99;
+  --text-dim: #b0a58e;
   --vibe-name: 'UNTITLED 1982';
 }
 
@@ -94,19 +120,19 @@
    VIBE 03 — SLIME DRIP  (ref: dripping graffiti letterforms)
    ---------------------------------------------------------------------- */
 :root[data-vibe='slime'] {
-  --void: #04202a;
-  --void-2: #073744;
-  --void-3: #0a4c5c;
-  --edge: #011016;
+  --void: #06170f;
+  --void-2: #0a2618;
+  --void-3: #0f3722;
+  --edge: #010a06;
 
-  --n1: #ff2d95; /* hot pink   */
-  --n2: #b4ff1a; /* chartreuse */
+  --n1: #b4ff1a; /* chartreuse */
+  --n2: #ff2d95; /* hot pink   */
   --n3: #14e6e6; /* turquoise  */
-  --n4: #ffd400; /* yellow     */
-  --n5: #9a4dff; /* purple     */
+  --n4: #ffd400; /* cadmium    */
+  --n5: #dd2a17; /* red        */
 
-  --text: #e9fff8;
-  --text-dim: #7fc4bb;
+  --text: #eafff2;
+  --text-dim: #7fb497;
   --vibe-name: 'SLIME DRIP';
 }
 
@@ -114,20 +140,50 @@
    VIBE 04 — KAIJU DREAM  (ref: psychedelic oni + gumball maximalism)
    ---------------------------------------------------------------------- */
 :root[data-vibe='kaiju'] {
-  --void: #240838;
-  --void-2: #3c0d54;
-  --void-3: #571473;
-  --edge: #12031c;
+  --void: #200607;
+  --void-2: #330d0c;
+  --void-3: #4a1513;
+  --edge: #0d0202;
 
-  --n1: #ff2d78; /* coral pink */
-  --n2: #6ff2d4; /* mint       */
-  --n3: #ffb3c9; /* blush      */
-  --n4: #ffd166; /* gold       */
-  --n5: #a86bff; /* lilac      */
+  --n1: #ef8a1f; /* orange     */
+  --n2: #e8478f; /* hot pink   */
+  --n3: #6ff2d4; /* mint       */
+  --n4: #f5c400; /* cadmium    */
+  --n5: #1244c4; /* cobalt     */
 
-  --text: #fff0f8;
-  --text-dim: #cfa6dd;
+  --text: #ffeee6;
+  --text-dim: #c99b8a;
   --vibe-name: 'KAIJU DREAM';
+}
+
+/* -------------------------------------------------------------------------
+   VIBE 05 — UNTITLED — the odd one out.
+
+   Every other palette is neon on black. This one is paint on raw canvas: a
+   bone-white ground, opaque primaries, black ink, and no glow anywhere. The
+   site's glow utilities are switched off for it in basquiat.css rather than
+   tinted down, because a light source on a painting is a mistake, not a dim
+   version of a good idea.
+   ---------------------------------------------------------------------- */
+:root[data-vibe='basquiat'] {
+  --void: #f2ece0;
+  --void-2: #e8e0d0;
+  --void-3: #dcd2be;
+  --edge: #0a0a09;
+
+  --n1: #f5c400; /* cadmium */
+  --n2: #dd2a17; /* ferrari red */
+  --n3: #1244c4; /* cobalt */
+  --n4: #2f9c45; /* grass */
+  --n5: #0a0a09; /* ink — the line does the work here */
+
+  --text: #0a0a09;
+  --text-dim: #4a453c;
+  --vibe-name: 'UNTITLED';
+
+  /* What the wiki map draws a page with. Everywhere else this is the signage
+     colour, which on bone ground would be a yellow dot on cream. */
+  --graph-ink: #17150f;
 }
 
 /* ==========================================================================

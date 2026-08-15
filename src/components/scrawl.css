@@ -1,0 +1,44 @@
+.scrawl {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  /* Inert until DRAW is on — otherwise it would swallow the whole site. */
+  pointer-events: none;
+}
+
+:root[data-drawing='1'] .scrawl {
+  pointer-events: auto;
+  cursor: crosshair;
+  /* sits above the content while the hand is out */
+  z-index: 8500;
+}
+
+.scrawl__wipe {
+  position: fixed;
+  left: 0.7rem;
+  bottom: 0.7rem;
+  z-index: 8600;
+  padding: 0.3rem 0.7rem;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  color: var(--text);
+  background: color-mix(in srgb, var(--void) 88%, transparent);
+  border: 3px solid var(--n5);
+  box-shadow: 4px 4px 0 var(--edge);
+}
+
+.scrawl__wipe b {
+  color: var(--n5);
+}
+
+.scrawl__wipe:hover {
+  background: var(--n5);
+  color: var(--edge);
+}
+
+.scrawl__wipe:hover b {
+  color: var(--edge);
+}

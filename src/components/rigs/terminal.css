@@ -1,0 +1,124 @@
+.term {
+  border: var(--rule) solid var(--edge);
+  background: #030308;
+  box-shadow:
+    inset 0 0 70px color-mix(in srgb, var(--glow) 26%, transparent),
+    0 0 var(--glow-r) color-mix(in srgb, var(--glow) 40%, transparent);
+  cursor: text;
+}
+
+.term__bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.6rem;
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.1em;
+  color: var(--edge);
+  background: var(--glow);
+  border-bottom: var(--rule) solid var(--edge);
+}
+
+.term__led {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--void);
+  animation: flicker calc(3.4s * var(--tempo)) steps(1) infinite;
+}
+
+.term__baud {
+  margin-left: auto;
+  opacity: 0.75;
+}
+
+.term__screen {
+  height: clamp(230px, 34vh, 340px);
+  overflow-y: auto;
+  padding: 0.7rem 0.8rem 1rem;
+  font-family: var(--f-crt);
+  font-size: clamp(1.05rem, 0.95rem + 0.4vw, 1.35rem);
+  line-height: 1.25;
+  color: var(--glow);
+  text-shadow: 0 0 8px color-mix(in srgb, var(--glow) 80%, transparent);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0 2px,
+    rgb(0 0 0 / 0.45) 2px 4px
+  );
+}
+
+.term__line {
+  margin: 0;
+  font: inherit;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.term__line--in {
+  color: var(--text);
+  opacity: 0.9;
+}
+
+.term__line--err {
+  color: var(--n2);
+  text-shadow: 0 0 8px var(--n2);
+}
+
+.term__line--art {
+  color: var(--n5);
+  text-shadow: 0 0 10px var(--n5);
+}
+
+.term__prompt {
+  display: flex;
+  gap: 0.45rem;
+  align-items: baseline;
+}
+
+.term__input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  color: var(--text);
+  caret-color: var(--glow);
+}
+
+.term__input::placeholder {
+  color: color-mix(in srgb, var(--glow) 45%, transparent);
+}
+
+.term__keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.5rem;
+  border-top: var(--rule) solid var(--edge);
+  background: var(--void-3);
+}
+
+.term__key {
+  padding: 0.2rem 0.55rem;
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  color: var(--text);
+  background: var(--void-2);
+  border: 2px solid var(--glow);
+  box-shadow: 3px 3px 0 var(--edge);
+  transition: transform 140ms ease, background-color 140ms ease;
+}
+
+.term__key:hover {
+  background: var(--glow);
+  color: var(--edge);
+  transform: translate(-1px, -2px);
+}
+
+.term__key:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 var(--edge);
+}

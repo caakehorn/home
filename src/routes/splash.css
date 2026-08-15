@@ -1,0 +1,379 @@
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9700;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(120% 80% at 50% 8%, color-mix(in srgb, var(--n4) 34%, transparent), transparent 62%),
+    linear-gradient(180deg, #05000d 0%, var(--void) 38%, var(--void-2) 78%, var(--void-3) 100%);
+  animation: splash-in 700ms ease both;
+}
+
+@keyframes splash-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* leaving: iris + glitch out */
+.splash--out {
+  animation: splash-out 900ms cubic-bezier(0.7, 0, 0.3, 1) forwards;
+}
+
+@keyframes splash-out {
+  0% { clip-path: circle(140% at 50% 50%); filter: none; opacity: 1; }
+  22% { filter: invert(1) hue-rotate(90deg) saturate(3); }
+  30% { filter: none; transform: translateX(-8px); }
+  36% { filter: invert(1); transform: translateX(9px); }
+  44% { filter: none; transform: none; }
+  100% { clip-path: circle(0% at 50% 46%); opacity: 0.2; }
+}
+
+/* ---- sky ---------------------------------------------------------- */
+.splash__sky {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.splash__star {
+  position: absolute;
+  background: #fff;
+  clip-path: polygon(50% 0%, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0% 50%, 39% 39%);
+  animation: spark-twinkle calc(3.2s * var(--tempo)) ease-in-out infinite;
+  filter: drop-shadow(0 0 5px var(--n3));
+}
+
+/* crescent = a disc with an offset disc masked out of it */
+.splash__moon {
+  position: absolute;
+  top: clamp(4%, 7vh, 12%);
+  left: clamp(8%, 16vw, 22%);
+  width: clamp(60px, 9vw, 130px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--n3);
+  -webkit-mask-image: radial-gradient(circle at 118% 34%, transparent 0 62%, #000 62.5%);
+  mask-image: radial-gradient(circle at 118% 34%, transparent 0 62%, #000 62.5%);
+  filter: drop-shadow(0 0 calc(var(--glow-r) * 1.6) var(--n3));
+  animation: throb calc(7s * var(--tempo)) ease-in-out infinite;
+}
+
+/* ---- skyline ------------------------------------------------------- */
+.splash__skyline {
+  position: absolute;
+  inset: auto 0 15vh 0;
+  width: 100%;
+  height: min(44vh, 360px);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.splash__towers rect {
+  fill: color-mix(in srgb, var(--void-3) 82%, transparent);
+  stroke: var(--n1);
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 8px var(--n1));
+}
+
+.splash__windows rect {
+  fill: var(--n3);
+  opacity: 0.55;
+  animation: flicker calc(6s * var(--tempo)) steps(1) infinite;
+}
+
+.splash__windows rect:nth-child(3n) {
+  fill: var(--n2);
+  animation-delay: -2s;
+}
+.splash__windows rect:nth-child(5n) {
+  opacity: 0.2;
+  animation-delay: -4s;
+}
+
+.splash__tower {
+  fill: none;
+  stroke: var(--n2);
+  stroke-width: 3;
+  filter: drop-shadow(0 0 10px var(--n2));
+}
+
+.splash__tower-x {
+  stroke: var(--n2);
+  stroke-width: 2;
+  opacity: 0.7;
+}
+
+.splash__pagoda path,
+.splash__pagoda rect {
+  fill: color-mix(in srgb, var(--void-2) 70%, transparent);
+  stroke: var(--n5);
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 9px var(--n5));
+}
+
+/* ---- vertical signs ------------------------------------------------ */
+.splash__sign {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1em;
+  font-size: clamp(1.2rem, 3vw, 2.4rem);
+  line-height: 1.05;
+  padding: 0.4em 0.3em;
+  color: var(--glow);
+  background: color-mix(in srgb, var(--void) 62%, transparent);
+  border: 3px solid var(--glow);
+  text-shadow: 0 0 6px #fff, 0 0 22px var(--glow), 0 0 44px var(--glow);
+  box-shadow:
+    0 0 26px color-mix(in srgb, var(--glow) 60%, transparent),
+    inset 0 0 20px color-mix(in srgb, var(--glow) 25%, transparent);
+  animation: flicker calc(9s * var(--tempo)) steps(1) infinite;
+  pointer-events: none;
+}
+
+.splash__sign-glyph {
+  display: block;
+}
+
+.splash__sign--left {
+  left: clamp(0.4rem, 3vw, 3rem);
+}
+.splash__sign--right {
+  right: clamp(0.4rem, 3vw, 3rem);
+}
+
+@media (max-width: 760px) {
+  .splash__sign {
+    opacity: 0.5;
+    font-size: 1.1rem;
+  }
+  .splash__sign--minor {
+    display: none;
+  }
+}
+
+/* ---- lanterns ------------------------------------------------------ */
+.splash__lanterns {
+  position: absolute;
+  top: clamp(6%, 10vh, 16%);
+  right: clamp(4%, 12vw, 18%);
+  display: flex;
+  gap: 0.6rem;
+  pointer-events: none;
+}
+
+.splash__lantern {
+  display: grid;
+  place-items: center;
+  width: clamp(28px, 4.2vw, 48px);
+  aspect-ratio: 0.78;
+  border-radius: 46% 46% 46% 46% / 34% 34% 34% 34%;
+  font-size: clamp(0.7rem, 1.6vw, 1.1rem);
+  color: var(--void);
+  background: var(--n2);
+  border: 3px solid var(--edge);
+  box-shadow: 0 0 26px var(--n2);
+  animation: lantern-sway calc(5s * var(--tempo)) ease-in-out infinite alternate;
+  transform-origin: 50% -12px;
+}
+
+@keyframes lantern-sway {
+  from { transform: rotate(-7deg); }
+  to { transform: rotate(7deg); }
+}
+
+/* ---- core mark ----------------------------------------------------- */
+.splash__core {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  justify-items: center;
+  gap: 0.6rem;
+  padding: var(--gutter);
+  text-align: center;
+  transform: translateY(-6vh);
+}
+
+.splash__venue {
+  font-size: clamp(1.4rem, 4vw, 2.6rem);
+  letter-spacing: 0.4em;
+  padding-left: 0.4em;
+  color: var(--n2);
+  text-shadow: 0 0 8px #fff, 0 0 26px var(--n2), 0 0 60px var(--n2);
+  animation: flicker calc(7s * var(--tempo)) steps(1) infinite;
+}
+
+/* backing plate: the skyline behind this is busy on purpose, the words
+   still have to win */
+.splash__tagline {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: min(38rem, 92vw);
+  margin-top: 1.4rem;
+  padding: 0.5rem 1.1rem 0.6rem;
+  font-size: clamp(1.15rem, 3vw, 2.1rem);
+  background: color-mix(in srgb, var(--void) 78%, transparent);
+  backdrop-filter: blur(7px);
+  border: 3px solid color-mix(in srgb, var(--n3) 55%, transparent);
+  box-shadow: 0 0 30px color-mix(in srgb, var(--void) 90%, transparent);
+}
+
+.splash__tagline-sep {
+  color: var(--n3);
+  text-shadow: 0 0 12px var(--n3);
+}
+
+.splash__tagline-alt {
+  font-family: var(--f-mono);
+  font-size: 0.72em;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+/* ---- enter --------------------------------------------------------- */
+.splash__enter {
+  position: relative;
+  margin-top: 1.2rem;
+  padding: 0.55rem 2.6rem 0.65rem;
+  font-family: var(--f-head);
+  font-size: clamp(1.4rem, 3.6vw, 2.6rem);
+  letter-spacing: 0.24em;
+  text-indent: 0.24em;
+  color: var(--void);
+  background: var(--n3);
+  border: 4px solid var(--edge);
+  box-shadow:
+    9px 9px 0 var(--edge),
+    0 0 calc(var(--glow-r) * 1.4) var(--n3);
+  transition: transform 160ms cubic-bezier(0.2, 1.5, 0.4, 1), background-color 160ms ease;
+  overflow: hidden;
+}
+
+.splash__enter:hover {
+  background: var(--n2);
+  transform: translate(-3px, -5px) scale(1.03);
+  box-shadow:
+    14px 14px 0 var(--edge),
+    0 0 calc(var(--glow-r) * 2) var(--n2);
+}
+
+.splash__enter:active {
+  transform: translate(4px, 4px) scale(0.99);
+  box-shadow: 0 0 0 var(--edge);
+}
+
+.splash__enter-glow {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 20%, rgb(255 255 255 / 0.85) 50%, transparent 80%);
+  transform: translateX(-120%);
+  animation: enter-sheen calc(3.4s * var(--tempo)) ease-in-out infinite;
+}
+
+@keyframes enter-sheen {
+  0%, 60% { transform: translateX(-120%); }
+  100% { transform: translateX(120%); }
+}
+
+.splash__enter-label {
+  position: relative;
+}
+
+.splash__enter-kana {
+  position: absolute;
+  top: 2px;
+  right: 8px;
+  font-size: 0.4em;
+  letter-spacing: 0;
+  opacity: 0.65;
+}
+
+.splash__hint {
+  margin-top: 0.5rem;
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+/* ---- roof + crows --------------------------------------------------- */
+.splash__roof {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 26vh;
+  min-height: 150px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.splash__tiles {
+  position: absolute;
+  inset: 22% 0 0 0;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      var(--n1) 0 4px,
+      color-mix(in srgb, var(--n4) 70%, var(--edge)) 4px 48px
+    );
+  border-top: 5px solid var(--n2);
+  box-shadow: 0 -12px 40px color-mix(in srgb, var(--n1) 55%, transparent);
+  transform: perspective(320px) rotateX(38deg);
+  transform-origin: 50% 0;
+}
+
+.splash__crows {
+  position: absolute;
+  left: 50%;
+  bottom: 18%;
+  width: min(560px, 82vw);
+  transform: translateX(-50%);
+  z-index: 2;
+}
+
+.splash__crow-body {
+  fill: #05010a;
+  stroke: color-mix(in srgb, var(--n1) 85%, transparent);
+  stroke-width: 1.5;
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--n1) 70%, transparent));
+}
+
+.splash__crow-legs {
+  stroke: #05010a;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  fill: none;
+}
+
+.splash__crow {
+  animation: crow-bob calc(4.5s * var(--tempo)) ease-in-out infinite;
+  transform-origin: 50% 100%;
+}
+
+.splash__crow-eye {
+  fill: var(--n3);
+  filter: drop-shadow(0 0 6px var(--n3));
+  animation: flicker calc(5s * var(--tempo)) steps(1) infinite;
+}
+
+@keyframes crow-bob {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  40% { transform: translateY(-6px) rotate(-1.5deg); }
+  70% { transform: translateY(2px) rotate(1deg); }
+}
+
+/* ---- ticker --------------------------------------------------------- */
+.splash__ticker {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 4;
+}

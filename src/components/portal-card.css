@@ -1,0 +1,105 @@
+.portal {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    'num   kana'
+    'title title'
+    'blurb blurb'
+    'stat  stat';
+  align-content: start;
+  gap: 0.2rem 0.7rem;
+  padding: 0.9rem 1rem 2.2rem;
+  overflow: hidden;
+  color: var(--text);
+  text-decoration: none;
+  background:
+    radial-gradient(120% 90% at 12% 0%, color-mix(in srgb, var(--glow) 30%, transparent), transparent 62%),
+    var(--void-2);
+  border: var(--rule) solid var(--edge);
+  box-shadow:
+    8px 8px 0 var(--edge),
+    0 0 calc(var(--glow-r) * 0.7) color-mix(in srgb, var(--glow) 40%, transparent);
+  transform: rotate(calc(var(--lean) * var(--tilt)));
+  transition:
+    transform 260ms cubic-bezier(0.2, 1.4, 0.4, 1),
+    box-shadow 260ms ease;
+}
+
+.portal:hover,
+.portal:focus-visible {
+  transform: rotate(0deg) translate(-3px, -6px) scale(1.015);
+  box-shadow:
+    14px 14px 0 var(--edge),
+    0 0 calc(var(--glow-r) * 1.6) var(--glow);
+}
+
+.portal__num {
+  grid-area: num;
+  font-family: var(--f-poster);
+  font-size: var(--step-1);
+  line-height: 1;
+  color: var(--glow);
+  -webkit-text-stroke: 2px var(--edge);
+  paint-order: stroke fill;
+}
+
+.portal__kana {
+  grid-area: kana;
+  justify-self: end;
+  font-size: var(--step-1);
+  line-height: 1;
+  color: var(--glow);
+  text-shadow: 0 0 calc(var(--glow-r) * 0.6) var(--glow);
+}
+
+.portal__title {
+  grid-area: title;
+  margin-top: 0.3rem;
+  font-size: var(--step-2);
+  line-height: 0.95;
+}
+
+.portal__blurb {
+  grid-area: blurb;
+  margin-top: 0.45rem;
+  font-size: var(--step--1);
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+.portal__status {
+  grid-area: stat;
+  margin-top: 0.6rem;
+  justify-self: start;
+  padding: 0.1rem 0.5rem;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  border: 2px solid currentColor;
+}
+
+.portal__status--live {
+  color: var(--n2);
+}
+.portal__status--wiring {
+  color: var(--glow);
+  animation: flicker calc(4s * var(--tempo)) steps(1) infinite;
+}
+.portal__status--dark {
+  color: var(--text-dim);
+}
+
+.portal__chant {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+.portal:hover .portal__chant,
+.portal:focus-visible .portal__chant {
+  opacity: 1;
+}

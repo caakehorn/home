@@ -1,0 +1,146 @@
+.dial {
+  display: flex;
+  gap: 1.2rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.dial__knob {
+  position: relative;
+  width: 168px;
+  height: 168px;
+  flex: none;
+  touch-action: none;
+  cursor: grab;
+  display: grid;
+  place-items: center;
+  filter: drop-shadow(0 0 calc(var(--glow-r) * 0.6) var(--glow));
+}
+
+.dial__knob:active {
+  cursor: grabbing;
+}
+
+.dial__face {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Dashes start at 3 o'clock and run clockwise, so 135deg puts the sweep's
+   origin at bottom-left and leaves the gap centred at the bottom — matching
+   the tick marks, which are laid out from -135deg through +135deg. */
+.dial__track,
+.dial__fill {
+  fill: none;
+  stroke-width: 10;
+  stroke-linecap: butt;
+  transform: rotate(135deg);
+  transform-origin: 70px 70px;
+}
+
+.dial__track {
+  stroke: var(--void-3);
+  stroke-dasharray: 75 100;
+}
+
+.dial__fill {
+  stroke: var(--glow);
+  transition: stroke-dasharray 90ms linear;
+}
+
+.dial__tick {
+  stroke: var(--text-dim);
+  stroke-width: 2;
+}
+
+.dial__tick--max {
+  stroke: var(--n2);
+  stroke-width: 4;
+}
+
+/* rotating cap + needle */
+.dial__cap {
+  position: absolute;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 34% 28%, color-mix(in srgb, var(--text) 70%, transparent), transparent 45%),
+    conic-gradient(from 0deg, var(--void-3), var(--void-2), var(--void-3), var(--void-2), var(--void-3));
+  border: 3px solid var(--edge);
+  display: grid;
+  place-items: start center;
+  transition: transform 90ms linear;
+}
+
+.dial__needle {
+  width: 6px;
+  height: 34px;
+  margin-top: 6px;
+  background: var(--glow);
+  box-shadow: 0 0 12px var(--glow);
+  border: 2px solid var(--edge);
+}
+
+.dial__grip {
+  position: absolute;
+  width: 118px;
+  height: 118px;
+  border-radius: 50%;
+  border: 2px dashed color-mix(in srgb, var(--glow) 60%, transparent);
+  animation: spin-slow calc(18s * var(--tempo)) linear infinite;
+  pointer-events: none;
+}
+
+@keyframes spin-slow {
+  to { transform: rotate(360deg); }
+}
+
+/* readout */
+.dial__readout {
+  flex: 1 1 190px;
+  min-width: 0;
+}
+
+.dial__number {
+  display: block;
+  font-family: var(--f-crt);
+  font-size: var(--step-4);
+  line-height: 0.8;
+  color: var(--glow);
+  text-shadow:
+    0 0 10px var(--glow),
+    0 0 calc(var(--glow-r) * 1.4) var(--glow);
+  font-variant-numeric: tabular-nums;
+}
+
+.dial__band {
+  display: inline-block;
+  margin-top: 0.4rem;
+  padding: 0.15rem 0.6rem;
+  font-family: var(--f-poster);
+  font-size: var(--step-0);
+  color: var(--edge);
+  background: var(--glow);
+  border: 2px solid var(--edge);
+  transform: rotate(-2deg);
+}
+
+.dial__scale {
+  display: block;
+  margin-top: 0.5rem;
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.2em;
+  color: var(--text-dim);
+}
+
+.dial__note {
+  margin-top: 0.6rem;
+  font-size: var(--step--1);
+  line-height: 1.5;
+  color: var(--text-dim);
+  max-width: 34ch;
+}

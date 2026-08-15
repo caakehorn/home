@@ -1,0 +1,374 @@
+/* ==========================================================================
+   BRIEF — the visualiser for the wiki's compressed blocks
+   Reads --n*/--void*/--text* like everything else, so it follows the vibe.
+   ========================================================================== */
+
+.brief {
+  margin: 1.8rem 0;
+  padding: 0.9rem 1rem 1rem;
+  background: var(--void-2);
+  border: var(--rule) solid var(--edge);
+  box-shadow: 6px 6px 0 var(--edge);
+  scroll-margin-top: 5rem;
+}
+
+.brief__head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.brief__title {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-family: var(--f-head);
+  font-size: var(--step-1);
+  line-height: 1.1;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.brief__toggle {
+  display: flex;
+  gap: 3px;
+  flex: none;
+}
+
+.brief__tab {
+  padding: 0.15rem 0.5rem;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  color: var(--text-dim);
+  background: none;
+  border: 2px solid color-mix(in srgb, var(--n3) 50%, transparent);
+  cursor: pointer;
+}
+
+.brief__tab--on {
+  color: var(--edge);
+  background: var(--n3);
+  border-color: var(--n3);
+}
+
+.brief__meta {
+  margin: 0.35rem 0 0.9rem;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.brief__lede {
+  margin-right: 0.5rem;
+  padding: 0.1rem 0.4rem;
+  color: var(--edge);
+  background: var(--n5);
+}
+
+.brief__sub {
+  margin: 0 0 0.4rem;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.brief__panels {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+/* -- the stat row ---------------------------------------------------------
+   Figures the prose buried. Proportional figures, not tabular: these are
+   standalone values, never a column to align. */
+
+.brief__figures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.brief__figure {
+  flex: 1 1 9rem;
+  max-width: 18rem;
+  padding: 0.55rem 0.7rem;
+  background: color-mix(in srgb, var(--void) 55%, transparent);
+  border-left: 3px solid color-mix(in srgb, var(--n3) 65%, transparent);
+  transition: background 0.15s ease;
+}
+
+.brief__figure--on {
+  background: color-mix(in srgb, var(--n3) 14%, var(--void));
+}
+
+.brief__figure-value {
+  display: block;
+  font-family: var(--f-head);
+  font-size: var(--step-2);
+  line-height: 1;
+  color: var(--text);
+}
+
+.brief__figure-label {
+  display: block;
+  margin-top: 0.25rem;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+/* -- the timeline rail ---------------------------------------------------- */
+
+.rail {
+  margin: 0;
+}
+
+.rail__range {
+  margin-left: 0.5rem;
+  color: color-mix(in srgb, var(--text) 70%, transparent);
+}
+
+.rail__svg {
+  display: block;
+  overflow: visible;
+}
+
+.rail__axis,
+.rail__tick {
+  stroke: color-mix(in srgb, var(--text-dim) 45%, transparent);
+  stroke-width: 1;
+}
+
+.rail__stem {
+  stroke: color-mix(in srgb, var(--text-dim) 40%, transparent);
+  stroke-width: 1;
+}
+
+.rail__tick-label,
+.rail__label {
+  font-family: var(--f-mono);
+  fill: var(--text-dim);
+}
+
+.rail__tick-label {
+  font-size: 0.62rem;
+}
+
+.rail__label {
+  font-size: 0.6rem;
+  letter-spacing: 0.04em;
+}
+
+.rail__hit {
+  fill: transparent;
+}
+
+.rail__mark {
+  cursor: default;
+}
+
+/* A 2px surface ring keeps overlapping marks apart. */
+.rail__dot,
+.rail__span {
+  stroke: var(--void-2);
+  stroke-width: 2;
+}
+
+.rail__mark--on .rail__label {
+  fill: var(--text);
+}
+
+.rail__mark--on .rail__dot,
+.rail__mark--on .rail__span {
+  stroke: var(--text);
+}
+
+/* -- state flags ---------------------------------------------------------
+   Glyph + word + tone name: the hue is the third channel, never the only. */
+
+.brief__flags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.brief__flag {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  padding: 0.25rem 0.55rem;
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text);
+  background: color-mix(in srgb, var(--tone) 12%, var(--void));
+  border-left: 3px solid var(--tone);
+}
+
+.brief__flag--on {
+  background: color-mix(in srgb, var(--tone) 26%, var(--void));
+}
+
+.brief__flag-glyph {
+  color: var(--tone);
+  font-size: 0.66em;
+}
+
+.brief__flag-tone {
+  font-size: 0.62rem;
+  color: var(--text-dim);
+}
+
+/* -- the cast ------------------------------------------------------------- */
+
+.brief__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.brief__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.22rem 0.5rem;
+  font-family: var(--f-ui);
+  font-size: 0.8rem;
+  color: var(--text);
+  text-decoration: none;
+  background: color-mix(in srgb, var(--void) 55%, transparent);
+  border: 2px solid color-mix(in srgb, var(--n1) 55%, transparent);
+  transition: opacity 0.15s ease, border-color 0.15s ease;
+}
+
+.brief__chip:hover,
+.brief__chip:focus-visible {
+  border-color: var(--n2);
+  background: color-mix(in srgb, var(--n2) 18%, var(--void));
+}
+
+.brief__chip--dim {
+  opacity: 0.35;
+}
+
+.brief__chip .jp {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}
+
+.brief__chip-n {
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  color: var(--text-dim);
+}
+
+/* -- the facts ------------------------------------------------------------ */
+
+.brief__facts {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: fact;
+}
+
+.brief__fact {
+  display: grid;
+  grid-template-columns: 5.2rem 1fr;
+  gap: 0.7rem;
+  padding: 0.5rem 0.6rem;
+  background: color-mix(in srgb, var(--void) 45%, transparent);
+  border-left: 3px solid color-mix(in srgb, var(--text-dim) 30%, transparent);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.brief__fact--on {
+  background: color-mix(in srgb, var(--n3) 12%, var(--void));
+  border-left-color: var(--n3);
+}
+
+.brief__fact[data-kind='status'] {
+  border-left-color: color-mix(in srgb, var(--n2) 60%, transparent);
+}
+
+.brief__fact[data-kind='time'] {
+  border-left-color: color-mix(in srgb, var(--n3) 60%, transparent);
+}
+
+.brief__fact[data-kind='figure'] {
+  border-left-color: color-mix(in srgb, var(--n4) 60%, transparent);
+}
+
+.brief__fact[data-kind='link'] {
+  border-left-color: color-mix(in srgb, var(--n1) 60%, transparent);
+}
+
+.brief__fact-kind {
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  line-height: 1.9;
+  letter-spacing: 0.14em;
+  color: var(--text-dim);
+}
+
+.brief__fact-text {
+  margin: 0;
+  font-family: var(--f-ui);
+  font-size: var(--step-0);
+  line-height: 1.55;
+  color: var(--text);
+}
+
+.brief__fact-text .md__wikilink {
+  white-space: nowrap;
+}
+
+/* -- the prose, kept ------------------------------------------------------ */
+
+.brief__raw p {
+  margin: 0 0 0.8rem;
+  font-family: var(--f-ui);
+  font-size: var(--step-0);
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.brief__raw p:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 34rem) {
+  .brief__fact {
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brief__figure,
+  .brief__fact,
+  .brief__chip {
+    transition: none;
+  }
+}

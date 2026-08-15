@@ -188,6 +188,89 @@
   color: var(--n2);
 }
 
+.wiki__card-brief {
+  color: var(--n5);
+}
+
+/* ---- view switch + brief deck ------------------------------------------- */
+.wiki__views {
+  display: flex;
+  gap: 3px;
+}
+
+.wiki__view {
+  padding: 0.22rem 0.7rem;
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  color: var(--text);
+  background: none;
+  border: 2px solid color-mix(in srgb, var(--n3) 55%, transparent);
+  cursor: pointer;
+  transition: background-color 140ms ease, color 140ms ease;
+}
+
+.wiki__view:hover {
+  background: color-mix(in srgb, var(--n3) 25%, transparent);
+}
+
+.wiki__view--on {
+  color: var(--edge);
+  background: var(--n3);
+  border-color: var(--n3);
+}
+
+.wiki__deck-note {
+  max-width: 46rem;
+  margin: 0 auto 0 0;
+  padding-bottom: 0.6rem;
+  font-family: var(--f-ui);
+  font-size: var(--step--1);
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+.deck {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.deck__item {
+  max-width: 60rem;
+}
+
+.deck__title {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin: 0;
+  font-family: var(--f-head);
+  font-size: var(--step-1);
+  text-transform: uppercase;
+}
+
+.deck__title a {
+  color: var(--text);
+  text-decoration: none;
+  border-bottom: var(--rule) solid var(--n2);
+}
+
+.deck__title a:hover {
+  color: var(--n2);
+}
+
+.deck__domain {
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  color: var(--text-dim);
+}
+
+.deck .brief {
+  margin-top: 0.6rem;
+}
+
 /* ---- article ------------------------------------------------------------ */
 .wiki__article {
   padding-block: clamp(1.2rem, 4vh, 2.4rem) 3rem;

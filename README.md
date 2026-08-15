@@ -76,6 +76,38 @@ so nothing needs to know which palette is live.
 animation tempo, particle count and blur all derive from. The dial writes it,
 the shell can set it, and it persists to `localStorage` along with the palette.
 
+## Briefs
+
+The wiki writes an **LLM Quick Brief** on its load-bearing pages: every date,
+name and number of a page compressed into one paragraph for a machine to
+swallow whole. It is the densest thing on the page and usually the most
+important, and as prose it is close to unreadable.
+
+`src/wiki/brief.ts` takes those blocks apart — a pure text→shape pass, no React
+in it — and `Brief.tsx` draws the result:
+
+- **figures** — the quantities the prose buried, set large. A number only
+  qualifies if it carries a unit, a phrase or a currency marker; percentiles
+  and house numbers are true but are not statistics, and they are dropped.
+- **timeline** — every date on one axis, spans as bars and instants as dots.
+  One hue, because this is a sequence and not a set of categories; position
+  carries the meaning, the direct labels carry identity.
+- **state** — closed, live, unresolved, in transition. Glyph + word + hue, and
+  a state under a negation ("not closed") is not a claim about the state, so it
+  never reaches the row.
+- **cast** — the pages the brief points at, linked, lighting up with whichever
+  sentence names them.
+- **facts** — one sentence per card, tagged by kind.
+
+Hovering anything ties it back to the sentence it came from. The **TEXT**
+toggle puts the original paragraph back, word for word: the prose is the
+record, the visualisation is a reading of it.
+
+Blocks that are already structured — tables, lists, anything under 40 words —
+are left alone. `/brain?view=briefs` collects every brief in the wiki into one
+deck, and `npm run briefs` prints what the parser extracted, which is the thing
+to check after re-running `sync-wiki`.
+
 ## The six rigs
 
 Each announces itself on mount via `useRig`, so the HUD counts live elements
@@ -95,9 +127,10 @@ src/
   components/        chrome (nav, marquee, HUD, cursor trail, screen FX)
     rigs/            the six interactive elements
   content/           section definitions
-  routes/            Splash, Home, Stub
+  routes/            Splash, Home, Stub, wiki index + page
   state/             palette + chaos context, persisted
   styles/            fonts, tokens, type treatments, global
+  wiki/              snapshot loading, markdown, charts, infoboxes, briefs
 ```
 
 `/` renders Home with Splash layered over it; entering dismisses the gate for

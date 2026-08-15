@@ -13,13 +13,18 @@ export type IndexEntry = {
   links: number
   /** The page carries a compressed block the brief visualiser can open. */
   brief?: boolean
+  /** Map coordinates, baked at sync time. Roughly [-1, 1]. */
+  x?: number
+  y?: number
 }
 
 export type WikiIndex = {
   generatedAt: string
-  counts: { pages: number; words: number; chartables: number; briefs?: number }
+  counts: { pages: number; words: number; chartables: number; briefs?: number; edges?: number }
   domains: { id: string; count: number }[]
   pages: IndexEntry[]
+  /** Undirected links as index pairs into `pages`. */
+  edges?: [number, number][]
 }
 
 export type WikiPage = {

@@ -76,6 +76,33 @@ so nothing needs to know which palette is live.
 animation tempo, particle count and blur all derive from. The dial writes it,
 the shell can set it, and it persists to `localStorage` along with the palette.
 
+## The map
+
+`/brain` opens on **THE CORTEX** — the wiki as a place instead of a list. 458
+pages in a card grid is a filing cabinet; the same pages laid out by what they
+link to is something you can learn your way around.
+
+Position carries the whole encoding. Domains settle into lobes, and the pages
+that link across everything drift to the middle, which is where they belong.
+Colour is state, never identity: one accent for every page, brightening for the
+one under the cursor and its links, receding for anything filtered out — a
+nine-hue rainbow would be unreadable and would say less.
+
+- **hover** a star for its title and links · **click** to inspect it
+- the probe panel lists what the page connects to, and those are buttons — walk
+  the wiki link by link and only open a page when you mean it
+- **drag** to pan, **scroll** to zoom, **double-click** to reset
+- searching **lights the map** rather than emptying it; a single match is flown to
+- a domain chip **frames its lobe**
+- arrow keys walk between pages, Enter opens, Escape resets — the canvas is
+  reachable from the keyboard, and **LIST** is the same set as plain cards
+
+The coordinates are baked at sync time by `scripts/graph-layout.mjs` — a seeded
+force layout run once in node — and shipped in `index.json` with the edge list.
+The browser gets a finished map: nothing simulates on load, and the wiki is in
+the same shape every time you walk into it. The canvas only repaints when
+something actually moves.
+
 ## Briefs
 
 The wiki writes an **LLM Quick Brief** on its load-bearing pages: every date,
@@ -130,7 +157,7 @@ src/
   routes/            Splash, Home, Stub, wiki index + page
   state/             palette + chaos context, persisted
   styles/            fonts, tokens, type treatments, global
-  wiki/              snapshot loading, markdown, charts, infoboxes, briefs
+  wiki/              snapshot loading, markdown, charts, infoboxes, briefs, the map
 ```
 
 `/` renders Home with Splash layered over it; entering dismisses the gate for

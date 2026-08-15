@@ -122,3 +122,64 @@
   transform: translate(2px, 2px);
   box-shadow: 0 0 0 var(--edge);
 }
+
+/* ==========================================================================
+   Screen effects the shell can turn on. They sit on <html> so they outlive a
+   re-render of the rig, and the rig clears every one of them on unmount.
+   ========================================================================== */
+
+html.term-fx-inverted {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+html.term-fx-flipped body {
+  transform: rotate(180deg);
+  transform-origin: center;
+}
+
+html.term-fx-napping {
+  filter: brightness(0.08);
+  transition: filter 700ms ease;
+}
+
+/* Both filters at once, since one property cannot hold two rules. */
+html.term-fx-inverted.term-fx-napping {
+  filter: invert(1) hue-rotate(180deg) brightness(0.08);
+}
+
+html.term-fx-scanning body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.35) 0px,
+    rgba(0, 0, 0, 0.35) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+/* 1.5 Hz — half the 3 Hz general-flash threshold in WCAG 2.3.1, and the
+   `strobe` verb refuses outright under prefers-reduced-motion. */
+html.term-fx-strobing {
+  animation: term-strobe 0.66s steps(1, end) infinite alternate;
+}
+
+@keyframes term-strobe {
+  from {
+    filter: none;
+  }
+  to {
+    filter: brightness(1.7) saturate(1.5);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.term-fx-strobing {
+    animation: none;
+  }
+}

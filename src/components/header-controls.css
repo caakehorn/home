@@ -1,0 +1,153 @@
+/* ==========================================================================
+   The two site-wide dials, riding in the nav
+   ========================================================================== */
+
+.hctl {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem 0.7rem;
+  flex: none;
+  flex-wrap: wrap;
+}
+
+.hctl__label,
+.hctl__read {
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  color: var(--text-dim);
+}
+
+.hctl__read {
+  min-width: 1.9rem;
+  color: var(--n2);
+  text-align: right;
+}
+
+/* -- chaos ---------------------------------------------------------------- */
+
+.hctl__chaos {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.15rem 0.5rem;
+  border: 2px solid color-mix(in srgb, var(--n2) 45%, transparent);
+  cursor: pointer;
+}
+
+.hctl__chaos input {
+  width: clamp(4rem, 9vw, 7rem);
+  height: 1rem;
+  margin: 0;
+  background: none;
+  appearance: none;
+  cursor: grab;
+}
+
+.hctl__chaos input:active {
+  cursor: grabbing;
+}
+
+/* The track carries the fill: a gradient stop at the value would need JS to
+   stay in sync, so the whole track lights and the thumb marks the position. */
+.hctl__chaos input::-webkit-slider-runnable-track {
+  height: 4px;
+  background: linear-gradient(90deg, var(--n3), var(--n2), var(--n1));
+}
+
+.hctl__chaos input::-moz-range-track {
+  height: 4px;
+  background: linear-gradient(90deg, var(--n3), var(--n2), var(--n1));
+}
+
+.hctl__chaos input::-webkit-slider-thumb {
+  appearance: none;
+  width: 10px;
+  height: 16px;
+  margin-top: -6px;
+  background: var(--text);
+  border: 2px solid var(--edge);
+  box-shadow: 0 0 calc(var(--glow-r) * 0.5) var(--n2);
+}
+
+.hctl__chaos input::-moz-range-thumb {
+  width: 10px;
+  height: 16px;
+  border-radius: 0;
+  background: var(--text);
+  border: 2px solid var(--edge);
+  box-shadow: 0 0 calc(var(--glow-r) * 0.5) var(--n2);
+}
+
+.hctl__chaos input:focus-visible {
+  outline: 2px solid var(--n3);
+  outline-offset: 3px;
+}
+
+/* -- palette -------------------------------------------------------------- */
+
+.hctl__vibes {
+  display: flex;
+  gap: 3px;
+}
+
+.hctl__vibe {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.35rem;
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  background: none;
+  border: 2px solid color-mix(in srgb, var(--text-dim) 30%, transparent);
+  cursor: pointer;
+  transition: border-color 160ms ease, color 160ms ease;
+}
+
+.hctl__vibe:hover {
+  color: var(--text);
+  border-color: var(--n3);
+}
+
+.hctl__vibe--on {
+  color: var(--text);
+  border-color: var(--n3);
+  box-shadow: 0 0 calc(var(--glow-r) * 0.5) color-mix(in srgb, var(--n3) 55%, transparent);
+}
+
+.hctl__swatch {
+  display: flex;
+  gap: 1px;
+  flex: none;
+}
+
+.hctl__swatch span {
+  width: 7px;
+  height: 12px;
+  border: 1px solid var(--edge);
+}
+
+/* Four spelled-out palette names is the difference between a one-row header
+   and a two-row one on every screen worth the trouble, so the swatch carries
+   the identity and the name goes to the tooltip and the accessible label. */
+.hctl__vibe-name {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .hctl {
+    order: 2;
+    margin-inline-start: auto;
+  }
+
+  .hctl__label {
+    display: none;
+  }
+}

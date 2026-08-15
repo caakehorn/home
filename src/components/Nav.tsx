@@ -1,14 +1,10 @@
 import { Link, NavLink } from 'react-router-dom'
+import { HeaderControls } from './HeaderControls'
 import { Logo } from './Logo'
 import { SECTIONS } from '../content/sections'
-import { VIBES } from '../state/portal-context'
-import { usePortal } from '../state/usePortal'
 import './nav.css'
 
 export function Nav() {
-  const { vibe, setVibe } = usePortal()
-  const index = VIBES.findIndex((v) => v.id === vibe)
-
   return (
     <nav className="nav" aria-label="Portal">
       <Link to="/" className="nav__mark">
@@ -35,19 +31,7 @@ export function Nav() {
         ))}
       </ul>
 
-      <button
-        type="button"
-        className="nav__cycle"
-        onClick={() => setVibe(VIBES[(index + 1) % VIBES.length].id)}
-        aria-label={`Palette: ${VIBES[index]?.name}. Next palette.`}
-      >
-        <span className="nav__cycle-chips" aria-hidden="true">
-          {VIBES[index]?.swatch.map((hex) => (
-            <span key={hex} style={{ background: hex }} />
-          ))}
-        </span>
-        NEXT VIBE
-      </button>
+      <HeaderControls />
     </nav>
   )
 }

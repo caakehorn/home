@@ -1,36 +1,10 @@
-import { useEffect, useId, useRef, useState } from 'react'
+import { useId, useState } from 'react'
 import { formatValue, type ChartSpec, type TableData } from './table'
+import { MARKS } from './palette'
+import { useWidth } from './useWidth'
 import './chart.css'
 
-/**
- * Categorical ramp for chart marks.
- *
- * The site's raw neons (--n1..--n5) fail as a chart palette: magenta and
- * violet collapse to ΔE 6.9 under protanopia. These five are the snapped
- * equivalents — validated on the dark chart surface for chroma, adjacent-pair
- * CVD separation (worst 9.2 protan), normal-vision separation (20.6) and 3:1
- * contrast. They sit brighter than the standard lightness band, which is the
- * deliberate house style; identity never rests on colour alone here — every
- * chart carries a legend, direct labels and a table view.
- *
- * Order is fixed. Series take slots in order and never cycle.
- */
-const MARKS = ['#00d5e8', '#ff3ba7', '#a86bff', '#ffb020', '#3ddc84']
-
 const PAD = { top: 18, right: 20, bottom: 34, left: 54 }
-
-function useWidth<T extends HTMLElement>() {
-  const ref = useRef<T>(null)
-  const [width, setWidth] = useState(680)
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const ro = new ResizeObserver(([entry]) => setWidth(Math.max(280, entry.contentRect.width)))
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [])
-  return [ref, width] as const
-}
 
 function niceTicks(max: number, count = 4) {
   if (max <= 0) return [0]

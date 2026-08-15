@@ -11,11 +11,13 @@ export type IndexEntry = {
   words: number
   charts: number
   links: number
+  /** The page carries a compressed block the brief visualiser can open. */
+  brief?: boolean
 }
 
 export type WikiIndex = {
   generatedAt: string
-  counts: { pages: number; words: number; chartables: number }
+  counts: { pages: number; words: number; chartables: number; briefs?: number }
   domains: { id: string; count: number }[]
   pages: IndexEntry[]
 }

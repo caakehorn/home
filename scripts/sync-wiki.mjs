@@ -95,6 +95,14 @@ function extractWikiLinks(body) {
 }
 
 /**
+ * Does the page carry a compressed block — an "LLM Quick Brief" or one of its
+ * kin? Only the heading is checked here; the client's parser has the final
+ * say on whether there is enough in it to visualise. This flag exists so the
+ * index can offer the brief deck without reading 458 page bodies.
+ */
+const BRIEF_HEADING = /^#{2,4}\s+.*(quick brief|context injection|tl;?\s?dr|at a glance|in brief)/im
+
+/**
  * A table is chartable when it has a label column and at least one column
  * whose cells are mostly numbers. Detected here so the client does not have
  * to re-scan every page body just to know whether a chart is possible.
@@ -175,6 +183,7 @@ const pages = files.map((file) => {
     body: content.trimEnd(),
     words: content.split(/\s+/).filter(Boolean).length,
     charts: countChartableTables(content),
+    brief: BRIEF_HEADING.test(content),
   }
 })
 
@@ -196,6 +205,7 @@ for (const page of pages) {
     words: page.words,
     charts: page.charts,
     links: page.links.length,
+    brief: page.brief,
   })
 }
 
@@ -212,6 +222,7 @@ writeFileSync(
       pages: index.length,
       words: index.reduce((n, p) => n + p.words, 0),
       chartables: index.reduce((n, p) => n + p.charts, 0),
+      briefs: index.filter((p) => p.brief).length,
     },
     domains,
     pages: index.sort((a, b) => a.slug.localeCompare(b.slug)),
@@ -220,5 +231,6 @@ writeFileSync(
 
 console.log(
   `wiki: ${index.length} pages · ${domains.length} domains · ` +
-    `${index.reduce((n, p) => n + p.charts, 0)} chartable tables -> public/wiki`,
+    `${index.reduce((n, p) => n + p.charts, 0)} chartable tables · ` +
+    `${index.filter((p) => p.brief).length} briefs -> public/wiki`,
 )

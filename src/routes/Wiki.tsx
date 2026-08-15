@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
 import { SubHead } from '../components/Wordmark'
+import { BriefDeck } from '../wiki/BriefDeck'
 import { useWikiIndex, type IndexEntry } from '../wiki/data'
 import { allDrafts } from '../wiki/store'
 import './wiki.css'
@@ -17,12 +18,21 @@ export function WikiIndexRoute() {
   const [params, setParams] = useSearchParams()
   const [query, setQuery] = useState('')
   const domain = params.get('domain')
+  const deck = params.get('view') === 'briefs'
   const drafts = useMemo(() => Object.keys(allDrafts()), [])
+
+  const setParam = (key: string, value: string | null) => {
+    const next = new URLSearchParams(params)
+    if (value === null) next.delete(key)
+    else next.set(key, value)
+    setParams(next)
+  }
 
   const results = useMemo(() => {
     if (!data) return []
     const q = query.trim().toLowerCase()
     return data.pages
+      .filter((p) => (deck ? p.brief : true))
       .filter((p) => (domain ? p.domain === domain : true))
       .filter((p) =>
         !q
@@ -32,7 +42,7 @@ export function WikiIndexRoute() {
             (p.knownFor ?? '').toLowerCase().includes(q),
       )
       .sort((a, b) => b.words - a.words)
-  }, [data, domain, query])
+  }, [data, deck, domain, query])
 
   return (
     <div className="wiki">
@@ -54,7 +64,9 @@ export function WikiIndexRoute() {
         {data && (
           <p className="wiki__mast-note">
             {data.counts.pages.toLocaleString()} pages · {data.counts.words.toLocaleString()} words ·{' '}
-            {data.counts.chartables} tables drawn as charts. Every page is editable in the browser.
+            {data.counts.chartables} tables drawn as charts
+            {data.counts.briefs ? ` · ${data.counts.briefs} briefs unpacked` : ''}. Every page is
+            editable in the browser.
           </p>
         )}
       </header>
@@ -72,7 +84,7 @@ export function WikiIndexRoute() {
           <button
             type="button"
             className={`wiki__domain${!domain ? ' wiki__domain--on' : ''}`}
-            onClick={() => setParams({})}
+            onClick={() => setParam('domain', null)}
           >
             ALL {data ? `(${data.counts.pages})` : ''}
           </button>
@@ -81,7 +93,7 @@ export function WikiIndexRoute() {
               key={d.id}
               type="button"
               className={`wiki__domain${domain === d.id ? ' wiki__domain--on' : ''}`}
-              onClick={() => setParams({ domain: d.id })}
+              onClick={() => setParam('domain', d.id)}
             >
               <span className="jp" aria-hidden="true">
                 {DOMAIN_KANA[d.id] ?? '書'}
@@ -90,7 +102,32 @@ export function WikiIndexRoute() {
             </button>
           ))}
         </div>
+        <div className="wiki__views" role="group" aria-label="View">
+          {([
+            ['pages', 'PAGES'],
+            ['briefs', 'BRIEFS'],
+          ] as const).map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              className={`wiki__view${(id === 'briefs') === deck ? ' wiki__view--on' : ''}`}
+              aria-pressed={(id === 'briefs') === deck}
+              onClick={() => setParam('view', id === 'briefs' ? 'briefs' : null)}
+            >
+              {label}
+              {id === 'briefs' && data?.counts.briefs ? ` (${data.counts.briefs})` : ''}
+            </button>
+          ))}
+        </div>
       </div>
+
+      {deck && (
+        <p className="wrap wiki__deck-note">
+          The wiki writes a compressed block for machines — every date, name and number of a page
+          packed into one paragraph. Here they are taken apart: dates on a rail, numbers pulled out,
+          people linked, each sentence on its own. The original text is one toggle away.
+        </p>
+      )}
 
       {loading && <p className="wrap wiki__state">loading the index…</p>}
       {error && (
@@ -105,11 +142,15 @@ export function WikiIndexRoute() {
             {results.length} {results.length === 1 ? 'page' : 'pages'}
             {drafts.length > 0 && ` · ${drafts.length} with local edits`}
           </p>
-          <ul className="wiki__grid">
-            {results.map((page) => (
-              <PageCard key={page.slug} page={page} draft={drafts.includes(page.slug)} />
-            ))}
-          </ul>
+          {deck ? (
+            <BriefDeck pages={results} />
+          ) : (
+            <ul className="wiki__grid">
+              {results.map((page) => (
+                <PageCard key={page.slug} page={page} draft={drafts.includes(page.slug)} />
+              ))}
+            </ul>
+          )}
         </div>
       )}
     </div>
@@ -126,6 +167,7 @@ function PageCard({ page, draft }: { page: IndexEntry; draft: boolean }) {
         <span className="wiki__card-meta">
           <span>{page.words.toLocaleString()}w</span>
           {page.charts > 0 && <span className="wiki__card-charts">{page.charts} charts</span>}
+          {page.brief && <span className="wiki__card-brief">brief</span>}
           {page.links > 0 && <span>{page.links} links</span>}
           {draft && <span className="wiki__card-draft">edited</span>}
         </span>

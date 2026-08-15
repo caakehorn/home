@@ -6,12 +6,14 @@ import { sectionBySlug } from '../content/sections'
 import { INSTRUMENTS, instrumentById } from '../leviathan/core'
 import { Chronology } from '../leviathan/instruments/Chronology'
 import { Mass } from '../leviathan/instruments/Mass'
+import { Pen } from '../leviathan/instruments/Pen'
 import './leviathan.css'
 
 /** The rack knows which component an id belongs to; the registry stays data. */
 const BUILT: Record<string, typeof Mass> = {
   mass: Mass,
   chronology: Chronology,
+  pen: Pen,
 }
 
 const section = sectionBySlug('leviathan')!

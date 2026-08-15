@@ -112,11 +112,85 @@ const chronology = {
     .sort((a, b) => a.year - b.year),
 }
 
+
+// ---------------------------------------------------------------------------
+// III · THE PEN — the corpus as a chart recorder
+//
+// The old site's pen scaffold drew a moving stylus over stacked lanes and
+// looked like an instrument without measuring anything. The lanes here are
+// real, and every one of them is a count so the rule holds: nothing weighted,
+// nothing scored, nothing chosen for what it would surface.
+//
+//   MENTIONS  every dated mention landing in the year
+//   PAGES     distinct pages that name the year at all
+//   DOMAINS   distinct domains among those pages — breadth, not volume
+//   OPENINGS  pages whose earliest named date is this year: the record's
+//             own first word about something
+//
+// PAGES and MENTIONS diverge exactly where one page is doing all the talking,
+// which is the most useful thing a reader can notice about a year.
+
+const penYears = new Map()
+const firstYearOf = new Map()
+
+for (const page of pages) {
+  const seen = new Set()
+  for (const date of mineDates(page.body)) {
+    if (seen.has(date.label)) continue
+    seen.add(date.label)
+    const year = Math.floor(date.start)
+
+    const row = penYears.get(year) ?? { year, mentions: 0, pages: new Set(), domains: new Set(), openings: 0 }
+    row.mentions++
+    row.pages.add(page.slug)
+    row.domains.add(page.domain)
+    penYears.set(year, row)
+
+    const earliest = firstYearOf.get(page.slug)
+    if (earliest === undefined || year < earliest) firstYearOf.set(page.slug, year)
+  }
+}
+
+for (const year of firstYearOf.values()) {
+  const row = penYears.get(year)
+  if (row) row.openings++
+}
+
+// A continuous axis: a year the corpus never names is a zero, not a gap, or
+// the pen would skip over the quiet decades and flatter the record.
+const penSorted = [...penYears.values()].sort((a, b) => a.year - b.year)
+const penFrom = penSorted.length ? penSorted[0].year : 0
+const penTo = penSorted.length ? penSorted[penSorted.length - 1].year : 0
+const penRows = []
+for (let year = penFrom; year <= penTo; year++) {
+  const row = penYears.get(year)
+  penRows.push({
+    year,
+    mentions: row ? row.mentions : 0,
+    pages: row ? row.pages.size : 0,
+    domains: row ? row.domains.size : 0,
+    openings: row ? row.openings : 0,
+  })
+}
+
+const pen = {
+  from: penFrom,
+  to: penTo,
+  lanes: [
+    { key: 'mentions', label: 'MENTIONS', unit: 'dated mentions landing in the year' },
+    { key: 'pages', label: 'PAGES', unit: 'distinct pages naming it' },
+    { key: 'domains', label: 'DOMAINS', unit: 'distinct domains among them' },
+    { key: 'openings', label: 'OPENINGS', unit: "pages whose earliest date is this year" },
+  ],
+  rows: penRows,
+}
+
 // ---------------------------------------------------------------------------
 
 mkdirSync(OUT, { recursive: true })
 writeFileSync(join(OUT, 'mass.json'), JSON.stringify(mass))
 writeFileSync(join(OUT, 'chronology.json'), JSON.stringify(chronology))
+writeFileSync(join(OUT, 'pen.json'), JSON.stringify(pen))
 
 const span = chronology.years.length
   ? `${chronology.years[0].year}–${chronology.years[chronology.years.length - 1].year}`

@@ -3,6 +3,7 @@ import { CursorTrail } from './components/CursorTrail'
 import { Fx } from './components/Fx'
 import { Hud } from './components/Hud'
 import { Home } from './routes/Home'
+import { LeviathanRoute } from './routes/Leviathan'
 import { Splash } from './routes/Splash'
 import { WikiIndexRoute } from './routes/Wiki'
 import { WikiPageRoute } from './routes/WikiPage'
@@ -26,6 +27,8 @@ export function App() {
         {/* static segments outrank the dynamic stub route */}
         <Route path="/brain" element={<WikiIndexRoute />} />
         <Route path="/brain/*" element={<WikiPageRoute />} />
+        <Route path="/leviathan" element={<LeviathanRoute />} />
+        <Route path="/leviathan/:id" element={<LeviathanRoute />} />
         <Route path="/:slug" element={<Stub />} />
       </Routes>
 

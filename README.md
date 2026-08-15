@@ -135,6 +135,50 @@ are left alone. `/brain?view=briefs` collects every brief in the wiki into one
 deck, and `npm run briefs` prints what the parser extracted, which is the thing
 to check after re-running `sync-wiki`.
 
+## LEVIATHAN
+
+`/leviathan` is the wing where the old repo's visualizers get rebuilt. The
+original is thirty-seven instruments over two sections, each a hand-wired page
+that loaded its own payload and drew its own chrome. Here they get a rack:
+
+- `src/leviathan/core.ts` — the registry (what an instrument *is*), the dataset
+  loader, and the dataset shapes. An instrument is a row of data until it has a
+  component, so the ones still waiting on a corpus are listed honestly rather
+  than pretended at: **LIVE** is wired to a dataset that ships with this site,
+  **SEALED** is declared and waiting on one that does not.
+- `src/leviathan/Frame.tsx` — the chrome every instrument wears: numeral, name,
+  what it was computed over, and — always, never optional — **how**. An
+  instrument that cannot say how it got its numbers has no business being read.
+- `scripts/build-leviathan.mjs` — the counting, done once at build time
+  (`npm run leviathan`) instead of in every visitor's tab.
+
+**THE RULE**, carried across from the original unchanged: *no instrument makes a
+judgement*. Every number is a count, a date or a length, taken over the whole
+corpus with nothing excluded and nothing weighted. No sentiment scoring, no
+keyword list, no threshold chosen because of what it would surface. Anything
+editorial would make the output a portrait of an argument; left alone, the
+counts make a portrait of the thing itself.
+
+Two instruments are built:
+
+- **I · THE MASS** — where the corpus's weight actually sits. Nine domains by
+  word count, page-length distribution, heaviest pages; click a domain and the
+  panels below follow it.
+- **II · THE CHRONOLOGY** — every date the wiki names, mined out of its own
+  prose rather than off its timeline pages, binned by year across 1900→2026.
+  What it shows is not when things happened but when the record *says* things
+  happened, which is a different and more honest object. Open a year for its
+  months and every page that named it.
+
+The dates come from the same matchers the brief visualiser uses
+(`mineDates` in `src/wiki/brief.ts`), so a date reads the same way on the
+instrument as it does on the page.
+
+The sealed instruments need the message corpus, which is **not** vendored into
+this repository. The portal is ungated; the old site put a terms-and-passphrase
+gate in front of that material. Bringing it across is a decision about exposure,
+not a porting task, so the rack declares those instruments and stops there.
+
 ## The six rigs
 
 Each announces itself on mount via `useRig`, so the HUD counts live elements
@@ -157,6 +201,7 @@ src/
   routes/            Splash, Home, Stub, wiki index + page
   state/             palette + chaos context, persisted
   styles/            fonts, tokens, type treatments, global
+  leviathan/         the instrument rack: registry, frame, datasets
   wiki/              snapshot loading, markdown, charts, infoboxes, briefs, the map
 ```
 

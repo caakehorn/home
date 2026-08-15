@@ -1,14 +1,20 @@
-# 月光宿 MOONLIGHT INN
+# @danfrank
 
-@danfrank's portal. A splash gate, a home page behind it, and the shell of four
-wings: the **wiki-brain**, the **LEVIATHAN** visualizers, an **arcade** of
-experimental web games, and **transmissions**.
+**Dan's Dialectical Database and Drug Den** — 弁証薬窟.
 
-> THE MORE EXCESS, THE BUSIER, THE MORE CHAOTIC, THE BRIGHTER, THE MORE NEON,
-> THE MORE OBNOXIOUS, THE MORE VAPORWAVE THE BETTER
+Three things under one roof, and they are the same thing. The **dialectic**:
+every position here got argued at, usually at an hour no argument should be
+trusted at. The **database**: it got written down anyway — 458 pages, cited,
+cross-linked, contradictions left in where they are load-bearing. The **den**:
+the room where both of those happened.
 
-This pass is the aesthetic foundation only — visual identity, typography and the
-interactive furniture. The wings are doors, not rooms yet.
+> THESIS · ANTITHESIS · ANOTHER BUMP · SYNTHESIS · CITE YOUR SOURCES ·
+> LOSE THE ARGUMENT · LOG IT ANYWAY
+
+Five rooms off one hallway: the **wiki-brain** and its map, **THE LATTICE**,
+the **LEVIATHAN** instruments, an **arcade** of experimental web games, and
+**transmissions**. The first three are open; the rest are doors with
+scaffolding behind them.
 
 ## Running it
 
@@ -42,7 +48,7 @@ from the root and will not catch base-path mistakes.
 
 ## The gate
 
-Four steps stand in front of the whole site — every wing, every page. Nothing
+Three steps stand in front of the whole site — every room, every page. Nothing
 behind them mounts: the router is not rendered until the gate resolves, so
 there is no frame in which the site exists on screen unlocked.
 
@@ -56,17 +62,9 @@ there is no frame in which the site exists on screen unlocked.
 1. **The quiz.** An empty submit passes. Anything else drops the visitor into a
    decoy that is always about to finish rebuilding an archive index and never
    does.
-2. **The curtain.** The flash screen. Its copy rotates through `TAUNTS`, one
-   line every `MSG_MS`. Type `SKIP_CODE` and hit Enter to cut it short; do
-   nothing and it opens itself after `WAIT_MS`, a full minute. There is no
-   field and no prompt — keystrokes are read off the window and the echo stays
-   empty until the first character, so nothing on screen admits a code exists.
-   Anyone on a phone, or anyone who was never told, simply waits, which is the
-   point of the minute.
-3. **The passphrase.** Behind the curtain, the only one of the four that is an
-   actual lock.
+2. **The passphrase.** The only one of the three that is an actual lock.
 
-Steps 0, 1 and 2 are doormen. Step 3 is the boundary.
+Steps 0 and 1 are doormen. Step 2 is the boundary.
 
 The lock is PBKDF2-SHA256 over the passphrase (250,000 iterations) and
 AES-256-GCM, and it checks an entry by *decrypting* a small blob: a wrong
@@ -81,11 +79,11 @@ takes the page for the whole 30 seconds.
 
 One unlock covers the tab. Append `#lock` to any URL to throw the bolt again —
 it drops the stored passphrase, strips itself out of the URL and re-serves the
-curtain, so the owner can see their own front door without opening a new tab.
+door, so the owner can see their own front step without opening a new tab.
 
 Every dial and every line of copy sits in one block in `src/gate/config.ts`.
-**The curtain's lines are the block to edit** — the voice of the door is the
-owner's, and nothing else in the codebase reads those strings.
+**`TAUNTS` is the block to edit** — the voice of the door is the owner's, and
+nothing else in the codebase reads those strings.
 
 ### Building the verifier
 
@@ -146,7 +144,7 @@ up, with a per-line gradient so a five-line block stays evenly bright).
 ## Palettes
 
 Four, one per reference board, swapped by `data-vibe` on `<html>`:
-`moonlight` · `untitled` · `slime` · `kaiju`. Defined as custom properties in
+`den` · `untitled` · `slime` · `kaiju`. Defined as custom properties in
 `src/styles/tokens.css`; every component reads `--n1`…`--n5`, `--void*`, `--text*`,
 so nothing needs to know which palette is live.
 
@@ -295,7 +293,7 @@ to check after re-running `sync-wiki`.
 
 ## LEVIATHAN
 
-`/leviathan` is the wing where the old repo's visualizers get rebuilt. The
+`/leviathan` is the room where the old repo's visualizers get rebuilt. The
 original is thirty-seven instruments over two sections, each a hand-wired page
 that loaded its own payload and drew its own chrome. Here they get a rack:
 
@@ -365,4 +363,4 @@ src/
 ```
 
 `/` renders Home with Splash layered over it; entering dismisses the gate for
-the session. Every wing has a stub route, so no link dead-ends.
+the session. Every room has a stub route, so no link dead-ends.

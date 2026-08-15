@@ -1,4 +1,4 @@
-# 月光宿 MOONLIGHT INN
+# @danfrank — Dan's Dialectical Database and Drug Den
 #
 # Reading is welcome. The site itself is a React app behind a gate and is a
 # waste of a crawl; everything worth reading is served as static JSON and text,

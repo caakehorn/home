@@ -138,7 +138,7 @@ for (const record of records) {
 // /agent/manifest.json — the contract
 
 const manifest = {
-  name: '月光宿 MOONLIGHT INN — wiki-brain',
+  name: "Dan's Dialectical Database and Drug Den — wiki-brain",
   description:
     'A personal wiki of 458 interlinked pages: people, timeline, places, work, ' +
     'interests, and synthesis. This manifest describes how to read it without ' +
@@ -202,7 +202,7 @@ const notable = (list, n) =>
   [...list].sort((a, b) => b.backlinks - a.backlinks || b.words - a.words).slice(0, n)
 
 const lines = [
-  '# 月光宿 MOONLIGHT INN — wiki-brain',
+  "# Dan's Dialectical Database and Drug Den — wiki-brain",
   '',
   `> ${manifest.description}`,
   '',
@@ -244,7 +244,7 @@ lines.push('')
 // /llms-full.txt — everything, in one stream
 
 const full = [
-  `# 月光宿 MOONLIGHT INN — wiki-brain, complete`,
+  "# Dan's Dialectical Database and Drug Den — wiki-brain, complete",
   ``,
   `${manifest.counts.pages} pages, ${manifest.counts.words.toLocaleString()} words, generated ${manifest.generatedAt}.`,
   `Source: ${manifest.source}. Each page below is delimited by a level-1 heading and its slug.`,

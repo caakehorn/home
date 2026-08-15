@@ -13,7 +13,7 @@ export function Nav() {
       <Link to="/" className="nav__mark">
         <span className="nav__mark-face">DAN FRANK</span>
         <span className="nav__mark-kana jp" aria-hidden="true">
-          月光宿
+          薬窟
         </span>
       </Link>
 

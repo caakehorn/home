@@ -8,8 +8,31 @@
  * so an edit persists across reloads and navigation.
  */
 
-const DRAFTS = 'moonlight-inn:wiki:drafts:v1'
-const IMAGES = 'moonlight-inn:wiki:images:v1'
+const DRAFTS = 'danfrank:wiki:drafts:v1'
+const IMAGES = 'danfrank:wiki:images:v1'
+
+/**
+ * The keys were namespaced to the old name of this place. Renaming them would
+ * strand any draft that had not been published yet, so anything found under
+ * the old key is moved across once, on first read, and the old key dropped.
+ */
+function migrate() {
+  for (const [from, to] of [
+    ['moonlight-inn:wiki:drafts:v1', DRAFTS],
+    ['moonlight-inn:wiki:images:v1', IMAGES],
+  ]) {
+    try {
+      const old = localStorage.getItem(from)
+      if (old === null) continue
+      if (localStorage.getItem(to) === null) localStorage.setItem(to, old)
+      localStorage.removeItem(from)
+    } catch {
+      /* private mode, or a quota that will not take the copy */
+    }
+  }
+}
+
+migrate()
 
 export type Draft = { slug: string; source: string; savedAt: string }
 

@@ -1,0 +1,94 @@
+.ib {
+  float: right;
+  clear: right;
+  width: min(22rem, 100%);
+  margin: 0 0 1.2rem 1.6rem;
+  background: var(--void-2);
+  border: var(--rule) solid var(--edge);
+  box-shadow:
+    7px 7px 0 var(--edge),
+    0 0 var(--glow-r) color-mix(in srgb, var(--n1) 35%, transparent);
+}
+
+@media (max-width: 720px) {
+  .ib {
+    float: none;
+    width: 100%;
+    margin: 0 0 1.4rem;
+  }
+}
+
+.ib__head {
+  padding: 0.5rem 0.7rem;
+  font-family: var(--f-head);
+  font-size: var(--step-1);
+  line-height: 1.15;
+  text-align: center;
+  color: var(--edge);
+  background: linear-gradient(180deg, var(--n2), color-mix(in srgb, var(--n2) 72%, var(--edge)));
+  border-bottom: var(--rule) solid var(--edge);
+}
+
+.ib__figure {
+  margin: 0;
+  padding: 0.7rem 0.7rem 0.3rem;
+  text-align: center;
+}
+
+.ib__img {
+  display: block;
+  width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+  margin-inline: auto;
+  border: 3px solid var(--edge);
+  box-shadow: 0 0 calc(var(--glow-r) * 0.8) color-mix(in srgb, var(--n3) 55%, transparent);
+}
+
+.ib__caption {
+  margin-top: 0.4rem;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  line-height: 1.4;
+  color: var(--text-dim);
+}
+
+.ib__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--step--1);
+}
+
+.ib__table th,
+.ib__table td {
+  padding: 0.4rem 0.6rem;
+  text-align: left;
+  vertical-align: top;
+  border-top: 1px solid color-mix(in srgb, var(--text-dim) 26%, transparent);
+}
+
+.ib__table th {
+  width: 38%;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--n3);
+  font-weight: 400;
+}
+
+.ib__table td {
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.ib__link {
+  color: var(--n5);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--n5) 50%, transparent);
+}
+
+.ib__link:hover {
+  background: var(--n5);
+  color: var(--edge);
+}

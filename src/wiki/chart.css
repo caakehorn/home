@@ -1,0 +1,195 @@
+.chart {
+  margin: 1.4rem 0;
+  padding: 0.8rem 0.9rem 0.7rem;
+  background: var(--void-2);
+  border: var(--rule) solid var(--edge);
+  box-shadow: 6px 6px 0 var(--edge);
+}
+
+.chart__head {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.chart__title {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--f-head);
+  font-size: var(--step-0);
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.chart__toggle {
+  display: flex;
+  gap: 3px;
+  flex: none;
+}
+
+.chart__tab {
+  padding: 0.15rem 0.5rem;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  color: var(--text-dim);
+  border: 2px solid color-mix(in srgb, var(--n3) 50%, transparent);
+}
+
+.chart__tab--on {
+  color: var(--edge);
+  background: var(--n3);
+  border-color: var(--n3);
+}
+
+/* legend — always present for 2+ series */
+.chart__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.9rem;
+  margin-bottom: 0.4rem;
+}
+
+.chart__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  color: var(--text-dim); /* text tokens, never the series colour */
+}
+
+.chart__swatch {
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--edge);
+  flex: none;
+}
+
+.chart__plot {
+  position: relative;
+  overflow-x: auto;
+}
+
+.chart__grid {
+  stroke: color-mix(in srgb, var(--text-dim) 26%, transparent);
+  stroke-width: 1;
+}
+
+.chart__axis,
+.chart__cat,
+.chart__value {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  fill: var(--text-dim);
+}
+
+.chart__value {
+  fill: var(--text);
+  font-size: 10px;
+}
+
+.chart__cat {
+  fill: var(--text);
+}
+
+.chart__bar {
+  transition: opacity 120ms ease;
+  /* 2px surface ring keeps adjacent fills separate */
+  stroke: var(--void-2);
+  stroke-width: 2;
+  paint-order: stroke fill;
+}
+
+.chart__bar--on {
+  opacity: 0.82;
+}
+
+.chart__line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.chart__dot {
+  stroke: var(--void-2);
+  stroke-width: 2;
+  transition: r 120ms ease;
+}
+
+.chart__tip {
+  position: absolute;
+  z-index: 5;
+  display: grid;
+  gap: 1px;
+  padding: 0.35rem 0.5rem;
+  min-width: 110px;
+  pointer-events: none;
+  transform: translateY(-50%);
+  background: color-mix(in srgb, var(--void) 94%, transparent);
+  border: 2px solid var(--n3);
+  box-shadow: 3px 3px 0 var(--edge);
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  color: var(--text);
+}
+
+.chart__tip b {
+  color: var(--n3);
+}
+
+.chart__tip em {
+  color: var(--text-dim);
+  font-style: normal;
+  font-size: 0.62rem;
+}
+
+.chart__source {
+  display: block;
+  margin-top: 0.4rem;
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+/* table view */
+.chart__tablewrap {
+  overflow-x: auto;
+}
+
+.chart__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--step--1);
+}
+
+.chart__table th,
+.chart__table td {
+  padding: 0.3rem 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--text-dim) 30%, transparent);
+  text-align: left;
+}
+
+.chart__table thead th {
+  background: var(--void-3);
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.chart__table tbody th {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.chart__table td {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-dim);
+}

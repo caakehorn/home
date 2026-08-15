@@ -10,6 +10,7 @@
     "typecheck": "tsc -b --noEmit"
   },
   "dependencies": {
+    "marked": "^18.0.9",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.9.1"

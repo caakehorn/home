@@ -581,6 +581,17 @@ const classify = (
 const LEDE = /^\s*(?:\*\*|__)?\s*(for context injection|context|summary|tl;?\s?dr|brief)\s*:?\s*(?:\*\*|__)?\s*:?\s*/i
 
 /**
+ * Every date named in a run of prose, in order of appearance.
+ *
+ * The brief visualiser mines a paragraph; LEVIATHAN mines the whole wiki with
+ * the same matchers, so a date that reads one way on a page reads the same way
+ * on the instrument. `fact` is meaningless outside a brief and is left at 0.
+ */
+export function mineDates(text: string): Omit<BriefDate, 'fact'>[] {
+  return scanDates(text).dates.map(({ at: _at, ...date }) => date)
+}
+
+/**
  * Turns a brief block into its facets. Returns null when the block is not
  * actually compressed — a list of links or a two-word note gains nothing from
  * being visualised and should stay the markdown it is.

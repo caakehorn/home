@@ -1,0 +1,210 @@
+/* ==========================================================================
+   LEVIATHAN — the wing and its rack
+   ========================================================================== */
+
+.lev {
+  position: relative;
+  z-index: 1;
+  min-height: 100%;
+  background:
+    radial-gradient(80% 45% at 50% 0%, color-mix(in srgb, var(--n1) 22%, transparent), transparent 70%),
+    var(--void);
+}
+
+.lev__masthead {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 0.3rem 1rem;
+  padding-block: clamp(1.6rem, 5vh, 3rem) 0.6rem;
+}
+
+.lev__mast-title {
+  font-size: clamp(1.7rem, 6vw, 4.2rem);
+  line-height: 0.95;
+}
+
+.lev__mast-kana {
+  font-size: clamp(1.6rem, 5vw, 3.4rem);
+  line-height: 1;
+  color: var(--n1);
+  text-shadow: 0 0 calc(var(--glow-r) * 0.8) var(--n1);
+}
+
+.lev__mast-note {
+  grid-column: 1 / -1;
+  max-width: 70ch;
+  font-size: var(--step--1);
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+/* The rule is the wing's constitution; it reads like a plaque, not a caption. */
+.lev__rule {
+  grid-column: 1 / -1;
+  max-width: 70ch;
+  margin-top: 0.5rem;
+  padding: 0.6rem 0.8rem;
+  font-family: var(--f-ui);
+  font-size: var(--step--1);
+  line-height: 1.6;
+  color: var(--text-dim);
+  background: color-mix(in srgb, var(--void-2) 80%, transparent);
+  border-left: var(--rule) solid var(--n1);
+}
+
+.lev__rule b {
+  color: var(--n1);
+  font-family: var(--f-mono);
+  letter-spacing: 0.14em;
+}
+
+/* ---- the rack ----------------------------------------------------------- */
+
+.lev__rack {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: 0.9rem;
+  margin: 0;
+  padding: 1.2rem 0 3rem;
+  list-style: none;
+}
+
+.lev__card {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 0.3rem;
+  height: 100%;
+  padding: 0.9rem 1rem 1rem;
+  text-decoration: none;
+  color: var(--text);
+  background: var(--void-2);
+  border: var(--rule) solid var(--edge);
+  box-shadow: 6px 6px 0 var(--edge);
+  transition: transform 180ms cubic-bezier(0.2, 1.4, 0.4, 1), box-shadow 180ms ease;
+}
+
+.lev__card:hover,
+.lev__card:focus-visible {
+  transform: translate(-2px, -4px);
+  box-shadow: 10px 10px 0 var(--edge), 0 0 var(--glow-r) color-mix(in srgb, var(--n1) 55%, transparent);
+}
+
+.lev__card--sealed {
+  background: color-mix(in srgb, var(--void-2) 55%, var(--void));
+}
+
+.lev__card-numeral {
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+  color: var(--n1);
+}
+
+.lev__card-title {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-family: var(--f-head);
+  font-size: var(--step-1);
+  line-height: 1.05;
+}
+
+.lev__card-kana {
+  font-size: 0.7em;
+  color: var(--text-dim);
+}
+
+.lev__card-corpus {
+  font-family: var(--f-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--n3);
+}
+
+.lev__card-blurb {
+  font-size: var(--step--1);
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+.lev__badge {
+  justify-self: start;
+  margin-top: 0.3rem;
+  padding: 0.1rem 0.45rem;
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  color: var(--edge);
+  background: var(--n3);
+}
+
+.lev__badge--sealed {
+  color: var(--text-dim);
+  background: none;
+  border: 1px solid color-mix(in srgb, var(--text-dim) 50%, transparent);
+}
+
+/* ---- a room ------------------------------------------------------------- */
+
+.lev__stage {
+  padding-block: 1.2rem 3rem;
+}
+
+.lev__missing,
+.lev__sealed {
+  display: grid;
+  gap: 0.5rem;
+  justify-items: start;
+  padding-block: clamp(2rem, 8vh, 5rem) 4rem;
+}
+
+.lev__numeral {
+  font-family: var(--f-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.3em;
+  color: var(--n1);
+}
+
+.lev__title {
+  font-size: clamp(1.6rem, 5vw, 3.2rem);
+  line-height: 1;
+}
+
+.lev__blurb {
+  max-width: 60ch;
+  font-size: var(--step-0);
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+.lev__needs {
+  max-width: 60ch;
+  padding: 0.7rem 0.9rem;
+  font-size: var(--step--1);
+  line-height: 1.6;
+  color: var(--text-dim);
+  background: var(--void-2);
+  border-left: var(--rule) solid var(--n4);
+}
+
+.lev__needs b {
+  font-family: var(--f-mono);
+  letter-spacing: 0.16em;
+  color: var(--n4);
+}
+
+.lev__back {
+  margin-top: 0.6rem;
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: var(--n3);
+  text-decoration: none;
+}
+
+.lev__back:hover {
+  text-decoration: underline;
+}

@@ -27,7 +27,7 @@ export const SECTIONS: Section[] = [
     blurb:
       'The family tree on a real time axis — 515 people, seven generations, every ancestor sized by how much of the genome came through them. Including the one the record loses.',
     status: 'LIVE',
-    accent: 1,
+    accent: 4,
     chant: '515 INDIVIDUALS · 218 FAMILIES · 90 DIRECT ANCESTORS · ONE HOLE ·',
   },
   {
@@ -36,7 +36,7 @@ export const SECTIONS: Section[] = [
     kana: '巨獣',
     blurb:
       'The good visualizers, dragged out of the old repo, rebuilt bigger and rewired for the browser. Nothing subtle survives the port.',
-    status: 'WIRING',
+    status: 'LIVE',
     accent: 1,
     chant: 'SALVAGED · REIMAGINED · OVERCLOCKED · SALVAGED · REIMAGINED · OVERCLOCKED ·',
   },

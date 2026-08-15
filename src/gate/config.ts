@@ -9,7 +9,6 @@
  *
  *   0. THE TERMS      — an acceptance dialog. Per device, versioned, forever.
  *   1. THE QUIZ       — an empty submit passes. Anything else is a decoy.
- *   2. THE CURTAIN    — type SKIP_CODE and hit Enter, or wait WAIT_MS.
  *   3. THE PASSPHRASE — the only one of the four that is an actual lock.
  *
  * Steps 0, 1 and 2 are doormen. Step 3 is the boundary.
@@ -42,11 +41,11 @@ export const KEYS = {
 export const LOCKOUT_MS = 30_000
 
 // ---------------------------------------------------------------------------
-// the curtain
+// the lockout's voice
 
 /**
- * The curtain's copy, one line every MSG_MS, rotating for as long as the
- * visitor is standing there. Add or remove lines freely — the rotation reads
+ * The door's copy, one line every MSG_MS, rotating for as long as the
+ * visitor is held. Add or remove lines freely — the rotation reads
  * the array's length. **This is the block to edit**: the voice of the door is
  * the owner's, and nothing else in the codebase reads these strings.
  */
@@ -55,26 +54,12 @@ export const TAUNTS = [
   'the door is not locked because there is anything in here worth taking.',
   'it is locked because you keep coming back.',
   'nothing on this screen is a hint.',
-  'the wait is the point. it is not long. it only feels long.',
-  'there is no button. there is no prompt. there is a minute.',
 ]
 
 /** How long each line stays up. */
 export const MSG_MS = 3_000
 
-/**
- * Type this and hit Enter to cut the curtain short. There is no field and no
- * prompt: keystrokes are read off the window and the echo stays empty until
- * the first character, so nothing on screen admits a code exists. Anyone on a
- * phone, or anyone who was never told, simply waits — which is the minute's
- * whole job.
- */
-export const SKIP_CODE = '420666'
-
-/** Do nothing and the curtain opens itself after this. */
-export const WAIT_MS = 60_000
-
-/** The line above the passphrase field, once the curtain lifts. */
+/** The line above the passphrase field. */
 export const GREETING = 'the door opens for a passphrase and for nothing else. you either have it or you do not.'
 
 // ---------------------------------------------------------------------------

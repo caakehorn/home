@@ -5,12 +5,10 @@ import {
   LOCKOUT_MS,
   MSG_MS,
   QUIZ_PROMPT,
-  SKIP_CODE,
   TAUNTS,
   TRAP_HEAD,
   TRAP_ROWS,
   TRAP_ROW_MS,
-  WAIT_MS,
 } from './config'
 import { loadChallenge, tryPassphrase } from './protocol'
 import { TERMS_EFFECTIVE, TERMS_SECTIONS, TERMS_TITLE, TERMS_VERSION } from './terms'
@@ -21,14 +19,14 @@ import './gate.css'
  *
  * Nothing behind it mounts: the router is not rendered until this resolves, so
  * there is no frame in which the site exists on screen unlocked. One unlock
- * covers the tab, and skips the quiz and the curtain for the rest of it.
+ * covers the tab, and skips the quiz for the rest of it.
  *
  * `#lock` on any URL throws the bolt again — an unlock lasts as long as the
  * tab, which otherwise means the owner cannot see their own front door without
  * opening a new one.
  */
 
-type Step = 'boot' | 'terms' | 'declined' | 'quiz' | 'trap' | 'curtain' | 'pass' | 'punish' | 'open'
+type Step = 'boot' | 'terms' | 'declined' | 'quiz' | 'trap' | 'pass' | 'punish' | 'open'
 
 const read = (store: Storage | undefined, key: string) => {
   try {
@@ -131,9 +129,8 @@ export function Gate({ children }: { children: React.ReactNode }) {
         />
       )}
       {step === 'declined' && <Declined />}
-      {step === 'quiz' && <QuizStep onPass={() => setStep('curtain')} onFail={() => setStep('trap')} />}
+      {step === 'quiz' && <QuizStep onPass={() => setStep('pass')} onFail={() => setStep('trap')} />}
       {step === 'trap' && <Trap />}
-      {step === 'curtain' && <Curtain onThrough={() => setStep('pass')} />}
       {step === 'pass' && <Passphrase onOpen={open} onWrong={punish} />}
       {step === 'punish' && (
         <Punish
@@ -262,69 +259,6 @@ function Trap() {
           <li key={i}>{row}</li>
         ))}
       </ol>
-    </div>
-  )
-}
-
-// ---------------------------------------------------------------------------
-// 2 · THE CURTAIN
-
-function Curtain({ onThrough }: { onThrough: () => void }) {
-  const [line, setLine] = useState(0)
-  const [echo, setEcho] = useState('')
-  const buffer = useRef('')
-
-  useEffect(() => {
-    if (TAUNTS.length < 2) return
-    const id = setInterval(() => setLine((n) => (n + 1) % TAUNTS.length), MSG_MS)
-    return () => clearInterval(id)
-  }, [])
-
-  // Do nothing and it opens itself. The minute is the door for everyone who
-  // was never told about the code, which is nearly everyone.
-  useEffect(() => {
-    const id = setTimeout(onThrough, WAIT_MS)
-    return () => clearTimeout(id)
-  }, [onThrough])
-
-  // No field, no prompt: keystrokes come off the window, and the echo line
-  // stays empty until the first character so nothing admits a code exists.
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Enter') {
-        if (buffer.current === SKIP_CODE) {
-          // The keypress and keyup of this same Enter would otherwise land on
-          // the passphrase form the moment it mounts and submit it empty,
-          // which reads to the door as a wrong guess. Swallow the key and let
-          // the sequence finish before the form exists.
-          e.preventDefault()
-          setTimeout(onThrough, 0)
-        }
-        buffer.current = ''
-        setEcho('')
-        return
-      }
-      if (e.key === 'Backspace') {
-        buffer.current = buffer.current.slice(0, -1)
-      } else if (e.key.length === 1) {
-        buffer.current = (buffer.current + e.key).slice(-SKIP_CODE.length * 2)
-      } else {
-        return
-      }
-      setEcho('•'.repeat(buffer.current.length))
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onThrough])
-
-  return (
-    <div className="gate__flash">
-      <div className="gate__box">
-        <p className="gate__say gate__say--big">{TAUNTS[line]}</p>
-        <p className="gate__echo" aria-hidden="true">
-          {echo}
-        </p>
-      </div>
     </div>
   )
 }

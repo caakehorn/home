@@ -7,6 +7,13 @@ dist-ssr
 *.log
 tsconfig.tsbuildinfo
 
+# The agent surface is derived from public/wiki on every build (see
+# scripts/build-agent-api.mjs). Committing it would rewrite a 3 MB text file
+# on every sync for no gain — the deploy regenerates it.
+public/llms.txt
+public/llms-full.txt
+public/agent/
+
 # The gate's verifier is per-deployment. Build it with `npm run gate:verify`
 # and commit it deliberately, or let the Pages workflow write it from the
 # HOME_PASSPHRASE secret at build time. A verifier built from someone's test

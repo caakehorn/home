@@ -1,0 +1,16 @@
+# 月光宿 MOONLIGHT INN
+#
+# Reading is welcome. The site itself is a React app behind a gate and is a
+# waste of a crawl; everything worth reading is served as static JSON and text,
+# described in one place:
+#
+#   https://caakehorn.github.io/home/llms.txt
+#
+# To close this again: change the line below to `Disallow: /`. It is a request,
+# not a control — an ill-behaved crawler ignores this file, and the payloads
+# resolve regardless.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://caakehorn.github.io/home/llms.txt

@@ -156,6 +156,42 @@ so nothing needs to know which palette is live.
 animation tempo, particle count and blur all derive from. The dial writes it,
 the shell can set it, and it persists to `localStorage` along with the palette.
 
+## The agent surface
+
+The portal renders 458 wiki pages through a React app behind a gate, which is
+useless to a machine. So the same corpus is emitted a second way, for crawlers
+and for agents that want to look something up and read it:
+
+| endpoint | what it is |
+| --- | --- |
+| `/llms.txt` | the entry point — what this is, every endpoint, and the notable pages per domain |
+| `/agent/manifest.json` | the contract: endpoints, the slug rule, what every field means |
+| `/agent/search.json` | one compact record per page — title, aliases, tags, a one-line summary — plus a **name → slug lookup** |
+| `/llms-full.txt` | the whole corpus as one markdown stream, for one-shot ingestion (~3 MB) |
+| `/wiki/index.json` | every page with its counts and map coordinates |
+| `/wiki/pages/{slug}.json` | the page itself; `body` is markdown |
+
+The one rule: a slug's `/` becomes `__` in the filename, so `people/annie-ulmer`
+is read at `wiki/pages/people__annie-ulmer.json`.
+
+That makes a lookup four hops with no JavaScript anywhere: `llms.txt` →
+manifest → `search.json` → the page. The lookup covers titles *and* aliases, so
+"Annie", "Anne Louise Ulmer" and "@Lo_weez" all resolve to the same slug, and
+`links`/`backlinks` on every page let an agent walk the graph from there.
+
+Summaries are not generated: where a page carries an **LLM Quick Brief** the
+summary *is* that brief, because it was already written to be read by a
+machine. Everything else falls back to the opening prose, cut at a sentence.
+
+`npm run agent` builds it, and `prebuild` runs it, so a deploy is always
+current. None of it is committed — it is derived from `public/wiki/`, it
+changes whenever any page does, and a 3 MB text file rewritten on every sync
+would bloat the repository for nothing.
+
+`public/robots.txt` says all of this is fair game and points at `llms.txt`.
+To close it again, change that file's `Allow: /` to `Disallow: /` — though a
+robots file is a request, not a control, and these payloads resolve either way.
+
 ## Editing the wiki, permanently
 
 Every page has an editor, and the editor can **publish**. The portal is a

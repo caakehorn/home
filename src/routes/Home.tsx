@@ -14,8 +14,16 @@ import { SECTIONS } from '../content/sections'
 import { usePortal } from '../state/usePortal'
 import './home.css'
 
-const MISSION =
-  'THESIS · ANTITHESIS · ANOTHER BUMP · SYNTHESIS · CITE YOUR SOURCES · LOSE THE ARGUMENT · LOG IT ANYWAY'
+/** The banner. One line, one place to edit it. */
+const MISSION = [
+  'GET FUCKED',
+  'DO DRUGS',
+  'GLOBAL COMMUNISM',
+  'JET FUEL CAN’T MELT STEEL BEAMS',
+  'EAT THE RICH',
+  'TRANS RIGHTS',
+  'SOLIDARITY FOREVER',
+].join(' · ')
 
 export function Home() {
   const { rigs } = usePortal()

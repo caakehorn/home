@@ -11,6 +11,7 @@
  */
 import { mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { join, relative, resolve } from 'node:path'
+import { layoutWiki, undirectedEdges } from './graph-layout.mjs'
 
 const SOURCE = resolve(process.argv[2] ?? process.env.WIKI_BRAIN ?? '../wiki-brain')
 const OUT = resolve('public/wiki')
@@ -214,6 +215,24 @@ const domains = [...new Set(index.map((p) => p.domain))].sort().map((id) => ({
   count: index.filter((p) => p.domain === id).length,
 }))
 
+index.sort((a, b) => a.slug.localeCompare(b.slug))
+
+// The map's coordinates are baked here rather than simulated on load, and the
+// edge list rides along as index pairs — slugs would triple the file for the
+// same graph.
+const edges = undirectedEdges(pages)
+const position = layoutWiki(
+  index.map((p) => ({ slug: p.slug, domain: p.domain, weight: p.words })),
+  edges,
+)
+const order = new Map(index.map((p, i) => [p.slug, i]))
+for (const entry of index) {
+  const at = position.get(entry.slug)
+  entry.x = at?.x ?? 0
+  entry.y = at?.y ?? 0
+}
+const wire = edges.map(([a, b]) => [order.get(a), order.get(b)])
+
 writeFileSync(
   join(OUT, 'index.json'),
   JSON.stringify({
@@ -223,14 +242,16 @@ writeFileSync(
       words: index.reduce((n, p) => n + p.words, 0),
       chartables: index.reduce((n, p) => n + p.charts, 0),
       briefs: index.filter((p) => p.brief).length,
+      edges: edges.length,
     },
     domains,
-    pages: index.sort((a, b) => a.slug.localeCompare(b.slug)),
+    pages: index,
+    edges: wire,
   }),
 )
 
 console.log(
   `wiki: ${index.length} pages · ${domains.length} domains · ` +
     `${index.reduce((n, p) => n + p.charts, 0)} chartable tables · ` +
-    `${index.filter((p) => p.brief).length} briefs -> public/wiki`,
+    `${index.filter((p) => p.brief).length} briefs · ${edges.length} mapped links -> public/wiki`,
 )

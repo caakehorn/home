@@ -6,7 +6,7 @@ export const VIBES = [
     name: 'DRUG DEN',
     kana: '薬窟',
     blurb: 'back-room neon, crows on the roof, 4am and still arguing',
-    swatch: ['#b026ff', '#ff2bd6', '#00eaff'],
+    swatch: ['#f5c400', '#ff2bd6', '#1244c4'],
   },
   {
     id: 'untitled',
@@ -20,14 +20,21 @@ export const VIBES = [
     name: 'SLIME DRIP',
     kana: '滴',
     blurb: 'wet letterforms, chartreuse, turquoise wall',
-    swatch: ['#ff2d95', '#b4ff1a', '#14e6e6'],
+    swatch: ['#b4ff1a', '#ff2d95', '#14e6e6'],
   },
   {
     id: 'kaiju',
     name: 'KAIJU DREAM',
     kana: '怪獣夢',
     blurb: 'gumball planets, oni gate, too much of everything',
-    swatch: ['#ff2d78', '#6ff2d4', '#ffd166'],
+    swatch: ['#ef8a1f', '#e8478f', '#f5c400'],
+  },
+  {
+    id: 'basquiat',
+    name: 'UNTITLED',
+    kana: '王冠',
+    blurb: 'raw canvas, crown, teeth — the whole thing scrawled over',
+    swatch: ['#f5f0e4', '#dd2a17', '#1244c4'],
   },
 ] as const
 
@@ -51,6 +58,9 @@ export type PortalState = {
   pokeRig: (id: string) => void
   /** Most recently used rig, for the HUD readout. */
   lastPoked: string | null
+  /** Oil-stick mode: the scrawl layer takes the pointer instead of the page. */
+  drawing: boolean
+  setDrawing: (drawing: boolean) => void
 }
 
 export const PortalContext = createContext<PortalState | null>(null)

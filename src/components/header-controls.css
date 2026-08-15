@@ -151,3 +151,33 @@
     display: none;
   }
 }
+
+/* ---- the oil stick -------------------------------------------------------- */
+.hctl__draw {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.18rem 0.55rem;
+  font-family: var(--f-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.14em;
+  color: var(--text-dim);
+  background: none;
+  border: 2px solid color-mix(in srgb, var(--n5) 55%, transparent);
+  cursor: pointer;
+  transition: background-color 140ms ease, color 140ms ease;
+}
+
+.hctl__draw .jp {
+  color: var(--n5);
+}
+
+.hctl__draw--on {
+  color: var(--edge);
+  background: var(--n5);
+  border-color: var(--n5);
+}
+
+.hctl__draw--on .jp {
+  color: var(--edge);
+}

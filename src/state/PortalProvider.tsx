@@ -38,6 +38,7 @@ export function PortalProvider({ children }: { children: ReactNode }) {
     () => typeof window !== 'undefined' && window.sessionStorage.getItem(SESSION_KEY) === '1',
   )
   const [rigs, setRigs] = useState<string[]>([])
+  const [drawing, setDrawing] = useState(false)
   const [lastPoked, setLastPoked] = useState<string | null>(null)
 
   // Paint the palette + chaos onto <html> so plain CSS can read them.
@@ -48,6 +49,11 @@ export function PortalProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     document.documentElement.style.setProperty('--chaos', chaos.toFixed(3))
   }, [chaos])
+
+  // CSS gates the scrawl layer's pointer-events off this.
+  useEffect(() => {
+    document.documentElement.dataset.drawing = drawing ? '1' : '0'
+  }, [drawing])
 
   useEffect(() => {
     try {
@@ -85,8 +91,10 @@ export function PortalProvider({ children }: { children: ReactNode }) {
       rigs,
       pokeRig,
       lastPoked,
+      drawing,
+      setDrawing,
     }),
-    [vibe, chaos, entered, enter, registerRig, rigs, pokeRig, lastPoked],
+    [vibe, chaos, entered, enter, registerRig, rigs, pokeRig, lastPoked, drawing],
   )
 
   return <PortalContext.Provider value={value}>{children}</PortalContext.Provider>

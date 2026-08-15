@@ -30,6 +30,10 @@ const readPalette = () => {
   const read = (token: string, fallback: string) => styles.getPropertyValue(token).trim() || fallback
   return {
     n1: read('--n1', '#b026ff'),
+    // The map draws its pages in whatever the palette says a mark is. On the
+    // dark palettes that is the signage colour; on raw canvas a yellow dot
+    // disappears, so UNTITLED overrides it with ink.
+    ink: read('--graph-ink', '') || read('--n1', '#b026ff'),
     n2: read('--n2', '#ff2bd6'),
     n3: read('--n3', '#00eaff'),
     text: read('--text', '#f2e9ff'),
@@ -172,7 +176,7 @@ export function Cortex({ index, visible, domain, query, onClear }: Props) {
 
       // synapses — a faint mesh, with the focused page's own links lit
       ctx.lineWidth = 1
-      ctx.strokeStyle = mix(palette.n1, 0.1)
+      ctx.strokeStyle = mix(palette.ink, 0.1)
       ctx.beginPath()
       for (const [a, b] of g.edges) {
         if (active !== null && (a === active || b === active)) continue
@@ -208,8 +212,8 @@ export function Cortex({ index, visible, domain, query, onClear }: Props) {
         const isNear = near.has(node.index)
         const inSet = shownSet.has(node.page.slug)
 
-        let fill = mix(palette.n1, inSet ? 0.5 : 0.14)
-        if (inSet) fill = mix(palette.n1, 0.42 + Math.min(node.degree, 40) / 90)
+        let fill = mix(palette.ink, inSet ? 0.5 : 0.14)
+        if (inSet) fill = mix(palette.ink, 0.42 + Math.min(node.degree, 40) / 90)
         if (isNear) fill = mix(palette.n3, 0.85)
         if (isActive) fill = palette.n2
 

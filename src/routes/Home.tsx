@@ -12,6 +12,7 @@ import { Terminal } from '../components/rigs/Terminal'
 import { VibeSwitch } from '../components/rigs/VibeSwitch'
 import { SECTIONS } from '../content/sections'
 import { banner } from '../content/slogans'
+import { VIBES } from '../state/portal-context'
 import { usePortal } from '../state/usePortal'
 import './home.css'
 
@@ -53,7 +54,7 @@ export function Home() {
           <div className="mast__meta">
             <span className="mast__chip">{SECTIONS.length} ROOMS</span>
             <span className="mast__chip">{rigs.length} LIVE RIGS</span>
-            <span className="mast__chip">4 PALETTES</span>
+            <span className="mast__chip">{VIBES.length} PALETTES</span>
             <span className="mast__chip mast__chip--hot">CHAOS ENABLED</span>
           </div>
         </div>

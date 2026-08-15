@@ -1,0 +1,179 @@
+/* ==========================================================================
+   THE CANVAS — raw ground for the UNTITLED palette only.
+   Bone white, packed with oil stick, two figures standing in it.
+   ========================================================================== */
+
+.cv__defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.cv {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  /* Raw canvas, not paper: a warm ground with tooth in it. */
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='t'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23t)' opacity='0.14'/%3E%3C/svg%3E"),
+    var(--void);
+}
+
+/* ---- the scrawl ----------------------------------------------------------- */
+.cv__scrawl,
+.cv__glyphs {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.cv__scrawl {
+  opacity: calc(0.55 + 0.35 * var(--chaos));
+}
+
+.cv__glyphs {
+  opacity: calc(0.45 + 0.3 * var(--chaos));
+}
+
+.cv__mark path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.cv__glyph {
+  font-family: var(--f-head);
+  font-weight: 400;
+}
+
+/* The five hands on the canvas. Ink does most of the work; colour interrupts. */
+.cv__mark--0 path { stroke: var(--edge); }
+.cv__mark--1 path { stroke: var(--n2); }
+.cv__mark--2 path { stroke: var(--n3); }
+.cv__mark--3 path { stroke: var(--n1); }
+.cv__mark--4 path { stroke: var(--n4); }
+
+text.cv__mark--0 { fill: var(--edge); }
+text.cv__mark--1 { fill: var(--n2); }
+text.cv__mark--2 { fill: var(--n3); }
+text.cv__mark--3 { fill: var(--n1); }
+text.cv__mark--4 { fill: var(--n4); }
+
+/* ---- the figures ---------------------------------------------------------- */
+.cv__figure {
+  position: absolute;
+  height: min(72vh, 640px);
+  width: auto;
+  opacity: 0.92;
+}
+
+/* Placement is a compromise with the reading column. Everything in the left
+   half of the viewport ends up behind a paper patch, so the figures stand
+   where the prose is not: one up top through the headline, one bottom right,
+   one small one hanging off the middle. */
+.cv__figure--left {
+  left: 38%;
+  top: 1%;
+  height: min(54vh, 500px);
+}
+
+.cv__figure--right {
+  right: 1%;
+  bottom: 3%;
+}
+
+.cv__figure--third {
+  left: 44%;
+  bottom: -2%;
+  height: min(38vh, 340px);
+}
+
+@media (max-width: 1100px) {
+  .cv__figure {
+    height: 46vh;
+    opacity: 0.7;
+  }
+
+  .cv__figure--left {
+    left: 4%;
+    top: 2%;
+  }
+
+  .cv__figure--third {
+    display: none;
+  }
+}
+
+.cv__ink {
+  stroke: var(--edge);
+  fill: var(--edge);
+}
+
+.cv__ink[fill='none'] {
+  fill: none;
+}
+
+.cv__fill-y { fill: var(--n1); }
+.cv__fill-r { fill: var(--n2); }
+.cv__fill-b { fill: var(--n3); }
+.cv__fill-w { fill: #fbf7ec; }
+.cv__bone { stroke: var(--edge); fill: none; }
+.cv__crown-on { color: var(--n1); }
+
+/* ---- crossed-out words ------------------------------------------------------ */
+.cv__word {
+  position: absolute;
+  font-family: var(--f-head);
+  font-size: clamp(2rem, 7vw, 5.5rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: transparent;
+  -webkit-text-stroke: 3px var(--edge);
+  opacity: 0.5;
+  white-space: nowrap;
+}
+
+.cv__word::after {
+  content: '';
+  position: absolute;
+  left: -4%;
+  right: -4%;
+  top: 52%;
+  height: 7px;
+  background: var(--n2);
+  filter: url(#oilstick);
+}
+
+.cv__word--1 { top: 10%; left: 22%; transform: rotate(-4deg); }
+.cv__word--2 { top: 58%; right: 24%; transform: rotate(3deg); }
+.cv__word--3 { bottom: 8%; left: 30%; transform: rotate(-2deg); }
+.cv__word--4 { top: 34%; right: 30%; transform: rotate(6deg); font-size: clamp(1.4rem, 4vw, 3rem); }
+.cv__word--5 { top: 76%; left: 42%; transform: rotate(-7deg); font-size: clamp(1.2rem, 3vw, 2.4rem); }
+
+/* ---- loose crowns ------------------------------------------------------------ */
+.cv__crown {
+  position: absolute;
+  width: clamp(60px, 8vw, 130px);
+  height: auto;
+  color: var(--n1);
+  filter: url(#oilstick);
+  overflow: visible;
+}
+
+.cv__crown--1 { top: 6%; left: 8%; transform: rotate(-12deg); }
+.cv__crown--2 { top: 44%; right: 12%; transform: rotate(8deg); }
+
+/* ---- the crown component ------------------------------------------------------ */
+.crown {
+  display: inline-block;
+  width: 1.1em;
+  height: 0.68em;
+  color: var(--n1);
+  filter: url(#oilstick);
+  overflow: visible;
+}

@@ -1,5 +1,7 @@
 import { Route, Routes, useLocation } from 'react-router-dom'
+import { Canvas } from './components/Canvas'
 import { CursorTrail } from './components/CursorTrail'
+import { Scrawl } from './components/Scrawl'
 import { Fx } from './components/Fx'
 import { Hud } from './components/Hud'
 import { Gate } from './gate/Gate'
@@ -38,6 +40,8 @@ function Site() {
 
   return (
     <>
+      <Canvas />
+      <Scrawl />
       <Fx />
       <CursorTrail />
 

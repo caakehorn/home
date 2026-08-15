@@ -1,0 +1,177 @@
+.dos {
+  align-self: start;
+  position: sticky;
+  top: 4.5rem;
+  display: grid;
+  gap: 0.7rem;
+  padding: 0.9rem 1rem 1rem;
+  background: var(--void-2);
+  border: var(--rule) solid var(--edge);
+  box-shadow:
+    8px 8px 0 var(--edge),
+    0 0 var(--glow-r) color-mix(in srgb, var(--n3) 35%, transparent);
+}
+
+.dos--void {
+  border-color: var(--n2);
+  box-shadow:
+    8px 8px 0 var(--edge),
+    0 0 var(--glow-r) color-mix(in srgb, var(--n2) 55%, transparent);
+}
+
+.dos__empty p {
+  font-size: var(--step--1);
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+.dos__eyebrow {
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--n3);
+}
+
+.dos__name {
+  margin-top: 0.2rem;
+  font-family: var(--f-head);
+  font-size: var(--step-1);
+  line-height: 1.1;
+  color: var(--text);
+}
+
+.dos__dates {
+  margin-top: 0.15rem;
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  color: var(--text-dim);
+}
+
+/* ---- the share ---------------------------------------------------------- */
+.dos__share {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.6rem 0.7rem;
+  background: var(--void);
+  border: 2px solid color-mix(in srgb, var(--n2) 55%, transparent);
+}
+
+.dos__share-num {
+  font-family: var(--f-crt);
+  font-size: var(--step-3);
+  line-height: 0.85;
+  color: var(--n2);
+  text-shadow: 0 0 12px var(--n2);
+  font-variant-numeric: tabular-nums;
+}
+
+.dos__share-frac {
+  font-family: var(--f-mono);
+  font-size: var(--step-0);
+  color: var(--text);
+}
+
+.dos__share-note {
+  flex-basis: 100%;
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+
+/* ---- facts -------------------------------------------------------------- */
+.dos__facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.25rem 0.7rem;
+  font-size: var(--step--1);
+}
+
+.dos__facts dt {
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--n3);
+  padding-top: 0.15rem;
+}
+
+.dos__facts dd {
+  margin: 0;
+  color: var(--text);
+  line-height: 1.45;
+}
+
+/* ---- descent ------------------------------------------------------------ */
+.dos__chain ol {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.15rem;
+  margin-top: 0.25rem;
+  font-size: var(--step--1);
+}
+
+.dos__chain span {
+  color: var(--n3);
+}
+
+.dos__step {
+  padding: 0.1rem 0.35rem;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  border: 1px solid transparent;
+}
+
+.dos__step:hover {
+  color: var(--edge);
+  background: var(--n3);
+}
+
+.dos__step--on {
+  color: var(--n3);
+  border-color: var(--n3);
+}
+
+.dos__note,
+.dos__correction {
+  font-size: var(--step--1);
+  line-height: 1.55;
+  color: var(--text-dim);
+}
+
+.dos__correction {
+  padding: 0.5rem 0.6rem;
+  background: color-mix(in srgb, var(--n2) 12%, transparent);
+  border-left: 3px solid var(--n2);
+}
+
+.dos__correction b {
+  color: var(--n2);
+}
+
+.dos__link {
+  justify-self: start;
+  padding: 0.28rem 0.7rem;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-decoration: none;
+  color: var(--text);
+  border: 2px solid var(--n3);
+}
+
+.dos__link:hover {
+  background: var(--n3);
+  color: var(--edge);
+}
+
+@media (max-width: 900px) {
+  .dos {
+    position: static;
+  }
+}

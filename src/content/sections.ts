@@ -21,6 +21,16 @@ export const SECTIONS: Section[] = [
     chant: 'NOTES BECOME CHARTS · CHARTS BECOME PICTURES · PICTURES BECOME NOTES ·',
   },
   {
+    slug: 'lineage',
+    title: 'THE LATTICE',
+    kana: '血統',
+    blurb:
+      'The family tree on a real time axis — 515 people, seven generations, every ancestor sized by how much of the genome came through them. Including the one the record loses.',
+    status: 'LIVE',
+    accent: 1,
+    chant: '515 INDIVIDUALS · 218 FAMILIES · 90 DIRECT ANCESTORS · ONE HOLE ·',
+  },
+  {
     slug: 'leviathan',
     title: 'LEVIATHAN',
     kana: '巨獣',

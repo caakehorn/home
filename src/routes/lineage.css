@@ -1,0 +1,450 @@
+.lin {
+  position: relative;
+  z-index: 1;
+  min-height: 100%;
+  background:
+    radial-gradient(80% 45% at 50% 0%, color-mix(in srgb, var(--n1) 22%, transparent), transparent 70%),
+    var(--void);
+}
+
+/* ---- masthead ----------------------------------------------------------- */
+.lin__mast {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 0.3rem 1rem;
+  padding-block: clamp(1.6rem, 5vh, 3rem) 0.4rem;
+}
+
+.lin__title {
+  font-size: clamp(1.7rem, 6vw, 4.2rem);
+  line-height: 0.95;
+}
+
+.lin__kana {
+  font-size: clamp(1.6rem, 5vw, 3.4rem);
+  line-height: 1;
+  color: var(--n2);
+  text-shadow: 0 0 calc(var(--glow-r) * 0.8) var(--n2);
+}
+
+.lin__note {
+  grid-column: 1 / -1;
+  max-width: 76ch;
+  font-size: var(--step-0);
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+.lin__scope {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.7rem;
+}
+
+.lin__scope li {
+  padding: 0.2rem 0.6rem;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  border: 2px solid color-mix(in srgb, var(--n1) 45%, transparent);
+}
+
+.lin__scope b {
+  color: var(--n1);
+}
+
+/* ---- controls ------------------------------------------------------------ */
+.lin__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.8rem;
+  padding-block: 1rem;
+}
+
+.lin__lines {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.lin__line {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.22rem 0.6rem;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  border: 2px solid color-mix(in srgb, var(--n1) 45%, transparent);
+  transition: background-color 140ms ease, color 140ms ease;
+}
+
+.lin__line .jp {
+  color: var(--n1);
+}
+
+.lin__line--on {
+  color: var(--edge);
+  background: var(--n1);
+  border-color: var(--n1);
+  box-shadow: 0 0 calc(var(--glow-r) * 0.6) var(--n1);
+}
+
+.lin__line--on .jp {
+  color: var(--edge);
+}
+
+.lin__depth,
+.lin__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+}
+
+.lin__depth b {
+  color: var(--n3);
+  min-width: 4rem;
+}
+
+.lin__depth input[type='range'] {
+  width: 120px;
+  accent-color: var(--n3);
+}
+
+.lin__toggle em {
+  font-style: normal;
+  opacity: 0.7;
+}
+
+.lin__toggle input {
+  accent-color: var(--n2);
+}
+
+/* ---- stage --------------------------------------------------------------- */
+.lin__stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
+  gap: clamp(1rem, 2.5vw, 1.8rem);
+  padding-bottom: 2rem;
+}
+
+@media (max-width: 900px) {
+  .lin__stage {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---- the void ------------------------------------------------------------ */
+.lin__void {
+  margin-block: clamp(1.5rem, 5vh, 3rem);
+  padding: 1.1rem 1.2rem 1.2rem;
+  background:
+    repeating-linear-gradient(-45deg, transparent 0 12px, color-mix(in srgb, var(--n2) 7%, transparent) 12px 24px),
+    var(--void-2);
+  border: var(--rule) solid var(--n2);
+  box-shadow: 8px 8px 0 var(--edge), 0 0 var(--glow-r) color-mix(in srgb, var(--n2) 40%, transparent);
+}
+
+.lin__void-title {
+  font-family: var(--f-poster);
+  font-size: var(--step-1);
+  letter-spacing: 0.02em;
+  color: var(--n2);
+  text-shadow: 0 0 calc(var(--glow-r) * 0.6) var(--n2);
+}
+
+.lin__void-body {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+  max-width: 74ch;
+}
+
+.lin__void-body p {
+  font-size: var(--step-0);
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.lin__void-body b {
+  color: var(--n2);
+}
+
+.lin__void-fine {
+  font-size: var(--step--1) !important;
+  color: var(--text-dim) !important;
+}
+
+.lin__void-btn {
+  justify-self: start;
+  padding: 0.3rem 0.8rem;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  color: var(--edge);
+  background: var(--n2);
+  border: 3px solid var(--edge);
+  box-shadow: 4px 4px 0 var(--edge);
+}
+
+.lin__void-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--edge);
+}
+
+/* ---- generic sections ----------------------------------------------------- */
+.lin__section {
+  padding-block: clamp(1.4rem, 4vh, 2.6rem);
+}
+
+.lin__h2 {
+  font-size: clamp(1.3rem, 4vw, 2.6rem);
+  line-height: 1;
+}
+
+.lin__lede {
+  max-width: 70ch;
+  margin-top: 0.6rem;
+  font-size: var(--step--1);
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+.lin__legend {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.9rem;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+
+.lin__legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.lin__sw {
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--edge);
+}
+
+/* ---- crosscheck table ------------------------------------------------------ */
+.lin__check {
+  width: 100%;
+  margin-top: 0.7rem;
+  border-collapse: collapse;
+  font-size: var(--step--1);
+}
+
+.lin__check th,
+.lin__check td {
+  padding: 0.5rem 0.6rem;
+  border-top: 1px solid color-mix(in srgb, var(--text-dim) 26%, transparent);
+  text-align: left;
+  vertical-align: top;
+}
+
+.lin__check thead th {
+  font-family: var(--f-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--n3);
+  border-top: none;
+}
+
+.lin__check tbody th {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.lin__check tbody th em {
+  display: block;
+  font-style: normal;
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  color: var(--text-dim);
+}
+
+.lin__num {
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.lin__bars {
+  display: grid;
+  gap: 3px;
+  min-width: 90px;
+}
+
+.lin__bar {
+  display: block;
+  height: 8px;
+  border: 1px solid var(--edge);
+}
+
+.lin__verdict {
+  display: block;
+  margin-top: 0.25rem;
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  color: var(--text-dim);
+}
+
+/* ---- haplogroups ----------------------------------------------------------- */
+.lin__haplo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: 0.8rem;
+  margin-top: 1.2rem;
+}
+
+.lin__haplo-card {
+  padding: 0.7rem 0.8rem;
+  background: var(--void-2);
+  border: 2px solid color-mix(in srgb, var(--n5) 55%, transparent);
+}
+
+.lin__haplo-code {
+  display: block;
+  font-family: var(--f-crt);
+  font-size: var(--step-2);
+  line-height: 1;
+  color: var(--n5);
+  text-shadow: 0 0 12px var(--n5);
+}
+
+.lin__haplo-card b {
+  display: block;
+  margin-top: 0.2rem;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.lin__haplo-card p {
+  margin-top: 0.3rem;
+  font-size: var(--step--1);
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+/* ---- corridors -------------------------------------------------------------- */
+.lin__corridors {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.lin__corridor {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.5rem;
+  padding: 0.5rem 0.7rem;
+  background: var(--void-2);
+  border-left: 4px solid var(--n4);
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  color: var(--text-dim);
+}
+
+.lin__corridor-from {
+  color: var(--n4);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.lin__hop {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.lin__arrow {
+  width: 22px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--n4));
+  position: relative;
+}
+
+.lin__arrow::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: -2px;
+  border-left: 5px solid var(--n4);
+  border-block: 3px solid transparent;
+}
+
+.lin__corridor-who {
+  margin-left: auto;
+  color: var(--text);
+}
+
+/* ---- surnames ----------------------------------------------------------------- */
+.lin__surnames {
+  display: grid;
+  gap: 0.3rem;
+  margin-top: 1rem;
+}
+
+.lin__surnames li {
+  display: grid;
+  grid-template-columns: 8rem 1fr 3rem;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.lin__sur-name {
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--text);
+}
+
+.lin__sur-bar {
+  height: 12px;
+  background: linear-gradient(90deg, var(--n1), var(--n2));
+  border: 1px solid var(--edge);
+  border-radius: 0 4px 4px 0;
+}
+
+.lin__sur-count {
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- foot ---------------------------------------------------------------------- */
+.lin__foot {
+  padding-block: 2rem 3rem;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  line-height: 1.7;
+  color: var(--text-dim);
+}
+
+.lin__foot code {
+  color: var(--n3);
+}

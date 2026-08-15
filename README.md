@@ -20,7 +20,25 @@ npm run preview    # serve the production build
 npm run typecheck
 ```
 
-Serving from a subpath (GitHub Pages project site, say): `BASE_PATH=/home/ npm run build`.
+Serving from a subpath: `BASE_PATH=/home/ npm run build`.
+
+## Deployment
+
+Pushes to `main` build and publish to GitHub Pages via
+`.github/workflows/deploy.yml` — live at **https://caakehorn.github.io/home/**.
+
+Two things make the subpath work:
+
+- `BASE_PATH` is set to `/<repo>/` in the workflow, so Vite rewrites every asset
+  URL (including the `url(...)` font references in CSS) and the router picks the
+  same value up through `import.meta.env.BASE_URL`.
+- Pages has no SPA rewrite rule, so a cold load of `/home/brain` would 404 before
+  the router boots. The build emits a copy of `index.html` as `404.html`; Pages
+  serves it for unmatched paths and the app routes itself from there.
+
+To check a production subpath build locally, build with `BASE_PATH` set and serve
+`dist/` under that prefix with a 404 fallback — not `vite preview`, which serves
+from the root and will not catch base-path mistakes.
 
 ## The type system
 

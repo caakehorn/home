@@ -2,7 +2,17 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { WikiPage } from './data'
 import { frontmatterOf } from './data'
 import { Markdown } from './Markdown'
-import { discardDraft, download, downscaleImage, getDraft, saveDraft, saveImage, toMarkdown } from './store'
+import { forgetToken, getToken, publishPage, setToken, SOURCE_REPO } from './publish'
+import {
+  allImages,
+  discardDraft,
+  download,
+  downscaleImage,
+  getDraft,
+  saveDraft,
+  saveImage,
+  toMarkdown,
+} from './store'
 import './editor.css'
 
 type Props = {
@@ -27,6 +37,8 @@ export function Editor({ page, frontmatter, body, onChange, onClose }: Props) {
   const [tab, setTab] = useState<'body' | 'frontmatter' | 'preview'>('body')
   const [status, setStatus] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [asking, setAsking] = useState(false)
+  const [published, setPublished] = useState<string | null>(null)
   const file = useRef<HTMLInputElement>(null)
   const saved = useRef<number | undefined>(undefined)
 
@@ -61,6 +73,38 @@ export function Editor({ page, frontmatter, body, onChange, onClose }: Props) {
       onChange({ frontmatter: next, body })
       setTab('frontmatter')
       setStatus('picture added to the infobox')
+    } catch (e) {
+      setStatus((e as Error).message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  /**
+   * Push the page to the wiki everyone reads.
+   *
+   * The commit goes to the source repository, not to this site's snapshot of
+   * it — the snapshot is a build artifact and the next sync would overwrite
+   * anything written there. The site catches up when the rebuild lands, so
+   * the local draft is kept until then rather than discarded on success.
+   */
+  const publish = async () => {
+    if (!getToken()) {
+      setAsking(true)
+      return
+    }
+    setBusy(true)
+    setPublished(null)
+    try {
+      const { commit, pictures } = await publishPage(
+        { slug: page.slug, markdown: toMarkdown(frontmatter, body), images: allImages() },
+        setStatus,
+      )
+      setPublished(commit)
+      setStatus(
+        `published${pictures ? ` with ${pictures} picture${pictures === 1 ? '' : 's'}` : ''} — ` +
+          'live for everyone once the rebuild finishes, a minute or two from now',
+      )
     } catch (e) {
       setStatus((e as Error).message)
     } finally {
@@ -120,6 +164,10 @@ export function Editor({ page, frontmatter, body, onChange, onClose }: Props) {
           }}
         />
 
+        <button type="button" className="ed__btn ed__btn--go" onClick={publish} disabled={busy}>
+          {busy ? 'PUBLISHING…' : 'PUBLISH'}
+        </button>
+
         <button type="button" className="ed__btn" onClick={exportFile}>
           DOWNLOAD .MD
         </button>
@@ -135,6 +183,15 @@ export function Editor({ page, frontmatter, body, onChange, onClose }: Props) {
           DONE
         </button>
       </div>
+
+      {asking && (
+        <TokenPanel
+          onDone={(ok) => {
+            setAsking(false)
+            if (ok) void publish()
+          }}
+        />
+      )}
 
       {tab === 'preview' ? (
         <div className="ed__preview">
@@ -159,11 +216,86 @@ export function Editor({ page, frontmatter, body, onChange, onClose }: Props) {
       <p className="ed__note" role="status">
         {status ?? (
           <>
-            Edits live in <b>this browser only</b> — the portal is a static site with no server
-            behind it. Download or copy the page to put it back in wiki-brain.
+            Edits autosave to <b>this browser</b>. <b>PUBLISH</b> commits the page — and any
+            pictures on it — to <code>{SOURCE_REPO}</code>, and the site rebuilds from there, so it
+            sticks for every machine that opens the wiki afterwards.
           </>
+        )}
+        {published && (
+          <>
+            {' '}
+            <a href={published} target="_blank" rel="noreferrer noopener" className="ed__link">
+              see the commit →
+            </a>
+          </>
+        )}
+        {getToken() && (
+          <button
+            type="button"
+            className="ed__forget"
+            onClick={() => {
+              forgetToken()
+              setStatus('token forgotten on this device')
+            }}
+          >
+            FORGET TOKEN
+          </button>
         )}
       </p>
     </div>
+  )
+}
+
+/**
+ * Where the write credential is asked for.
+ *
+ * There is no server to hold a secret, so publishing needs a token from
+ * whoever is doing it. It stays in this tab unless "remember" is ticked, and
+ * it is never sent anywhere except api.github.com.
+ */
+function TokenPanel({ onDone }: { onDone: (ok: boolean) => void }) {
+  const [value, setValue] = useState('')
+  const [remember, setRemember] = useState(false)
+
+  return (
+    <form
+      className="ed__token"
+      onSubmit={(e) => {
+        e.preventDefault()
+        if (!value.trim()) return
+        setToken(value.trim(), remember)
+        setValue('')
+        onDone(true)
+      }}
+    >
+      <p className="ed__token-head">A GITHUB TOKEN, TO WRITE TO THE WIKI</p>
+      <p className="ed__token-note">
+        Fine-grained, with <b>contents: read and write</b> on <code>{SOURCE_REPO}</code> and{' '}
+        <code>caakehorn/home</code> — nothing else. It is held in this tab, sent only to
+        api.github.com, and never committed anywhere.
+      </p>
+      <input
+        className="ed__token-field"
+        type="password"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        placeholder="github_pat_…"
+        aria-label="GitHub token"
+        autoComplete="off"
+        spellCheck={false}
+      />
+      <label className="ed__token-check">
+        <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
+        remember on this device — only on a machine you own
+      </label>
+      <div className="ed__token-row">
+        <button type="submit" className="ed__btn ed__btn--go">
+          USE IT
+        </button>
+        <button type="button" className="ed__btn" onClick={() => onDone(false)}>
+          CANCEL
+        </button>
+      </div>
+    </form>
   )
 }

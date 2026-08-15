@@ -9,7 +9,7 @@
  * The portal is static, so nothing is read from the source repo at runtime.
  * Re-run this to pull in new writing.
  */
-import { mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { join, relative, resolve } from 'node:path'
 import { layoutWiki, undirectedEdges } from './graph-layout.mjs'
 
@@ -71,6 +71,8 @@ function parseFrontmatter(text) {
 function walk(dir, out = []) {
   for (const entry of readdirSync(dir)) {
     if (entry.startsWith('.')) continue
+    // Pictures live under wiki/assets/ and are copied wholesale, not parsed.
+    if (entry === 'assets') continue
     const full = join(dir, entry)
     if (statSync(full).isDirectory()) walk(full, out)
     else if (entry.endsWith('.md')) out.push(full)
@@ -147,6 +149,11 @@ if (!sourceStat.isDirectory()) process.exit(1)
 
 rmSync(OUT, { recursive: true, force: true })
 mkdirSync(join(OUT, 'pages'), { recursive: true })
+
+// Pictures published from the portal ride along with the prose; an `image:`
+// value of `assets/<slug>/<id>.jpg` resolves against this directory.
+const assets = join(SOURCE, 'wiki', 'assets')
+if (existsSync(assets)) cpSync(assets, join(OUT, 'assets'), { recursive: true })
 
 const files = walk(join(SOURCE, 'wiki')).sort()
 const index = []

@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  # Callable, so the wiki sync can deploy what it just committed — a push made
+  # with GITHUB_TOKEN never triggers a workflow of its own.
+  workflow_call:
 
 # Required by actions/deploy-pages: read the repo, write a Pages deployment,
 # and mint the OIDC token it verifies the deployment with.
@@ -42,10 +45,12 @@ jobs:
         if: env.HOME_PASSPHRASE != ''
         run: npm run gate:verify
 
+      # Project sites are served from /<repo>/, not the domain root. Taken
+      # from GITHUB_REPOSITORY rather than github.event.repository, which is
+      # not populated on a schedule or a reusable call.
+      - run: echo "BASE_PATH=/${GITHUB_REPOSITORY#*/}/" >> "$GITHUB_ENV"
+
       - run: npm run build
-        env:
-          # Project sites are served from /<repo>/, not the domain root.
-          BASE_PATH: /${{ github.event.repository.name }}/
 
       # enablement turns Pages on (source: GitHub Actions) if it is not already,
       # so the first deploy needs no manual visit to repo settings.

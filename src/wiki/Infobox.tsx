@@ -56,13 +56,19 @@ function Value({ text }: { text: string }) {
 }
 
 /**
- * Resolve an `image:` frontmatter value. Pictures uploaded through the editor
- * are stored in this browser under an `upload:<id>` handle; anything else is
- * treated as a URL.
+ * Resolve an `image:` frontmatter value.
+ *
+ * Three forms, in the order a picture passes through them: `upload:<id>` while
+ * it is still only in this browser, `assets/<slug>/<id>.jpg` once it has been
+ * published and vendored into the snapshot, and a plain URL for anything
+ * pointed at from elsewhere.
  */
 export function resolveImage(value: string | undefined): string | null {
   if (!value) return null
   if (value.startsWith('upload:')) return getImage(value.slice(7))
+  if (value.startsWith('assets/')) {
+    return `${import.meta.env.BASE_URL}wiki/${value}`.replace(/\/{2,}/g, '/')
+  }
   if (/^(https?:|data:)/.test(value)) return value
   return null
 }

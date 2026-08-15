@@ -1,0 +1,329 @@
+/* ==========================================================================
+   THE GATE — in front of everything
+   Deliberately self-contained: the gate paints before the site's own chrome
+   is anything, so it leans on the tokens and nothing else.
+   ========================================================================== */
+
+.gate {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(0.8rem, 4vw, 2rem);
+  overflow: auto;
+  background: var(--void, #07010e);
+}
+
+.gate::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 55% at 22% 20%, color-mix(in srgb, var(--n3) 20%, transparent), transparent 66%),
+    radial-gradient(ellipse 55% 45% at 82% 76%, color-mix(in srgb, var(--n2) 16%, transparent), transparent 62%),
+    radial-gradient(ellipse 50% 42% at 70% 14%, color-mix(in srgb, var(--n1) 16%, transparent), transparent 64%);
+}
+
+/* the scanline wash, same as the original's */
+.gate::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(4, 0, 12, 0.22) 0px,
+    rgba(4, 0, 12, 0.22) 1px,
+    color-mix(in srgb, var(--n3) 4%, transparent) 1px,
+    transparent 3px
+  );
+}
+
+.gate--boot {
+  background: var(--void, #07010e);
+}
+
+.gate__box {
+  position: relative;
+  z-index: 1;
+  width: min(34rem, 100%);
+  padding: clamp(1.1rem, 3vw, 1.9rem);
+  background: color-mix(in srgb, var(--void-2, #14032a) 96%, transparent);
+  border: 2px solid color-mix(in srgb, var(--n3) 55%, transparent);
+  box-shadow: 0 0 90px color-mix(in srgb, var(--n3) 22%, transparent);
+}
+
+.gate__box--wide {
+  width: min(52rem, 100%);
+}
+
+.gate__tag {
+  margin: 0;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.3em;
+  color: var(--n3);
+  text-shadow: 0 0 14px color-mix(in srgb, var(--n3) 70%, transparent);
+}
+
+.gate__head {
+  margin: 0.6rem 0 0.2rem;
+  font-family: var(--f-head);
+  font-size: clamp(1rem, 2.6vw, 1.5rem);
+  line-height: 1.15;
+  color: var(--text);
+}
+
+.gate__meta {
+  margin: 0 0 0.8rem;
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+}
+
+.gate__say {
+  margin: 0.9rem 0 1.1rem;
+  font-family: var(--f-ui);
+  font-size: 0.95rem;
+  line-height: 1.75;
+  color: var(--text);
+  text-wrap: pretty;
+}
+
+.gate__say--big {
+  font-size: clamp(1rem, 2.4vw, 1.25rem);
+  min-height: 4.5rem;
+}
+
+.gate__note {
+  margin: 0.6rem 0 1rem;
+  font-family: var(--f-ui);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+.gate__note code {
+  font-family: var(--f-mono);
+  font-size: 0.9em;
+  color: var(--n3);
+}
+
+/* ---- the terms ---------------------------------------------------------- */
+
+.gate__scroll {
+  max-height: min(46vh, 26rem);
+  overflow-y: auto;
+  padding: 0.8rem 1rem;
+  background: color-mix(in srgb, var(--void) 60%, transparent);
+  border: 1px solid color-mix(in srgb, var(--text-dim) 30%, transparent);
+}
+
+.gate__scroll:focus-visible {
+  outline: 2px solid var(--n3);
+  outline-offset: 2px;
+}
+
+.gate__scroll h2 {
+  margin: 1.1rem 0 0.3rem;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  color: var(--n3);
+}
+
+.gate__scroll section:first-child h2 {
+  margin-top: 0;
+}
+
+.gate__scroll p {
+  margin: 0 0 0.6rem;
+  font-family: var(--f-ui);
+  font-size: 0.78rem;
+  line-height: 1.65;
+  color: var(--text-dim);
+}
+
+.gate__check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0.9rem 0;
+  font-family: var(--f-ui);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.gate__check input {
+  margin-top: 0.2rem;
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--n3);
+  flex: none;
+}
+
+.gate__row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* ---- controls ----------------------------------------------------------- */
+
+.gate__field {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.75rem 0.8rem;
+  font-family: var(--f-mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  color: var(--text);
+  background: color-mix(in srgb, var(--void) 70%, transparent);
+  border: 1px solid color-mix(in srgb, var(--n3) 45%, transparent);
+  outline: none;
+}
+
+.gate__field:focus {
+  border-color: var(--n1);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--n1) 40%, transparent);
+}
+
+.gate__err {
+  min-height: 1rem;
+  margin: 0.5rem 0.1rem 0;
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  color: var(--n2);
+}
+
+.gate__go,
+.gate__no {
+  flex: 1 1 10rem;
+  margin-top: 0.6rem;
+  padding: 0.8rem;
+  font-family: var(--f-poster);
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+  border: 1px solid var(--n3);
+  color: var(--edge);
+  background: var(--n3);
+}
+
+.gate__go:hover:not(:disabled) {
+  background: var(--n5);
+  border-color: var(--n5);
+}
+
+.gate__go:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.gate__no {
+  color: var(--text-dim);
+  background: none;
+  border-color: color-mix(in srgb, var(--text-dim) 45%, transparent);
+}
+
+.gate__no:hover {
+  color: var(--text);
+  border-color: var(--text);
+}
+
+/* ---- the decoy ---------------------------------------------------------- */
+
+.gate__track {
+  height: 6px;
+  margin: 1rem 0;
+  background: color-mix(in srgb, var(--void) 70%, transparent);
+  border: 1px solid color-mix(in srgb, var(--n1) 45%, transparent);
+}
+
+.gate__fill {
+  display: block;
+  height: 100%;
+  background: var(--n3);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--n3) 80%, transparent);
+  transition: width 600ms ease;
+}
+
+.gate__rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  line-height: 2;
+  color: var(--text-dim);
+}
+
+/* ---- the curtain -------------------------------------------------------- */
+
+/* `alternate` makes one on-off cycle 0.68s — about 1.5 flashes a second, well
+   under the 3 Hz general-flash threshold in WCAG 2.3.1 (the original ran at
+   2.9, right on the line; this one does not need to). Do not speed it up. */
+.gate__flash {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  animation: gate-flash 0.34s steps(1, end) infinite alternate;
+}
+
+.gate__flash--punish {
+  animation-name: gate-flash-hard;
+}
+
+@keyframes gate-flash {
+  from {
+    filter: none;
+  }
+  to {
+    filter: brightness(1.9) saturate(1.4);
+  }
+}
+
+@keyframes gate-flash-hard {
+  from {
+    filter: none;
+  }
+  to {
+    filter: brightness(2.2) saturate(1.6) hue-rotate(18deg);
+  }
+}
+
+/* It still takes the whole screen for the whole thirty seconds — it just
+   stops strobing. */
+@media (prefers-reduced-motion: reduce) {
+  .gate__flash {
+    animation: none;
+  }
+}
+
+.gate__echo {
+  min-height: 1.2rem;
+  margin: 0;
+  font-family: var(--f-mono);
+  font-size: 0.9rem;
+  letter-spacing: 0.4em;
+  color: var(--n3);
+}
+
+.gate__count {
+  margin: 0.4rem 0 0;
+  font-family: var(--f-head);
+  font-size: clamp(2rem, 8vw, 3.4rem);
+  line-height: 1;
+  color: var(--n2);
+}

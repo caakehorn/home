@@ -1,0 +1,119 @@
+/* ==========================================================================
+   The instrument frame — shared chrome for every LEVIATHAN instrument
+   ========================================================================== */
+
+.inst {
+  background: var(--void-2);
+  border: var(--rule) solid var(--edge);
+  box-shadow: 8px 8px 0 var(--edge);
+}
+
+.inst__head {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.8rem 1.2rem;
+  flex-wrap: wrap;
+  padding: 1rem 1.1rem 0.8rem;
+  border-bottom: var(--rule) solid color-mix(in srgb, var(--n1) 55%, transparent);
+}
+
+.inst__numeral {
+  font-family: var(--f-mono);
+  font-size: clamp(1.6rem, 4vw, 2.6rem);
+  line-height: 0.9;
+  letter-spacing: 0.1em;
+  color: var(--n1);
+  text-shadow: 0 0 calc(var(--glow-r) * 0.6) var(--n1);
+}
+
+.inst__id {
+  flex: 1;
+  min-width: 12rem;
+}
+
+.inst__title {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin: 0;
+  font-family: var(--f-head);
+  font-size: clamp(1.3rem, 3.5vw, 2.2rem);
+  line-height: 1;
+  color: var(--text);
+}
+
+.inst__kana {
+  font-size: 0.55em;
+  color: var(--text-dim);
+}
+
+.inst__corpus {
+  margin: 0.25rem 0 0;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--n3);
+}
+
+.inst__controls {
+  flex: none;
+}
+
+.inst__body {
+  padding: 1rem 1.1rem;
+}
+
+.inst__state {
+  padding: 2rem 0;
+  font-family: var(--f-mono);
+  font-size: var(--step-0);
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+}
+
+.inst__foot {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.9rem 1.1rem 1rem;
+  border-top: var(--rule) solid color-mix(in srgb, var(--text-dim) 30%, transparent);
+}
+
+.inst__method,
+.inst__note,
+.inst__rule {
+  max-width: 78ch;
+  margin: 0;
+  font-family: var(--f-ui);
+  font-size: var(--step--1);
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+.inst__method b,
+.inst__rule b {
+  margin-right: 0.5rem;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  color: var(--n3);
+}
+
+.inst__rule {
+  font-size: 0.72rem;
+  color: color-mix(in srgb, var(--text-dim) 75%, transparent);
+}
+
+.inst__back {
+  justify-self: start;
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  color: var(--n3);
+  text-decoration: none;
+}
+
+.inst__back:hover {
+  text-decoration: underline;
+}

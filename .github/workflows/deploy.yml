@@ -20,6 +20,10 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # The `secrets` context is not available to a step's `if:`, so the
+    # passphrase comes in as job-level env and the step tests that instead.
+    env:
+      HOME_PASSPHRASE: ${{ secrets.HOME_PASSPHRASE }}
     steps:
       - uses: actions/checkout@v4
 
@@ -29,6 +33,14 @@ jobs:
           cache: npm
 
       - run: npm ci
+
+      # The gate's verifier, written from the repository secret so the
+      # passphrase never enters the repository. Without the secret the site
+      # deploys with the door unconfigured, which the gate says out loud
+      # rather than pretending to be locked.
+      - name: Build the gate verifier
+        if: env.HOME_PASSPHRASE != ''
+        run: npm run gate:verify
 
       - run: npm run build
         env:

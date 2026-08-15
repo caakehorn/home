@@ -40,6 +40,86 @@ To check a production subpath build locally, build with `BASE_PATH` set and serv
 `dist/` under that prefix with a 404 fallback — not `vite preview`, which serves
 from the root and will not catch base-path mistakes.
 
+## The gate
+
+Four steps stand in front of the whole site — every wing, every page. Nothing
+behind them mounts: the router is not rendered until the gate resolves, so
+there is no frame in which the site exists on screen unlocked.
+
+0. **The terms.** An acceptance dialog with an explicit checkbox and an
+   "I AGREE — ENTER" button that stays disabled until it is ticked. Declining
+   ends the visit. Acceptance is recorded per device in `localStorage` against
+   `TERMS_VERSION`, so a returning visitor is never asked twice and bumping the
+   version asks everyone again. `/terms` renders the identical document from
+   the same source and is **the one route in front of the gate** — terms you
+   cannot read before agreeing to them are not terms.
+1. **The quiz.** An empty submit passes. Anything else drops the visitor into a
+   decoy that is always about to finish rebuilding an archive index and never
+   does.
+2. **The curtain.** The flash screen. Its copy rotates through `TAUNTS`, one
+   line every `MSG_MS`. Type `SKIP_CODE` and hit Enter to cut it short; do
+   nothing and it opens itself after `WAIT_MS`, a full minute. There is no
+   field and no prompt — keystrokes are read off the window and the echo stays
+   empty until the first character, so nothing on screen admits a code exists.
+   Anyone on a phone, or anyone who was never told, simply waits, which is the
+   point of the minute.
+3. **The passphrase.** Behind the curtain, the only one of the four that is an
+   actual lock.
+
+Steps 0, 1 and 2 are doormen. Step 3 is the boundary.
+
+The lock is PBKDF2-SHA256 over the passphrase (250,000 iterations) and
+AES-256-GCM, and it checks an entry by *decrypting* a small blob: a wrong
+passphrase fails GCM authentication and throws. There is no stored hash, so
+there is nothing on the wire to grind offline any faster than 250k iterations
+per guess. Getting it wrong takes the whole screen for 30 seconds with a
+countdown and no way through; the lockout is a **deadline in `sessionStorage`,
+not a timer**, so reloading does not skip it — which makes it the rate limit
+too. It flashes at about 1.5 Hz, half the 3 Hz general-flash threshold in
+WCAG 2.3.1, and under `prefers-reduced-motion` it stops strobing but still
+takes the page for the whole 30 seconds.
+
+One unlock covers the tab. Append `#lock` to any URL to throw the bolt again —
+it drops the stored passphrase, strips itself out of the URL and re-serves the
+curtain, so the owner can see their own front door without opening a new tab.
+
+Every dial and every line of copy sits in one block in `src/gate/config.ts`.
+**The curtain's lines are the block to edit** — the voice of the door is the
+owner's, and nothing else in the codebase reads those strings.
+
+### Building the verifier
+
+```bash
+HOME_PASSPHRASE='…' npm run gate:verify   # writes public/gate/verify.enc
+```
+
+The blob is a ciphertext, so committing it leaks nothing but the cost of
+guessing. The passphrase itself is never written anywhere and cannot be
+recovered from this repository, which is the point of the design. It is
+untracked by default (a verifier built from someone's throwaway test phrase is
+worse than none), so either commit yours deliberately or set a
+`HOME_PASSPHRASE` repository secret and let the Pages workflow write it at
+build time. With no verifier the gate says so on the passphrase step and lets
+the visitor through, because a missing build secret should not brick the site
+for everyone including its owner.
+
+### What the gate does not do
+
+**It gates rendering, not access.** These still resolve for anyone who types
+the URL, gate or no gate:
+
+- `public/wiki/**` — the whole vendored wiki snapshot
+- `public/leviathan/**` — the instrument datasets
+- every asset in the build
+
+And while this repository is public, all of it is readable on github.com
+regardless of what the deployed site does. Real protection at rest means three
+things, in this order: encrypt the payloads and have the pages decrypt them
+with the gate's passphrase; purge the history, since git keeps every plaintext
+blob ever committed; and make the repository private. Until those are done,
+this is a lock on the front door of a building with windows — which is worth
+having, and is not worth mistaking for something else.
+
 ## The type system
 
 Three voices, taken from the grounding references, plus supporting cast. All
@@ -135,6 +215,50 @@ are left alone. `/brain?view=briefs` collects every brief in the wiki into one
 deck, and `npm run briefs` prints what the parser extracted, which is the thing
 to check after re-running `sync-wiki`.
 
+## LEVIATHAN
+
+`/leviathan` is the wing where the old repo's visualizers get rebuilt. The
+original is thirty-seven instruments over two sections, each a hand-wired page
+that loaded its own payload and drew its own chrome. Here they get a rack:
+
+- `src/leviathan/core.ts` — the registry (what an instrument *is*), the dataset
+  loader, and the dataset shapes. An instrument is a row of data until it has a
+  component, so the ones still waiting on a corpus are listed honestly rather
+  than pretended at: **LIVE** is wired to a dataset that ships with this site,
+  **SEALED** is declared and waiting on one that does not.
+- `src/leviathan/Frame.tsx` — the chrome every instrument wears: numeral, name,
+  what it was computed over, and — always, never optional — **how**. An
+  instrument that cannot say how it got its numbers has no business being read.
+- `scripts/build-leviathan.mjs` — the counting, done once at build time
+  (`npm run leviathan`) instead of in every visitor's tab.
+
+**THE RULE**, carried across from the original unchanged: *no instrument makes a
+judgement*. Every number is a count, a date or a length, taken over the whole
+corpus with nothing excluded and nothing weighted. No sentiment scoring, no
+keyword list, no threshold chosen because of what it would surface. Anything
+editorial would make the output a portrait of an argument; left alone, the
+counts make a portrait of the thing itself.
+
+Two instruments are built:
+
+- **I · THE MASS** — where the corpus's weight actually sits. Nine domains by
+  word count, page-length distribution, heaviest pages; click a domain and the
+  panels below follow it.
+- **II · THE CHRONOLOGY** — every date the wiki names, mined out of its own
+  prose rather than off its timeline pages, binned by year across 1900→2026.
+  What it shows is not when things happened but when the record *says* things
+  happened, which is a different and more honest object. Open a year for its
+  months and every page that named it.
+
+The dates come from the same matchers the brief visualiser uses
+(`mineDates` in `src/wiki/brief.ts`), so a date reads the same way on the
+instrument as it does on the page.
+
+The sealed instruments need the message corpus, which is **not** vendored into
+this repository. The portal is ungated; the old site put a terms-and-passphrase
+gate in front of that material. Bringing it across is a decision about exposure,
+not a porting task, so the rack declares those instruments and stops there.
+
 ## The six rigs
 
 Each announces itself on mount via `useRig`, so the HUD counts live elements
@@ -157,6 +281,8 @@ src/
   routes/            Splash, Home, Stub, wiki index + page
   state/             palette + chaos context, persisted
   styles/            fonts, tokens, type treatments, global
+  gate/              the four steps in front of everything, and the terms
+  leviathan/         the instrument rack: registry, frame, datasets
   wiki/              snapshot loading, markdown, charts, infoboxes, briefs, the map
 ```
 

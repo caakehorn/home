@@ -26,7 +26,7 @@ export const SECTIONS: Section[] = [
     kana: '巨獣',
     blurb:
       'The good visualizers, dragged out of the old repo, rebuilt bigger and rewired for the browser. Nothing subtle survives the port.',
-    status: 'WIRING',
+    status: 'LIVE',
     accent: 1,
     chant: 'SALVAGED · REIMAGINED · OVERCLOCKED · SALVAGED · REIMAGINED · OVERCLOCKED ·',
   },

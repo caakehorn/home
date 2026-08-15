@@ -1,0 +1,192 @@
+/* ==========================================================================
+   I · THE MASS
+   One hue, more is brighter, every value direct-labelled.
+   ========================================================================== */
+
+.mass__bars {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mass__bar {
+  display: grid;
+  grid-template-columns: 8.5rem 1fr auto;
+  align-items: center;
+  gap: 0.5rem 0.8rem;
+  width: 100%;
+  padding: 0.4rem 0.5rem;
+  text-align: left;
+  color: var(--text);
+  background: color-mix(in srgb, var(--void) 45%, transparent);
+  border: none;
+  border-left: 3px solid transparent;
+  cursor: pointer;
+}
+
+.mass__bar:hover,
+.mass__row--on .mass__bar {
+  background: color-mix(in srgb, var(--n1) 12%, var(--void));
+  border-left-color: var(--n1);
+}
+
+.mass__name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.mass__name .jp {
+  color: var(--n1);
+}
+
+.mass__track {
+  display: block;
+  height: 14px;
+  background: color-mix(in srgb, var(--text-dim) 12%, transparent);
+}
+
+.mass__fill {
+  display: block;
+  height: 100%;
+  background: var(--n1);
+}
+
+.mass__value {
+  font-family: var(--f-head);
+  font-size: var(--step-0);
+  color: var(--text);
+}
+
+.mass__sub {
+  grid-column: 2 / -1;
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+
+.mass__clear {
+  padding: 0.2rem 0.6rem;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  color: var(--edge);
+  background: var(--n1);
+  border: none;
+  cursor: pointer;
+}
+
+/* ---- panels ------------------------------------------------------------- */
+
+.mass__split {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  gap: 1.4rem;
+  margin-top: 1.4rem;
+}
+
+.mass__sub-head {
+  margin: 0 0 0.5rem;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.mass__scope {
+  color: var(--n1);
+}
+
+.mass__hist {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mass__hist li {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr 2.5rem;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.mass__hist-label,
+.mass__hist-count {
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  color: var(--text-dim);
+}
+
+.mass__hist-count {
+  text-align: right;
+  color: var(--text);
+}
+
+.mass__hist-track {
+  display: block;
+  height: 10px;
+  background: color-mix(in srgb, var(--text-dim) 12%, transparent);
+}
+
+.mass__hist-fill {
+  display: block;
+  height: 100%;
+  background: color-mix(in srgb, var(--n3) 75%, transparent);
+}
+
+.mass__list {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: heavy;
+}
+
+.mass__list li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 0.2rem 0.4rem;
+  background: color-mix(in srgb, var(--void) 45%, transparent);
+}
+
+.mass__list a {
+  font-size: 0.82rem;
+  color: var(--text);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--n1) 55%, transparent);
+}
+
+.mass__list a:hover {
+  color: var(--n1);
+}
+
+.mass__list b {
+  flex: none;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  color: var(--text-dim);
+}
+
+@media (max-width: 34rem) {
+  .mass__bar {
+    grid-template-columns: 1fr auto;
+  }
+
+  .mass__track {
+    grid-column: 1 / -1;
+  }
+}

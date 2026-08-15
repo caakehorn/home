@@ -5,8 +5,6 @@ import { Rig } from '../components/Rig'
 import { Logo } from '../components/Logo'
 import { SubHead } from '../components/Wordmark'
 import { ChaosDial } from '../components/rigs/ChaosDial'
-import { Oracle } from '../components/rigs/Oracle'
-import { ScryPool } from '../components/rigs/ScryPool'
 import { StickerSlab } from '../components/rigs/StickerSlab'
 import { Terminal } from '../components/rigs/Terminal'
 import { VibeSwitch } from '../components/rigs/VibeSwitch'
@@ -104,8 +102,9 @@ export function Home() {
             操作卓
           </span>
           <p className="section__note">
-            Six things you can actually grab. They are wired to each other and to the rest of
-            the building — the dial and the palette drive every page you visit after this one.
+            Four things you can actually grab. They are wired to each other and to the rest of
+            the building — the dial and the palette drive every page you visit after this one,
+            and the shell knows more verbs than it admits to.
           </p>
         </div>
 
@@ -118,19 +117,11 @@ export function Home() {
             <VibeSwitch />
           </Rig>
 
-          <Rig index={3} title="SCRY POOL" kana="覗池" hint="LEVIATHAN offcut · pointer-driven field" accent={3} wide>
-            <ScryPool />
-          </Rig>
-
-          <Rig index={4} title="SHELL" kana="端末" hint="type at it · it answers · it navigates" accent={5} wide>
+          <Rig index={3} title="SHELL" kana="端末" hint="type at it · it answers · it navigates" accent={5} wide>
             <Terminal />
           </Rig>
 
-          <Rig index={5} title="THE ORACLE" kana="御神籤" hint="pull the lever · take the verdict" accent={4}>
-            <Oracle />
-          </Rig>
-
-          <Rig index={6} title="STICKER SLAB" kana="貼札" hint="drag · fling · they bounce" accent={2}>
+          <Rig index={4} title="STICKER SLAB" kana="貼札" hint="drag · fling · they bounce" accent={2}>
             <StickerSlab />
           </Rig>
         </div>

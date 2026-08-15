@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "agent": "node --experimental-strip-types scripts/build-agent-api.mjs",
+    "prebuild": "npm run agent",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "tsc -b --noEmit",

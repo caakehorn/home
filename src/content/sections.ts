@@ -1,3 +1,5 @@
+import { banner } from './slogans'
+
 export type Section = {
   slug: string
   title: string
@@ -5,7 +7,7 @@ export type Section = {
   blurb: string
   status: 'LIVE' | 'WIRING' | 'DARK'
   accent: 1 | 2 | 3 | 4 | 5
-  /** Marquee text that runs across the portal card on hover. */
+  /** Marquee text on the card and across the room's own header. */
   chant: string
 }
 
@@ -18,7 +20,7 @@ export const SECTIONS: Section[] = [
       'The whole tangle, searchable. Now it eats its own notes and spits out charts, diagrams, maps and images of whatever it just told you.',
     status: 'LIVE',
     accent: 3,
-    chant: 'NOTES BECOME CHARTS · CHARTS BECOME PICTURES · PICTURES BECOME NOTES ·',
+    chant: banner('brain'),
   },
   {
     slug: 'lineage',
@@ -28,7 +30,7 @@ export const SECTIONS: Section[] = [
       'The family tree on a real time axis — 515 people, seven generations, every ancestor sized by how much of the genome came through them. Including the one the record loses.',
     status: 'LIVE',
     accent: 4,
-    chant: '515 INDIVIDUALS · 218 FAMILIES · 90 DIRECT ANCESTORS · ONE HOLE ·',
+    chant: banner('lineage'),
   },
   {
     slug: 'leviathan',
@@ -38,7 +40,7 @@ export const SECTIONS: Section[] = [
       'The good visualizers, dragged out of the old repo, rebuilt bigger and rewired for the browser. Nothing subtle survives the port.',
     status: 'LIVE',
     accent: 1,
-    chant: 'SALVAGED · REIMAGINED · OVERCLOCKED · SALVAGED · REIMAGINED · OVERCLOCKED ·',
+    chant: banner('leviathan'),
   },
   {
     slug: 'arcade',
@@ -48,7 +50,7 @@ export const SECTIONS: Section[] = [
       'Experimental web games. Half of them are broken on purpose. Insert nothing, play anyway.',
     status: 'DARK',
     accent: 2,
-    chant: 'NO QUARTERS · NO MERCY · NO SAVE FILES · NO QUARTERS · NO MERCY ·',
+    chant: banner('arcade'),
   },
   {
     slug: 'blog',
@@ -58,7 +60,7 @@ export const SECTIONS: Section[] = [
       'Long posts, short posts, screenshots at 4am, and whatever the brain coughed up that week.',
     status: 'DARK',
     accent: 5,
-    chant: 'BROADCASTING FROM THE ROOF · BROADCASTING FROM THE ROOF ·',
+    chant: banner('blog'),
   },
 ]
 

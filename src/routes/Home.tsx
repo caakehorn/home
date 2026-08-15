@@ -11,19 +11,11 @@ import { StickerSlab } from '../components/rigs/StickerSlab'
 import { Terminal } from '../components/rigs/Terminal'
 import { VibeSwitch } from '../components/rigs/VibeSwitch'
 import { SECTIONS } from '../content/sections'
+import { banner } from '../content/slogans'
 import { usePortal } from '../state/usePortal'
 import './home.css'
 
-/** The banner. One line, one place to edit it. */
-const MISSION = [
-  'GET FUCKED',
-  'DO DRUGS',
-  'GLOBAL COMMUNISM',
-  'JET FUEL CAN’T MELT STEEL BEAMS',
-  'EAT THE RICH',
-  'TRANS RIGHTS',
-  'SOLIDARITY FOREVER',
-].join(' · ')
+const MISSION = banner('mast')
 
 export function Home() {
   const { rigs } = usePortal()
@@ -93,7 +85,7 @@ export function Home() {
       </section>
 
       <Marquee
-        text="SALVAGE · REBUILD · OVERCLOCK · SHIP UGLY · REPEAT ·"
+        text={banner('rooms')}
         duration={22}
         reverse
         tone={3}
@@ -145,7 +137,7 @@ export function Home() {
 
       {/* ---- footer --------------------------------------------------- */}
       <footer className="foot">
-        <Marquee text={MISSION} duration={28} tone={1} size="clamp(0.7rem, 1.5vw, 1rem)" />
+        <Marquee text={banner('foot')} duration={28} tone={1} size="clamp(0.7rem, 1.5vw, 1rem)" />
         <div className="wrap foot__inner">
           <Logo size="clamp(1.1rem, 3vw, 1.9rem)" />
           <p className="foot__note">

@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
 import { SubHead } from '../components/Wordmark'
+import { banner } from '../content/slogans'
 import { BriefDeck } from '../wiki/BriefDeck'
 import { Cortex } from '../wiki/Cortex'
 import { useWikiIndex, type IndexEntry, type WikiIndex } from '../wiki/data'
@@ -71,7 +72,7 @@ export function WikiIndexRoute() {
     <div className="wiki">
       <Nav />
       <Marquee
-        text="EVERY PAGE IS A STAR · EVERY LINK IS A SYNAPSE · DRAG THE MAP · OPEN A DOOR ·"
+        text={banner('wiki')}
         duration={20}
         tone={3}
         size="clamp(0.75rem, 1.6vw, 1.05rem)"

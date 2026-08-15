@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Logo } from '../components/Logo'
 import { Marquee } from '../components/Marquee'
+import { banner } from '../content/slogans'
 import { usePortal, useRig } from '../state/usePortal'
 import './splash.css'
 
@@ -186,7 +187,7 @@ export function Splash() {
 
       <div className="splash__ticker">
         <Marquee
-          text="EVERY CLAIM CITED · EVERY CONTRADICTION KEPT · EVERY HOUR THE WRONG ONE · NOBODY ASKED FOR THIS ·"
+          text={banner('splash')}
           duration={30}
           tone={2}
           size="clamp(0.7rem, 1.4vw, 1rem)"

@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+#
+# public/wiki is a generated snapshot of the wiki-brain repo — 458 files of
+# derived JSON, vendored on purpose so the portal stays self-contained and
+# deploys never depend on another repo being reachable. It is not code and
+# should not be reviewed; without this filter it also pushes the PR past
+# CodeRabbit's 300-file limit and no review happens at all.
+#
+# Edit the source in wiki-brain and re-run `node scripts/sync-wiki.mjs`.
+language: en-US
+
+reviews:
+  path_filters:
+    - '!public/wiki/**'
+    - '!public/fonts/**'

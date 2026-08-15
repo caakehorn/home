@@ -16,7 +16,7 @@ export const SECTIONS: Section[] = [
     kana: '脳',
     blurb:
       'The whole tangle, searchable. Now it eats its own notes and spits out charts, diagrams, maps and images of whatever it just told you.',
-    status: 'WIRING',
+    status: 'LIVE',
     accent: 3,
     chant: 'NOTES BECOME CHARTS · CHARTS BECOME PICTURES · PICTURES BECOME NOTES ·',
   },

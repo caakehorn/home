@@ -2,7 +2,8 @@ import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
 import { PortalCard } from '../components/PortalCard'
 import { Rig } from '../components/Rig'
-import { SubHead, Wordmark } from '../components/Wordmark'
+import { Logo } from '../components/Logo'
+import { SubHead } from '../components/Wordmark'
 import { ChaosDial } from '../components/rigs/ChaosDial'
 import { Oracle } from '../components/rigs/Oracle'
 import { ScryPool } from '../components/rigs/ScryPool'
@@ -32,12 +33,7 @@ export function Home() {
             <span className="jp"> 営業中</span>
           </span>
 
-          <Wordmark
-            text="DAN FRANK"
-            kana="ダン・フランク"
-            size="clamp(2.2rem, 8.5vw, 7rem)"
-            className="mast__mark"
-          />
+          <Logo size="clamp(1.6rem, 5.6vw, 4.2rem)" className="mast__mark" />
 
           <h1 className="mast__head">
             <SubHead>DIALECTICAL DATABASE &amp; DRUG DEN</SubHead>
@@ -143,7 +139,7 @@ export function Home() {
       <footer className="foot">
         <Marquee text={MISSION} duration={28} tone={1} size="clamp(0.7rem, 1.5vw, 1rem)" />
         <div className="wrap foot__inner">
-          <Wordmark text="DAN FRANK" size="clamp(1.4rem, 4vw, 2.6rem)" sparks={false} />
+          <Logo size="clamp(1.1rem, 3vw, 1.9rem)" />
           <p className="foot__note">
             弁証薬窟 · DAN'S DIALECTICAL DATABASE AND DRUG DEN · under construction, permanently ·
             built loud, on purpose

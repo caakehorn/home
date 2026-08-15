@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Wordmark } from '../components/Wordmark'
+import { Logo } from '../components/Logo'
 import { Marquee } from '../components/Marquee'
 import { usePortal, useRig } from '../state/usePortal'
 import './splash.css'
@@ -131,7 +131,7 @@ export function Splash() {
           弁証薬窟
         </span>
 
-        <Wordmark text="DAN FRANK" kana="ダン・フランク" size="clamp(2.6rem, 11vw, 9rem)" />
+        <Logo size="clamp(1.9rem, 7.5vw, 5.6rem)" />
 
         <p className="splash__tagline">
           <span className="firetext">DIALECTICAL DATABASE &amp; DRUG DEN</span>

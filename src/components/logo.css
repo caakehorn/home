@@ -1,0 +1,61 @@
+/* ==========================================================================
+   THE WORDMARK — DAN / FRANK
+   Heavy rounded caps in gold, stacked over red and indigo offset layers.
+   Everything is em-derived from the element's font-size, so one component
+   serves the nav chip and the masthead with no second set of numbers.
+   ========================================================================== */
+
+.logo {
+  /* Opaque by construction: no blend modes, no plate, no ground of its own.
+     It sits on whatever the site is already showing. */
+  display: inline-grid;
+  justify-items: center;
+  gap: 0.02em;
+  line-height: 0.86;
+  font-family: var(--f-logo); /* Titan One — the rounded bubble face */
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.005em;
+  white-space: nowrap;
+
+  --gold: #ffc72c;
+  --shade-1: #e8384f; /* red slab    */
+  --shade-2: #3b3fb0; /* indigo slab */
+}
+
+.logo--inline {
+  grid-auto-flow: column;
+  gap: 0.24em;
+  line-height: 1;
+}
+
+.logo__line {
+  color: var(--gold);
+  /*
+   * The depth is built from solid offset copies rather than one blurred
+   * shadow: each colour is stepped a fraction of an em at a time so the slabs
+   * read as flat planes with clean edges, which is what the reference does.
+   * A thin dark seam sits between the gold and the red so the two never melt
+   * into each other on a bright background.
+   */
+  text-shadow:
+    0.012em 0.012em 0 rgb(0 0 0 / 0.55),
+    0.03em 0.03em 0 var(--shade-1),
+    0.045em 0.045em 0 var(--shade-1),
+    0.06em 0.06em 0 var(--shade-1),
+    0.075em 0.075em 0 var(--shade-1),
+    0.09em 0.09em 0 var(--shade-2),
+    0.105em 0.105em 0 var(--shade-2),
+    0.12em 0.12em 0 var(--shade-2),
+    0.135em 0.135em 0 var(--shade-2),
+    0.15em 0.15em 0 rgb(0 0 0 / 0.35);
+}
+
+/* The nav is small enough that the full slab stack turns to mud. */
+.logo--inline .logo__line {
+  text-shadow:
+    0.02em 0.02em 0 var(--shade-1),
+    0.035em 0.035em 0 var(--shade-1),
+    0.05em 0.05em 0 var(--shade-2),
+    0.065em 0.065em 0 var(--shade-2);
+}

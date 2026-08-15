@@ -1,5 +1,5 @@
 /* ==========================================================================
-   月光宿 — DESIGN TOKENS
+   DAN'S DIALECTICAL DATABASE AND DRUG DEN — DESIGN TOKENS
    Four palettes, one per grounding reference. Swap with [data-vibe] on <html>.
    ========================================================================== */
 
@@ -50,10 +50,10 @@
 }
 
 /* -------------------------------------------------------------------------
-   VIBE 01 — MOONLIGHT INN  (ref: neon Tokyo rooftop, crows, cup ramen)
+   VIBE 01 — DRUG DEN  (ref: neon Tokyo rooftop, crows, cup ramen at 4am)
    ---------------------------------------------------------------------- */
 :root,
-:root[data-vibe='moonlight'] {
+:root[data-vibe='den'] {
   --void: #07010e;
   --void-2: #14032a;
   --void-3: #240a45;
@@ -67,7 +67,7 @@
 
   --text: #f2e9ff;
   --text-dim: #a98ecf;
-  --vibe-name: 'MOONLIGHT INN';
+  --vibe-name: 'DRUG DEN';
 }
 
 /* -------------------------------------------------------------------------

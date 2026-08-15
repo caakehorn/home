@@ -1,5 +1,5 @@
 /**
- * THE GATE — every dial and every line of copy, in one block.
+ * THE DOOR — every dial and every line of copy, in one block.
  *
  * The original kept all of this at the top of one file on purpose: the door's
  * behaviour is a matter of taste and gets retuned, and hunting it through a
@@ -29,12 +29,12 @@ export const GATE_VERSION = 'v1'
 
 export const KEYS = {
   /** localStorage: acceptance of the terms, keyed to the terms version. */
-  terms: 'moonlight-inn:terms',
+  terms: 'danfrank:terms',
   /** sessionStorage: the accepted passphrase. One unlock covers the tab. */
-  pass: `moonlight-inn:gate:${GATE_VERSION}`,
+  pass: `danfrank:gate:${GATE_VERSION}`,
   /** sessionStorage: lockout deadline. A deadline, not a timer, so a reload
    *  does not skip it — which makes it the rate limit as well. */
-  until: `moonlight-inn:gate:until:${GATE_VERSION}`,
+  until: `danfrank:gate:until:${GATE_VERSION}`,
 } as const
 
 /** A wrong passphrase costs this much wall-clock time, per tab. */
@@ -50,9 +50,10 @@ export const LOCKOUT_MS = 30_000
  * the owner's, and nothing else in the codebase reads these strings.
  */
 export const TAUNTS = [
-  'you are early. or you are late. either way you are standing outside.',
+  'wrong. stand there and think about your epistemics.',
   'the door is not locked because there is anything in here worth taking.',
   'it is locked because you keep coming back.',
+  'everyone inside is mid-argument and none of them want to catch you up.',
   'nothing on this screen is a hint.',
 ]
 
@@ -60,12 +61,13 @@ export const TAUNTS = [
 export const MSG_MS = 3_000
 
 /** The line above the passphrase field. */
-export const GREETING = 'the door opens for a passphrase and for nothing else. you either have it or you do not.'
+export const GREETING =
+  'the door opens for a passphrase and for nothing else. you either have it or you do not.'
 
 // ---------------------------------------------------------------------------
 // the quiz
 
-export const QUIZ_PROMPT = 'Before the door: what are you looking for here?'
+export const QUIZ_PROMPT = 'Before the door: what are you looking for in here?'
 
 /** What the decoy says while it fails to arrive, forever. */
 export const TRAP_HEAD = 'RECONSTRUCTING ARCHIVE INDEX'

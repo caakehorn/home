@@ -10,7 +10,7 @@ import {
 
 type Prefs = { vibe: VibeId; chaos: number }
 
-const DEFAULTS: Prefs = { vibe: 'moonlight', chaos: 0.55 }
+const DEFAULTS: Prefs = { vibe: 'den', chaos: 0.55 }
 
 function readPrefs(): Prefs {
   if (typeof window === 'undefined') return DEFAULTS

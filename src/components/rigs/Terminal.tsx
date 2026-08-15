@@ -8,7 +8,7 @@ import './terminal.css'
 type Line = { kind: 'in' | 'out' | 'err' | 'art'; text: string }
 
 const BANNER: Line[] = [
-  { kind: 'art', text: '月光宿 SHELL v0.1 — "the more excess the better"' },
+  { kind: 'art', text: '薬窟 SHELL v0.1 — "argue first, cite afterwards"' },
   { kind: 'out', text: 'type `help` for the verbs. type `sudo` and see what happens.' },
 ]
 
@@ -142,15 +142,15 @@ export function Terminal() {
         break
 
       case 'moon':
-        print({ kind: 'art', text: '     ☾     ✦        ✧\n  the inn is open. it is always 4am here.' })
+        print({ kind: 'art', text: '     ☾     ✦        ✧\n  the den is open. it is always 4am here.' })
         break
 
       case 'whoami':
-        print({ kind: 'out', text: 'guest@moonlight-inn — you brought your own noise. good.' })
+        print({ kind: 'out', text: 'guest@drug-den — unverified, unmedicated, welcome anyway.' })
         break
 
       case 'sudo':
-        print({ kind: 'err', text: 'nice try. this establishment has no root, only vibes.' })
+        print({ kind: 'err', text: 'nice try. this establishment has no root, only priors.' })
         break
 
       case 'echo':
@@ -189,7 +189,7 @@ export function Terminal() {
     <div className="term" onClick={() => input.current?.focus()}>
       <div className="term__bar" aria-hidden="true">
         <span className="term__led" />
-        guest@moonlight-inn:~
+        guest@drug-den:~
         <span className="term__baud">9600 8N1</span>
       </div>
 

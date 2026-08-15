@@ -13,7 +13,7 @@
 
 export const TERMS_VERSION = '1.0'
 export const TERMS_EFFECTIVE = 'JULY 27, 2026'
-export const TERMS_TITLE = 'TERMS OF SERVICE — 月光宿 MOONLIGHT INN'
+export const TERMS_TITLE = "TERMS OF SERVICE — DAN'S DIALECTICAL DATABASE AND DRUG DEN"
 
 export const TERMS_SECTIONS: [string, ...string[]][] = [
   [

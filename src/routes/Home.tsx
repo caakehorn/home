@@ -14,7 +14,7 @@ import { usePortal } from '../state/usePortal'
 import './home.css'
 
 const MISSION =
-  'THE MORE EXCESS · THE BUSIER · THE MORE CHAOTIC · THE BRIGHTER · THE MORE NEON · THE MORE OBNOXIOUS · THE MORE VAPORWAVE · THE BETTER'
+  'THESIS · ANTITHESIS · ANOTHER BUMP · SYNTHESIS · CITE YOUR SOURCES · LOSE THE ARGUMENT · LOG IT ANYWAY'
 
 export function Home() {
   const { rigs } = usePortal()
@@ -28,7 +28,7 @@ export function Home() {
         <div className="mast__glow" aria-hidden="true" />
         <div className="wrap mast__inner">
           <span className="eyebrow mast__eyebrow">
-            EST. 4AM · ROOFTOP · ALWAYS OPEN
+            OPEN LATE · ARGUE FIRST · CITE AFTERWARDS
             <span className="jp"> 営業中</span>
           </span>
 
@@ -40,20 +40,22 @@ export function Home() {
           />
 
           <h1 className="mast__head">
-            <SubHead>MOONLIGHT INN</SubHead>
+            <SubHead>DIALECTICAL DATABASE &amp; DRUG DEN</SubHead>
           </h1>
 
           <p className="mast__mission firetext">{MISSION}</p>
 
           <p className="mast__body">
-            One building for the whole mess: the <b>wiki-brain</b> and everything it can be
-            turned into, the <b>LEVIATHAN</b> visualizers dragged out and rebuilt louder,
-            <b> experimental games</b> that mostly work, and the <b>transmissions</b> in between.
-            Nothing here is tasteful. That is the specification.
+            Three things under one roof, and they are the same thing. The <b>dialectic</b>: every
+            position here got argued at, usually by me, usually at an hour no argument should be
+            trusted at. The <b>database</b>: it all got written down anyway — 458 pages, cited,
+            cross-linked, contradictions left in where they are load-bearing. The <b>den</b>: the
+            room where both of those happened, which was never as well-ventilated as it should
+            have been. Nothing here is tasteful. That is the specification, not an apology.
           </p>
 
           <div className="mast__meta">
-            <span className="mast__chip">{SECTIONS.length} WINGS</span>
+            <span className="mast__chip">{SECTIONS.length} ROOMS</span>
             <span className="mast__chip">{rigs.length} LIVE RIGS</span>
             <span className="mast__chip">4 PALETTES</span>
             <span className="mast__chip mast__chip--hot">CHAOS ENABLED</span>
@@ -63,18 +65,19 @@ export function Home() {
 
       <Marquee text={MISSION} duration={34} tone={2} size="clamp(0.8rem, 1.8vw, 1.3rem)" />
 
-      {/* ---- the wings ----------------------------------------------- */}
-      <section className="wrap section" aria-labelledby="wings-title">
+      {/* ---- the rooms ------------------------------------------------ */}
+      <section className="wrap section" aria-labelledby="rooms-title">
         <div className="section__head">
-          <h2 id="wings-title" className="section__title">
-            <SubHead venn={false}>THE WINGS</SubHead>
+          <h2 id="rooms-title" className="section__title">
+            <SubHead venn={false}>THE ROOMS</SubHead>
           </h2>
           <span className="section__kana jp" aria-hidden="true">
             館内
           </span>
           <p className="section__note">
-            Four rooms. Two are being wired right now — the doors still open, there is just
-            scaffolding inside.
+            {SECTIONS.length} rooms off one hallway.{' '}
+            {SECTIONS.filter((s) => s.status !== 'LIVE').length} are still being wired — the doors
+            open, there is just scaffolding and a smell in there.
           </p>
         </div>
 
@@ -142,13 +145,13 @@ export function Home() {
         <div className="wrap foot__inner">
           <Wordmark text="DAN FRANK" size="clamp(1.4rem, 4vw, 2.6rem)" sparks={false} />
           <p className="foot__note">
-            月光宿 MOONLIGHT INN · a portal under construction, permanently ·
+            弁証薬窟 · DAN'S DIALECTICAL DATABASE AND DRUG DEN · under construction, permanently ·
             built loud, on purpose
           </p>
           <p className="foot__meta">
             <span>NO COOKIES</span>
             <span>NO ANALYTICS</span>
-            <span>NO TASTE</span>
+            <span>NO TAPER</span>
           </p>
         </div>
       </footer>

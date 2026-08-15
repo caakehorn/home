@@ -89,7 +89,7 @@ export function Oracle() {
         {fortune ? (
           <div className="oracle__receipt" key={serial}>
             <span className="oracle__receipt-head">
-              月光宿 · LOT #{serial}
+              薬窟 · LOT #{serial}
             </span>
             <p className="oracle__receipt-body">{fortune}</p>
             <span className="oracle__receipt-foot">NO REFUNDS · NO REDEALS · PULL AGAIN</span>
@@ -97,7 +97,7 @@ export function Oracle() {
           </div>
         ) : (
           <div className="oracle__blank">
-            <span className="oracle__blank-head">月光宿 · LOT #————</span>
+            <span className="oracle__blank-head">薬窟 · LOT #————</span>
             <p className="oracle__idle">
               {phase === 'cranking'
                 ? 'CLUNK… rattle… rattle…'

@@ -14,9 +14,9 @@ const STARS = Array.from({ length: 46 }, (_, i) => ({
 const SIGNS = [
   { text: '営業中', tone: 2, side: 'left', top: '16%', minor: false },
   // the mid-height pair collides with the tagline plate on narrow screens
-  { text: '月光', tone: 3, side: 'left', top: '46%', minor: true },
-  { text: '開運', tone: 1, side: 'right', top: '12%', minor: false },
-  { text: '無限', tone: 5, side: 'right', top: '44%', minor: true },
+  { text: '弁証', tone: 3, side: 'left', top: '46%', minor: true },
+  { text: '資料', tone: 1, side: 'right', top: '12%', minor: false },
+  { text: '薬窟', tone: 5, side: 'right', top: '44%', minor: true },
 ]
 
 /** The gate. Sits over the home page until you push through it. */
@@ -128,17 +128,17 @@ export function Splash() {
       {/* ---- the mark ----------------------------------------------- */}
       <div className="splash__core">
         <span className="splash__venue jp" aria-hidden="true">
-          月光宿
+          弁証薬窟
         </span>
 
         <Wordmark text="DAN FRANK" kana="ダン・フランク" size="clamp(2.6rem, 11vw, 9rem)" />
 
         <p className="splash__tagline">
-          <span className="firetext">MOONLIGHT INN</span>
+          <span className="firetext">DIALECTICAL DATABASE &amp; DRUG DEN</span>
           <span className="splash__tagline-sep" aria-hidden="true">
             ✦
           </span>
-          <span className="splash__tagline-alt">wiki-brain · visualizers · games · transmissions</span>
+          <span className="splash__tagline-alt">the brain · the lattice · the instruments · the noise</span>
         </p>
 
         <button type="button" className="splash__enter" onClick={go}>
@@ -186,7 +186,7 @@ export function Splash() {
 
       <div className="splash__ticker">
         <Marquee
-          text="THE MORE EXCESS · THE BUSIER · THE MORE CHAOTIC · THE BRIGHTER · THE MORE NEON · THE MORE OBNOXIOUS · THE MORE VAPORWAVE · THE BETTER ·"
+          text="EVERY CLAIM CITED · EVERY CONTRADICTION KEPT · EVERY HOUR THE WRONG ONE · NOBODY ASKED FOR THIS ·"
           duration={30}
           tone={2}
           size="clamp(0.7rem, 1.4vw, 1rem)"

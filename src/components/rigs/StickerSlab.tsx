@@ -13,11 +13,11 @@ type Sticker = {
 const STICKERS: Sticker[] = [
   { id: 1, label: 'OPEN', kana: '開', tone: 2, shape: 'slab' },
   { id: 2, label: '4AM', tone: 3, shape: 'round' },
-  { id: 3, label: 'CUP RAMEN', kana: 'ラーメン', tone: 1, shape: 'flag' },
+  { id: 3, label: 'CITE IT', kana: '出典', tone: 1, shape: 'flag' },
   { id: 4, label: 'NO REFUNDS', tone: 5, shape: 'slab' },
-  { id: 5, label: '月光', tone: 4, shape: 'round' },
+  { id: 5, label: '薬窟', tone: 4, shape: 'round' },
   { id: 6, label: 'BUILT LOUD', tone: 3, shape: 'flag' },
-  { id: 7, label: '★★★', tone: 2, shape: 'round' },
+  { id: 7, label: 'Q.E.D.', tone: 2, shape: 'round' },
   { id: 8, label: 'BETA 4EVER', tone: 1, shape: 'slab' },
 ]
 

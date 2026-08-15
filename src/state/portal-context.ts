@@ -2,10 +2,10 @@ import { createContext } from 'react'
 
 export const VIBES = [
   {
-    id: 'moonlight',
-    name: 'MOONLIGHT INN',
-    kana: '月光宿',
-    blurb: 'rooftop neon, crows, cup ramen at 4am',
+    id: 'den',
+    name: 'DRUG DEN',
+    kana: '薬窟',
+    blurb: 'back-room neon, crows on the roof, 4am and still arguing',
     swatch: ['#b026ff', '#ff2bd6', '#00eaff'],
   },
   {
@@ -55,5 +55,5 @@ export type PortalState = {
 
 export const PortalContext = createContext<PortalState | null>(null)
 
-export const STORAGE_KEY = 'moonlight-inn:prefs:v1'
-export const SESSION_KEY = 'moonlight-inn:entered:v1'
+export const STORAGE_KEY = 'danfrank:prefs:v1'
+export const SESSION_KEY = 'danfrank:entered:v1'

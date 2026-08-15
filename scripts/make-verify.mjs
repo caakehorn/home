@@ -54,7 +54,7 @@ const key = await crypto.subtle.deriveKey(
 const ct = await crypto.subtle.encrypt(
   { name: 'AES-GCM', iv },
   key,
-  new TextEncoder().encode('月光宿 — the door is open'),
+  new TextEncoder().encode('薬窟 — the door is open'),
 )
 
 mkdirSync('public/gate', { recursive: true })

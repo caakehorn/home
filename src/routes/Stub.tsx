@@ -24,10 +24,10 @@ export function Stub() {
             <SubHead>NO SUCH ROOM</SubHead>
           </h1>
           <p className="stub__note">
-            You walked into a wall. The inn is still mostly walls.
+            You walked into a wall. The den is still mostly walls.
           </p>
           <Link to="/" className="stub__back">
-            ← BACK TO THE ROOF
+            ← BACK TO THE HALLWAY
           </Link>
         </main>
       </div>
@@ -56,11 +56,12 @@ export function Stub() {
           </span>
           <p className="stub__plate-note">
             The shell is up, the aesthetic is locked, the wiring is next. This door will open.
+            Nobody has ever finished a room in this building on the first attempt.
           </p>
         </div>
 
         <Link to="/" className="stub__back">
-          ← BACK TO THE ROOF
+          ← BACK TO THE HALLWAY
         </Link>
       </main>
     </div>

@@ -26,7 +26,7 @@ const API = 'https://api.github.com'
 export const SOURCE_REPO = 'caakehorn/wiki-brain'
 export const SITE_REPO = 'caakehorn/home'
 
-const TOKEN_KEY = 'moonlight-inn:gh:token'
+const TOKEN_KEY = 'danfrank:gh:token'
 
 /**
  * The token lives in this tab by default and only reaches localStorage if you

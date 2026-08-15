@@ -156,6 +156,48 @@ so nothing needs to know which palette is live.
 animation tempo, particle count and blur all derive from. The dial writes it,
 the shell can set it, and it persists to `localStorage` along with the palette.
 
+## Editing the wiki, permanently
+
+Every page has an editor, and the editor can **publish**. The portal is a
+static site with no server behind it, so the browser commits:
+
+1. **PUBLISH** sends the page's markdown — and any pictures on it — to
+   [`caakehorn/wiki-brain`](https://github.com/caakehorn/wiki-brain), which is
+   where the wiki actually lives. Pictures land beside the prose under
+   `wiki/assets/<slug>/`.
+2. It then fires a `repository_dispatch` at this repo, and
+   `.github/workflows/sync-wiki.yml` re-runs `sync-wiki.mjs` against the
+   updated source, rebuilds the derived datasets, commits the refreshed
+   snapshot and deploys it.
+
+A minute or two later the edit is live for everyone. Until then the local draft
+keeps showing your version to you, so the page never appears to lose the change.
+
+Writing to the source rather than to `public/wiki/` is the whole point of the
+arrangement: that snapshot is a build artifact, and the next sync would
+overwrite anything written into it. This way one edit survives every future
+rebuild, and the derivation stays in the one script that has always owned it.
+
+An hourly schedule runs the same sync as a backstop, so an edit still lands if
+the dispatch never arrives.
+
+### The token
+
+Publishing needs a GitHub token, because there is no server to hold one. The
+editor asks for it the first time and keeps it **in that tab** unless you tick
+*remember on this device*; FORGET TOKEN drops it from both. It is sent only to
+`api.github.com` and is never committed anywhere.
+
+Make it a **fine-grained** token with **contents: read and write** on
+`caakehorn/wiki-brain` and `caakehorn/home`, and nothing else. Contents-write
+on `home` is what lets the browser fire the rebuild; neither repo needs any
+other permission.
+
+This is a write credential living in a browser on a public site, which is worth
+saying out loud. It is scoped to two repositories, it is per-device, and it is
+one click to revoke — but treat *remember on this device* as meaning a machine
+you own.
+
 ## The map
 
 `/brain` opens on **THE CORTEX** — the wiki as a place instead of a list. 458

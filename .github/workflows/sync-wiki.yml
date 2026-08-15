@@ -1,0 +1,72 @@
+name: Sync the wiki snapshot
+
+# The portal serves a vendored snapshot of caakehorn/wiki-brain. This is what
+# closes the loop: the editor commits a page to that repository and fires
+# `wiki-updated` at this one, which re-derives the snapshot and redeploys, so
+# the edit is live for everyone rather than only in the browser that made it.
+on:
+  repository_dispatch:
+    types: [wiki-updated]
+  workflow_dispatch:
+  # A backstop, so an edit still lands if the dispatch never arrived.
+  schedule:
+    - cron: '17 * * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-wiki
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.commit.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check out the wiki source
+        uses: actions/checkout@v4
+        with:
+          repository: caakehorn/wiki-brain
+          path: .wiki-brain
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # One implementation of the derivation, the same one a local sync runs.
+      - run: node scripts/sync-wiki.mjs .wiki-brain
+      - run: npm run leviathan
+
+      - id: commit
+        name: Commit the snapshot if it moved
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/wiki public/leviathan
+          if git diff --cached --quiet; then
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+            echo 'Snapshot already current.'
+          else
+            git commit -m 'Resync the wiki snapshot'
+            git push
+            echo 'changed=true' >> "$GITHUB_OUTPUT"
+          fi
+
+  # A push made with GITHUB_TOKEN does not trigger other workflows, so the
+  # deploy is called rather than waited for.
+  deploy:
+    needs: sync
+    if: needs.sync.outputs.changed == 'true'
+    uses: ./.github/workflows/deploy.yml
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    secrets: inherit

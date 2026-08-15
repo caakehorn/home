@@ -335,17 +335,22 @@ this repository. The portal is ungated; the old site put a terms-and-passphrase
 gate in front of that material. Bringing it across is a decision about exposure,
 not a porting task, so the rack declares those instruments and stops there.
 
-## The six rigs
+## The rigs
 
 Each announces itself on mount via `useRig`, so the HUD counts live elements
 instead of a hard-coded number.
 
 1. **CHAOS DIAL** — draggable/arrow-keyed knob, 0 to 11, drives `--chaos`
 2. **VIBE SWITCH** — the four palettes
-3. **SCRY POOL** — canvas flow field; pointer steers, click sends a shockwave
-4. **SHELL** — real command handling (`help`, `ls`, `goto`, `vibe`, `chaos`, `status`, …), including navigation
-5. **THE ORACLE** — gachapon lever, dispenses a verdict
-6. **STICKER SLAB** — drag, fling, bounce, with momentum
+3. **SHELL** — 34 verbs, 8 of them listed in `help`; reads the corpus (`grep`,
+   `whois`, `cite`, `hegel`), drives the site (`chaos`, `vibe`, `goto`,
+   `overdose`, `narcan`), and takes the screen apart (`invert`, `flip`,
+   `scanlines`, `nap`, `strobe`). `man <verb>` documents any of them and Tab
+   completes over all of them.
+4. **STICKER SLAB** — drag, fling, bounce, with momentum
+
+The chaos dial and the palette switch also ride in the header on every page —
+the console keeps the big versions, both surfaces drive the same state.
 
 ## Layout
 

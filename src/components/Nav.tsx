@@ -1,4 +1,5 @@
 import { Link, NavLink } from 'react-router-dom'
+import { Logo } from './Logo'
 import { SECTIONS } from '../content/sections'
 import { VIBES } from '../state/portal-context'
 import { usePortal } from '../state/usePortal'
@@ -11,7 +12,7 @@ export function Nav() {
   return (
     <nav className="nav" aria-label="Portal">
       <Link to="/" className="nav__mark">
-        <span className="nav__mark-face">DAN FRANK</span>
+        <Logo size="var(--step-1)" inline />
         <span className="nav__mark-kana jp" aria-hidden="true">
           薬窟
         </span>

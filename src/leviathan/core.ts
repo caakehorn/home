@@ -64,8 +64,20 @@ export const INSTRUMENTS: Instrument[] = [
     status: 'LIVE',
   },
   {
-    id: 'ask',
+    id: 'pen',
     numeral: 'III',
+    title: 'THE PEN',
+    kana: '筆',
+    corpus: '4,987 dated mentions · 1900 → 2026',
+    blurb:
+      'The chart recorder from the old console, with the lanes finally carrying something. Four counts against one axis, traced by a stylus that sits where the value is.',
+    method:
+      'Per year: mentions landing in it, distinct pages naming it, distinct domains among those pages, and pages whose earliest named date it is. Each lane scaled to its own maximum, which is printed beside it.',
+    status: 'LIVE',
+  },
+  {
+    id: 'ask',
+    numeral: 'IV',
     title: 'THE ASK',
     kana: '請求',
     corpus: 'the message record',
@@ -76,7 +88,7 @@ export const INSTRUMENTS: Instrument[] = [
   },
   {
     id: 'clock',
-    numeral: 'IV',
+    numeral: 'V',
     title: 'THE CLOCK',
     kana: '時計',
     corpus: 'eleven years of messages',

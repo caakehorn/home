@@ -5,6 +5,7 @@ import { Hud } from './components/Hud'
 import { Gate } from './gate/Gate'
 import { Home } from './routes/Home'
 import { LeviathanRoute } from './routes/Leviathan'
+import { LineageRoute } from './routes/Lineage'
 import { Splash } from './routes/Splash'
 import { TermsRoute } from './routes/Terms'
 import { WikiIndexRoute } from './routes/Wiki'
@@ -43,6 +44,7 @@ function Site() {
       <Routes>
         <Route path="/" element={<Home />} />
         {/* static segments outrank the dynamic stub route */}
+        <Route path="/lineage" element={<LineageRoute />} />
         <Route path="/brain" element={<WikiIndexRoute />} />
         <Route path="/brain/*" element={<WikiPageRoute />} />
         <Route path="/leviathan" element={<LeviathanRoute />} />

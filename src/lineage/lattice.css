@@ -1,0 +1,207 @@
+.lat {
+  position: relative;
+  background:
+    radial-gradient(70% 50% at 50% 100%, color-mix(in srgb, var(--n3) 16%, transparent), transparent 70%),
+    var(--void);
+  border: var(--rule) solid var(--edge);
+  box-shadow:
+    8px 8px 0 var(--edge),
+    inset 0 0 90px color-mix(in srgb, var(--n1) 16%, transparent);
+  overflow: hidden;
+}
+
+.lat__svg {
+  display: block;
+  width: 100%;
+  touch-action: pan-y;
+}
+
+/* ---- time rules -------------------------------------------------------- */
+.lat__rule {
+  stroke: color-mix(in srgb, var(--text-dim) 22%, transparent);
+  stroke-width: 1;
+  stroke-dasharray: 2 6;
+}
+
+.lat__year {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  fill: var(--text-dim);
+}
+
+/* ---- edges -------------------------------------------------------------- */
+.lat__edge {
+  fill: none;
+  stroke: color-mix(in srgb, var(--n1) 42%, transparent);
+  stroke-width: 1.5;
+  transition: stroke 160ms ease, stroke-width 160ms ease;
+}
+
+.lat__edge--lit {
+  stroke: var(--n3);
+  stroke-width: 3;
+  filter: drop-shadow(0 0 6px var(--n3));
+}
+
+.lat__edge--dim {
+  stroke: color-mix(in srgb, var(--text-dim) 14%, transparent);
+}
+
+/* ---- nodes -------------------------------------------------------------- */
+.lat__node {
+  cursor: pointer;
+  transition: opacity 160ms ease;
+}
+
+.lat__node:focus {
+  outline: none;
+}
+
+.lat__node:focus-visible .lat__dot {
+  stroke: var(--n3);
+  stroke-width: 3;
+}
+
+.lat__dot {
+  fill: var(--void-3);
+  stroke: color-mix(in srgb, var(--n1) 80%, transparent);
+  stroke-width: 2;
+  transition: fill 160ms ease, stroke 160ms ease;
+}
+
+.lat__node--lit .lat__dot {
+  fill: color-mix(in srgb, var(--n3) 34%, var(--void-3));
+  stroke: var(--n3);
+  filter: drop-shadow(0 0 10px var(--n3));
+}
+
+.lat__node--on .lat__dot {
+  fill: var(--n3);
+  stroke: #fff;
+  stroke-width: 3;
+}
+
+.lat__node--dim {
+  opacity: 0.24;
+}
+
+/* the void: an ancestor the record barely holds */
+.lat__dot--void {
+  fill: none;
+  stroke: var(--n2);
+  stroke-width: 2;
+  stroke-dasharray: 3 4;
+  animation: void-flicker calc(2.4s * var(--tempo)) steps(1) infinite;
+}
+
+@keyframes void-flicker {
+  0%, 42%, 47%, 100% { opacity: 1; }
+  44%, 49% { opacity: 0.25; }
+}
+
+/* share ring — how much of Dan this person is */
+.lat__ring {
+  fill: none;
+  stroke: var(--n2);
+  stroke-width: 3;
+  transform: rotate(-90deg);
+  opacity: 0.85;
+}
+
+.lat__node--lit .lat__ring {
+  stroke: #fff;
+  filter: drop-shadow(0 0 6px var(--n2));
+}
+
+/* born outside the US */
+.lat__crossed {
+  fill: none;
+  stroke: var(--n4);
+  stroke-width: 1.5;
+  stroke-dasharray: 1 5;
+  opacity: 0.9;
+}
+
+.lat__label {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  fill: var(--text);
+  pointer-events: none;
+}
+
+.lat__node--dim .lat__label,
+.lat__node--dim .lat__born {
+  fill: var(--text-dim);
+}
+
+.lat__born {
+  font-family: var(--f-mono);
+  font-size: 9px;
+  fill: var(--text-dim);
+  pointer-events: none;
+}
+
+.lat__origin {
+  font-family: var(--f-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  fill: var(--n4);
+  pointer-events: none;
+}
+
+/* ---- legend ------------------------------------------------------------- */
+.lat__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  padding: 0.5rem 0.7rem;
+  border-top: var(--rule) solid var(--edge);
+  background: var(--void-3);
+  font-family: var(--f-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+}
+
+.lat__legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.lat__key {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.lat__key--ring {
+  border: 3px solid var(--n2);
+}
+
+.lat__key--void {
+  border: 2px dashed var(--n2);
+}
+
+.lat__key--crossed {
+  border: 2px dotted var(--n4);
+}
+
+/* the root: Dan is where every path terminates, so he reads as the anchor */
+.lat__dot--root {
+  fill: var(--n3);
+  stroke: #fff;
+  stroke-width: 3;
+  filter: drop-shadow(0 0 14px var(--n3));
+}
+
+.lat__label--root {
+  font-family: var(--f-poster);
+  font-size: 12px;
+  fill: var(--n3);
+  letter-spacing: 0.06em;
+}

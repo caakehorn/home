@@ -461,7 +461,7 @@ keyword list, no threshold chosen because of what it would surface. Anything
 editorial would make the output a portrait of an argument; left alone, the
 counts make a portrait of the thing itself.
 
-Two instruments are built:
+Four instruments are built:
 
 - **I · THE MASS** — where the corpus's weight actually sits. Nine domains by
   word count, page-length distribution, heaviest pages; click a domain and the
@@ -471,10 +471,52 @@ Two instruments are built:
   What it shows is not when things happened but when the record *says* things
   happened, which is a different and more honest object. Open a year for its
   months and every page that named it.
+- **III · THE PEN** — the chart recorder from the old console, four counts
+  against one axis, each lane scaled to its own maximum.
+- **VI · THE ACCRETION** — the wiki being built, against real time. See below.
 
 The dates come from the same matchers the brief visualiser uses
 (`mineDates` in `src/wiki/brief.ts`), so a date reads the same way on the
 instrument as it does on the page.
+
+### THE ACCRETION, and the one dataset that is not derived from the snapshot
+
+Every other instrument reads `public/wiki/` — the corpus as it stands. That
+snapshot is a single frame and cannot answer a question about growth, so this
+one reads the only source that knows what the corpus *was*: the commit history
+of [`caakehorn/wiki-brain`](https://github.com/caakehorn/wiki-brain).
+
+Four counts per first-parent commit — pages, bytes, every `[[wiki/…]]`
+occurrence, and distinct page→page pairs. Merges count once; replaying a
+branch's commits and then its merge would count the same growth twice.
+
+**The four lanes disagree, and that is the reading.** 260 pages arrive in a
+single migration commit on day one. After it the page count rises 72% over five
+weeks while bytes rise 278% — 231 bytes per page becomes 8,057. What grew was
+not the number of pages but what is on them and what they point at, which is
+`CLAUDE.md`'s "depth is the binding constraint" showing up as a measurement
+rather than an instruction.
+
+Each lane is scaled to its own maximum, printed beside it: pages are hundreds
+and bytes are millions, so on a shared axis the byte curve would be the chart
+and everything else a flat line on the floor. **Lanes are comparable in shape,
+never in height.** The x-axis is real elapsed time rather than commit number, so
+a quiet week looks like one. Nothing is smoothed — a moving average would file
+the day-one step down into a gentle slope that never happened. The only scale
+transform anywhere is a square root on the per-commit bars, disclosed on the
+instrument, because one 260-page commit renders every other bar at under a pixel
+linearly.
+
+```bash
+npm run accretion -- ../wiki-brain    # writes public/leviathan/accretion.json
+```
+
+**This dataset is committed**, unlike the other three, which `prebuild`
+regenerates. It is derived from a repository this one does not vendor, so there
+is nothing for CI to build it from — the same arrangement `sync-wiki.mjs` uses
+for the wiki snapshot itself. Re-run it against a wiki-brain checkout when the
+history has moved. It needs full history: the script refuses a shallow clone
+rather than silently reporting a corpus that begins four commits ago.
 
 The sealed instruments need the message corpus, which is **not** vendored into
 this repository. The portal is ungated; the old site put a terms-and-passphrase

@@ -1,0 +1,295 @@
+/* ==========================================================================
+   VI · THE ACCRETION
+
+   Four lanes on one time axis. Each is scaled to its own maximum and prints
+   it, so the lanes are comparable in shape and never in height — a reader who
+   compares their heights has been misled by the chart, so the maximum sits at
+   the left of every lane where it cannot be missed.
+
+   One hue for the whole instrument. This is one corpus measured four ways, not
+   four categories; colour would be claiming a distinction the data does not
+   have. The lanes are told apart by position and by their printed labels.
+   ========================================================================== */
+
+.acc__svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  touch-action: pan-y;
+  cursor: crosshair;
+}
+
+/* -- the lanes ----------------------------------------------------------- */
+
+.acc__base {
+  stroke: color-mix(in srgb, var(--text-dim) 45%, transparent);
+  stroke-width: 1;
+}
+
+.acc__line {
+  fill: none;
+  stroke: var(--n3);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.acc__area {
+  /* Faint on purpose. A day-one step to 60% of maximum means most of every
+     lane is filled area carrying no information; at 16% it read as a solid
+     block and the line — the part with the shape in it — was a thin edge on
+     top of it. */
+  fill: color-mix(in srgb, var(--n3) 7%, transparent);
+  stroke: none;
+}
+
+.acc__lane-label {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  fill: var(--text);
+}
+
+.acc__lane-max,
+.acc__lane-zero {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  fill: var(--text-dim);
+}
+
+/* -- the per-commit pulse ------------------------------------------------ */
+
+.acc__bar--up {
+  fill: var(--n1);
+}
+
+.acc__bar--down {
+  fill: var(--n2);
+}
+
+/* -- the migration marker ------------------------------------------------ */
+
+.acc__migration line {
+  stroke: var(--n1);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+  opacity: 0.85;
+}
+
+.acc__migration text {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  fill: var(--n1);
+}
+
+/* -- axis ---------------------------------------------------------------- */
+
+.acc__tick line {
+  stroke: color-mix(in srgb, var(--text-dim) 22%, transparent);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+}
+
+.acc__tick text {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  fill: var(--text-dim);
+}
+
+/* -- the cursor ---------------------------------------------------------- */
+
+.acc__cursor line {
+  stroke: var(--n1);
+  stroke-width: 1.5;
+}
+
+.acc__cursor circle {
+  fill: var(--n1);
+  stroke: var(--void);
+  stroke-width: 2;
+}
+
+/* -- the readout --------------------------------------------------------- */
+
+.acc__readout {
+  display: grid;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+  padding: 0.7rem 0.9rem;
+  background: color-mix(in srgb, var(--void) 55%, transparent);
+  border-left: var(--rule) solid var(--n3);
+}
+
+.acc__stamp {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.acc__sha {
+  color: var(--n3);
+  font-weight: 400;
+}
+
+.acc__subject {
+  font-family: var(--f-ui);
+  font-size: var(--step-0);
+  line-height: 1.35;
+  color: var(--text);
+  /* A commit subject is one line; two would reflow the panel on every hover. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.acc__figures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.4rem;
+  margin-top: 0.2rem;
+}
+
+.acc__figure {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  font-family: var(--f-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.14em;
+  color: var(--text-dim);
+}
+
+.acc__figure b {
+  font-family: var(--f-head);
+  font-size: var(--step-1);
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.acc__figure i {
+  font-style: normal;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+}
+
+.acc__up {
+  color: var(--n1);
+}
+
+.acc__down {
+  color: var(--n2);
+}
+
+/* -- the finding --------------------------------------------------------- */
+
+.acc__finding {
+  margin-top: 1.2rem;
+  padding-top: 1rem;
+  border-top: 2px solid color-mix(in srgb, var(--text-dim) 30%, transparent);
+}
+
+.acc__finding p {
+  max-width: 74ch;
+  font-size: var(--step-0);
+  line-height: 1.65;
+  color: var(--text);
+}
+
+.acc__derived {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 2rem;
+  margin: 1rem 0 0.5rem;
+}
+
+.acc__derived span {
+  display: grid;
+  gap: 0.1rem;
+  font-family: var(--f-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.acc__derived b {
+  font-family: var(--f-head);
+  font-size: var(--step-1);
+  letter-spacing: -0.01em;
+  color: var(--n3);
+}
+
+.acc__derived-note,
+.acc__note {
+  max-width: 74ch;
+  font-size: var(--step--1);
+  line-height: 1.55;
+  color: var(--text-dim);
+}
+
+.acc__state {
+  padding: 2rem 0;
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  color: var(--text-dim);
+}
+
+/* --------------------------------------------------------------------------
+   RAW CANVAS / NEWSPRINT — the chart is drawn, not lit.
+   -------------------------------------------------------------------------- */
+:root[data-vibe='basquiat'] .acc__line,
+:root[data-vibe='riot'] .acc__line {
+  stroke: var(--n2);
+  stroke-width: 2.5;
+}
+
+:root[data-vibe='basquiat'] .acc__area,
+:root[data-vibe='riot'] .acc__area {
+  fill: color-mix(in srgb, var(--n2) 9%, transparent);
+}
+
+:root[data-vibe='basquiat'] .acc__readout,
+:root[data-vibe='riot'] .acc__readout {
+  background: #faf6ec;
+  border-left-color: var(--n2);
+  color: var(--edge);
+}
+
+:root[data-vibe='basquiat'] .acc__derived b,
+:root[data-vibe='riot'] .acc__derived b {
+  color: var(--n2);
+}
+
+/* Cadmium on cream is unreadable — the marker takes the ink in the light
+   palettes, where it is the only thing on the chart that must be read. */
+:root[data-vibe='basquiat'] .acc__migration text,
+:root[data-vibe='riot'] .acc__migration text {
+  fill: var(--edge);
+}
+
+:root[data-vibe='basquiat'] .acc__migration line,
+:root[data-vibe='riot'] .acc__migration line {
+  stroke: var(--edge);
+  opacity: 0.6;
+}
+
+:root[data-vibe='basquiat'] .acc__bar--up,
+:root[data-vibe='riot'] .acc__bar--up {
+  fill: var(--n3);
+}
+
+@media (max-width: 720px) {
+  .acc__figures {
+    gap: 0.35rem 0.9rem;
+  }
+  .acc__subject {
+    white-space: normal;
+  }
+}

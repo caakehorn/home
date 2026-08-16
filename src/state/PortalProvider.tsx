@@ -44,7 +44,6 @@ export function PortalProvider({ children }: { children: ReactNode }) {
     () => typeof window !== 'undefined' && window.sessionStorage.getItem(SESSION_KEY) === '1',
   )
   const [rigs, setRigs] = useState<string[]>([])
-  const [drawing, setDrawing] = useState(false)
   const [lastPoked, setLastPoked] = useState<string | null>(null)
 
   // The OS preference, tracked live — someone who turns Reduce Motion on mid-
@@ -74,11 +73,6 @@ export function PortalProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     document.documentElement.style.setProperty('--chaos', chaos.toFixed(3))
   }, [chaos])
-
-  // CSS gates the scrawl layer's pointer-events off this.
-  useEffect(() => {
-    document.documentElement.dataset.drawing = drawing ? '1' : '0'
-  }, [drawing])
 
   // The single resolved answer, published for plain CSS. Every stylesheet keys
   // its still variant off this rather than off the media query directly, so the
@@ -123,12 +117,10 @@ export function PortalProvider({ children }: { children: ReactNode }) {
       rigs,
       pokeRig,
       lastPoked,
-      drawing,
-      setDrawing,
       motion,
       setMotion: setMotionPref,
     }),
-    [vibe, chaos, entered, enter, registerRig, rigs, pokeRig, lastPoked, drawing, motion],
+    [vibe, chaos, entered, enter, registerRig, rigs, pokeRig, lastPoked, motion],
   )
 
   return <PortalContext.Provider value={value}>{children}</PortalContext.Provider>

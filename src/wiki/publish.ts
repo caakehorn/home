@@ -138,6 +138,17 @@ async function putFile(repo: string, path: string, base64: string, message: stri
   return result.commit.html_url as string
 }
 
+/**
+ * Commit one text file to the source repository.
+ *
+ * For things that are not a wiki page — the `raw/` capture a staged gap answer
+ * is filed as, which has to outlive the staging block that `bin/wiki-gaps
+ * clear` deletes.
+ */
+export async function publishFile(path: string, text: string, message: string) {
+  return putFile(SOURCE_REPO, path, encode(text), message)
+}
+
 /** Wake the sync workflow so the deployed snapshot catches up with the source. */
 async function dispatch(repo: string, slug: string) {
   await call(`/repos/${repo}/dispatches`, {

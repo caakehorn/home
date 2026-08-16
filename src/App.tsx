@@ -2,7 +2,6 @@ import { Route, Routes, useLocation } from 'react-router-dom'
 import { Canvas } from './components/Canvas'
 import { Crawl } from './components/Crawl'
 import { CursorTrail } from './components/CursorTrail'
-import { Scrawl } from './components/Scrawl'
 import { JET_FUEL, RATIO } from './content/crawls'
 import { Fx } from './components/Fx'
 import { Hud } from './components/Hud'
@@ -45,7 +44,6 @@ function Site() {
   return (
     <>
       <Canvas />
-      <Scrawl />
       <Fx />
       <CursorTrail />
 

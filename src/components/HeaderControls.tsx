@@ -16,7 +16,7 @@ import './header-controls.css'
  * screen reader and by thumb, and the platform slider is all three for free.
  */
 export function HeaderControls() {
-  const { vibe, setVibe, chaos, setChaos, drawing, setDrawing, motion, setMotion } = usePortal()
+  const { vibe, setVibe, chaos, setChaos, motion, setMotion } = usePortal()
 
   return (
     <div className="hctl">
@@ -34,22 +34,9 @@ export function HeaderControls() {
         <b className="hctl__read">{(chaos * 11).toFixed(1)}</b>
       </label>
 
-      <button
-        type="button"
-        className={`hctl__draw${drawing ? ' hctl__draw--on' : ''}`}
-        aria-pressed={drawing}
-        onClick={() => setDrawing(!drawing)}
-        title="Oil stick — drag anywhere to leave a mark"
-      >
-        <span className="jp" aria-hidden="true">筆</span>
-        DRAW
-      </button>
-
-      {/* Sits next to DRAW because it is the same kind of switch: a thing the
-          reader turns on and off about how the site behaves, not a setting.
-          It shows its state in the label rather than only in the pressed
-          styling — someone looking for why nothing is moving is scanning for
-          the word, and a dim outline is not an answer. */}
+      {/* Shows its state in the label rather than only in the pressed styling —
+          someone looking for why nothing is moving is scanning for the word,
+          and a dim outline is not an answer. */}
       <button
         type="button"
         className={`hctl__motion${motion ? ' hctl__motion--on' : ''}`}

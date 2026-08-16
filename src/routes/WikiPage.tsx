@@ -4,7 +4,7 @@ import { Nav } from '../components/Nav'
 import { Editor } from '../wiki/Editor'
 import { Infobox } from '../wiki/Infobox'
 import { Markdown, outline } from '../wiki/Markdown'
-import { frontmatterOf, humanize, useWikiPage, type WikiPage as Page } from '../wiki/data'
+import { editableFrontmatter, humanize, useWikiPage, type WikiPage as Page } from '../wiki/data'
 import { getDraft } from '../wiki/store'
 import './wiki.css'
 
@@ -31,7 +31,7 @@ export function WikiPageRoute() {
   useEffect(() => {
     if (!data) return
     const stored = getDraft(data.slug)
-    setDraft(stored ? splitMarkdown(stored.source) : { frontmatter: frontmatterOf(data), body: data.body })
+    setDraft(stored ? splitMarkdown(stored.source) : { frontmatter: editableFrontmatter(data), body: data.body })
     setEditing(false)
   }, [data])
 

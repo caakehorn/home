@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { WikiPage } from './data'
-import { frontmatterOf } from './data'
+import { editableFrontmatter, toSource } from './data'
 import { Markdown } from './Markdown'
 import { configured, ready, unlock } from './keyring'
 import { publishPage, SOURCE_REPO } from './publish'
@@ -12,7 +12,6 @@ import {
   getDraft,
   saveDraft,
   saveImage,
-  toMarkdown,
 } from './store'
 import './editor.css'
 
@@ -44,7 +43,7 @@ export function Editor({ page, frontmatter, body, onChange, onClose }: Props) {
   const saved = useRef<number | undefined>(undefined)
 
   const dirty = useMemo(
-    () => frontmatter !== frontmatterOf(page) || body !== page.body,
+    () => frontmatter !== editableFrontmatter(page) || body !== page.body,
     [frontmatter, body, page],
   )
 
@@ -53,7 +52,7 @@ export function Editor({ page, frontmatter, body, onChange, onClose }: Props) {
     if (!dirty) return
     window.clearTimeout(saved.current)
     saved.current = window.setTimeout(() => {
-      const ok = saveDraft(page.slug, toMarkdown(frontmatter, body))
+      const ok = saveDraft(page.slug, toSource(page, { frontmatter, body }))
       setStatus(ok ? `saved locally · ${new Date().toLocaleTimeString()}` : 'could not save — browser storage is full')
     }, 700)
     return () => window.clearTimeout(saved.current)
@@ -101,7 +100,7 @@ export function Editor({ page, frontmatter, body, onChange, onClose }: Props) {
     setPublished(null)
     try {
       const { commit, pictures } = await publishPage(
-        { slug: page.slug, markdown: toMarkdown(frontmatter, body), images: allImages() },
+        { slug: page.slug, markdown: toSource(page, { frontmatter, body }), images: allImages() },
         setStatus,
       )
       setPublished(commit)
@@ -117,13 +116,13 @@ export function Editor({ page, frontmatter, body, onChange, onClose }: Props) {
   }
 
   const exportFile = () => {
-    download(`${page.slug.split('/').pop()}.md`, toMarkdown(frontmatter, body))
+    download(`${page.slug.split('/').pop()}.md`, toSource(page, { frontmatter, body }))
     setStatus('downloaded — drop it into wiki-brain at wiki/' + page.slug + '.md')
   }
 
   const copy = async () => {
     try {
-      await navigator.clipboard.writeText(toMarkdown(frontmatter, body))
+      await navigator.clipboard.writeText(toSource(page, { frontmatter, body }))
       setStatus('full page copied to clipboard')
     } catch {
       setStatus('clipboard blocked — use DOWNLOAD instead')
@@ -132,7 +131,7 @@ export function Editor({ page, frontmatter, body, onChange, onClose }: Props) {
 
   const revert = () => {
     discardDraft(page.slug)
-    onChange({ frontmatter: frontmatterOf(page), body: page.body })
+    onChange({ frontmatter: editableFrontmatter(page), body: page.body })
     setStatus('reverted to the shipped version')
   }
 

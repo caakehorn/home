@@ -6,6 +6,7 @@ import { SubHead } from '../components/Wordmark'
 import { banner } from '../content/slogans'
 import { BriefDeck } from '../wiki/BriefDeck'
 import { Cortex } from '../wiki/Cortex'
+import { Gaps } from '../wiki/Gaps'
 import { useWikiIndex, type IndexEntry, type WikiIndex } from '../wiki/data'
 import { allDrafts } from '../wiki/store'
 import './wiki.css'
@@ -19,6 +20,10 @@ const VIEWS = [
   { id: 'map', label: 'MAP', kana: '地図' },
   { id: 'list', label: 'LIST', kana: '一覧' },
   { id: 'briefs', label: 'BRIEFS', kana: '要約' },
+  // Sits with the other three because it is the same act — a way of reading the
+  // wiki. MAP is what connects, LIST is what exists, BRIEFS is what it says,
+  // GAPS is what it admits it does not know.
+  { id: 'gaps', label: 'GAPS', kana: '空白' },
 ] as const
 
 type View = (typeof VIEWS)[number]['id']
@@ -182,6 +187,12 @@ export function WikiIndexRoute() {
             out, people linked, each sentence on its own. The original text is one toggle away.
           </p>
           <BriefDeck pages={results} />
+        </div>
+      )}
+
+      {view === 'gaps' && (
+        <div className="wrap wiki__results">
+          <Gaps />
         </div>
       )}
 

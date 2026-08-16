@@ -39,6 +39,43 @@ export type WikiPage = {
   body: string
   words: number
   charts: number
+  /** The frontmatter block exactly as written upstream. See `toSource`. */
+  fmRaw?: string
+  /** The leading `# Heading` line, stripped from `body` at sync time. */
+  h1?: string | null
+}
+
+/**
+ * A page as a file again, ready to commit.
+ *
+ * `frontmatterOf` rebuilds frontmatter from the *parsed* view, and that view is
+ * lossy: `lists` flattens each `connections:` entry to a string, dropping the
+ * `type:` and `claim:` written under it. Saving a page reconstructed that way
+ * deleted every typed edge's claim on it, and dropped the leading H1 as well,
+ * because nothing remembered either had been there.
+ *
+ * So the raw frontmatter is what gets edited and written back, and the H1 is
+ * put back on the front of the body. `frontmatterOf` is still what the editor
+ * *shows* — it is readable, and it is what someone editing frontmatter by hand
+ * wants — but a page is only ever committed through here.
+ */
+/**
+ * What the frontmatter pane should show and edit.
+ *
+ * The raw block, so what you see is what is in the file and what you type is
+ * what gets written. `frontmatterOf` is the fallback for a page from a snapshot
+ * built before the raw text was carried.
+ */
+export const editableFrontmatter = (page: WikiPage) => page.fmRaw ?? frontmatterOf(page)
+
+export function toSource(
+  page: WikiPage,
+  next: { frontmatter?: string; body: string },
+): string {
+  // An edited frontmatter pane wins; otherwise the raw block, untouched.
+  const fm = (next.frontmatter ?? page.fmRaw ?? frontmatterOf(page)).replace(/^\n+|\n+$/g, '')
+  const head = page.h1 ? `${page.h1}\n\n` : ''
+  return `---\n${fm}\n---\n\n${head}${next.body.replace(/^\n+/, '')}`
 }
 
 const asset = (path: string) => `${import.meta.env.BASE_URL}wiki/${path}`.replace(/\/{2,}/g, '/')

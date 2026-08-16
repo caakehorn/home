@@ -65,7 +65,14 @@ function parseFrontmatter(text) {
     }
   }
 
-  return { meta, infobox, lists, body }
+  // The frontmatter block exactly as written, kept alongside the parsed view.
+  //
+  // The parsed view is lossy and cannot be otherwise: `connections:` entries
+  // carry `type:` and `claim:` under each `- page:`, and `lists` flattens them
+  // to strings. Rebuilding frontmatter from it therefore *deletes every typed
+  // edge's claim* — which is what saving a page from the portal used to do.
+  // Anything that writes a page back edits this text instead.
+  return { meta, infobox, lists, body, fmRaw: text.slice(4, end) }
 }
 
 function walk(dir, out = []) {
@@ -157,18 +164,117 @@ if (existsSync(assets)) cpSync(assets, join(OUT, 'assets'), { recursive: true })
 
 const files = walk(join(SOURCE, 'wiki')).sort()
 const index = []
+/* ---- gaps ----------------------------------------------------------------
+ *
+ * A page's `## Gaps` section is the wiki admitting what it does not know. The
+ * GAPS view answers them in the browser, and it needs the whole set at once —
+ * fetching 460 page files to build a list is not a list. So they are baked
+ * here, into their own dataset rather than into index.json, which every route
+ * loads and which has no use for the text of 269 gaps.
+ *
+ * This is a port of the parser in wiki-brain's `bin/wiki-gaps`, and the two
+ * have to agree: the tool cuts a gap out of the page by matching its text, so
+ * a gap this splits differently is a gap the tool cannot find. Keep them in
+ * step.
+ */
+const GAP_HEAD = /^(#{2,3})\s+(gaps?\b|notes\s+(and|&)\s+gaps\b|corpus gaps\b|open questions\b)/i
+const BULLET = /^([-*]|\d+\.)\s+\S/
+
+/** Flatten to one line for a list label: links unwrapped, emphasis stripped. */
+function flatten(text) {
+  return text
+    .replace(/\[\[[^\]|]+\|([^\]]+)\]\]/g, '$1')
+    .replace(/\[\[([^\]]+)\]\]/g, (_, p) => p.replace(/\/$/, '').split('/').pop())
+    .replace(/^\s*([-*]|\d+\.)\s+/, '')
+    .replace(/[*_`]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+/**
+ * Every open gap on a page.
+ *
+ * Sections come in five heading variants and pages carry more than one —
+ * jerel-coles has both an `## Open questions` and a `## Gaps` — so every
+ * matching section is read, not just the first. Items come in two shapes:
+ * bulleted lists with wrapped continuations and nested sub-bullets, and bare
+ * paragraphs. Blocks are split on blank lines, then any block opening with a
+ * top-level bullet is split at each subsequent one, which leaves nested
+ * bullets attached to the item they belong to.
+ */
+function extractGaps(body) {
+  const lines = body.split('\n')
+  const out = []
+
+  for (let i = 0; i < lines.length; i++) {
+    const head = lines[i].match(GAP_HEAD)
+    if (!head) continue
+    const level = head[1].length
+    let end = lines.length
+    for (let j = i + 1; j < lines.length; j++) {
+      const h = lines[j].match(/^(#+)\s/)
+      if (h && h[1].length <= level) {
+        end = j
+        break
+      }
+    }
+
+    // group the section body into blank-line-separated blocks
+    const blocks = []
+    let cur = []
+    for (let k = i + 1; k < end; k++) {
+      if (lines[k].trim()) cur.push(k)
+      else if (cur.length) {
+        blocks.push(cur)
+        cur = []
+      }
+    }
+    if (cur.length) blocks.push(cur)
+
+    for (const block of blocks) {
+      const first = lines[block[0]].trimStart()
+      // sub-headings, blockquotes and whole-line italic placeholders are
+      // commentary on the section, not gaps in it
+      if (first.startsWith('#') || first.startsWith('>')) continue
+      if (block.length === 1 && /^[_*].+[_*]$/.test(first.trim())) continue
+
+      const starts = block.filter((k) => BULLET.test(lines[k]))
+      const spans = []
+      if (!starts.length) spans.push([block[0], block[block.length - 1] + 1])
+      else {
+        if (starts[0] > block[0]) spans.push([block[0], starts[0]])
+        const bounds = [...starts, block[block.length - 1] + 1]
+        for (let b = 0; b < bounds.length - 1; b++) spans.push([bounds[b], bounds[b + 1]])
+      }
+
+      for (const [lo, hi] of spans) {
+        const text = lines.slice(lo, hi).join('\n')
+        const label = flatten(text)
+        // Settled already, by the two marks bin/wiki-digest filters OPEN.md on.
+        if (!label || label.startsWith('~~')) continue
+        if (/\b(CLOSED|RESOLVED|SETTLED)\b/.test(label)) continue
+        out.push({ text, label })
+      }
+    }
+  }
+  return out
+}
+
 const backlinks = new Map()
 
 const pages = files.map((file) => {
   const rel = relative(join(SOURCE, 'wiki'), file).replace(/\\/g, '/')
   const slug = rel.replace(/\.md$/, '')
   const raw = readFileSync(file, 'utf8')
-  const { meta, infobox, lists, body } = parseFrontmatter(raw)
+  const { meta, infobox, lists, body, fmRaw } = parseFrontmatter(raw)
 
   // A leading H1 duplicates the title; drop it and prefer it as the title.
+  // Kept verbatim as `h1` so a page written back from the browser puts it back
+  // — saving used to delete it, because nothing remembered it had been there.
   let title = meta.title || titleFromSlug(slug)
   let content = body.replace(/^\s*\n/, '')
   const h1 = content.match(/^#\s+(.+)\n?/)
+  const h1Line = h1 ? h1[0].replace(/\n$/, '') : null
   if (h1) {
     title = h1[1].trim()
     content = content.slice(h1[0].length)
@@ -187,11 +293,16 @@ const pages = files.map((file) => {
     meta,
     infobox,
     lists: lists ?? {},
+    fmRaw,
+    h1: h1Line,
     links,
     body: content.trimEnd(),
     words: content.split(/\s+/).filter(Boolean).length,
     charts: countChartableTables(content),
     brief: BRIEF_HEADING.test(content),
+    gaps: extractGaps(content),
+    /** Set by bin/wiki-gaps: this page is holding an answer nothing has acted on. */
+    staged: meta.pending_ingest ?? null,
   }
 })
 
@@ -254,6 +365,28 @@ writeFileSync(
     domains,
     pages: index,
     edges: wire,
+  }),
+)
+
+// Its own file: every route loads index.json, and none of them but GAPS wants
+// the full text of a few hundred gaps.
+const withGaps = pages.filter((p) => p.gaps.length || p.staged)
+writeFileSync(
+  join(OUT, 'gaps.json'),
+  JSON.stringify({
+    generatedAt: new Date().toISOString(),
+    counts: {
+      open: withGaps.reduce((n, p) => n + p.gaps.length, 0),
+      pages: withGaps.filter((p) => p.gaps.length).length,
+      staged: withGaps.filter((p) => p.staged).length,
+    },
+    pages: withGaps.map((p) => ({
+      slug: p.slug,
+      domain: p.domain,
+      title: p.title,
+      staged: p.staged,
+      gaps: p.gaps,
+    })),
   }),
 )
 

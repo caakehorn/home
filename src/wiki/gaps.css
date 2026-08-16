@@ -1,0 +1,260 @@
+/* ==========================================================================
+   THE GAPS
+
+   Three columns, left to right, in the order the job is actually done: pick the
+   page, pick the thing it does not know, say it. Nothing is a dialog — the list
+   stays on screen while you type, so answering three gaps on one page costs
+   three sentences rather than three round trips.
+
+   Column widths are fixed at the ends and fluid in the middle: the page list is
+   slugs (predictable), the answer box wants room, and the gap labels are the
+   part that varies, so they get the slack.
+   ========================================================================== */
+
+.gaps {
+  display: grid;
+  gap: 1rem;
+}
+
+/* On its own patch, not bare. The scrawl layer runs underneath everything on
+   this route, and dim body text laid straight over it is unreadable — the panes
+   already sit on paper, and the sentence explaining them has to as well. */
+.gaps__lede {
+  max-width: 88ch;
+  margin: 0;
+  padding: 0.55rem 0.7rem;
+  font-size: var(--step--1);
+  line-height: 1.6;
+  color: var(--text-dim);
+  background: color-mix(in srgb, var(--void) 72%, transparent);
+  border-left: var(--rule) solid var(--n2);
+}
+
+.gaps__lede b {
+  font-family: var(--f-head);
+  font-size: var(--step-0);
+  color: var(--n2);
+}
+
+.gaps__panes {
+  display: grid;
+  grid-template-columns: minmax(200px, 24%) minmax(0, 1fr) minmax(260px, 34%);
+  gap: 0.9rem;
+  align-items: start;
+}
+
+.gaps__pane {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+  padding: 0.7rem;
+  background: color-mix(in srgb, var(--void) 45%, transparent);
+  border: var(--rule) solid color-mix(in srgb, var(--text-dim) 28%, transparent);
+}
+
+/* The two lists scroll inside themselves rather than growing the page: the
+   whole point is that all three panes stay visible at once. */
+.gaps__pages,
+.gaps__list {
+  max-height: 58vh;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.gaps__search {
+  width: 100%;
+  padding: 0.35rem 0.5rem;
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  color: var(--text);
+  background: var(--void-2);
+  border: 1px solid color-mix(in srgb, var(--text-dim) 40%, transparent);
+}
+
+.gaps__search:focus {
+  outline: none;
+  border-color: var(--n3);
+}
+
+.gaps__page,
+.gaps__gap {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.3rem 0.4rem;
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  line-height: 1.45;
+  text-align: left;
+  color: var(--text-dim);
+  background: none;
+  border: 0;
+  border-left: 3px solid transparent;
+  cursor: pointer;
+}
+
+.gaps__page:hover,
+.gaps__gap:hover {
+  color: var(--text);
+  background: color-mix(in srgb, var(--n3) 10%, transparent);
+}
+
+.gaps__page--on,
+.gaps__gap--on {
+  color: var(--text);
+  background: color-mix(in srgb, var(--n3) 16%, transparent);
+  border-left-color: var(--n3);
+}
+
+.gaps__count {
+  flex: none;
+  min-width: 2ch;
+  font-family: var(--f-head);
+  text-align: right;
+  color: var(--n2);
+}
+
+.gaps__slug {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A page already holding an unintegrated answer. Marked, not hidden — it is
+   still answerable, and knowing something is queued there is the point. */
+.gaps__staged {
+  flex: none;
+  margin-left: auto;
+  color: var(--spot);
+}
+
+.gaps__gap--manual {
+  font-weight: 700;
+  color: var(--n2);
+  letter-spacing: 0.06em;
+}
+
+.gaps__head {
+  margin: 0;
+  font-family: var(--f-head);
+  font-size: var(--step-0);
+  color: var(--text);
+}
+
+.gaps__empty,
+.gaps__manual-note,
+.gaps__status {
+  margin: 0;
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  line-height: 1.55;
+  color: var(--text-dim);
+}
+
+/* The gap, verbatim. Wraps rather than scrolls — it is the thing being answered
+   and reading it should not be a second interaction. */
+.gaps__quote {
+  max-height: 30vh;
+  margin: 0;
+  padding: 0.5rem 0.6rem;
+  overflow-y: auto;
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--text);
+  background: var(--void-2);
+  border-left: 3px solid var(--n2);
+}
+
+.gaps__box {
+  width: 100%;
+  min-height: 11rem;
+  padding: 0.55rem;
+  font-family: var(--f-mono);
+  font-size: 0.78rem;
+  line-height: 1.6;
+  resize: vertical;
+  color: var(--text);
+  background: var(--void-2);
+  border: 1px solid color-mix(in srgb, var(--text-dim) 40%, transparent);
+}
+
+.gaps__box:focus {
+  outline: none;
+  border-color: var(--n3);
+}
+
+.gaps__row {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.gaps__btn {
+  padding: 0.28rem 0.7rem;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  background: none;
+  border: 2px solid color-mix(in srgb, var(--text-dim) 45%, transparent);
+  cursor: pointer;
+}
+
+.gaps__btn:hover:not(:disabled) {
+  color: var(--text);
+  border-color: var(--text);
+}
+
+.gaps__btn--go {
+  color: var(--on-glow);
+  background: var(--n3);
+  border-color: var(--n3);
+}
+
+.gaps__btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.gaps__state {
+  padding: 2rem 0;
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  color: var(--text-dim);
+}
+
+/* Raw canvas: the panes are paper, not lit panels. */
+:root[data-vibe='basquiat'] .gaps__pane,
+:root[data-vibe='riot'] .gaps__pane,
+:root[data-vibe='basquiat'] .gaps__lede,
+:root[data-vibe='riot'] .gaps__lede {
+  background: #faf6ec;
+  color: var(--edge);
+}
+
+:root[data-vibe='basquiat'] .gaps__quote,
+:root[data-vibe='riot'] .gaps__quote,
+:root[data-vibe='basquiat'] .gaps__box,
+:root[data-vibe='riot'] .gaps__box,
+:root[data-vibe='basquiat'] .gaps__search,
+:root[data-vibe='riot'] .gaps__search {
+  color: var(--edge);
+  background: #fffdf6;
+}
+
+/* Below a laptop the three columns stop being three columns — stacking keeps
+   the order of the job, which is the part that matters. */
+@media (max-width: 900px) {
+  .gaps__panes {
+    grid-template-columns: 1fr;
+  }
+
+  .gaps__pages,
+  .gaps__list {
+    max-height: 34vh;
+  }
+}

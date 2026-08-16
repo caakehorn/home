@@ -65,9 +65,6 @@ export type PortalState = {
   pokeRig: (id: string) => void
   /** Most recently used rig, for the HUD readout. */
   lastPoked: string | null
-  /** Oil-stick mode: the scrawl layer takes the pointer instead of the page. */
-  drawing: boolean
-  setDrawing: (drawing: boolean) => void
   /**
    * Whether the site is allowed to move.
    *

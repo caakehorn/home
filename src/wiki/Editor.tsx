@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { WikiPage } from './data'
 import { frontmatterOf } from './data'
 import { Markdown } from './Markdown'
-import { forgetToken, getToken, publishPage, setToken, SOURCE_REPO } from './publish'
+import { configured, ready, unlock } from './keyring'
+import { publishPage, SOURCE_REPO } from './publish'
 import {
   allImages,
   discardDraft,
@@ -89,7 +90,10 @@ export function Editor({ page, frontmatter, body, onChange, onClose }: Props) {
    * the local draft is kept until then rather than discarded on success.
    */
   const publish = async () => {
-    if (!getToken()) {
+    // Normally nothing is asked: the gate already took the passphrase for this
+    // session and the keyring opens on it. The prompt is the exception — a tab
+    // that skipped the door, or one whose session storage was cleared under it.
+    if (!(await ready()) && (await configured())) {
       setAsking(true)
       return
     }
@@ -165,7 +169,7 @@ export function Editor({ page, frontmatter, body, onChange, onClose }: Props) {
         />
 
         <button type="button" className="ed__btn ed__btn--go" onClick={publish} disabled={busy}>
-          {busy ? 'PUBLISHING…' : 'PUBLISH'}
+          {busy ? 'SAVING…' : 'SAVE'}
         </button>
 
         <button type="button" className="ed__btn" onClick={exportFile}>
@@ -185,7 +189,7 @@ export function Editor({ page, frontmatter, body, onChange, onClose }: Props) {
       </div>
 
       {asking && (
-        <TokenPanel
+        <PassPanel
           onDone={(ok) => {
             setAsking(false)
             if (ok) void publish()
@@ -216,7 +220,7 @@ export function Editor({ page, frontmatter, body, onChange, onClose }: Props) {
       <p className="ed__note" role="status">
         {status ?? (
           <>
-            Edits autosave to <b>this browser</b>. <b>PUBLISH</b> commits the page — and any
+            Edits autosave to <b>this browser</b>. <b>SAVE</b> commits the page — and any
             pictures on it — to <code>{SOURCE_REPO}</code>, and the site rebuilds from there, so it
             sticks for every machine that opens the wiki afterwards.
           </>
@@ -229,68 +233,68 @@ export function Editor({ page, frontmatter, body, onChange, onClose }: Props) {
             </a>
           </>
         )}
-        {getToken() && (
-          <button
-            type="button"
-            className="ed__forget"
-            onClick={() => {
-              forgetToken()
-              setStatus('token forgotten on this device')
-            }}
-          >
-            FORGET TOKEN
-          </button>
-        )}
       </p>
     </div>
   )
 }
 
 /**
- * Where the write credential is asked for.
+ * The passphrase, on the rare occasion it has to be asked for.
  *
- * There is no server to hold a secret, so publishing needs a token from
- * whoever is doing it. It stays in this tab unless "remember" is ticked, and
- * it is never sent anywhere except api.github.com.
+ * The keyring normally opens on the passphrase the gate already took, so this
+ * panel is not part of saving — it is what happens when a tab has no
+ * passphrase to open it with, which means the door was skipped or session
+ * storage was cleared underneath it. Same passphrase as the door; there is
+ * only one on this site.
  */
-function TokenPanel({ onDone }: { onDone: (ok: boolean) => void }) {
+export function PassPanel({ onDone }: { onDone: (ok: boolean) => void }) {
   const [value, setValue] = useState('')
-  const [remember, setRemember] = useState(false)
+  const [wrong, setWrong] = useState(false)
+  const [trying, setTrying] = useState(false)
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!value.trim() || trying) return
+    setTrying(true)
+    // 250,000 PBKDF2 iterations — about a second, and the button has to say so
+    // or it reads as a dead click.
+    const ok = await unlock(value)
+    setTrying(false)
+    if (!ok) {
+      setWrong(true)
+      setValue('')
+      return
+    }
+    setValue('')
+    onDone(true)
+  }
 
   return (
-    <form
-      className="ed__token"
-      onSubmit={(e) => {
-        e.preventDefault()
-        if (!value.trim()) return
-        setToken(value.trim(), remember)
-        setValue('')
-        onDone(true)
-      }}
-    >
-      <p className="ed__token-head">A GITHUB TOKEN, TO WRITE TO THE WIKI</p>
-      <p className="ed__token-note">
-        Fine-grained, with <b>contents: read and write</b> on <code>{SOURCE_REPO}</code> and{' '}
-        <code>caakehorn/home</code> — nothing else. It is held in this tab, sent only to
-        api.github.com, and never committed anywhere.
+    <form className="ed__pass" onSubmit={submit}>
+      <p className="ed__pass-head">THE PASSPHRASE</p>
+      <p className="ed__pass-note">
+        The same one the door takes. This tab does not have it — you came in without it, or the tab
+        was cleared under you. It opens the key that writes to <code>{SOURCE_REPO}</code>.
       </p>
       <input
-        className="ed__token-field"
+        className="ed__pass-field"
         type="password"
         value={value}
-        onChange={(e) => setValue(e.target.value)}
-        placeholder="github_pat_…"
-        aria-label="GitHub token"
-        autoComplete="off"
+        onChange={(e) => {
+          setValue(e.target.value)
+          setWrong(false)
+        }}
+        placeholder="passphrase"
+        aria-label="Site passphrase"
+        aria-invalid={wrong}
+        autoComplete="current-password"
+        autoFocus
         spellCheck={false}
       />
-      <label className="ed__token-check">
-        <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
-        remember on this device — only on a machine you own
-      </label>
-      <div className="ed__token-row">
-        <button type="submit" className="ed__btn ed__btn--go">
-          USE IT
+      {wrong && <p className="ed__pass-wrong">Not it.</p>}
+      <div className="ed__pass-row">
+        <button type="submit" className="ed__btn ed__btn--go" disabled={trying}>
+          {trying ? 'OPENING…' : 'UNLOCK'}
         </button>
         <button type="button" className="ed__btn" onClick={() => onDone(false)}>
           CANCEL

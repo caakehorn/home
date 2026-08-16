@@ -119,24 +119,7 @@
   color: var(--n3);
 }
 
-.ed__forget {
-  margin-left: 0.6rem;
-  padding: 0.05rem 0.4rem;
-  font-family: var(--f-mono);
-  font-size: 0.6rem;
-  letter-spacing: 0.12em;
-  color: var(--text-dim);
-  background: none;
-  border: 1px solid color-mix(in srgb, var(--text-dim) 40%, transparent);
-  cursor: pointer;
-}
-
-.ed__forget:hover {
-  color: var(--n2);
-  border-color: var(--n2);
-}
-
-/* ---- publishing --------------------------------------------------------- */
+/* ---- saving ------------------------------------------------------------- */
 
 .ed__btn--go {
   color: var(--edge);
@@ -149,7 +132,7 @@
   border-color: var(--n5);
 }
 
-.ed__token {
+.ed__pass {
   display: grid;
   gap: 0.5rem;
   padding: 0.9rem 1.1rem;
@@ -157,7 +140,7 @@
   border-bottom: var(--rule) solid var(--edge);
 }
 
-.ed__token-head {
+.ed__pass-head {
   margin: 0;
   font-family: var(--f-mono);
   font-size: 0.66rem;
@@ -165,7 +148,7 @@
   color: var(--n3);
 }
 
-.ed__token-note {
+.ed__pass-note {
   max-width: 62ch;
   margin: 0;
   font-family: var(--f-ui);
@@ -174,16 +157,16 @@
   color: var(--text-dim);
 }
 
-.ed__token-note code {
+.ed__pass-note code {
   font-family: var(--f-mono);
   color: var(--n3);
 }
 
-.ed__token-note b {
+.ed__pass-note b {
   color: var(--text);
 }
 
-.ed__token-field {
+.ed__pass-field {
   width: min(30rem, 100%);
   padding: 0.5rem 0.7rem;
   font-family: var(--f-mono);
@@ -194,26 +177,19 @@
   outline: none;
 }
 
-.ed__token-field:focus {
+.ed__pass-field:focus {
   border-color: var(--n1);
 }
 
-.ed__token-check {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
+.ed__pass-wrong {
+  margin: 0;
   font-family: var(--f-mono);
-  font-size: 0.66rem;
-  letter-spacing: 0.06em;
-  color: var(--text-dim);
-  cursor: pointer;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  color: var(--n2);
 }
 
-.ed__token-check input {
-  accent-color: var(--n3);
-}
-
-.ed__token-row {
+.ed__pass-row {
   display: flex;
   gap: 0.4rem;
 }

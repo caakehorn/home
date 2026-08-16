@@ -2,6 +2,20 @@ import { createContext } from 'react'
 
 export const VIBES = [
   {
+    id: 'basquiat',
+    name: 'UNTITLED',
+    kana: '王冠',
+    blurb: 'raw canvas, crown, teeth — the whole thing scrawled over',
+    swatch: ['#f5f0e4', '#dd2a17', '#1244c4'],
+  },
+  {
+    id: 'riot',
+    name: 'RIOT',
+    kana: '暴動',
+    blurb: 'photocopied twice, stapled to a lamppost, still wet',
+    swatch: ['#e8e2d4', '#e01b12', '#111110'],
+  },
+  {
     id: 'den',
     name: 'DRUG DEN',
     kana: '薬窟',
@@ -28,13 +42,6 @@ export const VIBES = [
     kana: '怪獣夢',
     blurb: 'gumball planets, oni gate, too much of everything',
     swatch: ['#ef8a1f', '#e8478f', '#f5c400'],
-  },
-  {
-    id: 'basquiat',
-    name: 'UNTITLED',
-    kana: '王冠',
-    blurb: 'raw canvas, crown, teeth — the whole thing scrawled over',
-    swatch: ['#f5f0e4', '#dd2a17', '#1244c4'],
   },
 ] as const
 
@@ -65,5 +72,8 @@ export type PortalState = {
 
 export const PortalContext = createContext<PortalState | null>(null)
 
-export const STORAGE_KEY = 'danfrank:prefs:v1'
+// Bumped when the default palette changed to UNTITLED. A returning visitor
+// with `den` in v1 storage would otherwise never see the new house style —
+// which is not a preference they expressed, it is one they were handed.
+export const STORAGE_KEY = 'danfrank:prefs:v2'
 export const SESSION_KEY = 'danfrank:entered:v1'

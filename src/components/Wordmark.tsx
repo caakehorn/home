@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react'
+import { Crown } from './Canvas'
 
 const SPARKS = [
   { top: '-14%', left: '-5%', s: '26px', color: '#ffd400', delay: '0s' },
@@ -65,16 +66,33 @@ export function Wordmark({
 
 type SubHeadProps = {
   children: string
-  /** The additive R/G/B bloom from reference #2. */
+  /**
+   * The block of colour behind the words. It was the additive R/G/B bloom of
+   * reference #2; it is now a slab of paint on raw canvas and a hard block of
+   * spot red everywhere else — same element, doing the job the bloom was
+   * pretending to do.
+   */
   venn?: boolean
+  /** A crown, for the headings that earn one. Drawn only where it belongs. */
+  crown?: boolean
   size?: string
   className?: string
   id?: string
 }
 
-export function SubHead({ children, venn = true, size, className = '', id }: SubHeadProps) {
+export function SubHead({
+  children,
+  venn = true,
+  crown = false,
+  size,
+  className = '',
+  id,
+}: SubHeadProps) {
   return (
-    <span className={`subhead-set ${className}`} style={size ? { fontSize: size } : undefined}>
+    <span
+      className={`subhead-set${crown ? ' crowned' : ''} ${className}`}
+      style={size ? { fontSize: size } : undefined}
+    >
       {venn && (
         <span className="subhead-set__venn" aria-hidden="true">
           <span className="subhead-set__lobe" />
@@ -85,6 +103,7 @@ export function SubHead({ children, venn = true, size, className = '', id }: Sub
       <span className="subhead" id={id}>
         {children}
       </span>
+      {crown && <Crown />}
     </span>
   )
 }

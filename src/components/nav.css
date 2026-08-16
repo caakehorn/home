@@ -61,22 +61,22 @@
 
 .nav__link:hover {
   background: var(--glow);
-  color: var(--edge);
+  color: var(--on-glow);
   transform: translateY(-2px);
 }
 
 .nav__link:hover .jp {
-  color: var(--edge);
+  color: var(--on-glow);
 }
 
 .nav__link--on {
   background: var(--glow);
-  color: var(--edge);
+  color: var(--on-glow);
   box-shadow: 0 0 calc(var(--glow-r) * 0.8) var(--glow);
 }
 
 .nav__link--on .jp {
-  color: var(--edge);
+  color: var(--on-glow);
 }
 
 @media (max-width: 640px) {

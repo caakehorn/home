@@ -1,0 +1,589 @@
+/* ==========================================================================
+   TRANSMISSIONS
+
+   A flyposted wall. Every post is a photocopied sheet taped to it: torn edge,
+   halftone ground, tape at the corners, pasted on at an angle over the one
+   underneath. The lead post is A3, the rest are A5, and they overlap, because
+   a wall of evenly-spaced cards is a blog and this is not one.
+   ========================================================================== */
+
+.blog {
+  position: relative;
+  z-index: 1;
+  min-height: 100%;
+  padding-bottom: clamp(2rem, 6vh, 4rem);
+  background:
+    radial-gradient(85% 55% at 50% -8%, color-mix(in srgb, var(--n5) 22%, transparent), transparent 70%),
+    var(--void);
+}
+
+/* --------------------------------------------------------------------------
+   MASTHEAD
+   -------------------------------------------------------------------------- */
+.blog__mast {
+  position: relative;
+  display: grid;
+  justify-items: start;
+  gap: 0.7rem;
+  padding-block: clamp(1.6rem, 5vh, 3.2rem) clamp(1rem, 3vh, 2rem);
+}
+
+.blog__mast-title {
+  margin: 0;
+  font-size: clamp(1.9rem, 8vw, 5.5rem);
+}
+
+.blog__mast-kana {
+  font-size: clamp(1rem, 2.6vw, 1.8rem);
+  color: var(--n5);
+  letter-spacing: 0.5em;
+}
+
+.blog__mast-note {
+  max-width: 62ch;
+  font-size: var(--step-0);
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+/* --------------------------------------------------------------------------
+   THE BAR — tags, search, count
+   -------------------------------------------------------------------------- */
+.blog__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 0.9rem;
+  padding-block: 0.9rem;
+  border-block: var(--rule) solid var(--edge);
+}
+
+/* The tag list is long enough to wrap on its own; giving it the whole row
+   keeps the search field and the count from being pushed into it. */
+.blog__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  flex: 1 0 100%;
+  min-width: 0;
+}
+
+.blog__tag {
+  padding: 0.18rem 0.55rem;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  color: var(--text);
+  background: var(--void-2);
+  border: 2px solid var(--edge);
+  box-shadow: 3px 3px 0 var(--edge);
+  transition: transform 120ms ease;
+}
+
+.blog__tag:hover {
+  transform: translate(-1px, -1px);
+}
+
+.blog__tag--on {
+  color: var(--on-glow);
+  background: var(--n5);
+}
+
+.blog__search {
+  flex: 0 1 22ch;
+  padding: 0.3rem 0.6rem;
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  color: var(--text);
+  background: var(--void-2);
+  border: 2px solid var(--edge);
+}
+
+.blog__count {
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.blog__empty {
+  padding-block: 3rem;
+  max-width: 58ch;
+  color: var(--text-dim);
+}
+
+/* --------------------------------------------------------------------------
+   THE WALL
+   -------------------------------------------------------------------------- */
+.blog__lead-wrap {
+  padding-top: clamp(1.4rem, 4vh, 2.6rem);
+}
+
+.blog__wall {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: clamp(1.4rem, 3vw, 2.4rem);
+  padding-top: clamp(1.6rem, 4vh, 2.8rem);
+}
+
+/* ---- one flyer ------------------------------------------------------- */
+.flyer {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 0.55rem;
+  padding: clamp(1rem, 2.4vw, 1.6rem);
+  background:
+    /* the halftone the copier leaves behind */
+    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--edge) 22%, transparent) 0 22%, transparent 24%)
+      0 0 / 5px 5px,
+    var(--void-2);
+  border: var(--rule) solid var(--edge);
+  box-shadow: 8px 9px 0 var(--edge);
+  transform: rotate(var(--lean, 0deg));
+  transition: transform 180ms ease, box-shadow 180ms ease;
+  /* torn along the bottom */
+  clip-path: polygon(
+    0 0, 100% 0, 100% calc(100% - 10px), 94% 100%, 88% calc(100% - 7px),
+    80% calc(100% - 2px), 71% calc(100% - 9px), 62% calc(100% - 1px),
+    53% calc(100% - 8px), 44% calc(100% - 2px), 35% calc(100% - 9px),
+    26% calc(100% - 3px), 17% calc(100% - 8px), 9% calc(100% - 1px), 0 calc(100% - 9px)
+  );
+}
+
+.flyer:hover {
+  transform: rotate(0deg) translateY(-4px);
+  box-shadow: 12px 13px 0 var(--edge);
+}
+
+.flyer--lead {
+  gap: 0.8rem;
+  padding: clamp(1.4rem, 3.4vw, 2.6rem);
+  background:
+    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--edge) 24%, transparent) 0 22%, transparent 24%)
+      0 0 / 7px 7px,
+    var(--void-2);
+  box-shadow: 12px 14px 0 var(--edge);
+}
+
+/* Tape at two corners, opposite ones, like somebody in a hurry.
+   Tape is not a colour, it is a change in what is underneath — so it screens
+   on a dark ground and multiplies on a light one. Either polarity the other
+   way round makes it disappear entirely. */
+.flyer__tape {
+  position: absolute;
+  z-index: 4;
+  width: 5.5rem;
+  height: 1.5rem;
+  background: rgb(255 255 255 / 0.16);
+  border-inline: 1px dashed rgb(255 255 255 / 0.22);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+:root[data-vibe='basquiat'] .flyer__tape,
+:root[data-vibe='riot'] .flyer__tape {
+  background: rgb(150 140 115 / 0.34);
+  border-inline-color: rgb(90 84 68 / 0.34);
+  mix-blend-mode: multiply;
+}
+
+.flyer__tape--a {
+  top: -0.6rem;
+  left: -1.4rem;
+  transform: rotate(-34deg);
+}
+
+.flyer__tape--b {
+  top: -0.7rem;
+  right: -1.6rem;
+  transform: rotate(31deg);
+}
+
+.flyer__stamp {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+}
+
+.flyer__date {
+  padding: 0.1rem 0.4rem;
+  color: var(--on-glow);
+  background: var(--glow, var(--n5));
+}
+
+.flyer__read {
+  padding: 0.1rem 0.4rem;
+  color: var(--text-dim);
+  border: 1px solid currentColor;
+}
+
+.flyer__kana {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.7rem;
+  font-size: clamp(1.6rem, 4vw, 3rem);
+  line-height: 1;
+  color: color-mix(in srgb, var(--glow, var(--n5)) 40%, transparent);
+  pointer-events: none;
+}
+
+.flyer__title {
+  margin: 0;
+  font-family: var(--f-head);
+  font-size: var(--step-1);
+  line-height: 1.06;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+}
+
+.flyer--lead .flyer__title {
+  font-size: clamp(1.4rem, 4.6vw, 3.2rem);
+  line-height: 1.2;
+}
+
+.flyer__link {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.flyer__link::after {
+  /* the whole sheet is the hit area, not just the words */
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+}
+
+.flyer:hover .flyer__link {
+  color: var(--glow, var(--n5));
+}
+
+.flyer--lead .flyer__link:hover {
+  color: inherit;
+}
+
+.flyer__dek {
+  max-width: 58ch;
+  font-size: var(--step--1);
+  line-height: 1.55;
+  color: var(--text-dim);
+}
+
+.flyer--lead .flyer__dek {
+  font-size: var(--step-0);
+  color: var(--text);
+}
+
+.flyer__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.flyer__tag {
+  padding: 0.08rem 0.36rem;
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  color: var(--text-dim);
+  border: 1px solid color-mix(in srgb, var(--text-dim) 60%, transparent);
+}
+
+.flyer__cta {
+  margin-top: 0.2rem;
+  font-family: var(--f-poster);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: var(--glow, var(--n5));
+}
+
+/* --------------------------------------------------------------------------
+   FOOT
+   -------------------------------------------------------------------------- */
+.blog__foot {
+  display: grid;
+  justify-items: start;
+  gap: 0.8rem;
+  padding-top: clamp(2rem, 6vh, 3.4rem);
+}
+
+.blog__foot-note {
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  color: var(--text-dim);
+}
+
+.blog__back {
+  align-self: start;
+  padding: 0.3rem 0.7rem;
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.12em;
+  text-decoration: none;
+  color: var(--text);
+  border: 2px solid var(--edge);
+  box-shadow: 4px 4px 0 var(--edge);
+  background: var(--void-2);
+}
+
+.blog__back:hover {
+  color: var(--on-glow);
+  background: var(--n5);
+}
+
+/* ==========================================================================
+   ONE TRANSMISSION
+   ========================================================================== */
+.blog--post {
+  background:
+    radial-gradient(70% 40% at 50% -6%, color-mix(in srgb, var(--glow) 20%, transparent), transparent 70%),
+    var(--void);
+}
+
+.post {
+  padding-block: clamp(1.2rem, 4vh, 2.4rem) 3rem;
+}
+
+.post__head {
+  display: grid;
+  justify-items: start;
+  gap: 0.7rem;
+  padding-bottom: 1.2rem;
+  border-bottom: var(--rule) solid var(--edge);
+}
+
+.post__crumbs {
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  color: var(--text-dim);
+}
+
+.post__crumbs a {
+  color: var(--glow, var(--n5));
+  text-decoration: none;
+}
+
+.post__title {
+  margin: 0;
+  max-width: 20ch;
+  font-size: clamp(1.6rem, 5.6vw, 4rem);
+}
+
+.post__dek {
+  max-width: 60ch;
+  font-family: var(--f-ui);
+  font-size: clamp(0.95rem, 1.9vw, 1.25rem);
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.post__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.post__chip {
+  padding: 0.15rem 0.5rem;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-decoration: none;
+  color: var(--text-dim);
+  border: 2px solid color-mix(in srgb, var(--text-dim) 45%, transparent);
+}
+
+/* Outlined, not filled. Three filled chips in a row read as a redaction bar
+   rather than as three tags — especially where the accent is the ink. */
+.post__chip--tag {
+  color: var(--glow, var(--n5));
+  border-color: currentColor;
+}
+
+.post__chip--tag:hover {
+  color: var(--on-glow);
+  background: var(--glow, var(--n5));
+  border-color: var(--edge);
+}
+
+.post__toc {
+  float: left;
+  width: min(15rem, 100%);
+  margin: 1.4rem 1.4rem 1rem 0;
+  padding: 0.6rem 0.8rem;
+  font-size: var(--step--1);
+  background: var(--void-2);
+  border: 2px solid var(--edge);
+  box-shadow: 5px 5px 0 var(--edge);
+}
+
+@media (max-width: 720px) {
+  .post__toc {
+    float: none;
+    width: 100%;
+    margin: 1.2rem 0;
+  }
+}
+
+.post__toc b {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-family: var(--f-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.18em;
+  color: var(--glow, var(--n5));
+}
+
+.post__toc ol {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.post__toc li[data-depth='3'] {
+  padding-left: 0.9rem;
+}
+
+.post__toc a {
+  color: var(--text-dim);
+  text-decoration: none;
+}
+
+.post__toc a:hover {
+  color: var(--text);
+  text-decoration: underline;
+}
+
+.post__body {
+  padding-top: 1.4rem;
+}
+
+.post__body::after {
+  content: '';
+  display: block;
+  clear: both;
+}
+
+.post__foot {
+  display: grid;
+  gap: 1.2rem;
+  margin-top: 2.4rem;
+  padding-top: 1.4rem;
+  border-top: var(--rule) solid var(--edge);
+}
+
+.post__sign {
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  color: var(--text-dim);
+}
+
+.post__pager {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: 0.8rem;
+}
+
+.post__step {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.7rem 0.9rem;
+  text-decoration: none;
+  color: var(--text);
+  background: var(--void-2);
+  border: 2px solid var(--edge);
+  box-shadow: 6px 6px 0 var(--edge);
+}
+
+.post__step--right {
+  text-align: right;
+}
+
+.post__step--end {
+  color: var(--text-dim);
+  box-shadow: none;
+  border-style: dashed;
+  align-content: center;
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+}
+
+.post__step-dir {
+  font-family: var(--f-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.18em;
+  color: var(--glow, var(--n5));
+}
+
+.post__step-title {
+  font-family: var(--f-head);
+  font-size: var(--step-0);
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+
+.post__step:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0 var(--edge);
+}
+
+.blog__missing {
+  display: grid;
+  justify-items: start;
+  gap: 1rem;
+  padding-block: clamp(3rem, 12vh, 7rem);
+}
+
+/* --------------------------------------------------------------------------
+   RAW CANVAS — the flyers become taped-down paper rather than lit panels.
+   -------------------------------------------------------------------------- */
+:root[data-vibe='basquiat'] .blog,
+:root[data-vibe='basquiat'] .blog--post {
+  background: none !important;
+}
+
+:root[data-vibe='basquiat'] .flyer {
+  background: #faf6ec !important;
+  box-shadow: 9px 10px 0 var(--edge) !important;
+}
+
+:root[data-vibe='basquiat'] .flyer__kana {
+  color: color-mix(in srgb, var(--glow, var(--n2)) 55%, transparent);
+}
+
+:root[data-vibe='basquiat'] .blog__mast-note,
+:root[data-vibe='basquiat'] .post__dek,
+:root[data-vibe='basquiat'] .post__crumbs,
+:root[data-vibe='basquiat'] .post__sign,
+:root[data-vibe='basquiat'] .blog__count,
+:root[data-vibe='basquiat'] .blog__foot-note,
+:root[data-vibe='basquiat'] .blog__empty {
+  position: relative;
+  z-index: 1;
+  color: var(--edge);
+  background: #faf6ec;
+  box-shadow: 0 0 0 10px #faf6ec;
+}
+
+:root[data-vibe='basquiat'] .blog__tag,
+:root[data-vibe='basquiat'] .blog__search,
+:root[data-vibe='basquiat'] .post__toc,
+:root[data-vibe='basquiat'] .post__step,
+:root[data-vibe='basquiat'] .blog__back {
+  background: #faf6ec;
+  color: var(--edge);
+}
+
+:root[data-vibe='basquiat'] .blog__tag--on {
+  background: var(--n2);
+  color: #faf6ec;
+}

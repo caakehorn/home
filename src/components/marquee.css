@@ -4,7 +4,7 @@
   padding: 0.28em 0;
   background: var(--glow);
   border-block: var(--rule) solid var(--edge);
-  color: var(--edge);
+  color: var(--on-glow);
   font-family: var(--f-poster);
   letter-spacing: 0.04em;
   text-transform: uppercase;

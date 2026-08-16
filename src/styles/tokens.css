@@ -1,14 +1,16 @@
 /* ==========================================================================
    DAN'S DIALECTICAL DATABASE AND DRUG DEN — DESIGN TOKENS
 
-   The house style is Tokyo neon painted onto a Basquiat canvas: a raw black
+   The house style is a Basquiat canvas that somebody flyposted over: a raw
    ground, cadmium and ferrari red and cobalt laid on in slabs, everything
-   hand-ruled and dripping, with the kana signage still burning on top.
+   hand-ruled and dripping — and then xeroxed, cut up and stapled back down.
+   The Tokyo neon is still burning underneath, in the rooms that want it.
 
-   Four palettes, all of them primary-heavy now. Swap with [data-vibe] on
-   <html>. The neon ramp (--n1..--n5) is the SIGNAGE layer; the paint ramp
+   Six palettes. Swap with [data-vibe] on <html>; UNTITLED is the default and
+   the house style, RIOT is the photocopier, the other four are the neon
+   rooms. The neon ramp (--n1..--n5) is the SIGNAGE layer; the paint ramp
    (--p-*) is the CANVAS layer underneath it, and they are deliberately
-   different jobs — neon glows, paint does not.
+   different jobs — neon glows, paint does not, and toner does neither.
    ========================================================================== */
 
 :root {
@@ -61,9 +63,32 @@
   --p-pink: #e8478f;
   --p-orange: #ef8a1f;
 
+  /* -- the copy shop ------------------------------------------------------
+     A photocopier has three colours and none of them are chosen: the paper it
+     was fed, the toner it had left, and whatever the spot ink was on the
+     sheet before you cut it up. These are constants across every palette,
+     because a xerox looks the same whatever room it is taped up in. */
+  --paper: #e8e2d4;   /* bleached newsprint */
+  --paper-2: #d6cfbd; /* the second-generation copy */
+  --toner: #111110;   /* never quite black */
+  --spot: #e01b12;    /* the one spot colour anybody could afford */
+  --tape: rgb(226 218 196 / 0.55);
+
   /* stroke weights for hand-drawn work */
   --oil: 5px;   /* oil-stick line */
   --brush: 12px; /* loaded brush */
+  --staple: 2px; /* xerox hairline */
+
+  /* -- text drawn ON an accent -------------------------------------------
+     A chip, a lit nav link, a date stamp: anything whose background is
+     --glow. It used to be hard-coded to --edge, which is right in every
+     palette where the accents are neon on black and catastrophic in the two
+     where an accent IS the ink — black on black, and the label vanishes.
+
+     --void is the correct answer in all six: it is near-black in the dark
+     rooms (indistinguishable from --edge, so nothing there changes) and it is
+     paper in the two light ones, which is what you want on top of ink. */
+  --on-glow: var(--void);
 
   /* -- geometry ---------------------------------------------------------- */
   --rule: 3px;
@@ -184,6 +209,35 @@
   /* What the wiki map draws a page with. Everywhere else this is the signage
      colour, which on bone ground would be a yellow dot on cream. */
   --graph-ink: #17150f;
+}
+
+/* -------------------------------------------------------------------------
+   VIBE 06 — RIOT — the photocopier.
+
+   Two inks and a sheet of paper, which is the entire budget a flyer has ever
+   had. Everything here is toner on newsprint with one spot red, and the
+   accent ramp does not go anywhere near a sixth hue: --n1 and --n4 are the
+   same red at two weights on purpose, because a copy shop does not stock
+   cadmium and the constraint is the aesthetic.
+   ---------------------------------------------------------------------- */
+:root[data-vibe='riot'] {
+  --void: #e8e2d4;
+  --void-2: #ddd6c5;
+  --void-3: #cfc7b2;
+  --edge: #111110;
+
+  --n1: #e01b12; /* spot red   */
+  --n2: #111110; /* toner      */
+  --n3: #7d1409; /* red, twice through the machine */
+  --n4: #e01b12; /* spot red, again — there is no fifth ink */
+  --n5: #111110;
+
+  --text: #111110;
+  --text-dim: #4a463c;
+  --vibe-name: 'RIOT';
+
+  /* Toner on paper: the wiki map draws its pages in ink, not in signage. */
+  --graph-ink: #111110;
 }
 
 /* ==========================================================================

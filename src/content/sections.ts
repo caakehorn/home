@@ -57,8 +57,8 @@ export const SECTIONS: Section[] = [
     title: 'TRANSMISSIONS',
     kana: '通信',
     blurb:
-      'Long posts, short posts, screenshots at 4am, and whatever the brain coughed up that week.',
-    status: 'DARK',
+      'Long posts, short posts, screenshots at 4am, and whatever the brain coughed up that week. Flyposted, not published. No RSS, no newsletter, no metrics — nobody is counting you.',
+    status: 'LIVE',
     accent: 5,
     chant: banner('blog'),
   },

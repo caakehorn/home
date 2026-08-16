@@ -5,6 +5,8 @@ import { Scrawl } from './components/Scrawl'
 import { Fx } from './components/Fx'
 import { Hud } from './components/Hud'
 import { Gate } from './gate/Gate'
+import { BlogRoute } from './routes/Blog'
+import { BlogPostRoute } from './routes/BlogPost'
 import { Home } from './routes/Home'
 import { LeviathanRoute } from './routes/Leviathan'
 import { LineageRoute } from './routes/Lineage'
@@ -49,6 +51,8 @@ function Site() {
         <Route path="/" element={<Home />} />
         {/* static segments outrank the dynamic stub route */}
         <Route path="/lineage" element={<LineageRoute />} />
+        <Route path="/blog" element={<BlogRoute />} />
+        <Route path="/blog/:slug" element={<BlogPostRoute />} />
         <Route path="/brain" element={<WikiIndexRoute />} />
         <Route path="/brain/*" element={<WikiPageRoute />} />
         <Route path="/leviathan" element={<LeviathanRoute />} />

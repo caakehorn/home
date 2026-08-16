@@ -357,7 +357,7 @@ export function Terminal() {
     party: {
       blurb: 'cycle every palette, one a second',
       run: () => {
-        out('four palettes, one second each.')
+        out(`${VIBES.length} palettes, one second each.`)
         VIBES.forEach((v, i) => later(() => setVibe(v.id), i * 1000))
       },
     },

@@ -137,7 +137,7 @@ export function Splash() {
         <p className="splash__tagline">
           <span className="firetext">DIALECTICAL DATABASE &amp; DRUG DEN</span>
           <span className="splash__tagline-sep" aria-hidden="true">
-            ✦
+            ✕
           </span>
           <span className="splash__tagline-alt">the brain · the lattice · the instruments · the noise</span>
         </p>

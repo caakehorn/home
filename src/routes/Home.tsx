@@ -15,6 +15,7 @@ import { usePortal } from '../state/usePortal'
 import './home.css'
 
 const MISSION = banner('mast')
+const DARK = SECTIONS.filter((section) => section.status !== 'LIVE').length
 
 export function Home() {
   const { rigs } = usePortal()
@@ -28,14 +29,14 @@ export function Home() {
         <div className="mast__glow" aria-hidden="true" />
         <div className="wrap mast__inner">
           <span className="eyebrow mast__eyebrow">
-            OPEN LATE · ARGUE FIRST · CITE AFTERWARDS
+            OPEN LATE · ARGUE FIRST · CITE AFTERWARDS · ASK NOBODY
             <span className="jp"> 営業中</span>
           </span>
 
           <Logo size="clamp(1.6rem, 5.6vw, 4.2rem)" className="mast__mark" />
 
           <h1 className="mast__head">
-            <SubHead>DIALECTICAL DATABASE &amp; DRUG DEN</SubHead>
+            <SubHead crown>DIALECTICAL DATABASE &amp; DRUG DEN</SubHead>
           </h1>
 
           <p className="mast__mission firetext">{MISSION}</p>
@@ -46,7 +47,8 @@ export function Home() {
             trusted at. The <b>database</b>: it all got written down anyway — 458 pages, cited,
             cross-linked, contradictions left in where they are load-bearing. The <b>den</b>: the
             room where both of those happened, which was never as well-ventilated as it should
-            have been. Nothing here is tasteful. That is the specification, not an apology.
+            have been. Nothing here is tasteful. That is the specification, not an apology — and
+            the tasteful web is a uniform nobody issued you.
           </p>
 
           <div className="mast__meta">
@@ -70,9 +72,8 @@ export function Home() {
             館内
           </span>
           <p className="section__note">
-            {SECTIONS.length} rooms off one hallway.{' '}
-            {SECTIONS.filter((s) => s.status !== 'LIVE').length} are still being wired — the doors
-            open, there is just scaffolding and a smell in there.
+            {SECTIONS.length} rooms off one hallway. {DARK === 1 ? 'One is' : `${DARK} are`} still
+            being wired — the door opens, there is just scaffolding and a smell in there.
           </p>
         </div>
 
@@ -113,7 +114,7 @@ export function Home() {
             <ChaosDial />
           </Rig>
 
-          <Rig index={2} title="VIBE SWITCH" kana="色替" hint="four palettes, four references" accent={1}>
+          <Rig index={2} title="VIBE SWITCH" kana="色替" hint="six palettes · paint, toner, neon" accent={1}>
             <VibeSwitch />
           </Rig>
 
@@ -134,11 +135,13 @@ export function Home() {
           <Logo size="clamp(1.1rem, 3vw, 1.9rem)" />
           <p className="foot__note">
             弁証薬窟 · DAN'S DIALECTICAL DATABASE AND DRUG DEN · under construction, permanently ·
-            built loud, on purpose
+            built loud, on purpose · no permission asked
           </p>
           <p className="foot__meta">
             <span>NO COOKIES</span>
             <span>NO ANALYTICS</span>
+            <span>NO TRACKING</span>
+            <span>NO ADS</span>
             <span>NO TAPER</span>
           </p>
         </div>

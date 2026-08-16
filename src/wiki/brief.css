@@ -1,6 +1,8 @@
 /* ==========================================================================
    BRIEF — the visualiser for the wiki's compressed blocks
-   Reads --n*/--void*/--text* like everything else, so it follows the vibe.
+   Reads the --n, --void and --text ramps like everything else, so it follows
+   the vibe. (Spelling those with a trailing star closes this comment on the
+   first one and spills the rest of the line into the stylesheet.)
    ========================================================================== */
 
 .brief {

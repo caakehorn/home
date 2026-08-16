@@ -55,15 +55,39 @@ const drop = (store: Storage | undefined, key: string) => {
 const wantsLock = () => /(^|[?&#])lock\b/.test(location.search + location.hash)
 
 export function Gate({ children }: { children: React.ReactNode }) {
-  const [step, setStep] = useState<Step>('boot')
-  const [until, setUntil] = useState(0)
+  // Compute initial UI state synchronously so the gate renders the correct
+  // step on first paint instead of showing the empty "boot" placeholder.
+  const computeInitial = (): { step: Step; until: number } => {
+    try {
+      if (wantsLock()) {
+        // Clear stored unlocks and deadlines immediately so the computed
+        // initial state reflects the intent of the fragment.
+        drop(sessionStorage, KEYS.pass)
+        drop(sessionStorage, KEYS.until)
+      }
+    } catch {
+      /* ignore storage errors */
+    }
 
-  // Where the door stands on this tab, decided before anything paints.
+    const agreed = read(localStorage, KEYS.terms) === TERMS_VERSION
+    const unlocked = read(sessionStorage, KEYS.pass) !== null
+    const deadline = Number(read(sessionStorage, KEYS.until) ?? 0)
+
+    if (!agreed) return { step: 'terms', until: 0 }
+    if (unlocked) return { step: 'open', until: 0 }
+    if (deadline > Date.now()) return { step: 'punish', until: deadline }
+    return { step: 'quiz', until: 0 }
+  }
+
+  const initial = computeInitial()
+  const [step, setStep] = useState<Step>(initial.step)
+  const [until, setUntil] = useState<number>(initial.until)
+
+  // Handle URL fragment cleanup and hash navigation side-effects. The heavy
+  // synchronous decision above already dealt with storage so this effect only
+  // needs to manipulate the URL and listen for hash changes.
   useEffect(() => {
     if (wantsLock()) {
-      drop(sessionStorage, KEYS.pass)
-      drop(sessionStorage, KEYS.until)
-      // Strip only the lock token; other fragments have to survive it.
       try {
         const q = location.search.replace(/([?&])lock\b&?/, '$1').replace(/[?&]$/, '')
         const h = location.hash.replace(/([#&])lock\b&?/, '$1').replace(/[#&]$/, '')
@@ -72,21 +96,6 @@ export function Gate({ children }: { children: React.ReactNode }) {
         /* file:// and the like */
       }
     }
-
-    const agreed = read(localStorage, KEYS.terms) === TERMS_VERSION
-    const unlocked = read(sessionStorage, KEYS.pass) !== null
-    // A lockout is a deadline, not a timer: reload mid-sentence and you serve
-    // the remainder before the door is offered again. That is also what makes
-    // it the rate limit — one guess per LOCKOUT_MS per tab, and no way to
-    // shorten it by reaching for the reload key.
-    const deadline = Number(read(sessionStorage, KEYS.until) ?? 0)
-
-    if (!agreed) setStep('terms')
-    else if (unlocked) setStep('open')
-    else if (deadline > Date.now()) {
-      setUntil(deadline)
-      setStep('punish')
-    } else setStep('quiz')
   }, [])
 
   // Typing #lock into the bar of an open page is a fragment navigation: the

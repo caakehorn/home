@@ -178,8 +178,6 @@ html.term-fx-strobing {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  html.term-fx-strobing {
-    animation: none;
-  }
+html[data-still='1'].term-fx-strobing {
+  animation: none;
 }

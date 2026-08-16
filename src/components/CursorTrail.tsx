@@ -8,7 +8,7 @@ type Dot = { x: number; y: number; life: number; tone: number }
  * would just be a smear behind your thumb.
  */
 export function CursorTrail() {
-  const { vibe, chaos } = usePortal()
+  const { vibe, chaos, motion } = usePortal()
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const chaosRef = useRef(chaos)
   const paletteRef = useRef<string[]>([])
@@ -23,9 +23,8 @@ export function CursorTrail() {
 
   useEffect(() => {
     const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches
-    const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const canvas = canvasRef.current
-    if (!fine || calm || !canvas) return
+    if (!fine || !motion || !canvas) return
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
@@ -78,7 +77,7 @@ export function CursorTrail() {
       window.removeEventListener('resize', resize)
       window.removeEventListener('pointermove', onMove)
     }
-  }, [])
+  }, [motion])
 
   return (
     <canvas

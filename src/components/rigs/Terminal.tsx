@@ -64,7 +64,10 @@ const setFx = (fx: Fx, on: boolean) => document.documentElement.classList.toggle
 const hasFx = (fx: Fx) => document.documentElement.classList.contains(`term-fx-${fx}`)
 const clearFx = () => FX.forEach((fx) => setFx(fx, false))
 
-const calm = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
+// The resolved answer, not the raw OS preference: PortalProvider paints
+// `data-still` from that preference *and* the header's MOTION switch, and the
+// `strobe` verb should refuse for whichever of the two is holding the site still.
+const calm = () => document.documentElement.dataset.still === '1'
 
 export function Terminal() {
   const { setVibe, setChaos, vibe, chaos, rigs } = usePortal()

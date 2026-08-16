@@ -62,7 +62,7 @@ type Props = {
 
 export function Cortex({ index, visible, domain, query, onClear }: Props) {
   const navigate = useNavigate()
-  const { chaos } = usePortal()
+  const { chaos, motion } = usePortal()
   const poke = useRig('CORTEX')
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const wrapRef = useRef<HTMLDivElement>(null)
@@ -113,7 +113,7 @@ export function Cortex({ index, visible, domain, query, onClear }: Props) {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const calm = !motion
     let palette = readPalette()
     let width = 0
     let height = 0

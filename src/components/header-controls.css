@@ -195,3 +195,38 @@
 .hctl__draw--on .jp {
   color: var(--edge);
 }
+
+/* The motion switch. Same chassis as DRAW, different ink — this one is not a
+   mode you are in, it is a statement about whether the page is alive, so it
+   takes the spot colour rather than the oil-stick colour. It carries its own
+   word ON/OFF because the person hunting for it is reading, not scanning
+   affordances: they have noticed the crawls are dead and want to know why. */
+.hctl__motion {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.18rem 0.55rem;
+  font-family: var(--f-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.14em;
+  white-space: nowrap;
+  color: var(--text-dim);
+  background: none;
+  border: 2px solid color-mix(in srgb, var(--spot) 55%, transparent);
+  cursor: pointer;
+  transition: background-color 140ms ease, color 140ms ease;
+}
+
+.hctl__motion .jp {
+  color: var(--spot);
+}
+
+.hctl__motion--on {
+  color: var(--on-glow);
+  background: var(--spot);
+  border-color: var(--spot);
+}
+
+.hctl__motion--on .jp {
+  color: var(--on-glow);
+}

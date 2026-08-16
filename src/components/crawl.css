@@ -196,24 +196,28 @@
 }
 
 /* --------------------------------------------------------------------------
-   REDUCED MOTION
+   STILL
    The crawl does not crawl. The strip stays where it is and becomes a
    scrollable one instead — the request is for less motion, not less content,
    and a banner you cannot read is not an accessible banner.
+
+   `data-still` is seeded from `prefers-reduced-motion` and overridden by the
+   header's MOTION switch. That switch exists because this state is invisible
+   from inside it: a reader whose OS has Reduce Motion on sees two dead bars
+   and nothing telling them the site is obeying an instruction they gave it
+   somewhere else, months ago, about something else.
    -------------------------------------------------------------------------- */
-@media (prefers-reduced-motion: reduce) {
-  .crawl {
-    overflow-x: auto;
-    scrollbar-width: thin;
-  }
+:root[data-still='1'] .crawl {
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
 
-  .crawl__track {
-    will-change: auto;
-    transform: none !important;
-  }
+:root[data-still='1'] .crawl__track {
+  will-change: auto;
+  transform: none !important;
+}
 
-  /* One copy is enough when nothing is looping. */
-  .crawl__seq:not(:first-child) {
-    display: none;
-  }
+/* One copy is enough when nothing is looping. */
+:root[data-still='1'] .crawl__seq:not(:first-child) {
+  display: none;
 }

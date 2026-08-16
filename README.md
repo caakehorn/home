@@ -229,23 +229,27 @@ so no two headings on a walk through the site are the same block of paint. Prose
 headings inside a page are not slabs — a painted block every four paragraphs is
 unreadable — but they stop being black too: red at h2, cobalt below it.
 
-## THE RATIO
+## THE CRAWLS
 
-A crawl along the bottom of the viewport, fixed, on every page behind the gate.
-The marquees inside a page are furniture you walk past; this one is furniture
-you live with, which is why it gets the loudest treatment on the site short of
-the masthead — a hazard bar for a top edge and every node cut out of a
-different sheet.
+Two banners fixed to the viewport, on every page behind the gate: **THE RATIO**
+along the bottom travelling left, **JET FUEL** along the top travelling right.
+The marquees inside a page are furniture you walk past; these are furniture you
+live with, which is why they get the loudest treatment on the site short of the
+masthead — a hazard bar on each outer edge and every node cut out of a
+different sheet. The sticky nav parks under the top bar rather than sliding
+beneath it, and `body` takes matching padding on both sides.
 
-**The reader drives it.** It creeps at 12–56 px/s (off `--chaos`, like
-everything else loud). Scroll the page in either direction and it lunges
-forward at a rate set by how hard you scrolled, then coasts back down to a
-creep over about a second. It is a rate control, not a direction control:
-scrolling up speeds it up exactly like scrolling down, and it never runs
-backwards. The feel to aim for is a flywheel — you are not steering it, you
-are spinning it, and it always winds back down to the same idle. The hazard
-strip brightens with `--rush` while it is being driven, so the feedback loop
-is visible.
+**The reader drives them.** They creep at 12–56 px/s (off `--chaos`, like
+everything else loud). Scroll the page in either direction and they lunge
+forward at a rate set by how hard you scrolled, then coast back down to a creep
+over about a second. It is a rate control, not a direction control: scrolling
+up speeds them up exactly like scrolling down, and neither ever runs backwards.
+The feel to aim for is a flywheel — you are not steering it, you are spinning
+it, and it always winds back down to the same idle. The hazard strips brighten
+with `--rush` while they are being driven, so the feedback loop is visible.
+
+They are the same component and the same physics; only the edge, the direction
+and the list differ, so one scroll moves the pair identically and in mirror.
 
 Two things about the implementation are deliberate:
 
@@ -257,25 +261,38 @@ Two things about the implementation are deliberate:
   rAF loop and writes one composited transform per frame instead.
 - **It measures itself.** None of the geometry is written down. The component
   measures one copy of the sequence, works out how many copies cover the
-  viewport plus one full wrap, and takes the offset modulo that width.
+  viewport plus one full wrap, and takes the offset modulo that width. The
+  wrap is why the copy count covers the viewport *plus a whole sequence* —
+  travelling right runs the track from `-width` to `0`, so the copies have to
+  queue to the left instead of the right.
 
-The content is in `src/content/ratio.ts`, and **the entries are nodes, not a
-sentence** — each is its own reply, its own scrap, and the `+` between them is
-an operator rather than punctuation. So they live as an array and the banner
+The content is in `src/content/crawls.ts`, and **the entries are nodes, not
+sentences** — each is its own reply, its own scrap, and the `+` between them is
+an operator rather than punctuation. So they live as arrays and the banner
 draws one chip per entry with the operator between; nothing is ever joined into
-a string and animated as prose, because then it stops being the meme and starts
+a string and animated as prose, because then it stops being the form and starts
 being a tagline.
 
-**To grow it: append to the array.** That is the whole maintenance story —
-there is no duration, no width and no copy count to update, and the loop stays
-seamless at any length. Order is the reading order: `L` opens and `GG` closes,
-so new material goes in the middle unless it is meant to be the last word.
+**To grow either one: append to the array.** That is the whole maintenance
+story — there is no duration, no width and no copy count to update, and the
+loop stays seamless at any length. Order is reading order: each list opens on
+its signature node and `GG` closes the ratio, so new material goes in the
+middle unless it is meant to be the last word.
 
-Under `prefers-reduced-motion` it does not crawl. The strip stays put and
-becomes horizontally scrollable instead — the request is for less motion, not
-less content, and a banner you cannot read is not an accessible banner. The
-list is also rendered once, visually hidden, for screen readers; the visual
-track is duplicated by construction and is `aria-hidden`.
+Growing them means pasting in a block of lines, and a block that size will
+contain something already on the pile — `SKILL ISSUE` twice in one pass reads
+as a bug rather than as a joke. So the source keeps every line exactly as it
+was written and **the renderer never draws the same node twice**: entries are
+collapsed on letters and digits only, first occurrence winning, which makes
+`"Don't care, didn't laugh"` and `dont care didnt laugh` the same node while
+leaving `"Not Funny Didn't Laugh"` a different one. In dev it logs what it
+collapsed, so a duplicate is visible rather than merely absent.
+
+Under `prefers-reduced-motion` they do not crawl. The strips stay put and
+become horizontally scrollable instead — the request is for less motion, not
+less content, and a banner you cannot read is not an accessible banner. Each
+list is also rendered once, visually hidden, for screen readers; the duplicated
+visual tracks are `aria-hidden`.
 
 ## Chaos
 
@@ -522,7 +539,7 @@ the console keeps the big versions, both surfaces drive the same state.
 src/
   components/        chrome (nav, marquee, crawl, HUD, cursor trail, FX, Ransom)
     rigs/            the six interactive elements
-  content/           section definitions, banner slogans, the ratio
+  content/           section definitions, banner slogans, the crawls
   routes/            Splash, Home, Stub, blog index + post, wiki index + page
   state/             palette + chaos context, persisted
   styles/            fonts, tokens, type treatments, punk, raw canvas, global

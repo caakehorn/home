@@ -1,6 +1,8 @@
 .nav {
   position: sticky;
-  top: 0;
+  /* Parks under the top crawl. `top: 0` would stick it beneath the bar, which
+     is fixed and outranks it, and the links would disappear as you scrolled. */
+  top: var(--crawl-h);
   z-index: 200;
   display: flex;
   align-items: center;

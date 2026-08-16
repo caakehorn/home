@@ -11,7 +11,8 @@
   background: var(--void-2);
   border: var(--rule) solid var(--edge);
   box-shadow: 6px 6px 0 var(--edge);
-  scroll-margin-top: 5rem;
+  /* clears the sticky nav AND the top crawl above it */
+  scroll-margin-top: calc(5rem + var(--crawl-h));
 }
 
 .brief__head {

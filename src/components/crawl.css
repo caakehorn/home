@@ -16,29 +16,40 @@
   position: fixed;
   left: 0;
   right: 0;
-  bottom: 0;
-  /* Above the page and the corner furniture, below the splash (9700) and
-     below the grain/toner layers (9000+) — the crawl is part of the page, so
-     the photocopier gets to run over it too. */
+  /* Above the page, the sticky nav and the corner furniture; below the splash
+     (9700) and below the grain/toner layers (9000+) — a crawl is part of the
+     page, so the photocopier gets to run over it too. */
   z-index: 8800;
   height: var(--crawl-h);
   display: flex;
   align-items: center;
   overflow: hidden;
   background: var(--void-2);
-  border-top: var(--rule) solid var(--edge);
-  /* the reader is driving it, and the bar says so */
-  box-shadow: 0 -4px 0 color-mix(in srgb, var(--spot) calc(20% + 70% * var(--rush, 0)), transparent);
   user-select: none;
   cursor: default;
 }
 
-/* The hazard strip along the top edge. It leans harder the faster the crawl
-   is being driven, which is the whole feedback loop made visible. */
+/* Each one is pinned to its own edge and ruled on the side that faces the
+   page, so the pair read as the top and bottom of the same object. */
+.crawl--bottom {
+  bottom: 0;
+  border-top: var(--rule) solid var(--edge);
+  /* the reader is driving it, and the bar says so */
+  box-shadow: 0 -4px 0 color-mix(in srgb, var(--spot) calc(20% + 70% * var(--rush, 0)), transparent);
+}
+
+.crawl--top {
+  top: 0;
+  border-bottom: var(--rule) solid var(--edge);
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--spot) calc(20% + 70% * var(--rush, 0)), transparent);
+}
+
+/* The hazard strip, on the outer edge of each bar so the two mirror. It leans
+   harder the faster the crawl is being driven, which is the whole feedback
+   loop made visible. */
 .crawl::before {
   content: '';
   position: absolute;
-  inset: 0 0 auto 0;
   height: 6px;
   z-index: 2;
   pointer-events: none;
@@ -48,6 +59,14 @@
     var(--n1) 9px 18px
   );
   opacity: calc(0.55 + 0.45 * var(--rush, 0));
+}
+
+.crawl--bottom::before {
+  inset: 0 0 auto 0;
+}
+
+.crawl--top::before {
+  inset: auto 0 0 0;
 }
 
 .crawl__track {

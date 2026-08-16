@@ -97,6 +97,18 @@ export const INSTRUMENTS: Instrument[] = [
     status: 'SEALED',
     needs: 'the message corpus, which is not vendored here',
   },
+  {
+    id: 'accretion',
+    numeral: 'VI',
+    title: 'THE ACCRETION',
+    kana: '堆積',
+    corpus: '147 commits · 36 days · 8 → 460 pages',
+    blurb:
+      'The wiki being built, plotted against real time. Four counts on one axis — and they disagree, which is the whole reading: the corpus arrived in a day and then deepened for five weeks.',
+    method:
+      'Per first-parent commit: files under wiki/ ending .md, the sum of their blob sizes, every [[wiki/…]] occurrence, and distinct page→page pairs. Read from git rather than the snapshot, since the snapshot only knows the present. Nothing smoothed, no commit excluded.',
+    status: 'LIVE',
+  },
 ]
 
 export const instrumentById = (id: string) => INSTRUMENTS.find((i) => i.id === id)

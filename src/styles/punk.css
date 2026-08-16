@@ -1,0 +1,653 @@
+/* ==========================================================================
+   THE PUNK LAYER
+   1977 · XEROX · CUT-UP · FLYPOSTED
+
+   The site was arcade-bright: bubble letterforms, rainbow bands, twinkling
+   sparkles, pastel bloom behind the headings. All of that is one aesthetic —
+   the gumball machine — and it is the wrong one for a building whose banner
+   says EAT THE RICH. This layer takes it apart and puts a photocopier in its
+   place.
+
+   Four devices, and they are all the same device seen from different angles:
+
+     1. THE COPIER   halftone, dropout, misregistration, blown contrast
+     2. THE SCISSORS torn edges, cut corners, nothing ruled straight
+     3. THE TAPE     everything is stuck down, badly, over something else
+     4. THE STENCIL  spray, hazard bars, the circled A
+
+   It is applied to the classes the site already has rather than by rewriting
+   every component, and it runs in EVERY palette — punk is not a colour scheme,
+   it is what happens to the surface. The palettes stay what they were.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1 · THE COPIER
+   -------------------------------------------------------------------------- */
+
+/* The toner layer. Halftone dots plus a diagonal band of copier flare, both
+   multiplied, so everything on the page reads as second-generation. Sits above
+   the CRT furniture: the photocopy is the last thing that happened. */
+.fx-toner {
+  z-index: 9001;
+  background-image:
+    /* the flare the platen leaves when the lid was open */
+    linear-gradient(
+      104deg,
+      transparent 0 38%,
+      color-mix(in srgb, var(--edge) 22%, transparent) 44%,
+      transparent 50% 100%
+    ),
+    /* the dot screen */
+    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--edge) 55%, transparent) 0 30%, transparent 32%);
+  background-size:
+    100% 100%,
+    4px 4px;
+  opacity: calc(0.1 + 0.26 * var(--chaos));
+  mix-blend-mode: multiply;
+}
+
+/* On the dark rooms multiply would just black the page out; the dots have to
+   be light and screened instead. Same effect, opposite polarity. */
+:root:not([data-vibe='basquiat']):not([data-vibe='riot']) .fx-toner {
+  background-image:
+    linear-gradient(104deg, transparent 0 38%, rgb(255 255 255 / 0.06) 44%, transparent 50% 100%),
+    radial-gradient(circle at 50% 50%, rgb(255 255 255 / 0.14) 0 30%, transparent 32%);
+  mix-blend-mode: screen;
+  opacity: calc(0.28 + 0.4 * var(--chaos));
+}
+
+/* Misregistration: the plate was a millimetre out and nobody ran it again.
+   Two ghosts, one red one cyan, offset in opposite directions. Applied to
+   headline type only — on body copy it is illegible, which is the difference
+   between a print fault and a bad idea. */
+.offset-print {
+  position: relative;
+  text-shadow:
+    calc(-0.014em - 0.01em * var(--chaos)) 0.008em 0 color-mix(in srgb, var(--spot) 78%, transparent),
+    calc(0.014em + 0.01em * var(--chaos)) -0.008em 0 color-mix(in srgb, #12b3c8 62%, transparent);
+}
+
+/* Blown-out contrast — the setting everybody used because it made the photo
+   readable and the rest of the sheet into shapes. */
+.xerox {
+  filter: grayscale(1) contrast(2.4) brightness(1.06);
+}
+
+/* --------------------------------------------------------------------------
+   2 · THE SCISSORS
+   Nothing on this site is cut square any more. The polygons are irregular by
+   hand: a repeating notch reads as a pattern, and a pattern reads as a border
+   treatment rather than as paper somebody tore.
+   -------------------------------------------------------------------------- */
+.torn {
+  clip-path: polygon(
+    0 0, 100% 0, 100% calc(100% - 11px), 93% 100%, 86% calc(100% - 6px),
+    78% calc(100% - 1px), 69% calc(100% - 9px), 61% calc(100% - 2px),
+    52% calc(100% - 10px), 43% calc(100% - 3px), 34% calc(100% - 8px),
+    25% calc(100% - 1px), 16% calc(100% - 9px), 8% calc(100% - 4px), 0 calc(100% - 8px)
+  );
+}
+
+.torn-top {
+  clip-path: polygon(
+    0 9px, 9% 1px, 18% 8px, 27% 2px, 37% 10px, 46% 3px, 56% 9px, 65% 1px,
+    75% 8px, 84% 2px, 93% 9px, 100% 3px, 100% 100%, 0 100%
+  );
+}
+
+/* A snipped corner — the cheapest possible way to say "this was cut out". */
+.snip {
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+}
+
+/* --------------------------------------------------------------------------
+   3 · THE TAPE
+   -------------------------------------------------------------------------- */
+.taped {
+  position: relative;
+}
+
+.taped::before,
+.taped::after {
+  content: '';
+  position: absolute;
+  z-index: 6;
+  width: 4.6rem;
+  height: 1.3rem;
+  background: var(--tape);
+  border-inline: 1px dashed color-mix(in srgb, var(--edge) 30%, transparent);
+  pointer-events: none;
+}
+
+.taped::before {
+  top: -0.5rem;
+  left: -1.2rem;
+  transform: rotate(-33deg);
+}
+
+.taped::after {
+  top: -0.55rem;
+  right: -1.3rem;
+  transform: rotate(29deg);
+}
+
+/* --------------------------------------------------------------------------
+   4 · THE STENCIL
+   -------------------------------------------------------------------------- */
+
+/* Hazard bars. The one piece of official graphic language punk stole wholesale
+   and never gave back. */
+.hazard {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--edge) 0 12px,
+    var(--spot) 12px 24px
+  );
+}
+
+/* Spray-can edge: a hard letterform with a soft halo bleeding off it. */
+.stencil {
+  font-family: var(--f-head);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  -webkit-text-stroke: 1px var(--edge);
+  paint-order: stroke fill;
+  filter: drop-shadow(0 0 2px color-mix(in srgb, var(--spot) 60%, transparent));
+}
+
+/* ==========================================================================
+   WHAT THIS DOES TO THE SITE THAT WAS ALREADY HERE
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   THE SPARKLES GO
+   Four-point twinkling stars around a logo is the single most load-bearing
+   piece of the arcade look. They are kept as elements so nothing has to change
+   shape, and turned into copier blots: no twinkle, no glow, hard edges, one
+   ink.
+   -------------------------------------------------------------------------- */
+.wordmark-set__spark {
+  background: var(--toner) !important;
+  clip-path: polygon(50% 0%, 68% 32%, 100% 50%, 68% 68%, 50% 100%, 32% 68%, 0% 50%, 32% 32%);
+  filter: none !important;
+  animation: none !important;
+  opacity: 0.85;
+  transform: rotate(18deg);
+}
+
+/* The rainbow band ramp becomes three inks: paper, spot red, toner. A gradient
+   with seven hues is a toy; the same construction with three is a poster. */
+.wordmark__face {
+  background-image: linear-gradient(
+    180deg,
+    var(--paper) 0 30%,
+    var(--spot) 30% 62%,
+    var(--toner) 62% 100%
+  ) !important;
+}
+
+.wordmark {
+  filter: drop-shadow(0.05em 0.05em 0 var(--toner));
+}
+
+/* --------------------------------------------------------------------------
+   THE PASTEL BLOOM GOES
+   .subhead was crackled white over a soft additive R/G/B venn — a lens flare,
+   in three sherbet colours, behind every heading on the site. It is replaced
+   with the same crackle over paper, a hard black stroke, and a misregistered
+   red ghost: the heading now looks printed rather than lit.
+   -------------------------------------------------------------------------- */
+.subhead-set__venn {
+  /* No blur, no breathing, no screen blend. What is left is a single hard
+     slab of spot red behind the words, sitting a few degrees off true — a
+     block of ink that was laid down before the type went on top of it. */
+  inset: -6% -2% -10% -3%;
+  filter: none;
+  opacity: 1;
+  transform: rotate(-1.2deg);
+  animation: none;
+}
+
+.subhead-set__lobe {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  border-radius: 0;
+  transform: none;
+  mix-blend-mode: normal;
+  animation: none;
+}
+
+/* Only the first slab survives; three stacked would just be one opaque box. */
+.subhead-set__lobe:nth-child(1) {
+  left: 0;
+  background: var(--spot);
+  clip-path: polygon(0 4%, 100% 0, 99% 96%, 1% 100%);
+}
+
+.subhead-set__lobe:nth-child(2),
+.subhead-set__lobe:nth-child(3) {
+  display: none;
+}
+
+.subhead {
+  /* the crackle stays — a photocopier and a dry brush leave the same dropout —
+     but it now multiplies into paper rather than into a lilac gradient */
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.62' numOctaves='4' seed='9'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='0 0 0 0 0 1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23c)'/%3E%3C/svg%3E"),
+    linear-gradient(180deg, #ffffff, #cfc8b8);
+  letter-spacing: -0.03em;
+  /* stroke it so it holds an edge against the slab behind it */
+  -webkit-text-stroke: calc(1px + 1px * var(--chaos)) var(--edge);
+  paint-order: stroke fill;
+}
+
+/* --------------------------------------------------------------------------
+   THE NEON SIGN GETS COLDER
+   .firetext was sodium orange, softly blurred, glowing. Punk signage is not a
+   warm light — it is a fluorescent tube in a squat. The ramp narrows and the
+   blur radii come down hard, so the sign has an edge instead of a halo.
+   -------------------------------------------------------------------------- */
+.firetext {
+  --fire-1: #fff4d6;
+  --fire-2: #ff2d16;
+  --fire-3: #8e0f05;
+  filter:
+    drop-shadow(0.02em 0.02em 0 rgb(0 0 0 / 0.95))
+    drop-shadow(0 0 0.03em var(--fire-2))
+    drop-shadow(0 0 calc(0.08em + 0.05em * var(--chaos)) var(--fire-3));
+}
+
+/* --------------------------------------------------------------------------
+   THE LOGO
+   DAN / FRANK was gold bubble caps on red and indigo slabs — a cartoon logo,
+   and the kiddiest object on the site. Same construction, punk materials: a
+   heavy grotesque, paper on toner, one spot-red slab behind it, cut out with
+   scissors. It is still a brand constant and still does not follow the
+   palette, because the moment it repaints it stops being an identity.
+   -------------------------------------------------------------------------- */
+.logo {
+  font-family: var(--f-head) !important;
+  letter-spacing: -0.035em;
+  --gold: var(--paper);
+  --shade-1: var(--spot);
+  --shade-2: var(--toner);
+}
+
+.logo__line {
+  padding-inline: 0.06em;
+  background: var(--toner);
+  /* trimmed by hand, at slightly the wrong angle */
+  clip-path: polygon(0 5%, 100% 0, 99% 95%, 1% 100%);
+  text-shadow:
+    0.028em 0.028em 0 var(--spot),
+    0.042em 0.042em 0 var(--spot),
+    0.056em 0.056em 0 var(--spot);
+}
+
+.logo--inline .logo__line {
+  text-shadow:
+    0.022em 0.022em 0 var(--spot),
+    0.034em 0.034em 0 var(--spot);
+}
+
+/* --------------------------------------------------------------------------
+   PANELS AND CHIPS
+   Hard offsets everywhere, no rounding anywhere, and the ones that read as
+   sheets of paper get torn along the bottom.
+   -------------------------------------------------------------------------- */
+.mast__chip,
+.foot__meta span,
+.wiki__chip,
+.blog__tag,
+.post__chip {
+  border-radius: 0;
+  text-transform: uppercase;
+}
+
+/* The one chip that used to pulse now flashes like a failing tube instead of
+   breathing like a jellyfish. */
+.mast__chip--hot {
+  animation: flicker calc(5s * var(--tempo)) steps(1) infinite !important;
+  background: var(--spot);
+  color: var(--paper);
+}
+
+/* Section headings get a hazard bar under them. */
+.section__head {
+  position: relative;
+}
+
+.section__head::after {
+  content: '';
+  grid-column: 1 / -1;
+  height: 9px;
+  margin-top: 0.5rem;
+  background-image: repeating-linear-gradient(-45deg, var(--edge) 0 10px, var(--n1) 10px 20px);
+  border: 1px solid var(--edge);
+}
+
+/* The portal cards become flyers: torn bottom edge, tape at one corner. */
+.portal {
+  clip-path: polygon(
+    0 0, 100% 0, 100% calc(100% - 10px), 92% 100%, 84% calc(100% - 6px),
+    75% calc(100% - 1px), 66% calc(100% - 9px), 57% calc(100% - 2px),
+    48% calc(100% - 9px), 39% calc(100% - 3px), 30% calc(100% - 8px),
+    21% calc(100% - 1px), 12% calc(100% - 9px), 5% calc(100% - 4px), 0 calc(100% - 8px)
+  );
+}
+
+/* --------------------------------------------------------------------------
+   THE SPLASH
+   A twinkling starfield and a soft moon over a Tokyo skyline is a lovely
+   picture and the wrong front door. The stars stop twinkling and become
+   punched holes in the sheet; the moon stops glowing and becomes a hole with
+   an edge; the ✦ in the tagline is a ✕ (set in the markup).
+   -------------------------------------------------------------------------- */
+.splash__star {
+  animation: none !important;
+  border-radius: 0 !important;
+  filter: none !important;
+  opacity: 0.7;
+}
+
+.splash__moon {
+  animation: none !important;
+}
+
+/* The sheen. A white gradient sweeping across a button at 3.4-second intervals
+   is the single most "app store" object on the site — it says BUY THIS, and it
+   is the last thing a door into somebody's own notes should say. */
+.splash__enter-glow {
+  display: none;
+}
+
+.splash__enter {
+  border-radius: 0 !important;
+  border-width: 5px;
+}
+
+/* A hazard bar under the door handle, which is where hazard bars go. */
+.splash__enter::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 7px;
+  background-image: repeating-linear-gradient(-45deg, var(--edge) 0 8px, var(--paper) 8px 16px);
+}
+
+/* ==========================================================================
+   THE FRONT DOOR, ON PAPER
+
+   The splash is a Tokyo night: a graded sky, a glowing moon, neon signs, lit
+   windows, a lantern row. All of it assumes a dark room, and in the two light
+   palettes the gradient runs from midnight to cream and the whole scene turns
+   into a pastel wash — the one thing those palettes must never look like.
+
+   So on paper it stops being a night and becomes a flyer OF a night: flat
+   ground, ink silhouette, one spot colour, no light sources anywhere. Same
+   drawing, different printing process.
+   ========================================================================== */
+:root[data-vibe='basquiat'] .splash,
+:root[data-vibe='riot'] .splash {
+  background: var(--void);
+}
+
+/* No stars and no moon: it is a sheet of paper, and a sheet of paper has no
+   sky in it. */
+:root[data-vibe='basquiat'] .splash__sky,
+:root[data-vibe='riot'] .splash__sky {
+  display: none;
+}
+
+/* The skyline goes flat — cut out of black paper and pasted down. */
+:root[data-vibe='basquiat'] .splash__skyline,
+:root[data-vibe='riot'] .splash__skyline {
+  opacity: 1;
+}
+
+:root[data-vibe='basquiat'] .splash__towers rect,
+:root[data-vibe='riot'] .splash__towers rect,
+:root[data-vibe='basquiat'] .splash__pagoda path,
+:root[data-vibe='basquiat'] .splash__pagoda rect,
+:root[data-vibe='riot'] .splash__pagoda path,
+:root[data-vibe='riot'] .splash__pagoda rect {
+  fill: var(--edge);
+  stroke: var(--edge);
+  filter: none;
+}
+
+:root[data-vibe='basquiat'] .splash__windows rect,
+:root[data-vibe='riot'] .splash__windows rect {
+  fill: var(--void);
+  opacity: 1;
+  animation: none;
+}
+
+:root[data-vibe='basquiat'] .splash__tower,
+:root[data-vibe='riot'] .splash__tower,
+:root[data-vibe='basquiat'] .splash__tower-x,
+:root[data-vibe='riot'] .splash__tower-x {
+  stroke: var(--edge);
+  stroke-width: 5;
+  filter: none;
+  opacity: 1;
+}
+
+/* Signage is printed, so it is ink on paper with a rule round it. */
+:root[data-vibe='basquiat'] .splash__sign,
+:root[data-vibe='riot'] .splash__sign {
+  color: var(--edge);
+  background: var(--void);
+  border-color: var(--edge);
+  text-shadow: none;
+  box-shadow: 6px 6px 0 var(--edge);
+  animation: none;
+}
+
+:root[data-vibe='basquiat'] .splash__lantern,
+:root[data-vibe='riot'] .splash__lantern {
+  color: var(--void);
+  background: var(--n2);
+  box-shadow: none;
+  border-radius: 0;
+}
+
+:root[data-vibe='riot'] .splash__lantern {
+  background: var(--spot);
+}
+
+:root[data-vibe='basquiat'] .splash__venue,
+:root[data-vibe='riot'] .splash__venue {
+  color: var(--n2);
+  text-shadow: none;
+  animation: none;
+}
+
+:root[data-vibe='riot'] .splash__venue {
+  color: var(--spot);
+}
+
+/* The backing plate becomes a strip of paper, torn along the bottom, taped
+   over the drawing. The raw-canvas layer gives it a patch as well; that patch
+   and this border were fighting, so the patch is switched off here. */
+:root[data-vibe='basquiat'] .splash__tagline,
+:root[data-vibe='riot'] .splash__tagline {
+  background: var(--void);
+  backdrop-filter: none;
+  border: var(--oil) solid var(--edge);
+  box-shadow: 10px 11px 0 var(--edge) !important;
+  color: var(--edge);
+}
+
+:root[data-vibe='basquiat'] .splash__tagline-sep,
+:root[data-vibe='riot'] .splash__tagline-sep {
+  color: var(--n2);
+  text-shadow: none;
+}
+
+:root[data-vibe='riot'] .splash__tagline-sep {
+  color: var(--spot);
+}
+
+/* Ink door, paper letters. */
+:root[data-vibe='basquiat'] .splash__enter,
+:root[data-vibe='riot'] .splash__enter {
+  color: var(--void);
+  background: var(--edge);
+  box-shadow: 10px 10px 0 var(--n2);
+}
+
+:root[data-vibe='basquiat'] .splash__enter:hover,
+:root[data-vibe='riot'] .splash__enter:hover {
+  background: var(--n2);
+  box-shadow: 14px 14px 0 var(--edge);
+}
+
+:root[data-vibe='riot'] .splash__enter:hover {
+  background: var(--spot);
+}
+
+/* The roof stops being a lit neon floor and becomes a hazard bar. */
+:root[data-vibe='basquiat'] .splash__tiles,
+:root[data-vibe='riot'] .splash__tiles {
+  background-image: repeating-linear-gradient(-45deg, var(--edge) 0 16px, var(--n1) 16px 32px);
+  border-top: 6px solid var(--edge);
+  box-shadow: none;
+}
+
+:root[data-vibe='riot'] .splash__tiles {
+  background-image: repeating-linear-gradient(-45deg, var(--toner) 0 16px, var(--spot) 16px 32px);
+}
+
+/* Crows: solid ink, no halo, still bobbing. */
+:root[data-vibe='basquiat'] .splash__crow-body,
+:root[data-vibe='riot'] .splash__crow-body {
+  fill: var(--edge);
+  stroke: var(--edge);
+  filter: none;
+}
+
+:root[data-vibe='basquiat'] .splash__crow-legs,
+:root[data-vibe='riot'] .splash__crow-legs {
+  stroke: var(--edge);
+}
+
+:root[data-vibe='basquiat'] .splash__crow-eye,
+:root[data-vibe='riot'] .splash__crow-eye {
+  fill: var(--n2);
+  filter: none;
+  animation: none;
+}
+
+:root[data-vibe='riot'] .splash__crow-eye {
+  fill: var(--spot);
+}
+
+/* ==========================================================================
+   RIOT — TONER ON PAPER
+
+   The site assumes a dark room lit from behind: routes paint a radial wash,
+   the screen wears scanlines and a vignette, and type is lit rather than
+   printed. A photocopy has none of those things. Every one of them is turned
+   off here rather than tinted down, for the same reason the raw-canvas palette
+   turns them off: a light source on a flyer is not a dim good idea, it is a
+   different object.
+   ========================================================================== */
+
+/* No wash. The sheet is the sheet. */
+:root[data-vibe='riot'] .home,
+:root[data-vibe='riot'] .wiki,
+:root[data-vibe='riot'] .lin,
+:root[data-vibe='riot'] .lev,
+:root[data-vibe='riot'] .stub,
+:root[data-vibe='riot'] .blog,
+:root[data-vibe='riot'] .blog--post,
+:root[data-vibe='riot'] .brief-route,
+:root[data-vibe='riot'] .foot {
+  background: var(--void) !important;
+}
+
+/* No screen furniture. A copier does not have a CRT in it. */
+:root[data-vibe='riot'] .fx-scanlines,
+:root[data-vibe='riot'] .fx-bleed,
+:root[data-vibe='riot'] .fx-vignette {
+  display: none;
+}
+
+:root[data-vibe='riot'] .fx-grain {
+  mix-blend-mode: multiply;
+  opacity: calc(0.08 + 0.14 * var(--chaos));
+}
+
+/* No glow. Toner does not emit. */
+:root[data-vibe='riot'] .neon,
+:root[data-vibe='riot'] .neon-weak,
+:root[data-vibe='riot'] .jp,
+:root[data-vibe='riot'] .nav__mark-kana,
+:root[data-vibe='riot'] .section__kana,
+:root[data-vibe='riot'] .blog__mast-kana {
+  text-shadow: none !important;
+}
+
+:root[data-vibe='riot'] .nav__link--on {
+  box-shadow: none;
+}
+
+/* The lit sign becomes a printed one: flat spot red, hard black edge. */
+:root[data-vibe='riot'] .firetext {
+  background-image: none !important;
+  -webkit-text-fill-color: var(--spot);
+  color: var(--spot);
+  -webkit-text-stroke: 1px var(--toner);
+  paint-order: stroke fill;
+  filter: none;
+}
+
+/* Panels are sheets: opaque, hard-shadowed, no rounding, no transparency. */
+:root[data-vibe='riot'] .rig,
+:root[data-vibe='riot'] .portal,
+:root[data-vibe='riot'] .wiki__card,
+:root[data-vibe='riot'] .dos,
+:root[data-vibe='riot'] .inst,
+:root[data-vibe='riot'] .chart,
+:root[data-vibe='riot'] .ib,
+:root[data-vibe='riot'] .flyer,
+:root[data-vibe='riot'] .lin__void {
+  background: var(--paper) !important;
+  box-shadow: 8px 9px 0 var(--toner) !important;
+}
+
+/* The terminal keeps its black — a screen is a screen in every room. */
+:root[data-vibe='riot'] .term,
+:root[data-vibe='riot'] .term__screen {
+  background: #111110 !important;
+}
+
+/* --------------------------------------------------------------------------
+   RULES AND SELECTION
+   -------------------------------------------------------------------------- */
+::selection {
+  background: var(--spot);
+  color: var(--paper);
+}
+
+:focus-visible {
+  outline: 3px solid var(--spot);
+  outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   REDUCED MOTION
+   Everything above is static by construction — the punk pass mostly REMOVES
+   animation. The one thing left to pin is the flicker.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .mast__chip--hot {
+    animation: none !important;
+  }
+}

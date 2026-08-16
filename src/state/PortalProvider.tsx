@@ -10,7 +10,9 @@ import {
 
 type Prefs = { vibe: VibeId; chaos: number }
 
-const DEFAULTS: Prefs = { vibe: 'den', chaos: 0.55 }
+// UNTITLED is the house palette now: raw canvas, opaque primaries, no glow.
+// The neon rooms are still there, but you have to ask for them.
+const DEFAULTS: Prefs = { vibe: 'basquiat', chaos: 0.55 }
 
 function readPrefs(): Prefs {
   if (typeof window === 'undefined') return DEFAULTS

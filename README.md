@@ -12,9 +12,9 @@ the room where both of those happened.
 > LOSE THE ARGUMENT · LOG IT ANYWAY
 
 Five rooms off one hallway: the **wiki-brain** and its map, **THE LATTICE**,
-the **LEVIATHAN** instruments, an **arcade** of experimental web games, and
-**transmissions**. The first three are open; the rest are doors with
-scaffolding behind them.
+the **LEVIATHAN** instruments, **TRANSMISSIONS**, and an **arcade** of
+experimental web games. Four are open; the arcade is a door with scaffolding
+behind it.
 
 ## Running it
 
@@ -125,8 +125,8 @@ subsets are self-hosted in `public/fonts` — nothing is fetched at runtime.
 
 | Token         | Face          | Job                                                       |
 | ------------- | ------------- | --------------------------------------------------------- |
-| `--f-logo`    | Titan One     | the wordmark: oblique, rainbow-banded, black shell         |
-| `--f-head`    | Archivo Black | sub-headers, panel titles, the lit "sign" text             |
+| `--f-logo`    | Titan One     | the oblique arcade shell, kept for the palettes that want it |
+| `--f-head`    | Archivo Black | the wordmark, sub-headers, panel titles, ransom scraps      |
 | `--f-ui`      | Archivo       | body copy                                                  |
 | `--f-display` | Monoton       | neon-tube signage                                          |
 | `--f-poster`  | Bungee        | stickers, marquees, chunky labels                          |
@@ -138,15 +138,75 @@ The three reference treatments live in `src/styles/type.css` as reusable
 classes: `.wordmark` (two stacked copies — a stroked shell under a
 gradient-clipped face, since `background-clip:text` and `-webkit-text-stroke`
 won't share an element), `.subhead` (crackle texture multiplied into the fill,
-with an additive R/G/B bloom behind), and `.firetext` (the same grotesque lit
-up, with a per-line gradient so a five-line block stays evenly bright).
+over a slab), and `.firetext` (the same grotesque lit up, with a per-line
+gradient so a five-line block stays evenly bright).
+
+`src/styles/punk.css` then re-cuts all three — see below. The rainbow ramp
+becomes three inks, the bloom becomes a slab, the sodium glow becomes a
+fluorescent tube in a squat, and the DAN/FRANK lockup drops Titan One for a
+heavy grotesque. The logo is still a brand constant and still does not follow
+the palette: the moment it repaints it stops being an identity.
+
+## The punk layer
+
+The site used to be arcade-bright: bubble letterforms, a seven-band rainbow
+wordmark, twinkling sparkles, a soft additive R/G/B bloom behind every heading,
+a sheen sweeping across the ENTER button. That is one coherent aesthetic — the
+gumball machine — and it is the wrong one for a building whose banner says EAT
+THE RICH.
+
+`src/styles/punk.css` takes it apart and puts a photocopier in its place. Four
+devices, which are the same device from four angles:
+
+1. **the copier** — a halftone/flare `fx-toner` layer multiplied over the whole
+   page, blown contrast, and misregistration for headline type
+2. **the scissors** — `.torn`, `.torn-top`, `.snip`; nothing is cut square
+3. **the tape** — `.taped`; everything is stuck down, badly, over something else
+4. **the stencil** — `.hazard` bars, `.stencil` spray edges
+
+It is applied to the classes the site already had rather than by rewriting
+components, and it runs in **every** palette: punk is not a colour scheme, it
+is what happens to the surface.
+
+The one new component is **`<Ransom>`** (`src/components/Ransom.tsx`) — cut-up
+headline type, six scraps from six sources. It is *seeded*, so a headline gets
+one cut for the life of the build instead of reshuffling on every render, and
+*word-atomic*, so a long headline wraps like text instead of shattering. The
+whole string is on the wrapper as an `aria-label` and every scrap is
+`aria-hidden`, so a screen reader gets the sentence and not twenty-two letters.
 
 ## Palettes
 
-Four, one per reference board, swapped by `data-vibe` on `<html>`:
-`den` · `untitled` · `slime` · `kaiju`. Defined as custom properties in
-`src/styles/tokens.css`; every component reads `--n1`…`--n5`, `--void*`, `--text*`,
-so nothing needs to know which palette is live.
+Six, swapped by `data-vibe` on `<html>`. **`basquiat` is the default and the
+house style**: raw canvas, opaque primaries, no glow anywhere. `riot` is the
+photocopier — toner on newsprint, one spot red, two inks and no third. The
+other four (`den` · `untitled` · `slime` · `kaiju`) are the neon rooms, and you
+have to ask for them.
+
+Defined as custom properties in `src/styles/tokens.css`; every component reads
+`--n1`…`--n5`, the `--void` and `--text` ramps, so nothing needs to know which
+palette is live.
+
+Two of the six put an accent where the others put a light source, which breaks
+one assumption the rest of the site made everywhere: that text sitting **on** an
+accent should be `--edge`. In `basquiat`, `--n5` *is* the ink, so a lit nav link
+was black on black. `--on-glow` is the fix — it resolves to `--void`, which is
+near-black in the dark rooms (nothing there changes) and paper in the light
+ones. Anything whose background is `--glow` reads its text colour from it.
+
+### The headings
+
+Raw canvas does not do black headings. Flat black Archivo Black at 5rem on bone
+is a legal notice: no weight of its own, and it kills the palette at the top of
+every page. What the paintings do is put the word on a **slab** — a block of
+cadmium or ferrari red or cobalt, hand-edged and not quite square, with the
+letters over it in bone and the line drawn round them.
+
+So `SubHead` renders that. The slab is the element that used to hold the RGB
+bloom, reused and run through the `#oilstick` filter; one slab colour per room,
+so no two headings on a walk through the site are the same block of paint. Prose
+headings inside a page are not slabs — a painted block every four paragraphs is
+unreadable — but they stop being black too: red at h2, cobalt below it.
 
 ## Chaos
 
@@ -335,13 +395,48 @@ this repository. The portal is ungated; the old site put a terms-and-passphrase
 gate in front of that material. Bringing it across is a decision about exposure,
 not a porting task, so the rack declares those instruments and stops there.
 
+## TRANSMISSIONS
+
+`/blog` is the zine. Posts are markdown files in `src/blog/posts/` with a small
+frontmatter block, bundled at build time rather than fetched — there are going
+to be dozens of them and not thousands, and a zine is not a corpus. The corpus
+is next door.
+
+```
+---
+title: NOTHING HERE IS TASTEFUL
+slug: nothing-here-is-tasteful     # optional; defaults to the filename
+date: 2026-04-02                   # ISO. Sorted on, printed as "2 APR 2026"
+dek: One sentence. It runs on the card and under the headline.
+tags: design, manifesto, argument
+kana: 悪趣味
+tone: 5                            # 1-5, picks --n1..--n5 as the post's accent
+---
+```
+
+Drop a file in and it is live: the index, the tag counts, the search and the
+prev/next pager all derive from `src/blog/posts.ts`. Nothing else to register.
+
+The body goes through **the wiki's markdown renderer, unchanged** — same charts
+out of tables, same `[[wiki/…]]` links straight into the brain. A post and a
+wiki page are the same organism seen from two angles, and giving the blog a
+second renderer would have been the moment they stopped being that.
+
+The index is a wall, not a feed: every post is a photocopied sheet, torn along
+the bottom, taped at two corners, pasted on at an angle. The lead post is A3 and
+its headline is set in `<Ransom>`; the rest are A5.
+
+No RSS, no newsletter, no subscribe button, and **no analytics** — which is a
+selfish position rather than a principled one, and the reason is in
+[`nothing-here-is-tasteful`](src/blog/posts/nothing-here-is-tasteful.md).
+
 ## The rigs
 
 Each announces itself on mount via `useRig`, so the HUD counts live elements
 instead of a hard-coded number.
 
 1. **CHAOS DIAL** — draggable/arrow-keyed knob, 0 to 11, drives `--chaos`
-2. **VIBE SWITCH** — the four palettes
+2. **VIBE SWITCH** — the six palettes
 3. **SHELL** — 34 verbs, 8 of them listed in `help`; reads the corpus (`grep`,
    `whois`, `cite`, `hegel`), drives the site (`chaos`, `vibe`, `goto`,
    `overdose`, `narcan`), and takes the screen apart (`invert`, `flip`,
@@ -356,12 +451,13 @@ the console keeps the big versions, both surfaces drive the same state.
 
 ```
 src/
-  components/        chrome (nav, marquee, HUD, cursor trail, screen FX)
+  components/        chrome (nav, marquee, HUD, cursor trail, screen FX, Ransom)
     rigs/            the six interactive elements
   content/           section definitions
-  routes/            Splash, Home, Stub, wiki index + page
+  routes/            Splash, Home, Stub, blog index + post, wiki index + page
   state/             palette + chaos context, persisted
-  styles/            fonts, tokens, type treatments, global
+  styles/            fonts, tokens, type treatments, punk, raw canvas, global
+  blog/              the transmissions and their markdown
   gate/              the four steps in front of everything, and the terms
   leviathan/         the instrument rack: registry, frame, datasets
   wiki/              snapshot loading, markdown, charts, infoboxes, briefs, the map

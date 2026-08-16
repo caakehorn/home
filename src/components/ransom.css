@@ -1,0 +1,114 @@
+/* ==========================================================================
+   RANSOM — cut-up headline type
+
+   Six scraps, cut from six different sources. They are deliberately NOT six
+   tints of one idea: the whole effect depends on the reader believing the
+   letters came off different pages, which means the faces, the grounds and the
+   ink all have to disagree.
+
+     0  newsprint    black on bleached paper, the default scrap
+     1  knockout     paper on black, cut out of a headline
+     2  hazard       black on cadmium, from a warning label
+     3  bled         paper on ferrari red, from a sale poster
+     4  typed        typewriter face, from a letter
+     5  photostat    the same letter run through the copier once too often
+   ========================================================================== */
+
+.ransom {
+  display: inline-block;
+  max-width: 100%;
+  font-family: var(--f-head);
+  font-weight: 400;
+  line-height: 1.35;
+  text-transform: uppercase;
+  letter-spacing: 0;
+  /* The scraps carry their own grounds, so the wrapper must not inherit a
+     text fill from .subhead or .firetext further up the tree. */
+  -webkit-text-fill-color: currentColor;
+  background: none;
+}
+
+.ransom__word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* A single long word — TRANSMISSIONS — cannot be broken, and every scrap adds
+   its own padding and border on top of the glyph, so a headline that fits as
+   plain text overruns the viewport as scraps. Below the phone breakpoint the
+   word is allowed to come apart. It should: these are separate pieces of paper
+   and there is no rule that says a word has to end up on one line. */
+@media (max-width: 560px) {
+  .ransom__word {
+    white-space: normal;
+  }
+}
+
+.ransom__cut {
+  display: inline-block;
+  padding: 0.02em var(--pad, 0.06em);
+  /* A scrap of paper is opaque and has an edge. Both are load-bearing. */
+  border: 1px solid rgb(0 0 0 / 0.55);
+  transform: rotate(var(--lean, 0deg)) translateY(var(--drop, 0));
+  /* Cut with scissors, not a guillotine. */
+  clip-path: polygon(0 3%, 100% 0, 99% 97%, 1% 100%);
+  box-shadow: 0.05em 0.06em 0 rgb(0 0 0 / 0.4);
+}
+
+/* Enough tilt to read as pasted, not enough to read as broken. */
+.ransom__cut--0 {
+  color: #17150f;
+  background: #efe7d4;
+}
+
+.ransom__cut--1 {
+  color: #efe7d4;
+  background: #0a0a09;
+  border-color: #0a0a09;
+}
+
+.ransom__cut--2 {
+  color: #0a0a09;
+  background: #f5c400;
+}
+
+.ransom__cut--3 {
+  color: #fbf6ea;
+  background: #dd2a17;
+  border-color: #7d1409;
+}
+
+.ransom__cut--4 {
+  font-family: var(--f-mono);
+  font-weight: 700;
+  color: #17150f;
+  background: #ddd4bd;
+  letter-spacing: -0.02em;
+}
+
+.ransom__cut--5 {
+  font-family: var(--f-poster);
+  color: #0a0a09;
+  background: #cfc6b0;
+  /* run through the copier once too often */
+  filter: contrast(1.6) brightness(0.94);
+}
+
+/* --------------------------------------------------------------------------
+   Loud rooms want the scraps to sit on the dark ground rather than glow off
+   it, so the paper stays paper and the black scrap gets an edge to be seen by.
+   -------------------------------------------------------------------------- */
+:root:not([data-vibe='basquiat']) .ransom__cut--1 {
+  outline: 1px solid rgb(255 255 255 / 0.25);
+}
+
+/* Chaos tears them further apart. */
+.ransom__cut {
+  transform: rotate(calc(var(--lean, 0deg) * (0.5 + var(--chaos)))) translateY(var(--drop, 0));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ransom__cut {
+    transform: rotate(var(--lean, 0deg));
+  }
+}

@@ -79,6 +79,10 @@ export function BlogRoute() {
           ))}
         </div>
 
+        <Link to="/blog/write" className="blog__write-btn">
+          + WRITE
+        </Link>
+
         <input
           className="blog__search"
           type="search"

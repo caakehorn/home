@@ -107,6 +107,25 @@
   white-space: nowrap;
 }
 
+.blog__write-btn {
+  margin-left: auto;
+  padding: 0.3rem 0.7rem;
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.12em;
+  text-decoration: none;
+  color: var(--edge);
+  background: var(--n3);
+  border: 2px solid var(--edge);
+  box-shadow: 4px 4px 0 var(--edge);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.blog__write-btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 6px 6px 0 var(--edge);
+}
+
 .blog__empty {
   padding-block: 3rem;
   max-width: 58ch;

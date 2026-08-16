@@ -103,7 +103,7 @@ export const RATIO = dedupe(RATIO_SOURCE, 'THE RATIO')
 const JET_FUEL_SOURCE = [
   "Jet fuel can't melt steel beams",
   'Water whip',
-  'I support the work agenda',
+  'we are woke',
   'Smiley piercings are now mandatory',
   'Pronouns for everybody',
   'We will move the US Capital to Oakland, California',

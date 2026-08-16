@@ -14,8 +14,13 @@ public/llms.txt
 public/llms-full.txt
 public/agent/
 
-# The gate's verifier is per-deployment. Build it with `npm run gate:verify`
-# and commit it deliberately, or let the Pages workflow write it from the
-# HOME_PASSPHRASE secret at build time. A verifier built from someone's test
-# passphrase is worse than none at all, so it is not tracked by default.
-public/gate/verify.enc
+# The gate's verifier used to be ignored here, on the reasoning that a blob
+# built from somebody's throwaway test passphrase is worse than none at all.
+# True — and the cost was that no verifier ever reached the deploy, so the
+# gate served ENTER ANYWAY to everybody and the lock on the front of the site
+# was not a lock. This deployment now commits a real one deliberately, which
+# is what the README always said to do.
+#
+# It is a ciphertext: committing it leaks nothing but the cost of guessing.
+# To rotate, re-run `npm run gate:verify` with the new phrase in the
+# environment and commit the result.

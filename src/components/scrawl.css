@@ -18,7 +18,8 @@
 .scrawl__wipe {
   position: fixed;
   left: 0.7rem;
-  bottom: 0.7rem;
+  /* clears the crawl, which owns the bottom strip of the viewport */
+  bottom: calc(0.7rem + var(--crawl-h));
   z-index: 8600;
   padding: 0.3rem 0.7rem;
   font-family: var(--f-mono);

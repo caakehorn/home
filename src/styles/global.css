@@ -23,6 +23,9 @@ body,
 
 body {
   margin: 0;
+  /* Clearance for the crawl, which is fixed over the bottom of the viewport
+     and would otherwise sit on top of the last line of every page. */
+  padding-bottom: var(--crawl-h);
   background: var(--void);
   color: var(--text);
   font-family: var(--f-ui);

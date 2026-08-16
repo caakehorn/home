@@ -91,6 +91,10 @@
   --on-glow: var(--void);
 
   /* -- geometry ---------------------------------------------------------- */
+  /* The crawl is fixed to the bottom of the viewport, so the page owes it a
+     strip of clearance and the corner furniture has to sit above it. Declared
+     here because three files need to agree on it. */
+  --crawl-h: clamp(2rem, 4.4vh, 2.7rem);
   --rule: 3px;
   --gutter: clamp(1rem, 3vw, 3rem);
   --slab: 0px; /* stickers do not get rounded corners */

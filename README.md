@@ -93,13 +93,34 @@ HOME_PASSPHRASE='…' npm run gate:verify   # writes public/gate/verify.enc
 
 The blob is a ciphertext, so committing it leaks nothing but the cost of
 guessing. The passphrase itself is never written anywhere and cannot be
-recovered from this repository, which is the point of the design. It is
-untracked by default (a verifier built from someone's throwaway test phrase is
-worse than none), so either commit yours deliberately or set a
-`HOME_PASSPHRASE` repository secret and let the Pages workflow write it at
-build time. With no verifier the gate says so on the passphrase step and lets
-the visitor through, because a missing build secret should not brick the site
-for everyone including its owner.
+recovered from this repository, which is the point of the design.
+
+**`public/gate/verify.enc` is committed.** It used to be gitignored, on the
+reasoning that a verifier built from somebody's throwaway test phrase is worse
+than none at all. That reasoning is fine and the consequence was not: no
+verifier ever reached a deploy, so the gate took the `unconfigured` branch and
+served **ENTER ANYWAY** to every visitor. The door was not locked. It is now.
+
+Two ways to set it, and the precedence matters:
+
+1. **Committed blob** (what this repo does) — run the command above with the
+   phrase in the environment and commit the result.
+2. **`HOME_PASSPHRASE` repository secret** — the Pages workflow rebuilds the
+   verifier at build time when the secret is set, which **overwrites the
+   committed one for that deploy**. That is the right way round, since a
+   secret is the more authoritative place to keep a phrase — but it means a
+   stale secret silently wins over the blob in the repo. If the deployed door
+   stops matching the phrase you committed, that secret is why.
+
+With no verifier from either route the gate says so on the passphrase step and
+lets the visitor through, because a missing build secret should not brick the
+site for everyone including its owner.
+
+Rotating is one command and one commit. Anyone who fetched the old blob keeps
+it forever, though, so rotation closes the door in front of new guesses and not
+old ones — pick a phrase with enough entropy to survive a wordlist, because
+250k PBKDF2 iterations buys time against a guesser, not immunity, and a public
+repository hands them the blob to grind offline at their leisure.
 
 ### What the gate does not do
 
@@ -207,6 +228,54 @@ bloom, reused and run through the `#oilstick` filter; one slab colour per room,
 so no two headings on a walk through the site are the same block of paint. Prose
 headings inside a page are not slabs — a painted block every four paragraphs is
 unreadable — but they stop being black too: red at h2, cobalt below it.
+
+## THE RATIO
+
+A crawl along the bottom of the viewport, fixed, on every page behind the gate.
+The marquees inside a page are furniture you walk past; this one is furniture
+you live with, which is why it gets the loudest treatment on the site short of
+the masthead — a hazard bar for a top edge and every node cut out of a
+different sheet.
+
+**The reader drives it.** It creeps at 12–56 px/s (off `--chaos`, like
+everything else loud). Scroll the page in either direction and it lunges
+forward at a rate set by how hard you scrolled, then coasts back down to a
+creep over about a second. It is a rate control, not a direction control:
+scrolling up speeds it up exactly like scrolling down, and it never runs
+backwards. The feel to aim for is a flywheel — you are not steering it, you
+are spinning it, and it always winds back down to the same idle. The hazard
+strip brightens with `--rush` while it is being driven, so the feedback loop
+is visible.
+
+Two things about the implementation are deliberate:
+
+- **It is not a CSS animation.** Every other banner here is two copies
+  translated -50% by a keyframe, which is right when the rate is constant and
+  wrong when it is not: a variable rate means restarting the animation on every
+  scroll event (which jumps, because the new one starts at 0%) or driving
+  `animation-delay` backwards, which fights the compositor. `Crawl.tsx` owns a
+  rAF loop and writes one composited transform per frame instead.
+- **It measures itself.** None of the geometry is written down. The component
+  measures one copy of the sequence, works out how many copies cover the
+  viewport plus one full wrap, and takes the offset modulo that width.
+
+The content is in `src/content/ratio.ts`, and **the entries are nodes, not a
+sentence** — each is its own reply, its own scrap, and the `+` between them is
+an operator rather than punctuation. So they live as an array and the banner
+draws one chip per entry with the operator between; nothing is ever joined into
+a string and animated as prose, because then it stops being the meme and starts
+being a tagline.
+
+**To grow it: append to the array.** That is the whole maintenance story —
+there is no duration, no width and no copy count to update, and the loop stays
+seamless at any length. Order is the reading order: `L` opens and `GG` closes,
+so new material goes in the middle unless it is meant to be the last word.
+
+Under `prefers-reduced-motion` it does not crawl. The strip stays put and
+becomes horizontally scrollable instead — the request is for less motion, not
+less content, and a banner you cannot read is not an accessible banner. The
+list is also rendered once, visually hidden, for screen readers; the visual
+track is duplicated by construction and is `aria-hidden`.
 
 ## Chaos
 
@@ -451,9 +520,9 @@ the console keeps the big versions, both surfaces drive the same state.
 
 ```
 src/
-  components/        chrome (nav, marquee, HUD, cursor trail, screen FX, Ransom)
+  components/        chrome (nav, marquee, crawl, HUD, cursor trail, FX, Ransom)
     rigs/            the six interactive elements
-  content/           section definitions
+  content/           section definitions, banner slogans, the ratio
   routes/            Splash, Home, Stub, blog index + post, wiki index + page
   state/             palette + chaos context, persisted
   styles/            fonts, tokens, type treatments, punk, raw canvas, global

@@ -31,10 +31,26 @@ const url = () => `${import.meta.env.BASE_URL}gate/keyring.enc`.replace(/\/{2,}/
 let blob: Promise<Blob | null> | null = null
 let token: string | null = null
 
+/**
+ * Fetch the blob, caching only success.
+ *
+ * Caching the failure too is the obvious version and it is wrong: a tab open
+ * across the deploy that first shipped the keyring gets one 404, remembers it
+ * forever, and tells its owner for the rest of the session that there is no
+ * keyring on a deploy that plainly has one. A miss here is nearly always
+ * temporal — not yet deployed, offline for a moment — so a retry is free and a
+ * cached "no" is a lie with a long tail.
+ *
+ * `no-store` for the same reason: `force-cache` let the browser keep serving a
+ * 404 from before the file existed.
+ */
 function load(): Promise<Blob | null> {
-  blob ??= fetch(url(), { cache: 'force-cache' })
-    .then((r) => (r.ok ? (r.json() as Promise<Blob>) : null))
-    .catch(() => null)
+  blob ??= fetch(url(), { cache: 'no-store' })
+    .then((r) => (r.ok ? (r.json() as Promise<Blob>) : Promise.reject(new Error('absent'))))
+    .catch(() => {
+      blob = null
+      return null
+    })
   return blob
 }
 

@@ -4,7 +4,9 @@
  * The portal is a static site with no server behind it, so there is nothing to
  * POST to. What there *is* is the repository the wiki actually lives in, and
  * GitHub's contents API, which will take a commit from anyone holding a token
- * with rights to it. So the browser commits.
+ * with rights to it. So the browser commits, with a token it gets from
+ * `keyring.ts` — shipped encrypted in the deploy, opened by the same passphrase
+ * the door already asked for, so pressing SAVE asks for nothing.
  *
  *   1. The page's markdown goes to `caakehorn/wiki-brain`, which is the source
  *      of truth. Pictures go beside it under `wiki/assets/<slug>/`.
@@ -21,44 +23,31 @@
  * later, not instantly. The local draft keeps showing your version until then.
  */
 
+import { configured, credential as fromKeyring } from './keyring'
+
 const API = 'https://api.github.com'
 
 export const SOURCE_REPO = 'caakehorn/wiki-brain'
 export const SITE_REPO = 'caakehorn/home'
 
-const TOKEN_KEY = 'danfrank:gh:token'
-
 /**
- * The token lives in this tab by default and only reaches localStorage if you
- * ask it to. It is a write credential on a public site: keep it fine-grained
- * (contents: read and write on those two repositories, nothing else), and
- * throw it away with FORGET when you are done on a machine you do not own.
+ * The write credential.
+ *
+ * There used to be a token box here and a FORGET button beside it, because a
+ * static site has nowhere private to keep a credential. It does now — see
+ * `keyring.ts` — so nothing asks and there is nothing to paste.
+ *
+ * The two failure modes are different problems with different fixes, so they
+ * get different sentences rather than one "no token".
  */
-export function getToken(): string | null {
-  try {
-    return sessionStorage.getItem(TOKEN_KEY) ?? localStorage.getItem(TOKEN_KEY)
-  } catch {
-    return null
-  }
-}
-
-export function setToken(token: string, remember: boolean) {
-  try {
-    sessionStorage.setItem(TOKEN_KEY, token)
-    if (remember) localStorage.setItem(TOKEN_KEY, token)
-    else localStorage.removeItem(TOKEN_KEY)
-  } catch {
-    /* private mode: it just will not stick */
-  }
-}
-
-export function forgetToken() {
-  try {
-    sessionStorage.removeItem(TOKEN_KEY)
-    localStorage.removeItem(TOKEN_KEY)
-  } catch {
-    /* ditto */
-  }
+async function credential(): Promise<string> {
+  const token = await fromKeyring()
+  if (token) return token
+  throw new Error(
+    (await configured())
+      ? 'this tab has no passphrase — reload and come in through the door'
+      : 'no keyring on this deploy — run `npm run keyring` and push'
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -77,8 +66,7 @@ async function reach(url: string, init: RequestInit) {
 }
 
 async function call(path: string, init: RequestInit = {}) {
-  const token = getToken()
-  if (!token) throw new Error('no token — add one before publishing')
+  const token = await credential()
   const res = await reach(`${API}${path}`, {
     ...init,
     headers: {
@@ -89,9 +77,12 @@ async function call(path: string, init: RequestInit = {}) {
       ...init.headers,
     },
   })
-  if (res.status === 401) throw new Error('GitHub rejected the token (401) — it may be expired')
-  if (res.status === 403) throw new Error('GitHub refused (403) — the token is missing contents: write')
-  if (res.status === 404) throw new Error('not found (404) — check the token can see both repositories')
+  if (res.status === 401)
+    throw new Error('GitHub rejected the keyring token (401) — it expired; re-run `npm run keyring`')
+  if (res.status === 403)
+    throw new Error('GitHub refused (403) — the keyring token is missing Contents: write')
+  if (res.status === 404)
+    throw new Error('not found (404) — the keyring token cannot see both repositories')
   if (!res.ok && res.status !== 204) {
     const detail = await res.text()
     throw new Error(`GitHub said ${res.status}: ${detail.slice(0, 200)}`)
@@ -113,7 +104,7 @@ function encode(text: string) {
 
 /** The current file's blob sha, or null when it does not exist yet. */
 async function shaOf(repo: string, path: string, branch: string): Promise<string | null> {
-  const token = getToken()
+  const token = await credential()
   const res = await reach(`${API}/repos/${repo}/contents/${path}?ref=${encodeURIComponent(branch)}`, {
     headers: {
       Accept: 'application/vnd.github+json',

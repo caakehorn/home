@@ -16,7 +16,7 @@ import './header-controls.css'
  * screen reader and by thumb, and the platform slider is all three for free.
  */
 export function HeaderControls() {
-  const { vibe, setVibe, chaos, setChaos, drawing, setDrawing } = usePortal()
+  const { vibe, setVibe, chaos, setChaos, drawing, setDrawing, motion, setMotion } = usePortal()
 
   return (
     <div className="hctl">
@@ -43,6 +43,26 @@ export function HeaderControls() {
       >
         <span className="jp" aria-hidden="true">筆</span>
         DRAW
+      </button>
+
+      {/* Sits next to DRAW because it is the same kind of switch: a thing the
+          reader turns on and off about how the site behaves, not a setting.
+          It shows its state in the label rather than only in the pressed
+          styling — someone looking for why nothing is moving is scanning for
+          the word, and a dim outline is not an answer. */}
+      <button
+        type="button"
+        className={`hctl__motion${motion ? ' hctl__motion--on' : ''}`}
+        aria-pressed={motion}
+        onClick={() => setMotion(!motion)}
+        title={
+          motion
+            ? 'Motion on — the crawls run and the marquees loop'
+            : "Motion off — everything holds still. Your system's Reduce Motion setting turns this off by default; this switch overrides it."
+        }
+      >
+        <span className="jp" aria-hidden="true">動</span>
+        MOTION {motion ? 'ON' : 'OFF'}
       </button>
 
       <div className="hctl__vibes" role="radiogroup" aria-label="Palette">

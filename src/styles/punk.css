@@ -646,8 +646,6 @@
    Everything above is static by construction — the punk pass mostly REMOVES
    animation. The one thing left to pin is the flicker.
    -------------------------------------------------------------------------- */
-@media (prefers-reduced-motion: reduce) {
-  .mast__chip--hot {
-    animation: none !important;
-  }
+:root[data-still='1'] .mast__chip--hot {
+  animation: none !important;
 }

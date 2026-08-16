@@ -305,10 +305,8 @@
 
 /* It still takes the whole screen for the whole thirty seconds — it just
    stops strobing. */
-@media (prefers-reduced-motion: reduce) {
-  .gate__flash {
-    animation: none;
-  }
+:root[data-still='1'] .gate__flash {
+  animation: none;
 }
 
 .gate__echo {

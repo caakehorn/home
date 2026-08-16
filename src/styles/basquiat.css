@@ -228,11 +228,9 @@
   text-shadow: 0 0 calc(var(--glow-r) * 0.5) currentColor;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .rig::before,
-  .portal::before {
-    filter: none;
-  }
+:root[data-still='1'] .rig::before,
+:root[data-still='1'] .portal::before {
+  filter: none;
 }
 
 /* --------------------------------------------------------------------------

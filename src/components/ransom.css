@@ -107,8 +107,6 @@
   transform: rotate(calc(var(--lean, 0deg) * (0.5 + var(--chaos)))) translateY(var(--drop, 0));
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .ransom__cut {
-    transform: rotate(var(--lean, 0deg));
-  }
+:root[data-still='1'] .ransom__cut {
+  transform: rotate(var(--lean, 0deg));
 }

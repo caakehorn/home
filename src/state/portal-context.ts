@@ -68,6 +68,19 @@ export type PortalState = {
   /** Oil-stick mode: the scrawl layer takes the pointer instead of the page. */
   drawing: boolean
   setDrawing: (drawing: boolean) => void
+  /**
+   * Whether the site is allowed to move.
+   *
+   * Seeded from `prefers-reduced-motion` and overridable from the header. The
+   * OS setting is a default, not a verdict: someone who runs macOS with Reduce
+   * Motion on for the window manager has not thereby asked this site to sit
+   * still forever, and until there was a switch their only way to see the
+   * crawls run was to change a system-wide accessibility setting. Every moving
+   * thing on the site reads the resolved answer — via this, or via the
+   * `data-still` attribute it paints on `<html>` for plain CSS.
+   */
+  motion: boolean
+  setMotion: (motion: boolean) => void
 }
 
 export const PortalContext = createContext<PortalState | null>(null)

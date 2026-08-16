@@ -368,10 +368,8 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .brief__figure,
-  .brief__fact,
-  .brief__chip {
-    transition: none;
-  }
+:root[data-still='1'] .brief__figure,
+:root[data-still='1'] .brief__fact,
+:root[data-still='1'] .brief__chip {
+  transition: none;
 }

@@ -13,7 +13,8 @@
     "briefs": "node --experimental-strip-types scripts/audit-briefs.mjs",
     "leviathan": "node --experimental-strip-types scripts/build-leviathan.mjs",
     "accretion": "node --experimental-strip-types scripts/build-accretion.mjs",
-    "gate:verify": "node scripts/make-verify.mjs"
+    "gate:verify": "node scripts/make-verify.mjs",
+    "keyring": "node scripts/make-keyring.mjs"
   },
   "dependencies": {
     "marked": "^18.0.9",

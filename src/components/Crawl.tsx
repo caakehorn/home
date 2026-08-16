@@ -59,7 +59,7 @@ type CrawlProps = {
 }
 
 export function Crawl({ nodes, label, edge, travel }: CrawlProps) {
-  const { chaos } = usePortal()
+  const { chaos, motion } = usePortal()
   const viewport = useRef<HTMLDivElement>(null)
   const track = useRef<HTMLDivElement>(null)
   const sequence = useRef<HTMLSpanElement>(null)
@@ -95,10 +95,20 @@ export function Crawl({ nodes, label, edge, travel }: CrawlProps) {
     const box = viewport.current
     if (!el || !box) return
 
-    // Under reduced motion the crawl does not crawl. The strip stays put and
-    // becomes scrollable instead (see crawl.css), so the content is still
-    // reachable — the request is for less motion, not less content.
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    // Held still, the crawl does not crawl. The strip stays put and becomes
+    // scrollable instead (see crawl.css), so the content is still reachable —
+    // the request is for less motion, not less content.
+    //
+    // Read from the portal rather than from matchMedia directly: the OS
+    // preference only seeds this, and the header's MOTION switch overrides it.
+    // `motion` is in the dep list, so flipping the switch starts and stops the
+    // loop rather than needing a reload.
+    if (!motion) {
+      // Drop the last transform, or the track freezes wherever it happened to
+      // be — mid-word, with the first node scrolled off the left edge.
+      el.style.transform = ''
+      return
+    }
 
     let offset = 0
     let lunge = 0
@@ -154,7 +164,7 @@ export function Crawl({ nodes, label, edge, travel }: CrawlProps) {
       window.removeEventListener('scroll', onScroll)
       document.removeEventListener('visibilitychange', onVisible)
     }
-  }, [])
+  }, [motion])
 
   return (
     <aside className={`crawl crawl--${edge}`} ref={viewport} aria-label={label}>

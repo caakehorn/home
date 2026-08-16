@@ -291,15 +291,22 @@
   background-size: 64px 64px;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  :root {
-    --tempo: 3;
-  }
-  *,
-  *::before,
-  *::after {
-    animation-duration: calc(1s * var(--tempo)) !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 120ms !important;
-  }
+/* STILL — the site-wide brake.
+ *
+ * Keyed off `data-still` on <html> rather than off the media query directly.
+ * `prefers-reduced-motion` seeds that attribute but does not own it: the header
+ * carries a MOTION switch, and someone who runs their OS with Reduce Motion on
+ * for the window manager has not thereby asked this site to sit still forever.
+ * One resolved signal means the switch and the OS can never disagree about what
+ * the page is doing. PortalProvider paints it; everything still-related reads it. */
+:root[data-still='1'] {
+  --tempo: 3;
+}
+
+:root[data-still='1'] *,
+:root[data-still='1'] *::before,
+:root[data-still='1'] *::after {
+  animation-duration: calc(1s * var(--tempo)) !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 120ms !important;
 }

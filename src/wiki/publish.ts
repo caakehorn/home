@@ -46,7 +46,7 @@ async function credential(): Promise<string> {
   throw new Error(
     (await configured())
       ? 'this tab has no passphrase — reload and come in through the door'
-      : 'no keyring on this deploy — run `npm run keyring` and push'
+      : 'could not read the keyring — reload the page; if it persists, it has not been built for this deploy'
   )
 }
 

@@ -6,6 +6,9 @@ import { PassPanel } from './Editor'
 import { publishFile, publishPage } from './publish'
 import './gaps.css'
 
+/** One slot: only one answer is ever being typed at a time. */
+const DRAFT = 'danfrank:gap-answer:v1'
+
 /**
  * THE GAPS — answering what the wiki says it does not know, from the wiki.
  *
@@ -35,6 +38,33 @@ export function Gaps() {
   const [busy, setBusy] = useState(false)
   const [status, setStatus] = useState<string | null>(null)
   const [asking, setAsking] = useState(false)
+
+  /**
+   * The answer box survives a reload.
+   *
+   * It did not, and the first time saving failed the operator lost a paragraph
+   * he had just typed and had to type it again to find out whether the fix had
+   * worked. An answer here is the one thing on this screen that exists nowhere
+   * else yet — everything else can be re-fetched — so it is the one thing that
+   * has to be written down before anything is attempted with it.
+   */
+  useEffect(() => {
+    try {
+      const held = localStorage.getItem(DRAFT)
+      if (held) setAnswer(held)
+    } catch {
+      /* private mode */
+    }
+  }, [])
+
+  useEffect(() => {
+    try {
+      if (answer.trim()) localStorage.setItem(DRAFT, answer)
+      else localStorage.removeItem(DRAFT)
+    } catch {
+      /* private mode */
+    }
+  }, [answer])
 
   useEffect(() => {
     loadGaps().then(setIndex).catch((e: Error) => setError(e.message))

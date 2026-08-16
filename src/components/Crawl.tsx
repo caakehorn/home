@@ -1,16 +1,21 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { OPERATOR, RATIO, ratioSentence } from '../content/ratio'
+import { OPERATOR, sentenceOf } from '../content/crawls'
 import { usePortal } from '../state/usePortal'
 import './crawl.css'
 
 /**
- * THE RATIO — a permanent crawl along the bottom of the viewport, whose speed
- * the reader drives with the scroll wheel.
+ * A crawl pinned to one edge of the viewport, whose speed the reader drives
+ * with the scroll wheel.
  *
  * It creeps. Scroll the page in either direction and it lunges forward at a
  * rate set by how hard you scrolled, then coasts back down to a creep over
  * about a second. The feel to aim for is a flywheel: you are not steering it,
  * you are spinning it, and it always winds back down to the same idle.
+ *
+ * Two of them run — THE RATIO along the bottom travelling left, JET FUEL along
+ * the top travelling right. They are the same component and the same physics;
+ * only the edge, the direction and the list differ, so the pair respond to a
+ * scroll identically and in mirror.
  *
  * ---- why this is not a CSS animation ----------------------------------
  *
@@ -24,11 +29,11 @@ import './crawl.css'
  *
  * ---- why it measures itself -------------------------------------------
  *
- * The list is stated to be growing. So nothing about the geometry is written
+ * The lists are stated to be growing. So nothing about the geometry is written
  * down: the component measures one copy of the sequence, works out how many
  * copies it takes to cover the viewport plus one full wrap, and takes the
- * offset modulo that width. Appending to RATIO is the whole edit — there is no
- * duration to retune and no seam to chase.
+ * offset modulo that width. Appending to a list is the whole edit — there is
+ * no duration to retune and no seam to chase.
  */
 
 /** px/s at the bottom of the chaos dial. A creep, not a scroll. */
@@ -44,32 +49,46 @@ const DECAY = 0.94
 /** Longest frame we integrate over; a backgrounded tab must not teleport it. */
 const MAX_FRAME_MS = 64
 
-export function Crawl() {
+type CrawlProps = {
+  nodes: readonly string[]
+  /** Accessible name for the region. */
+  label: string
+  edge: 'top' | 'bottom'
+  /** Which way the words travel. */
+  travel: 'left' | 'right'
+}
+
+export function Crawl({ nodes, label, edge, travel }: CrawlProps) {
   const { chaos } = usePortal()
   const viewport = useRef<HTMLDivElement>(null)
   const track = useRef<HTMLDivElement>(null)
   const sequence = useRef<HTMLSpanElement>(null)
   const [copies, setCopies] = useState(2)
 
-  // Chaos is read through a ref rather than closed over, so changing the dial
-  // does not tear down and restart the loop mid-crawl.
+  // Read through refs rather than closed over, so changing the dial (or, in
+  // principle, the direction) does not tear down and restart the loop.
   const idle = useRef(IDLE_MIN)
   idle.current = IDLE_MIN + IDLE_RANGE * chaos
+  const rightward = useRef(false)
+  rightward.current = travel === 'right'
 
   // Enough copies to cover the viewport plus one full sequence, so there is
-  // always a whole sequence queued to the right of the wrap point.
+  // always a whole sequence queued on the side the track is travelling from.
   useLayoutEffect(() => {
     const measure = () => {
       const width = sequence.current?.offsetWidth ?? 0
       if (!width) return
-      setCopies(Math.ceil((window.innerWidth + width) / width) + 1)
+      setCopies((current) => {
+        const needed = Math.ceil((window.innerWidth + width) / width) + 1
+        return needed === current ? current : needed
+      })
     }
     measure()
     window.addEventListener('resize', measure)
     // Webfonts land after first paint and change the width underneath us.
     document.fonts?.ready.then(measure).catch(() => {})
     return () => window.removeEventListener('resize', measure)
-  }, [])
+  }, [nodes])
 
   useEffect(() => {
     const el = track.current
@@ -106,7 +125,12 @@ export function Crawl() {
       const width = sequence.current?.offsetWidth ?? 0
       if (width > 0) {
         offset = (offset + ((idle.current + lunge) * dt) / 1000) % width
-        el.style.transform = `translate3d(${-offset}px, 0, 0)`
+        // Travelling left runs 0 -> -width, so the copies queue to the right.
+        // Travelling right runs -width -> 0, so they queue to the left, which
+        // is why the copy count covers the viewport PLUS one whole sequence
+        // rather than just the viewport.
+        const x = rightward.current ? offset - width : -offset
+        el.style.transform = `translate3d(${x}px, 0, 0)`
       }
 
       // Lets the stylesheet react to being driven without a re-render.
@@ -133,15 +157,15 @@ export function Crawl() {
   }, [])
 
   return (
-    <aside className="crawl" ref={viewport} aria-label="The ratio">
+    <aside className={`crawl crawl--${edge}`} ref={viewport} aria-label={label}>
       {/* The visual track is duplicated by construction, so AT gets the list
           once, here, and never reads the loop. */}
-      <p className="crawl__a11y">{ratioSentence()}</p>
+      <p className="crawl__a11y">{sentenceOf(nodes)}</p>
 
       <div className="crawl__track" ref={track} aria-hidden="true">
         {Array.from({ length: copies }, (_, copy) => (
           <span className="crawl__seq" key={copy} ref={copy === 0 ? sequence : undefined}>
-            {RATIO.map((node, i) => (
+            {nodes.map((node, i) => (
               <span className="crawl__node-wrap" key={i}>
                 <span className="crawl__op">{OPERATOR}</span>
                 <span className={`crawl__node crawl__node--${i % 6}`}>{node}</span>

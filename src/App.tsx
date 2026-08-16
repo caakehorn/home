@@ -3,6 +3,7 @@ import { Canvas } from './components/Canvas'
 import { Crawl } from './components/Crawl'
 import { CursorTrail } from './components/CursorTrail'
 import { Scrawl } from './components/Scrawl'
+import { JET_FUEL, RATIO } from './content/crawls'
 import { Fx } from './components/Fx'
 import { Hud } from './components/Hud'
 import { Gate } from './gate/Gate'
@@ -62,7 +63,10 @@ function Site() {
       </Routes>
 
       {splashed && <Splash />}
-      <Crawl />
+      {/* Two crawls, same physics, mirrored: the agenda runs right along the
+          top, the ratio runs left along the bottom. */}
+      <Crawl nodes={JET_FUEL} label="Jet fuel" edge="top" travel="right" />
+      <Crawl nodes={RATIO} label="The ratio" edge="bottom" travel="left" />
       <Hud />
     </>
   )

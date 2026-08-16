@@ -23,9 +23,11 @@ body,
 
 body {
   margin: 0;
-  /* Clearance for the crawl, which is fixed over the bottom of the viewport
-     and would otherwise sit on top of the last line of every page. */
-  padding-bottom: var(--crawl-h);
+  /* Clearance for the two crawls, which are fixed over the top and bottom of
+     the viewport and would otherwise sit on the first and last line of every
+     page. The sticky nav takes the same offset (see nav.css) so it parks under
+     the top bar rather than sliding beneath it. */
+  padding-block: var(--crawl-h);
   background: var(--void);
   color: var(--text);
   font-family: var(--f-ui);

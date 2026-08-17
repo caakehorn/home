@@ -177,8 +177,14 @@ const index = []
  * a gap this splits differently is a gap the tool cannot find. Keep them in
  * step.
  */
-const GAP_HEAD = /^(#{2,3})\s+(gaps?\b|notes\s+(and|&)\s+gaps\b|corpus gaps\b|open questions\b)/i
+const GAP_HEAD =
+  /^(#{2,3})[ \t]+(?:\d+[.)][ \t]*)?(?:new[ \t]+)?(gaps?\b|notes[ \t]+(?:and|&)[ \t]+gaps\b|corpus[ \t]+gaps\b|open[ \t]+questions\b|open[ \t]+leads\b|leads\b|corrections[ \t]+queue\b|what'?s[ \t]+missing\b|unresolved\b)/i
 const BULLET = /^([-*]|\d+\.)\s+\S/
+// A corrections queue is a table and its *rows* are the items; the whole table
+// is not one gap. Rows already dealt with are marked in the last cell.
+const TABLE_ROW = /^[ \t]*\|/
+const TABLE_RULE = /^[ \t]*\|[\s:|-]+\|[ \t]*$/
+const DONE_CELL = /\b(applied|n\/a)\b/i
 
 /** Flatten to one line for a list label: links unwrapped, emphasis stripped. */
 function flatten(text) {
@@ -231,12 +237,36 @@ function extractGaps(body) {
     }
     if (cur.length) blocks.push(cur)
 
-    for (const block of blocks) {
+    // A section that itemises may still open with a sentence or two of prose
+    // explaining the list. `## Gaps` rarely does; `## Open leads` and
+    // `## Corrections queue` usually do, and that prose is not a gap. So once a
+    // section is known to itemise, anything before the first item is preamble.
+    const itemised = (b) => b.some((k) => BULLET.test(lines[k]) || TABLE_ROW.test(lines[k]))
+    const firstItemised = blocks.findIndex(itemised)
+
+    for (const [n, block] of blocks.entries()) {
+      if (firstItemised !== -1 && n < firstItemised) continue
       const first = lines[block[0]].trimStart()
       // sub-headings, blockquotes and whole-line italic placeholders are
       // commentary on the section, not gaps in it
       if (first.startsWith('#') || first.startsWith('>')) continue
       if (block.length === 1 && /^[_*].+[_*]$/.test(first.trim())) continue
+
+      // a table: one gap per data row, header and rule dropped
+      if (TABLE_ROW.test(lines[block[0]])) {
+        for (const k of block) {
+          if (TABLE_RULE.test(lines[k])) continue
+          if (block.includes(k + 1) && TABLE_RULE.test(lines[k + 1])) continue
+          const cells = lines[k].trim().replace(/^\||\|$/g, '').split('|').map((c) => c.trim())
+          if (!cells.some(Boolean)) continue
+          if (DONE_CELL.test(cells[cells.length - 1])) continue
+          const label = flatten(cells.filter(Boolean).join(' · '))
+          if (!label || label.startsWith('~~')) continue
+          if (/\b(CLOSED|RESOLVED|SETTLED)\b/.test(label)) continue
+          out.push({ text: lines[k], label })
+        }
+        continue
+      }
 
       const starts = block.filter((k) => BULLET.test(lines[k]))
       const spans = []

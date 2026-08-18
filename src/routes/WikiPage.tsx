@@ -4,9 +4,11 @@ import { Nav } from '../components/Nav'
 import { Editor } from '../wiki/Editor'
 import { Infobox } from '../wiki/Infobox'
 import { Markdown, outline } from '../wiki/Markdown'
+import { QuickAdd } from '../wiki/QuickAdd'
 import { editableFrontmatter, humanize, useWikiPage, type WikiPage as Page } from '../wiki/data'
 import { getDraft } from '../wiki/store'
 import './wiki.css'
+import '../wiki/quick-add.css'
 
 /** Split a stored draft back into its frontmatter block and body. */
 function splitMarkdown(text: string) {
@@ -184,6 +186,8 @@ export function WikiPageRoute() {
               )}
             </footer>
           )}
+
+          <QuickAdd slug={view.slug} domain={view.domain} />
         </article>
       )}
     </div>

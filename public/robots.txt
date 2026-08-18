@@ -12,5 +12,15 @@
 
 User-agent: *
 Allow: /
+Disallow: /transcript/
+
+# /transcript/ is the message record — 134,348 messages between two people,
+# one of whom is not the author of this site. The rest of the den is writing
+# about that material and is offered for reading; the material itself is here
+# to be read on the page it was built for, not scraped into a training set or
+# a search index. Same caveat as above: this is a request. The payloads
+# resolve to anyone who asks for them, and the gate in front of the site gates
+# rendering rather than access. If that is not the posture wanted, the fix is
+# encryption at rest and a private repository, not this line.
 
 Sitemap: https://caakehorn.github.io/home/llms.txt

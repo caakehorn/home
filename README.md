@@ -11,10 +11,10 @@ the room where both of those happened.
 > THESIS · ANTITHESIS · ANOTHER BUMP · SYNTHESIS · CITE YOUR SOURCES ·
 > LOSE THE ARGUMENT · LOG IT ANYWAY
 
-Five rooms off one hallway: the **wiki-brain** and its map, **THE LATTICE**,
-the **LEVIATHAN** instruments, **TRANSMISSIONS**, and an **arcade** of
-experimental web games. Four are open; the arcade is a door with scaffolding
-behind it.
+Six rooms off one hallway: the **wiki-brain** and its map, **THE LATTICE**,
+the **LEVIATHAN** instruments, **THE TRANSCRIPT**, **TRANSMISSIONS**, and an
+**arcade** of experimental web games. Five are open; the arcade is a door with
+scaffolding behind it.
 
 ## Running it
 
@@ -129,6 +129,7 @@ the URL, gate or no gate:
 
 - `public/wiki/**` — the whole vendored wiki snapshot
 - `public/leviathan/**` — the instrument datasets
+- `public/transcript/**` — the whole message record, 134,348 messages
 - every asset in the build
 
 And while this repository is public, all of it is readable on github.com
@@ -518,10 +519,97 @@ for the wiki snapshot itself. Re-run it against a wiki-brain checkout when the
 history has moved. It needs full history: the script refuses a shallow clone
 rather than silently reporting a corpus that begins four commits ago.
 
-The sealed instruments need the message corpus, which is **not** vendored into
-this repository. The portal is ungated; the old site put a terms-and-passphrase
-gate in front of that material. Bringing it across is a decision about exposure,
-not a porting task, so the rack declares those instruments and stops there.
+The sealed instruments are what is left once the corpus question is settled.
+`IV · THE ASK` needs the classified ledger its rows were recounted from, which
+is a hand-audited reading of the record rather than the record, and is not
+vendored here. `V · THE CLOCK` needs nothing from outside any more — see below.
+
+## THE TRANSCRIPT
+
+`/transcript` is the complete message record — 134,348 messages between Dan and
+Annie, 2015-11-28 → 2026-07-26 — carried over intact from
+[`caakehorn/leviathan`](https://github.com/caakehorn/leviathan). It is the one
+room in the building that is not a reading of something. The wiki is prose
+about this material, LEVIATHAN counts it, the lattice draws the family it
+happened in; this is the material.
+
+**THE RULE binds harder here than anywhere else.** No summary, no sentiment, no
+selection, no highlights, no order but the order it was sent in. The only
+things the room adds to the text are a line number, the timestamp already in
+the export, and whatever filter the reader asked for.
+
+### Getting it over
+
+```bash
+npm run transcript -- ../leviathan   # writes public/transcript/
+```
+
+`scripts/sync-transcript.mjs` reads `data/transcript.json` out of a leviathan
+checkout — one envelope holding the whole record as `[timestamp, dir, text,
+flags]` rows — and splits it at month boundaries:
+
+- `public/transcript/index.json` — the spine: every month, its count, the line
+  number it starts at, the totals, and the gaps.
+- `public/transcript/months/YYYY-MM.json` — one file per covered month, 91 of
+  them, fetched only when that month is opened.
+
+The old site fetched the envelope whole: 9.4 MB before a single line was on
+screen. **The split is a split.** Concatenate the months in bin order and you
+have the envelope's `m` array back, in the same order, with the same timestamps
+and the same flags — nothing dropped, reordered or edited. Line numbers are
+global and 1-based, which is the identity the old repo's `#L1234` anchors used,
+so a link into the record still lands on the same message.
+
+**This dataset is committed**, like `accretion.json` and unlike the instrument
+sets `prebuild` regenerates: it is derived from a repository this one does not
+vendor, so there is nothing for CI to build it from. Re-run the script against a
+leviathan checkout when the record moves — splitting by month means a re-sync
+rewrites only the months that changed, rather than one nine-megabyte blob.
+
+### The gaps
+
+The record covers 91 of the 129 months it spans. **Those 38 missing months are
+holes in the exports, not quiet months in the relationship**, and the two look
+identical if you only draw the months that survived — so the runs are computed
+from the file (2016-06, 2016-09, 2017-08, 2020-08 → 2022-11, 2023-01 → 2023-07)
+and the rail draws them at their real width, hatched and labelled. Stating them
+is a fact about the archive; leaving them out would have been a claim about the
+thread.
+
+### Reading it
+
+The rail is the spine: every month as a bar sized by its own count, click to
+open. Within a month the rows grow in chunks as you scroll, and
+`content-visibility` keeps the browser from laying out what is off screen. Deep
+links work cold — `#L1234` resolves to the month that line lives in, loads it,
+grows far enough to reach it and scrolls to it, whatever was on screen before.
+
+Search is the one thing that costs something. Searching all of it means having
+all of it, so the first search pulls every month — about 9 MB — and says so
+while it happens rather than stalling silently. It is cached for the session,
+so the wait is per session and not per search. Every match is a line in the
+record and links back into it.
+
+### On putting it here at all
+
+This README used to say the sealed instruments needed a corpus this repository
+did not carry, and that bringing it across was *a decision about exposure, not a
+porting task*. That decision has now been made, so its terms belong in writing
+rather than in the implication:
+
+- The record is **two people's**, and only one of them writes here.
+- The gate gates rendering, not access. `public/transcript/**` resolves for
+  anyone who types the URL, and while this repository is public it is readable
+  on github.com regardless of what the deployed site does. The same three-step
+  fix applies as everywhere else — encrypt at rest, purge the history, make the
+  repository private — and none of it is done.
+- `robots.txt` carries a `Disallow: /transcript/`, and the agent surface
+  (`llms.txt`, `agent/`) is built from `public/wiki/` only, so the record is
+  not in it. Both are requests, not controls.
+
+`V · THE CLOCK` is the instrument that reads this corpus — Annie's 68,998
+messages, placed by when they were sent. It stays SEALED, but for a different
+reason than before: the corpus is here now, and the instrument is not built.
 
 ## TRANSMISSIONS
 
@@ -588,6 +676,7 @@ src/
   blog/              the transmissions and their markdown
   gate/              the four steps in front of everything, and the terms
   leviathan/         the instrument rack: registry, frame, datasets
+  transcript/        the message record: spine, month reader, whole-record search
   wiki/              snapshot loading, markdown, charts, infoboxes, briefs, the map
 ```
 

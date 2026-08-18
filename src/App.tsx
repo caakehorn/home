@@ -14,6 +14,7 @@ import { LeviathanRoute } from './routes/Leviathan'
 import { LineageRoute } from './routes/Lineage'
 import { Splash } from './routes/Splash'
 import { TermsRoute } from './routes/Terms'
+import { TranscriptRoute } from './routes/Transcript'
 import { WikiIndexRoute } from './routes/Wiki'
 import { WikiPageRoute } from './routes/WikiPage'
 import { Stub } from './routes/Stub'
@@ -59,6 +60,7 @@ function Site() {
         <Route path="/brain/*" element={<WikiPageRoute />} />
         <Route path="/leviathan" element={<LeviathanRoute />} />
         <Route path="/leviathan/:id" element={<LeviathanRoute />} />
+        <Route path="/transcript" element={<TranscriptRoute />} />
         <Route path="/:slug" element={<Stub />} />
       </Routes>
 

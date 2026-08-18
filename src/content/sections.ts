@@ -43,6 +43,16 @@ export const SECTIONS: Section[] = [
     chant: banner('leviathan'),
   },
   {
+    slug: 'transcript',
+    title: 'THE TRANSCRIPT',
+    kana: '記録',
+    blurb:
+      'The complete message record, dragged over from the old repo intact — 134,348 messages across eleven years, in the order they were sent. Every other room here argues about this material. This one is the material.',
+    status: 'LIVE',
+    accent: 5,
+    chant: banner('transcript'),
+  },
+  {
     slug: 'arcade',
     title: 'ARCADE',
     kana: '遊戯場',

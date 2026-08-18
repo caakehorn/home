@@ -84,7 +84,8 @@ export const INSTRUMENTS: Instrument[] = [
     blurb: 'Every request, recounted from the raw corpus, in the order it was made.',
     method: 'Ledger rows counted from the message export; citations, not claims.',
     status: 'SEALED',
-    needs: 'the message corpus, which is not vendored here',
+    needs:
+      'the classified ledger behind it, which is not vendored here — the raw record now is (see THE TRANSCRIPT), but the ledger is a hand-audited reading of it and is a separate artefact',
   },
   {
     id: 'clock',
@@ -95,7 +96,8 @@ export const INSTRUMENTS: Instrument[] = [
     blurb: 'Every message placed by when it was sent. Angle is the hour, radius is the date.',
     method: 'Timestamps read from the string, never through Date(), so no timezone can move an hour.',
     status: 'SEALED',
-    needs: 'the message corpus, which is not vendored here',
+    needs:
+      'nothing from outside any more — the corpus it reads arrived with THE TRANSCRIPT and ships at /transcript. What is missing is the instrument, which is not built yet',
   },
   {
     id: 'accretion',

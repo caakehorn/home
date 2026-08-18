@@ -1,0 +1,417 @@
+/* ==========================================================================
+   THE TRANSCRIPT — the reader
+
+   A record is not a feed. Nothing here is a card, nothing floats, nothing is
+   rounded off: it is ruled lines in a ledger, and the two voices are told
+   apart by a bar of colour down the left of each and nothing else. The chrome
+   stays out of the way, because the only thing on this page worth looking at
+   is the text somebody typed.
+   ========================================================================== */
+
+.tsc {
+  padding-bottom: 4rem;
+}
+
+.tsc__state {
+  max-width: 74ch;
+  padding: 1.4rem 0;
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  line-height: 1.7;
+  color: var(--text-dim);
+}
+
+.tsc__state code {
+  color: var(--glow, var(--n5));
+}
+
+/* ---- the control bar ---------------------------------------------------- */
+
+.tsc__bar {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.7rem 0;
+  background: color-mix(in srgb, var(--void) 94%, transparent);
+  backdrop-filter: blur(6px);
+  border-bottom: var(--rule) solid var(--edge);
+}
+
+.tsc__q {
+  flex: 1 1 18rem;
+  min-width: 12rem;
+  padding: 0.55rem 0.7rem;
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  color: var(--text);
+  background: var(--void-2);
+  border: var(--staple) solid color-mix(in srgb, var(--text-dim) 45%, transparent);
+  border-radius: 0;
+}
+
+.tsc__q:focus-visible {
+  outline: none;
+  border-color: var(--glow, var(--n5));
+}
+
+.tsc__filters {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.tsc__filter {
+  padding: 0.5rem 0.7rem;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  color: var(--text-dim);
+  background: var(--void-2);
+  border: var(--staple) solid color-mix(in srgb, var(--text-dim) 45%, transparent);
+  cursor: pointer;
+}
+
+.tsc__filter:hover {
+  color: var(--text);
+  border-color: var(--glow, var(--n5));
+}
+
+.tsc__filter[aria-pressed='true'] {
+  color: var(--on-glow);
+  background: var(--glow, var(--n5));
+  border-color: var(--glow, var(--n5));
+}
+
+.tsc__count {
+  flex: 0 0 auto;
+  margin-left: auto;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+/* ---- the rail: every month, and every month that is missing -------------- */
+
+.tsc__rail {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: end;
+  gap: 0.15rem 0.7rem;
+  padding: 0.9rem 0 1.1rem;
+  border-bottom: var(--staple) solid color-mix(in srgb, var(--text-dim) 30%, transparent);
+}
+
+.tsc__rail-year {
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  padding-bottom: 0.2rem;
+}
+
+.tsc__rail-run {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tsc__rail-month {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  width: 2.1rem;
+  padding: 0 0 0.15rem;
+  background: none;
+  border: none;
+  border-bottom: var(--staple) solid transparent;
+  cursor: pointer;
+}
+
+.tsc__rail-bar {
+  width: 100%;
+  height: 2.2rem;
+  display: block;
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--text-dim) 55%, transparent) 0 var(--h),
+    transparent var(--h)
+  );
+}
+
+.tsc__rail-name {
+  font-family: var(--f-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+
+.tsc__rail-month:hover .tsc__rail-bar {
+  background: linear-gradient(to top, var(--glow, var(--n5)) 0 var(--h), transparent var(--h));
+}
+
+.tsc__rail-month--on {
+  border-bottom-color: var(--glow, var(--n5));
+}
+
+.tsc__rail-month--on .tsc__rail-bar {
+  background: linear-gradient(to top, var(--glow, var(--n5)) 0 var(--h), transparent var(--h));
+}
+
+.tsc__rail-month--on .tsc__rail-name {
+  color: var(--glow, var(--n5));
+}
+
+/* A hole in the exports is drawn as a hole, sized by how long it ran — a rail
+   that only shows the months that survived makes an absence look like a lull. */
+.tsc__rail-gap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.2rem;
+  min-width: calc(var(--wide) * 0.42rem);
+  margin-bottom: 0.85rem;
+  padding: 0 0.3rem;
+  overflow: hidden;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent 0 5px,
+    color-mix(in srgb, var(--text-dim) 26%, transparent) 5px 6px
+  );
+  border-block: var(--staple) solid color-mix(in srgb, var(--text-dim) 40%, transparent);
+}
+
+.tsc__rail-gap span {
+  font-family: var(--f-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  color: var(--text-dim);
+}
+
+/* ---- the document ------------------------------------------------------- */
+
+.tsc__doc {
+  margin: 0;
+  padding: 0.6rem 0 0;
+  list-style: none;
+}
+
+.tsc__line {
+  display: grid;
+  grid-template-columns: 4.5rem 8.5rem 4.5rem 1fr;
+  gap: 0.5rem 0.8rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--text-dim) 16%, transparent);
+
+  /* 134,000 rows: the browser is told it may skip laying out what is off
+     screen, and roughly how tall a row is so the scrollbar does not lurch. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 2.6rem;
+}
+
+.tsc__ln {
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  text-align: right;
+  padding-top: 0.25rem;
+  color: color-mix(in srgb, var(--text-dim) 70%, transparent);
+  text-decoration: none;
+  user-select: none;
+}
+
+.tsc__ln:hover {
+  color: var(--glow, var(--n5));
+  text-decoration: underline;
+}
+
+.tsc__ts {
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  padding-top: 0.25rem;
+  white-space: nowrap;
+  color: var(--text-dim);
+}
+
+.tsc__att {
+  margin-left: 0.35rem;
+  font-size: 0.52rem;
+  letter-spacing: 0.1em;
+  color: var(--n3);
+}
+
+.tsc__who {
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding-top: 0.2rem;
+  white-space: nowrap;
+  color: var(--who);
+}
+
+.tsc__tx {
+  margin: 0;
+  padding-left: 0.7rem;
+  border-left: var(--rule) solid var(--who);
+  font-family: var(--f-ui);
+  font-size: var(--step-0);
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--text);
+}
+
+/* A tapback is a reaction to a message, not a message. It stays in the record
+   — nothing is removed — and is set back so it does not read as one. */
+.tsc__line--tap {
+  opacity: 0.55;
+}
+
+.tsc__line--landed {
+  background: color-mix(in srgb, var(--glow, var(--n5)) 14%, transparent);
+  outline: var(--staple) solid var(--glow, var(--n5));
+}
+
+.tsc__tx mark {
+  padding: 0 0.1em;
+  color: var(--on-glow);
+  background: var(--glow, var(--n5));
+}
+
+/* ---- the feet ----------------------------------------------------------- */
+
+.tsc__more {
+  display: flex;
+  justify-content: center;
+  padding: 1.2rem 0;
+}
+
+.tsc__note {
+  max-width: 74ch;
+  padding: 1rem 0 0;
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  line-height: 1.7;
+  color: var(--text-dim);
+}
+
+.tsc__step {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 1.4rem 0 0;
+  border-top: var(--staple) solid color-mix(in srgb, var(--text-dim) 30%, transparent);
+}
+
+.tsc__end {
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  align-self: center;
+}
+
+@media (width <= 46rem) {
+  .tsc__line {
+    grid-template-columns: 3.4rem 1fr;
+    gap: 0.15rem 0.6rem;
+  }
+
+  .tsc__ln {
+    grid-column: 1;
+    grid-row: 1 / 3;
+  }
+
+  .tsc__ts {
+    grid-column: 2;
+    grid-row: 1;
+    padding-top: 0;
+  }
+
+  .tsc__who {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+    padding-top: 0;
+  }
+
+  .tsc__tx {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .tsc__rail {
+    grid-template-columns: 1fr;
+    gap: 0.1rem;
+  }
+
+  .tsc__rail-run {
+    overflow-x: auto;
+  }
+}
+
+/* ---- the ledger: what the record is, before a word of it is read -------- */
+
+.tsc__ledger {
+  padding: 1.2rem 0 0.4rem;
+}
+
+.tsc__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0 0 1rem;
+}
+
+.tsc__chip {
+  padding: 0.4rem 0.6rem;
+  background: var(--void-2);
+  border-left: var(--rule) solid var(--glow, var(--n5));
+}
+
+.tsc__chip dt {
+  font-family: var(--f-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.14em;
+  color: var(--text-dim);
+}
+
+.tsc__chip dd {
+  margin: 0.1rem 0 0;
+  font-family: var(--f-mono);
+  font-size: var(--step-0);
+  color: var(--text);
+}
+
+.tsc__ledger .tsc__note {
+  padding: 0 0 0.8rem;
+}
+
+.tsc__note b {
+  color: var(--glow, var(--n5));
+  letter-spacing: 0.06em;
+}
+
+.tsc__note code {
+  color: var(--text);
+}
+
+.tsc__source {
+  margin: 0;
+  padding: 0.2rem 0 0.4rem;
+  font-family: var(--f-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--text-dim) 80%, transparent);
+}

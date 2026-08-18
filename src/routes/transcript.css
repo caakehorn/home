@@ -1,0 +1,59 @@
+/* ==========================================================================
+   THE TRANSCRIPT — the wing
+   ========================================================================== */
+
+.tsw {
+  position: relative;
+  z-index: 1;
+  min-height: 100%;
+  background:
+    radial-gradient(80% 45% at 50% 0%, color-mix(in srgb, var(--n5) 18%, transparent), transparent 70%),
+    var(--void);
+}
+
+.tsw__masthead {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 0.3rem 1rem;
+  padding-block: clamp(1.6rem, 5vh, 3rem) 0.6rem;
+}
+
+.tsw__title {
+  font-size: clamp(1.7rem, 6vw, 4.2rem);
+  line-height: 0.95;
+}
+
+.tsw__kana {
+  font-size: clamp(1.6rem, 5vw, 3.4rem);
+  line-height: 1;
+  color: var(--n5);
+  text-shadow: 0 0 calc(var(--glow-r) * 0.8) var(--n5);
+}
+
+.tsw__note {
+  grid-column: 1 / -1;
+  max-width: 70ch;
+  font-size: var(--step--1);
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+.tsw__rule {
+  grid-column: 1 / -1;
+  max-width: 70ch;
+  margin-top: 0.5rem;
+  padding: 0.6rem 0.8rem;
+  font-family: var(--f-ui);
+  font-size: var(--step--1);
+  line-height: 1.6;
+  color: var(--text-dim);
+  background: color-mix(in srgb, var(--void-2) 80%, transparent);
+  border-left: var(--rule) solid var(--n5);
+}
+
+.tsw__rule b {
+  color: var(--n5);
+  font-family: var(--f-mono);
+  letter-spacing: 0.14em;
+}

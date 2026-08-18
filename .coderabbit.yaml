@@ -7,9 +7,17 @@
 # CodeRabbit's 300-file limit and no review happens at all.
 #
 # Edit the source in wiki-brain and re-run `node scripts/sync-wiki.mjs`.
+#
+# public/transcript is the same arrangement for the message record: 91 files
+# of derived JSON split out of caakehorn/leviathan's transcript.json, one per
+# covered month. Also not code, also generated — edit nothing here, re-run
+# `npm run transcript -- ../leviathan`. Reviewing it would spend the budget on
+# nine megabytes of other people's text messages and say nothing about the
+# change that carried them.
 language: en-US
 
 reviews:
   path_filters:
     - '!public/wiki/**'
     - '!public/fonts/**'
+    - '!public/transcript/**'

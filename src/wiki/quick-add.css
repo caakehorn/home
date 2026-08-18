@@ -1,0 +1,128 @@
+/* ==========================================================================
+   QUICK ADD — manual note entry from the article footer.
+
+   A self-contained, collapsible panel: a single button that becomes a
+   textarea with SAVE/CANCEL. Styled to sit alongside the gaps module —
+   same input/button treatment, same paper-over-void surface — but placed
+   at the very bottom of an article rather than on its own route.
+   ========================================================================== */
+
+.qa {
+  display: grid;
+  gap: 0.4rem;
+  margin-top: 3rem;
+  padding-top: 1.4rem;
+  border-top: var(--rule) solid color-mix(in srgb, var(--text-dim) 30%, transparent);
+}
+
+.qa__btn {
+  justify-self: start;
+  padding: 0.4rem 0.9rem;
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: var(--edge);
+  background: var(--n3);
+  border: 3px solid var(--edge);
+  box-shadow: 4px 4px 0 var(--edge);
+  cursor: pointer;
+  transition: transform 130ms ease, box-shadow 130ms ease;
+}
+
+.qa__btn:hover:not(:disabled) {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--edge), 0 0 var(--glow-r) color-mix(in srgb, var(--n3) 55%, transparent);
+}
+
+.qa__btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.qa__btn--go {
+  background: var(--n3);
+}
+
+.qa__panel {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.8rem;
+  background: color-mix(in srgb, var(--void) 45%, transparent);
+  border: var(--rule) solid color-mix(in srgb, var(--text-dim) 28%, transparent);
+}
+
+.qa__label {
+  margin: 0;
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  color: var(--n2);
+}
+
+.qa__note {
+  margin: 0;
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+.qa__box {
+  width: 100%;
+  min-height: 9rem;
+  padding: 0.55rem;
+  font-family: var(--f-mono);
+  font-size: 0.78rem;
+  line-height: 1.6;
+  resize: vertical;
+  color: var(--text);
+  background: var(--void-2);
+  border: 1px solid color-mix(in srgb, var(--text-dim) 40%, transparent);
+}
+
+.qa__box:focus {
+  outline: none;
+  border-color: var(--n3);
+}
+
+.qa__row {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.qa__status {
+  margin: 0;
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  line-height: 1.55;
+  color: var(--text-dim);
+}
+
+.qa__commit {
+  margin: 0;
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+}
+
+.qa__commit a {
+  color: var(--n3);
+  text-decoration: none;
+}
+
+.qa__commit a:hover {
+  text-decoration: underline;
+}
+
+/* Light palettes (basquiat, riot): dark buttons on bone ground read fine,
+   but the panel surface wants the same cream treatment gaps gets. */
+:root[data-vibe='basquiat'] .qa__panel,
+:root[data-vibe='riot'] .qa__panel {
+  background: #faf6ec;
+  color: var(--edge);
+}
+
+:root[data-vibe='basquiat'] .qa__box,
+:root[data-vibe='riot'] .qa__box {
+  color: var(--edge);
+  background: #fffdf6;
+}

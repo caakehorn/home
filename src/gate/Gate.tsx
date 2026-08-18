@@ -76,7 +76,7 @@ export function Gate({ children }: { children: React.ReactNode }) {
     if (!agreed) return { step: 'terms', until: 0 }
     if (unlocked) return { step: 'open', until: 0 }
     if (deadline > Date.now()) return { step: 'punish', until: deadline }
-    return { step: 'quiz', until: 0 }
+    return { step: 'pass', until: 0 }
   }
 
   const initial = computeInitial()
@@ -132,7 +132,7 @@ export function Gate({ children }: { children: React.ReactNode }) {
             // device is asked again, which is the only way a change to the
             // document means anything.
             write(localStorage, KEYS.terms, TERMS_VERSION)
-            setStep('quiz')
+            setStep('pass')
           }}
           onDecline={() => setStep('declined')}
         />

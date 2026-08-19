@@ -113,15 +113,13 @@
   text-decoration: underline;
 }
 
-/* Light palettes (basquiat, riot): dark buttons on bone ground read fine,
-   but the panel surface wants the same cream treatment gaps gets. */
-:root[data-vibe='basquiat'] .qa__panel,
+/* RIOT: dark buttons on newsprint read fine, but the panel surface wants
+   the same cream treatment gaps gets. */
 :root[data-vibe='riot'] .qa__panel {
   background: #faf6ec;
   color: var(--edge);
 }
 
-:root[data-vibe='basquiat'] .qa__box,
 :root[data-vibe='riot'] .qa__box {
   color: var(--edge);
   background: #fffdf6;

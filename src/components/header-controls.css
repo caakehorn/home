@@ -86,10 +86,10 @@
 
 /* -- palette -------------------------------------------------------------- */
 
-/* Wraps. At four palettes this row fitted on a phone and did not need to; at
-   six it overflowed a 390px viewport, and since `body` clips overflow-x the
+/* Wraps. At four palettes this row fitted on a phone and did not need to; past
+   that it overflowed a 390px viewport, and since `body` clips overflow-x the
    last swatch was not merely off the edge, it was unreachable — you could not
-   select the sixth palette on a phone at all. `min-width: 0` is the half that
+   select it on a phone at all. `min-width: 0` is the half that
    matters: a flex item defaults to `min-width: auto` and refuses to shrink
    below its content, so without it the row would still push past the edge
    rather than wrapping. */
@@ -138,7 +138,7 @@
   border: 1px solid var(--edge);
 }
 
-/* Six spelled-out palette names is the difference between a one-row header
+/* Spelled-out palette names are the difference between a one-row header
    and a three-row one on every screen worth the trouble, so the swatch carries
    the identity and the name goes to the tooltip and the accessible label. */
 .hctl__vibe-name {

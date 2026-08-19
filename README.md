@@ -199,36 +199,26 @@ whole string is on the wrapper as an `aria-label` and every scrap is
 
 ## Palettes
 
-Six, swapped by `data-vibe` on `<html>`. **`basquiat` is the default and the
-house style**: raw canvas, opaque primaries, no glow anywhere. `riot` is the
-photocopier — toner on newsprint, one spot red, two inks and no third. The
-other four (`den` · `untitled` · `slime` · `kaiju`) are the neon rooms, and you
-have to ask for them.
+Five, swapped by `data-vibe` on `<html>`. **`riot` is the default and the
+house style**: the photocopier — toner on newsprint, one spot red, two inks and
+no third. The other four (`den` · `untitled` · `slime` · `kaiju`) are the neon
+rooms, and you have to ask for them.
 
 Defined as custom properties in `src/styles/tokens.css`; every component reads
 `--n1`…`--n5`, the `--void` and `--text` ramps, so nothing needs to know which
-palette is live.
+palette is live. `riot` also seeds bare `:root`, so the first paint — before the
+provider has written `[data-vibe]` onto `<html>` — is already the house style.
 
-Two of the six put an accent where the others put a light source, which breaks
-one assumption the rest of the site made everywhere: that text sitting **on** an
-accent should be `--edge`. In `basquiat`, `--n5` *is* the ink, so a lit nav link
+`riot` puts an accent where the others put a light source, which breaks one
+assumption the rest of the site made everywhere: that text sitting **on** an
+accent should be `--edge`. On newsprint `--n5` *is* the ink, so a lit nav link
 was black on black. `--on-glow` is the fix — it resolves to `--void`, which is
-near-black in the dark rooms (nothing there changes) and paper in the light
-ones. Anything whose background is `--glow` reads its text colour from it.
+near-black in the dark rooms (nothing there changes) and paper on newsprint.
+Anything whose background is `--glow` reads its text colour from it.
 
-### The headings
-
-Raw canvas does not do black headings. Flat black Archivo Black at 5rem on bone
-is a legal notice: no weight of its own, and it kills the palette at the top of
-every page. What the paintings do is put the word on a **slab** — a block of
-cadmium or ferrari red or cobalt, hand-edged and not quite square, with the
-letters over it in bone and the line drawn round them.
-
-So `SubHead` renders that. The slab is the element that used to hold the RGB
-bloom, reused and run through the `#oilstick` filter; one slab colour per room,
-so no two headings on a walk through the site are the same block of paint. Prose
-headings inside a page are not slabs — a painted block every four paragraphs is
-unreadable — but they stop being black too: red at h2, cobalt below it.
+A palette that is retired simply leaves `VIBES`: a stored `vibe` that no longer
+passes `isVibeId` falls back to the default on read, so nobody is stranded in a
+room that is not there any more and the storage key does not need a bump.
 
 ## THE CRAWLS
 
@@ -652,7 +642,7 @@ Each announces itself on mount via `useRig`, so the HUD counts live elements
 instead of a hard-coded number.
 
 1. **CHAOS DIAL** — draggable/arrow-keyed knob, 0 to 11, drives `--chaos`
-2. **VIBE SWITCH** — the six palettes
+2. **VIBE SWITCH** — the five palettes
 3. **SHELL** — 34 verbs, 8 of them listed in `help`; reads the corpus (`grep`,
    `whois`, `cite`, `hegel`), drives the site (`chaos`, `vibe`, `goto`,
    `overdose`, `narcan`), and takes the screen apart (`invert`, `flip`,
@@ -672,7 +662,7 @@ src/
   content/           section definitions, banner slogans, the crawls
   routes/            Splash, Home, Stub, blog index + post, wiki index + page
   state/             palette + chaos context, persisted
-  styles/            fonts, tokens, type treatments, punk, raw canvas, global
+  styles/            fonts, tokens, type treatments, punk, global
   blog/              the transmissions and their markdown
   gate/              the four steps in front of everything, and the terms
   leviathan/         the instrument rack: registry, frame, datasets

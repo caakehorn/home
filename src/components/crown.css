@@ -1,0 +1,49 @@
+/* ==========================================================================
+   THE CROWN — the mark itself, and the slot it hangs in.
+
+   Positioning is palette-independent; whether a crown is *shown* is not, and
+   that is decided per palette below.
+   ========================================================================== */
+
+.crown__defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.crown {
+  display: none;
+  width: 1.1em;
+  height: 0.68em;
+  color: var(--n1);
+  filter: url(#oilstick);
+  overflow: visible;
+}
+
+.crowned {
+  position: relative;
+}
+
+.crowned > .crown {
+  position: absolute;
+  top: -0.62em;
+  left: -0.1em;
+  width: 0.9em;
+  height: 0.56em;
+  transform: rotate(-9deg);
+  pointer-events: none;
+}
+
+/* The crown hangs above the letters, so the heading has to leave room for it —
+   in em, off the heading's own size, or it collides with the mark above it at
+   the top of the scale and floats miles clear at the bottom. */
+:root[data-vibe='riot'] .crowned {
+  margin-top: 0.72em;
+}
+
+:root[data-vibe='riot'] .crowned > .crown {
+  display: block;
+  z-index: 2;
+  color: var(--spot);
+}

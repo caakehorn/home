@@ -227,20 +227,15 @@
   color: var(--text-dim);
 }
 
-/* Raw canvas: the panes are paper, not lit panels. */
-:root[data-vibe='basquiat'] .gaps__pane,
+/* Newsprint: the panes are paper, not lit panels. */
 :root[data-vibe='riot'] .gaps__pane,
-:root[data-vibe='basquiat'] .gaps__lede,
 :root[data-vibe='riot'] .gaps__lede {
   background: #faf6ec;
   color: var(--edge);
 }
 
-:root[data-vibe='basquiat'] .gaps__quote,
 :root[data-vibe='riot'] .gaps__quote,
-:root[data-vibe='basquiat'] .gaps__box,
 :root[data-vibe='riot'] .gaps__box,
-:root[data-vibe='basquiat'] .gaps__search,
 :root[data-vibe='riot'] .gaps__search {
   color: var(--edge);
   background: #fffdf6;

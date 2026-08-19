@@ -95,10 +95,10 @@
 }
 
 /* --------------------------------------------------------------------------
-   Loud rooms want the scraps to sit on the dark ground rather than glow off
-   it, so the paper stays paper and the black scrap gets an edge to be seen by.
+   The scraps sit on the ground rather than glow off it, so the paper stays
+   paper and the black scrap gets an edge to be seen by.
    -------------------------------------------------------------------------- */
-:root:not([data-vibe='basquiat']) .ransom__cut--1 {
+.ransom__cut--1 {
   outline: 1px solid rgb(255 255 255 / 0.25);
 }
 

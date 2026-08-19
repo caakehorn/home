@@ -12,10 +12,12 @@ import './crawl.css'
  * about a second. The feel to aim for is a flywheel: you are not steering it,
  * you are spinning it, and it always winds back down to the same idle.
  *
- * Two of them run — THE RATIO along the bottom travelling left, JET FUEL along
- * the top travelling right. They are the same component and the same physics;
- * only the edge, the direction and the list differ, so the pair respond to a
- * scroll identically and in mirror.
+ * Two of them run — THE RATIO along the top travelling left, JET FUEL along
+ * the bottom travelling right. They are the same component and the same
+ * physics; only the edge, the direction and the list differ, so the pair
+ * respond to a scroll identically and in mirror. The two directions are
+ * opposed on purpose: a pair travelling the same way reads as one long strip
+ * that happens to be broken in the middle.
  *
  * ---- why this is not a CSS animation ----------------------------------
  *

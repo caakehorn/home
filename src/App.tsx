@@ -65,10 +65,10 @@ function Site() {
       </Routes>
 
       {splashed && <Splash />}
-      {/* Two crawls, same physics, mirrored: the agenda runs right along the
-          top, the ratio runs left along the bottom. */}
-      <Crawl nodes={JET_FUEL} label="Jet fuel" edge="top" travel="right" />
-      <Crawl nodes={RATIO} label="The ratio" edge="bottom" travel="left" />
+      {/* Two crawls, same physics, mirrored: the ratio runs left along the
+          top, the agenda runs right along the bottom. */}
+      <Crawl nodes={RATIO} label="The ratio" edge="top" travel="left" />
+      <Crawl nodes={JET_FUEL} label="Jet fuel" edge="bottom" travel="right" />
       <Hud />
     </>
   )

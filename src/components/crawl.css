@@ -1,10 +1,10 @@
 /* ==========================================================================
-   THE RATIO — the crawl along the bottom of the viewport
+   THE CRAWLS — the two banners pinned to the edges of the viewport
 
-   Fixed, so it never scrolls away: the marquees inside the page are furniture
-   you pass, and this one is furniture you live with. It gets the loudest
-   treatment on the site short of the masthead — a hazard bar for a top edge,
-   and every node cut out of a different sheet.
+   Fixed, so they never scroll away: the marquees inside the page are furniture
+   you pass, and these are furniture you live with. They get the loudest
+   treatment on the site short of the masthead — a hazard bar on the outer
+   edge, and every node cut out of a different sheet.
 
    The nodes reuse the ransom scrap idea rather than the marquee idea, because
    they are individually separate things being stacked up at you. A single

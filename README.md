@@ -223,7 +223,9 @@ room that is not there any more and the storage key does not need a bump.
 ## THE CRAWLS
 
 Two banners fixed to the viewport, on every page behind the gate: **THE RATIO**
-along the bottom travelling left, **JET FUEL** along the top travelling right.
+along the top travelling left, **JET FUEL** along the bottom travelling right.
+The two travel in opposite directions on purpose — a pair going the same way
+reads as one long strip that happens to be broken in the middle.
 The marquees inside a page are furniture you walk past; these are furniture you
 live with, which is why they get the loudest treatment on the site short of the
 masthead — a hazard bar on each outer edge and every node cut out of a

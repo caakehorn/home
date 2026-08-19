@@ -48,7 +48,7 @@
 
 /* On the dark rooms multiply would just black the page out; the dots have to
    be light and screened instead. Same effect, opposite polarity. */
-:root:not([data-vibe='basquiat']):not([data-vibe='riot']) .fx-toner {
+:root:not([data-vibe='riot']) .fx-toner {
   background-image:
     linear-gradient(104deg, transparent 0 38%, rgb(255 255 255 / 0.06) 44%, transparent 50% 100%),
     radial-gradient(circle at 50% 50%, rgb(255 255 255 / 0.14) 0 30%, transparent 32%);
@@ -384,36 +384,30 @@
    THE FRONT DOOR, ON PAPER
 
    The splash is a Tokyo night: a graded sky, a glowing moon, neon signs, lit
-   windows, a lantern row. All of it assumes a dark room, and in the two light
-   palettes the gradient runs from midnight to cream and the whole scene turns
-   into a pastel wash — the one thing those palettes must never look like.
+   windows, a lantern row. All of it assumes a dark room, and on newsprint the
+   gradient runs from midnight to cream and the whole scene turns into a pastel
+   wash — the one thing that palette must never look like.
 
    So on paper it stops being a night and becomes a flyer OF a night: flat
    ground, ink silhouette, one spot colour, no light sources anywhere. Same
    drawing, different printing process.
    ========================================================================== */
-:root[data-vibe='basquiat'] .splash,
 :root[data-vibe='riot'] .splash {
   background: var(--void);
 }
 
 /* No stars and no moon: it is a sheet of paper, and a sheet of paper has no
    sky in it. */
-:root[data-vibe='basquiat'] .splash__sky,
 :root[data-vibe='riot'] .splash__sky {
   display: none;
 }
 
 /* The skyline goes flat — cut out of black paper and pasted down. */
-:root[data-vibe='basquiat'] .splash__skyline,
 :root[data-vibe='riot'] .splash__skyline {
   opacity: 1;
 }
 
-:root[data-vibe='basquiat'] .splash__towers rect,
 :root[data-vibe='riot'] .splash__towers rect,
-:root[data-vibe='basquiat'] .splash__pagoda path,
-:root[data-vibe='basquiat'] .splash__pagoda rect,
 :root[data-vibe='riot'] .splash__pagoda path,
 :root[data-vibe='riot'] .splash__pagoda rect {
   fill: var(--edge);
@@ -421,16 +415,13 @@
   filter: none;
 }
 
-:root[data-vibe='basquiat'] .splash__windows rect,
 :root[data-vibe='riot'] .splash__windows rect {
   fill: var(--void);
   opacity: 1;
   animation: none;
 }
 
-:root[data-vibe='basquiat'] .splash__tower,
 :root[data-vibe='riot'] .splash__tower,
-:root[data-vibe='basquiat'] .splash__tower-x,
 :root[data-vibe='riot'] .splash__tower-x {
   stroke: var(--edge);
   stroke-width: 5;
@@ -439,7 +430,6 @@
 }
 
 /* Signage is printed, so it is ink on paper with a rule round it. */
-:root[data-vibe='basquiat'] .splash__sign,
 :root[data-vibe='riot'] .splash__sign {
   color: var(--edge);
   background: var(--void);
@@ -449,7 +439,6 @@
   animation: none;
 }
 
-:root[data-vibe='basquiat'] .splash__lantern,
 :root[data-vibe='riot'] .splash__lantern {
   color: var(--void);
   background: var(--n2);
@@ -461,7 +450,6 @@
   background: var(--spot);
 }
 
-:root[data-vibe='basquiat'] .splash__venue,
 :root[data-vibe='riot'] .splash__venue {
   color: var(--n2);
   text-shadow: none;
@@ -473,9 +461,7 @@
 }
 
 /* The backing plate becomes a strip of paper, torn along the bottom, taped
-   over the drawing. The raw-canvas layer gives it a patch as well; that patch
-   and this border were fighting, so the patch is switched off here. */
-:root[data-vibe='basquiat'] .splash__tagline,
+   over the drawing. */
 :root[data-vibe='riot'] .splash__tagline {
   background: var(--void);
   backdrop-filter: none;
@@ -484,7 +470,6 @@
   color: var(--edge);
 }
 
-:root[data-vibe='basquiat'] .splash__tagline-sep,
 :root[data-vibe='riot'] .splash__tagline-sep {
   color: var(--n2);
   text-shadow: none;
@@ -495,14 +480,12 @@
 }
 
 /* Ink door, paper letters. */
-:root[data-vibe='basquiat'] .splash__enter,
 :root[data-vibe='riot'] .splash__enter {
   color: var(--void);
   background: var(--edge);
   box-shadow: 10px 10px 0 var(--n2);
 }
 
-:root[data-vibe='basquiat'] .splash__enter:hover,
 :root[data-vibe='riot'] .splash__enter:hover {
   background: var(--n2);
   box-shadow: 14px 14px 0 var(--edge);
@@ -513,7 +496,6 @@
 }
 
 /* The roof stops being a lit neon floor and becomes a hazard bar. */
-:root[data-vibe='basquiat'] .splash__tiles,
 :root[data-vibe='riot'] .splash__tiles {
   background-image: repeating-linear-gradient(-45deg, var(--edge) 0 16px, var(--n1) 16px 32px);
   border-top: 6px solid var(--edge);
@@ -525,19 +507,16 @@
 }
 
 /* Crows: solid ink, no halo, still bobbing. */
-:root[data-vibe='basquiat'] .splash__crow-body,
 :root[data-vibe='riot'] .splash__crow-body {
   fill: var(--edge);
   stroke: var(--edge);
   filter: none;
 }
 
-:root[data-vibe='basquiat'] .splash__crow-legs,
 :root[data-vibe='riot'] .splash__crow-legs {
   stroke: var(--edge);
 }
 
-:root[data-vibe='basquiat'] .splash__crow-eye,
 :root[data-vibe='riot'] .splash__crow-eye {
   fill: var(--n2);
   filter: none;

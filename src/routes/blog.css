@@ -201,7 +201,6 @@
   pointer-events: none;
 }
 
-:root[data-vibe='basquiat'] .flyer__tape,
 :root[data-vibe='riot'] .flyer__tape {
   background: rgb(150 140 115 / 0.34);
   border-inline-color: rgb(90 84 68 / 0.34);
@@ -560,49 +559,4 @@
   justify-items: start;
   gap: 1rem;
   padding-block: clamp(3rem, 12vh, 7rem);
-}
-
-/* --------------------------------------------------------------------------
-   RAW CANVAS — the flyers become taped-down paper rather than lit panels.
-   -------------------------------------------------------------------------- */
-:root[data-vibe='basquiat'] .blog,
-:root[data-vibe='basquiat'] .blog--post {
-  background: none !important;
-}
-
-:root[data-vibe='basquiat'] .flyer {
-  background: #faf6ec !important;
-  box-shadow: 9px 10px 0 var(--edge) !important;
-}
-
-:root[data-vibe='basquiat'] .flyer__kana {
-  color: color-mix(in srgb, var(--glow, var(--n2)) 55%, transparent);
-}
-
-:root[data-vibe='basquiat'] .blog__mast-note,
-:root[data-vibe='basquiat'] .post__dek,
-:root[data-vibe='basquiat'] .post__crumbs,
-:root[data-vibe='basquiat'] .post__sign,
-:root[data-vibe='basquiat'] .blog__count,
-:root[data-vibe='basquiat'] .blog__foot-note,
-:root[data-vibe='basquiat'] .blog__empty {
-  position: relative;
-  z-index: 1;
-  color: var(--edge);
-  background: #faf6ec;
-  box-shadow: 0 0 0 10px #faf6ec;
-}
-
-:root[data-vibe='basquiat'] .blog__tag,
-:root[data-vibe='basquiat'] .blog__search,
-:root[data-vibe='basquiat'] .post__toc,
-:root[data-vibe='basquiat'] .post__step,
-:root[data-vibe='basquiat'] .blog__back {
-  background: #faf6ec;
-  color: var(--edge);
-}
-
-:root[data-vibe='basquiat'] .blog__tag--on {
-  background: var(--n2);
-  color: #faf6ec;
 }

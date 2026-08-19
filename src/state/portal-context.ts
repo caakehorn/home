@@ -2,13 +2,6 @@ import { createContext } from 'react'
 
 export const VIBES = [
   {
-    id: 'basquiat',
-    name: 'UNTITLED',
-    kana: '王冠',
-    blurb: 'raw canvas, crown, teeth — the whole thing scrawled over',
-    swatch: ['#f5f0e4', '#dd2a17', '#1244c4'],
-  },
-  {
     id: 'riot',
     name: 'RIOT',
     kana: '暴動',
@@ -82,8 +75,8 @@ export type PortalState = {
 
 export const PortalContext = createContext<PortalState | null>(null)
 
-// Bumped when the default palette changed to UNTITLED. A returning visitor
-// with `den` in v1 storage would otherwise never see the new house style —
-// which is not a preference they expressed, it is one they were handed.
+// A stored vibe that is no longer in VIBES fails `isVibeId` on read and falls
+// back to the default, so retiring a palette does not need a key bump: nobody
+// gets stranded on a room that is not there any more.
 export const STORAGE_KEY = 'danfrank:prefs:v2'
 export const SESSION_KEY = 'danfrank:entered:v1'

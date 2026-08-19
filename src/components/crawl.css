@@ -164,13 +164,12 @@
 
 /* On the dark rooms the black scrap needs an edge to be seen against the
    bar behind it. */
-:root:not([data-vibe='basquiat']):not([data-vibe='riot']) .crawl__node--1 {
+:root:not([data-vibe='riot']) .crawl__node--1 {
   outline: 1px solid rgb(255 255 255 / 0.25);
 }
 
-/* Raw canvas and newsprint: the bar is a strip of paper taped across the
-   bottom of the sheet, not a lit panel. */
-:root[data-vibe='basquiat'] .crawl,
+/* Newsprint: the bar is a strip of paper taped across the bottom of the
+   sheet, not a lit panel. */
 :root[data-vibe='riot'] .crawl {
   background: #faf6ec;
 }

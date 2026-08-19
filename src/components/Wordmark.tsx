@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react'
-import { Crown } from './Canvas'
+import { Crown } from './Crown'
 
 const SPARKS = [
   { top: '-14%', left: '-5%', s: '26px', color: '#ffd400', delay: '0s' },

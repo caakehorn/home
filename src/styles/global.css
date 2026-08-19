@@ -1,10 +1,8 @@
 @import './fonts.css';
 @import './tokens.css';
 @import './type.css';
-/* The punk pass runs over every palette; the raw-canvas layer runs over one,
-   so it comes last and wins where the two disagree. */
+/* The punk pass runs over every palette. */
 @import './punk.css';
-@import './basquiat.css';
 
 /* ==========================================================================
    RESET-ISH

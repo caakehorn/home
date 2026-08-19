@@ -114,7 +114,7 @@ export function Home() {
             <ChaosDial />
           </Rig>
 
-          <Rig index={2} title="VIBE SWITCH" kana="色替" hint="six palettes · paint, toner, neon" accent={1}>
+          <Rig index={2} title="VIBE SWITCH" kana="色替" hint="five palettes · toner, neon" accent={1}>
             <VibeSwitch />
           </Rig>
 

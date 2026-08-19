@@ -42,8 +42,8 @@ export function VibeSwitch() {
         })}
       </div>
       <p className="vibes__note">
-        Six palettes: one raw canvas, one photocopier, four rooms with the lights on. The whole
-        site repaints — every panel, every glow, the canvas, the cursor.
+        Five palettes: one photocopier, four rooms with the lights on. The whole site
+        repaints — every panel, every glow, the cursor.
       </p>
     </div>
   )

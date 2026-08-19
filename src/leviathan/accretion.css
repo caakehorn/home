@@ -242,45 +242,38 @@
 }
 
 /* --------------------------------------------------------------------------
-   RAW CANVAS / NEWSPRINT — the chart is drawn, not lit.
+   NEWSPRINT — the chart is drawn, not lit.
    -------------------------------------------------------------------------- */
-:root[data-vibe='basquiat'] .acc__line,
 :root[data-vibe='riot'] .acc__line {
   stroke: var(--n2);
   stroke-width: 2.5;
 }
 
-:root[data-vibe='basquiat'] .acc__area,
 :root[data-vibe='riot'] .acc__area {
   fill: color-mix(in srgb, var(--n2) 9%, transparent);
 }
 
-:root[data-vibe='basquiat'] .acc__readout,
 :root[data-vibe='riot'] .acc__readout {
   background: #faf6ec;
   border-left-color: var(--n2);
   color: var(--edge);
 }
 
-:root[data-vibe='basquiat'] .acc__derived b,
 :root[data-vibe='riot'] .acc__derived b {
   color: var(--n2);
 }
 
-/* Cadmium on cream is unreadable — the marker takes the ink in the light
-   palettes, where it is the only thing on the chart that must be read. */
-:root[data-vibe='basquiat'] .acc__migration text,
+/* Cadmium on cream is unreadable — the marker takes the ink on newsprint,
+   where it is the only thing on the chart that must be read. */
 :root[data-vibe='riot'] .acc__migration text {
   fill: var(--edge);
 }
 
-:root[data-vibe='basquiat'] .acc__migration line,
 :root[data-vibe='riot'] .acc__migration line {
   stroke: var(--edge);
   opacity: 0.6;
 }
 
-:root[data-vibe='basquiat'] .acc__bar--up,
 :root[data-vibe='riot'] .acc__bar--up {
   fill: var(--n3);
 }

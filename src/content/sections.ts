@@ -3,6 +3,8 @@ import { banner } from './slogans'
 export type Section = {
   slug: string
   title: string
+  /** Nav-sized name, for the rooms whose real title will not fit a chip. */
+  short?: string
   kana: string
   blurb: string
   status: 'LIVE' | 'WIRING' | 'DARK'
@@ -54,11 +56,12 @@ export const SECTIONS: Section[] = [
   },
   {
     slug: 'arcade',
-    title: 'ARCADE',
+    title: "ALLY LUBIN'S ADVENTURE ARCADE",
+    short: 'THE ARCADE',
     kana: '遊戯場',
     blurb:
-      'Experimental web games. Half of them are broken on purpose. Insert nothing, play anyway.',
-    status: 'DARK',
+      'Four cabinets, a prize counter and one name in lights. Built for a specific person about that specific person — the 2008 internet, two cats, a seventeen-year courtship and a Cancer sun. Insert nothing, play anyway.',
+    status: 'LIVE',
     accent: 2,
     chant: banner('arcade'),
   },

@@ -12,9 +12,28 @@ the room where both of those happened.
 > LOSE THE ARGUMENT · LOG IT ANYWAY
 
 Six rooms off one hallway: the **wiki-brain** and its map, **THE LATTICE**,
-the **LEVIATHAN** instruments, **THE TRANSCRIPT**, **TRANSMISSIONS**, and an
-**arcade** of experimental web games. Five are open; the arcade is a door with
-scaffolding behind it.
+the **LEVIATHAN** instruments, **THE TRANSCRIPT**, **TRANSMISSIONS**, and
+**ALLY LUBIN'S ADVENTURE ARCADE**. All six are open.
+
+### The arcade
+
+`/arcade` is the one wing addressed to a single named person, and it is named
+after her because she is the only reader the wiki has ever had who got to the
+end. Four cabinets and a prize counter, all of them built out of
+`wiki/people/ally-lubin`:
+
+| | cabinet | what it is |
+|---|---|---|
+| I | **ALU '08** | canvas catcher — catch the 2008 internet, let the marketing hit the floor |
+| II | **EDGAR & SYLVIA** | breakout with a cat for a paddle and a shelf of knock-off-able objects |
+| III | **THE COURTSHIP CONSOLE** | eight-scene dialogue game, 2013 → 2026, every line of his verbatim |
+| IV | **WATER SIGNS** | wire the Cancer constellation star by star, then read the chart |
+
+Cabinets pay one ticket per hundred points into a till in `localStorage`
+(`alu-arcade-v1`); the counter spends them. The room carries its own palette
+rather than following the vibe switch — an arcade is dark inside whatever the
+weather is doing — and its classes are namespaced `arc-*` so nothing in
+`punk.css` repaints them.
 
 ## Running it
 

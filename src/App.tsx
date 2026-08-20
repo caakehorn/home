@@ -6,6 +6,7 @@ import { JET_FUEL, RATIO } from './content/crawls'
 import { Fx } from './components/Fx'
 import { Hud } from './components/Hud'
 import { Gate } from './gate/Gate'
+import { ArcadeRoute } from './routes/Arcade'
 import { BlogRoute } from './routes/Blog'
 import { BlogPostRoute } from './routes/BlogPost'
 import { WritingDashboardRoute } from './routes/WritingDashboard'
@@ -53,6 +54,8 @@ function Site() {
         <Route path="/" element={<Home />} />
         {/* static segments outrank the dynamic stub route */}
         <Route path="/lineage" element={<LineageRoute />} />
+        <Route path="/arcade" element={<ArcadeRoute />} />
+        <Route path="/arcade/:cab" element={<ArcadeRoute />} />
         <Route path="/blog" element={<BlogRoute />} />
         <Route path="/blog/write" element={<WritingDashboardRoute />} />
         <Route path="/blog/:slug" element={<BlogPostRoute />} />

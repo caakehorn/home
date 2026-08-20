@@ -25,7 +25,7 @@ export function Nav() {
               <span className="jp" aria-hidden="true">
                 {section.kana}
               </span>
-              {section.title}
+              {section.short ?? section.title}
             </NavLink>
           </li>
         ))}

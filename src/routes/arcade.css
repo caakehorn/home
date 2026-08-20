@@ -1,0 +1,1306 @@
+/* ==========================================================================
+   ALLY LUBIN'S ADVENTURE ARCADE
+
+   An arcade is dark inside whatever the weather is doing outdoors, so this
+   room does not repaint with the vibe switch the way the rest of the building
+   does. It carries its own tubes: hot pink, cyan, cadmium and a violet that
+   only the star map is allowed to use. The palette tokens still light the nav
+   and the crawls above it — the floor itself is lit by its own signage.
+   ========================================================================== */
+
+.arc {
+  --pink: #ff2bd6;
+  --cyan: #00eaff;
+  --gold: #ffd400;
+  --violet: #a78bfa;
+  --carpet: #0a0413;
+  --carpet-2: #12072044;
+  --ink: #f6f0ff;
+  --ink-dim: #9d8fb8;
+
+  position: relative;
+  z-index: 1;
+  min-height: 100%;
+  color: var(--ink);
+  background:
+    radial-gradient(58% 40% at 50% 0%, #3a0a52 0%, transparent 68%),
+    radial-gradient(40% 30% at 12% 70%, #12043a 0%, transparent 70%),
+    radial-gradient(40% 30% at 88% 40%, #2a0433 0%, transparent 70%),
+    var(--carpet);
+  padding-bottom: 5rem;
+}
+
+/* The floor: the carpet every arcade on earth had, rebuilt in gradients. */
+.arc::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image:
+    repeating-conic-gradient(from 30deg at 22% 18%, #ff2bd611 0deg 12deg, transparent 12deg 30deg),
+    repeating-conic-gradient(from 0deg at 78% 62%, #00eaff11 0deg 10deg, transparent 10deg 26deg),
+    repeating-linear-gradient(58deg, #ffd4000c 0 3px, transparent 3px 42px),
+    repeating-linear-gradient(-58deg, #a78bfa0c 0 3px, transparent 3px 54px);
+}
+
+.arc > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ==========================================================================
+   THE SIGN OVER THE DOOR
+   ========================================================================== */
+
+.arc__mast {
+  padding-top: clamp(1.6rem, 5vh, 3.4rem);
+}
+
+.arc__sign {
+  position: relative;
+  width: min(1100px, 100% - var(--gutter) * 2);
+  margin-inline: auto;
+  padding: clamp(1.4rem, 4vw, 2.6rem) clamp(1.6rem, 5vw, 3.6rem) clamp(1.6rem, 4vw, 2.4rem);
+  text-align: center;
+  background:
+    radial-gradient(70% 100% at 50% 0%, #ff2bd622, transparent 70%),
+    linear-gradient(#0e0518, #150725);
+  border: 4px solid #2a1140;
+  box-shadow:
+    0 0 0 3px #000 inset,
+    0 0 calc(30px + 40px * var(--chaos)) #ff2bd655,
+    0 22px 60px #00000099;
+}
+
+.arc__sign-est {
+  display: block;
+  font-family: var(--f-mono);
+  font-size: clamp(0.6rem, 1.4vw, 0.8rem);
+  letter-spacing: 0.42em;
+  color: var(--cyan);
+  text-shadow: 0 0 12px var(--cyan);
+}
+
+.arc__sign-name {
+  display: grid;
+  gap: 0.1em;
+  margin-top: 0.7rem;
+  font-family: var(--f-logo);
+  line-height: 0.86;
+  text-transform: uppercase;
+}
+
+.arc__sign-line {
+  color: #fff2fb;
+  text-shadow:
+    0 0 4px #fff,
+    0 0 14px var(--pink),
+    0 0 34px var(--pink),
+    0 0 74px #ff2bd6aa,
+    4px 5px 0 #43064b;
+  animation: arc-buzz calc(9s * var(--tempo)) steps(1) infinite;
+}
+
+.arc__sign-line--sm { font-size: clamp(1.1rem, 4.4vw, 2.6rem); letter-spacing: 0.04em; }
+.arc__sign-line--lg {
+  font-size: clamp(2.5rem, 12vw, 8rem);
+  color: #fffbe8;
+  text-shadow:
+    0 0 5px #fff,
+    0 0 16px var(--gold),
+    0 0 42px #ffd400cc,
+    0 0 90px #ff8a00aa,
+    5px 7px 0 #4a2a00;
+  animation-delay: -1.4s;
+}
+.arc__sign-line--md {
+  font-size: clamp(1.7rem, 7.6vw, 5rem);
+  letter-spacing: 0.16em;
+  color: #eafcff;
+  text-shadow:
+    0 0 5px #fff,
+    0 0 16px var(--cyan),
+    0 0 44px #00eaffcc,
+    4px 6px 0 #023a45;
+  animation-delay: -3.1s;
+}
+
+.arc__sign-kana {
+  position: absolute;
+  right: clamp(0.6rem, 2vw, 1.6rem);
+  bottom: clamp(0.4rem, 1.6vw, 1rem);
+  font-size: clamp(0.9rem, 2.6vw, 1.5rem);
+  color: var(--violet);
+  text-shadow: 0 0 14px var(--violet);
+  opacity: 0.85;
+}
+
+/* The bulb chase around the marquee. */
+.arc__bulbs {
+  position: absolute;
+  inset: 8px;
+  pointer-events: none;
+}
+
+.arc__bulbs i {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #ffe9a8;
+  box-shadow: 0 0 10px #ffd400, 0 0 20px #ff8a00;
+  animation: arc-chase calc(1.1s * var(--tempo)) ease-in-out infinite;
+}
+
+/* 8 across the top, 8 across the bottom, 6 down each side. */
+.arc__bulbs i:nth-child(-n + 8) { top: -4px; }
+.arc__bulbs i:nth-child(1) { left: 2%; }
+.arc__bulbs i:nth-child(2) { left: 16%; }
+.arc__bulbs i:nth-child(3) { left: 30%; }
+.arc__bulbs i:nth-child(4) { left: 44%; }
+.arc__bulbs i:nth-child(5) { left: 58%; }
+.arc__bulbs i:nth-child(6) { left: 72%; }
+.arc__bulbs i:nth-child(7) { left: 86%; }
+.arc__bulbs i:nth-child(8) { left: 98%; }
+.arc__bulbs i:nth-child(n + 9):nth-child(-n + 16) { bottom: -4px; }
+.arc__bulbs i:nth-child(9) { left: 2%; }
+.arc__bulbs i:nth-child(10) { left: 16%; }
+.arc__bulbs i:nth-child(11) { left: 30%; }
+.arc__bulbs i:nth-child(12) { left: 44%; }
+.arc__bulbs i:nth-child(13) { left: 58%; }
+.arc__bulbs i:nth-child(14) { left: 72%; }
+.arc__bulbs i:nth-child(15) { left: 86%; }
+.arc__bulbs i:nth-child(16) { left: 98%; }
+.arc__bulbs i:nth-child(n + 17):nth-child(-n + 22) { left: -4px; }
+.arc__bulbs i:nth-child(n + 23) { right: -4px; }
+.arc__bulbs i:nth-child(17), .arc__bulbs i:nth-child(23) { top: 14%; }
+.arc__bulbs i:nth-child(18), .arc__bulbs i:nth-child(24) { top: 30%; }
+.arc__bulbs i:nth-child(19), .arc__bulbs i:nth-child(25) { top: 46%; }
+.arc__bulbs i:nth-child(20), .arc__bulbs i:nth-child(26) { top: 62%; }
+.arc__bulbs i:nth-child(21), .arc__bulbs i:nth-child(27) { top: 78%; }
+.arc__bulbs i:nth-child(22), .arc__bulbs i:nth-child(28) { top: 92%; }
+
+@keyframes arc-chase {
+  0%, 100% { opacity: 0.28; transform: scale(0.82); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes arc-buzz {
+  0%, 41%, 43%, 47%, 100% { opacity: 1; }
+  42%, 45% { opacity: 0.62; }
+}
+
+.arc__intro {
+  margin-top: clamp(1.2rem, 4vw, 2.2rem);
+  text-align: center;
+}
+
+.arc__lede {
+  max-width: 62ch;
+  margin-inline: auto;
+  font-size: var(--step-1);
+  line-height: 1.5;
+  color: #e6dcff;
+}
+
+.arc__meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.1rem;
+}
+
+.arc__meta span {
+  padding: 0.24rem 0.7rem;
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.14em;
+  color: var(--cyan);
+  border: 2px solid #00eaff55;
+  background: #00eaff0f;
+}
+
+/* ==========================================================================
+   THE ROW OF CABINETS
+   ========================================================================== */
+
+.arc__row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr));
+  gap: clamp(1rem, 2.4vw, 1.8rem);
+  margin-top: clamp(1.6rem, 5vw, 3rem);
+}
+
+.arc-unit {
+  --tube: var(--pink);
+  display: grid;
+  gap: 0.6rem;
+  height: 100%;
+  padding: 0.9rem 0.9rem 1rem;
+  text-decoration: none;
+  color: var(--ink);
+  background: linear-gradient(#150a22, #0c0517);
+  border: 3px solid color-mix(in srgb, var(--tube) 55%, #000);
+  box-shadow:
+    0 0 0 2px #000 inset,
+    0 0 calc(10px + 26px * var(--chaos)) color-mix(in srgb, var(--tube) 40%, transparent),
+    10px 12px 0 #00000066;
+  transform: rotate(var(--lean, -0.5deg));
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.arc-unit--pink { --tube: var(--pink); }
+.arc-unit--cyan { --tube: var(--cyan); }
+.arc-unit--gold { --tube: var(--gold); }
+.arc-unit--violet { --tube: var(--violet); }
+
+.arc__row li:nth-child(even) .arc-unit { --lean: 0.6deg; }
+
+.arc-unit:hover,
+.arc-unit:focus-visible {
+  transform: translateY(-6px) rotate(0deg);
+  box-shadow:
+    0 0 0 2px #000 inset,
+    0 0 calc(22px + 40px * var(--chaos)) color-mix(in srgb, var(--tube) 75%, transparent),
+    10px 16px 0 #00000088;
+}
+
+.arc-unit__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.arc-unit__numeral {
+  font-family: var(--f-poster);
+  font-size: var(--step-2);
+  line-height: 1;
+  color: var(--tube);
+  text-shadow: 0 0 14px var(--tube);
+}
+
+.arc-unit__kana {
+  font-size: var(--step--1);
+  letter-spacing: 0.2em;
+  color: var(--ink-dim);
+}
+
+.arc-unit__screen {
+  display: block;
+  border: 2px solid #000;
+  background: #000;
+  box-shadow: 0 0 22px color-mix(in srgb, var(--tube) 35%, transparent) inset;
+  overflow: hidden;
+}
+
+.arc-unit__screen svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.arc-unit__plate {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.arc-unit__plate b {
+  font-family: var(--f-head);
+  font-size: var(--step-1);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: #fff;
+  text-shadow: 0 0 16px color-mix(in srgb, var(--tube) 70%, transparent);
+}
+
+.arc-unit__plate i {
+  font-family: var(--f-mono);
+  font-style: normal;
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  color: var(--tube);
+}
+
+.arc-unit__blurb {
+  font-size: var(--step--1);
+  line-height: 1.5;
+  color: #cbbfe4;
+}
+
+.arc-unit__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 0.5rem;
+  border-top: 2px dashed #ffffff1f;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+}
+
+.arc-unit__best { color: var(--ink-dim); }
+.arc-unit__go { color: var(--tube); }
+
+/* ==========================================================================
+   THE COUNTER DOOR
+   ========================================================================== */
+
+.arc__counter-link {
+  margin-top: clamp(1.4rem, 4vw, 2.4rem);
+}
+
+.arc-door {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.2rem;
+  text-decoration: none;
+  color: var(--ink);
+  background: linear-gradient(90deg, #2a0c1e, #1a0a2c);
+  border: 3px solid var(--gold);
+  box-shadow: 0 0 calc(14px + 30px * var(--chaos)) #ffd40044, 8px 10px 0 #00000066;
+  transition: transform 160ms ease;
+}
+
+.arc-door:hover { transform: translateY(-3px); }
+
+.arc-door__tix {
+  font-size: clamp(1.6rem, 5vw, 2.6rem);
+  filter: drop-shadow(0 0 12px var(--gold));
+}
+
+.arc-door b {
+  display: block;
+  font-family: var(--f-head);
+  font-size: var(--step-1);
+  color: var(--gold);
+}
+
+.arc-door i {
+  font-style: normal;
+  font-size: var(--step--1);
+  color: #cbbfe4;
+}
+
+.arc-door__go {
+  margin-left: auto;
+  font-family: var(--f-poster);
+  font-size: var(--step-2);
+  color: var(--gold);
+}
+
+/* ==========================================================================
+   THE PLAQUE BY THE DOOR
+   ========================================================================== */
+
+.arc__plaque {
+  position: relative;
+  max-width: 72ch;
+  margin-top: clamp(2rem, 6vw, 3.4rem);
+  padding: clamp(1.2rem, 3.4vw, 2rem);
+  background: linear-gradient(#1b1220, #120a1a);
+  border: 3px solid #3b2a52;
+  box-shadow: 0 0 0 2px #000 inset, 10px 12px 0 #00000055;
+}
+
+.arc__plaque-screws i {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: radial-gradient(#c9bfe0, #4a4060);
+  box-shadow: 0 1px 2px #000;
+}
+.arc__plaque-screws i:nth-child(1) { top: 9px; left: 9px; }
+.arc__plaque-screws i:nth-child(2) { top: 9px; right: 9px; }
+.arc__plaque-screws i:nth-child(3) { bottom: 9px; left: 9px; }
+.arc__plaque-screws i:nth-child(4) { bottom: 9px; right: 9px; }
+
+.arc__plaque-head {
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.4em;
+  color: var(--gold);
+  margin-bottom: 0.8rem;
+}
+
+.arc__plaque p {
+  margin-bottom: 0.7rem;
+  font-size: var(--step-0);
+  line-height: 1.6;
+  color: #ded3f2;
+}
+
+.arc__plaque-sig {
+  font-family: var(--f-mono);
+  font-size: var(--step--1) !important;
+  color: var(--ink-dim) !important;
+}
+
+.arc__plaque-sig a { color: var(--pink); }
+
+/* ==========================================================================
+   THE CABINET ITSELF
+   ========================================================================== */
+
+.arc__stage,
+.arc__missing {
+  padding-top: clamp(1rem, 4vh, 2.2rem);
+}
+
+.arc__missing {
+  display: grid;
+  justify-items: start;
+  gap: 0.8rem;
+}
+
+.arc__missing h2 {
+  font-family: var(--f-head);
+  font-size: var(--step-3);
+  color: var(--pink);
+}
+
+.arc-cab {
+  --tube: var(--pink);
+  max-width: 1180px;
+  margin-inline: auto;
+}
+
+.arc-cab--pink { --tube: var(--pink); }
+.arc-cab--cyan { --tube: var(--cyan); }
+.arc-cab--gold { --tube: var(--gold); }
+.arc-cab--violet { --tube: var(--violet); }
+
+.arc-cab__marquee {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.6rem 1.1rem;
+  background: linear-gradient(#1d0b2c, #120620);
+  border: 3px solid color-mix(in srgb, var(--tube) 60%, #000);
+  border-bottom: none;
+  box-shadow: 0 -6px calc(16px + 30px * var(--chaos)) color-mix(in srgb, var(--tube) 45%, transparent);
+}
+
+.arc-cab__numeral {
+  font-family: var(--f-poster);
+  font-size: var(--step-2);
+  line-height: 1;
+  color: var(--tube);
+  text-shadow: 0 0 16px var(--tube);
+}
+
+.arc-cab__names { display: grid; }
+
+.arc-cab__title {
+  font-family: var(--f-head);
+  font-size: var(--step-1);
+  line-height: 1;
+  color: #fff;
+  text-shadow: 0 0 20px color-mix(in srgb, var(--tube) 80%, transparent);
+}
+
+.arc-cab__sub {
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.24em;
+  color: var(--tube);
+}
+
+.arc-cab__kana {
+  margin-left: auto;
+  font-size: var(--step-1);
+  color: var(--ink-dim);
+}
+
+.arc-cab__bezel {
+  padding: 0.55rem;
+  background: #08040e;
+  border: 3px solid color-mix(in srgb, var(--tube) 45%, #000);
+  box-shadow: 0 0 0 2px #000 inset;
+}
+
+.arc-cab__hud {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 1rem;
+  padding: 0.3rem 0.55rem 0.55rem;
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  color: var(--ink-dim);
+}
+
+.arc-cab__hud b { color: var(--tube); }
+.arc-cab__hud-slot { margin-right: auto; color: #e6dcff; }
+.arc-cab__hud-clock { color: var(--gold); }
+
+/* The glass is sized from the board's aspect ratio and the height that is
+   actually free on screen, so a 620px-tall canvas never pushes the controls
+   below the fold. Width — not height — is what gets clamped, which keeps the
+   element box and the drawing surface the same rectangle: pointer aiming maps
+   one to one, with no letterbox to correct for. */
+.arc-cab__glass {
+  position: relative;
+  /* One grid cell holding both the board and whatever is drawn over it, so
+     the cell is as tall as the taller of the two. On a phone the attract copy
+     is taller than a 620px board scaled to 390px wide, and an absolutely
+     positioned lid would simply be clipped by the bezel. */
+  display: grid;
+  grid-template-areas: 'stage';
+  width: min(100%, calc(58vh * 960 / 620));
+  margin-inline: auto;
+  background: #05020a;
+  border: 2px solid #000;
+  overflow: hidden;
+}
+
+.arc-cab__glass > * {
+  grid-area: stage;
+}
+
+/* The DOM cabinets set their own height and want the full width. */
+.arc-cab__glass:has(.arc-vn),
+.arc-cab__glass:has(.arc-sky) {
+  width: 100%;
+}
+
+/* The CRT: curvature is faked with an inset shadow and a scanline wash. */
+.arc-cab__glass::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  background: repeating-linear-gradient(to bottom, #0000 0 2px, #00000055 2px 4px);
+  box-shadow: 0 0 90px #000 inset;
+  opacity: calc(0.28 + 0.4 * var(--chaos));
+}
+
+.arc-board {
+  display: block;
+  align-self: start;
+  width: 100%;
+  height: auto;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.arc-cab__deck {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.7rem 1.2rem;
+  padding: 0.7rem 1.1rem;
+  background: linear-gradient(#160a22, #0d0616);
+  border: 3px solid color-mix(in srgb, var(--tube) 45%, #000);
+  border-top: none;
+}
+
+.arc-cab__controls {
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: var(--ink-dim);
+}
+
+.arc-cab__exit {
+  margin-left: auto;
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-decoration: none;
+  color: var(--tube);
+}
+
+.arc-cab__exit:hover { text-decoration: underline; }
+
+/* ==========================================================================
+   OVERLAYS — attract mode, payout, anything drawn over the glass
+   ========================================================================== */
+
+.arc-lid {
+  position: relative;
+  z-index: 6;
+  display: grid;
+  overflow-y: auto;
+  align-content: center;
+  justify-items: center;
+  gap: 0.7rem;
+  padding: clamp(1rem, 4vw, 2.4rem);
+  text-align: center;
+  background: radial-gradient(70% 70% at 50% 45%, #12061fd0, #05020ae8);
+  backdrop-filter: blur(2px);
+}
+
+/* The dialogue and star cabinets are DOM, not canvas: their overlay is the
+   screen rather than a lid over one. */
+.arc-lid--static {
+  position: static;
+  min-height: min(70vh, 560px);
+  backdrop-filter: none;
+}
+
+.arc-lid__kicker {
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.44em;
+  color: var(--tube);
+}
+
+.arc-lid__title {
+  font-family: var(--f-head);
+  font-size: clamp(1.6rem, 6vw, 3.4rem);
+  line-height: 0.95;
+  color: #fff;
+  text-shadow: 0 0 8px #fff, 0 0 30px var(--tube), 0 0 70px var(--tube);
+}
+
+.arc-lid__body {
+  max-width: 56ch;
+  font-size: var(--step-0);
+  line-height: 1.55;
+  color: #ded3f2;
+}
+
+.arc-lid__body--dim {
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  color: var(--ink-dim);
+}
+
+.arc-btn {
+  display: inline-block;
+  padding: 0.5rem 1.1rem;
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.2em;
+  text-decoration: none;
+  color: #ded3f2;
+  background: #1a0f28;
+  border: 2px solid #5b4a7a;
+  transition: transform 140ms ease, background-color 140ms ease, color 140ms ease;
+}
+
+.arc-btn:hover:not(:disabled) { transform: translateY(-2px); }
+
+.arc-btn:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.arc-btn--hot {
+  color: #12061f;
+  background: var(--tube, #ff2bd6);
+  border-color: #000;
+  box-shadow: 0 0 calc(10px + 26px * var(--chaos)) var(--tube, #ff2bd6);
+  animation: throb calc(2.4s * var(--tempo)) ease-in-out infinite;
+}
+
+.arc-btn--hot:hover { background: #fff; }
+
+/* ==========================================================================
+   PAYOUT
+   ========================================================================== */
+
+.arc-payout {
+  display: grid;
+  justify-items: center;
+  gap: 0.55rem;
+  text-align: center;
+}
+
+.arc-payout__head {
+  font-family: var(--f-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.5em;
+  color: var(--ink-dim);
+}
+
+.arc-payout__score {
+  font-family: var(--f-head);
+  font-size: clamp(2.4rem, 10vw, 5rem);
+  line-height: 0.9;
+  color: #fff;
+  text-shadow: 0 0 8px #fff, 0 0 26px var(--tube), 0 0 60px var(--tube);
+}
+
+.arc-payout__score span {
+  display: block;
+  margin-top: 0.5rem;
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.4em;
+  text-shadow: none;
+  color: var(--ink-dim);
+}
+
+.arc-payout__tix {
+  padding: 0.25rem 0.8rem;
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.14em;
+  color: var(--gold);
+  border: 2px dashed #ffd40066;
+}
+
+.arc-payout__note {
+  max-width: 54ch;
+  font-size: var(--step-0);
+  line-height: 1.55;
+  color: #ded3f2;
+}
+
+.arc-payout__row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 0.4rem;
+}
+
+/* ==========================================================================
+   II · CAT SELECT
+   ========================================================================== */
+
+.arc-picker {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.8rem;
+  margin: 0.4rem 0 0.2rem;
+}
+
+.arc-picker__cat {
+  display: grid;
+  justify-items: center;
+  gap: 0.2rem;
+  width: min(46%, 190px);
+  padding: 0.7rem 0.6rem;
+  text-align: center;
+  background: #100a1c;
+  border: 2px solid #3f3358;
+  transition: border-color 140ms ease, transform 140ms ease;
+}
+
+.arc-picker__cat--on {
+  border-color: var(--cyan);
+  transform: translateY(-3px);
+  box-shadow: 0 0 22px #00eaff55;
+}
+
+.arc-picker__face {
+  width: 84px;
+  height: auto;
+  filter: drop-shadow(0 0 10px #00eaff44);
+}
+
+.arc-picker__cat b {
+  font-family: var(--f-head);
+  font-size: var(--step-0);
+  color: #fff;
+}
+
+.arc-picker__cat span {
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  line-height: 1.35;
+  color: var(--ink-dim);
+}
+
+/* ==========================================================================
+   III · THE DIALOGUE SCREEN
+   ========================================================================== */
+
+.arc-vn {
+  display: grid;
+  gap: 0.9rem;
+  padding: clamp(0.9rem, 3vw, 1.8rem);
+  min-height: min(74vh, 620px);
+  align-content: start;
+  background:
+    radial-gradient(80% 60% at 50% 0%, #2a1c0433, transparent 70%),
+    linear-gradient(#0d0a04, #070506);
+}
+
+.arc-vn__meter {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.24em;
+  color: var(--gold);
+}
+
+.arc-vn__meter-track {
+  flex: 1;
+  height: 10px;
+  background: #221a06;
+  border: 2px solid #4a3a10;
+  overflow: hidden;
+}
+
+.arc-vn__meter-fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #ff8a00, var(--gold));
+  box-shadow: 0 0 16px var(--gold);
+  transition: width 520ms cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+
+.arc-vn__meter-num { min-width: 3ch; text-align: right; }
+
+.arc-vn__stamp {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 0.9rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #ffd40033;
+}
+
+.arc-vn__stamp b {
+  font-family: var(--f-head);
+  font-size: var(--step-1);
+  color: var(--gold);
+}
+
+.arc-vn__stamp span {
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.2em;
+  color: var(--ink-dim);
+}
+
+.arc-vn__thread {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.arc-bubble {
+  max-width: min(72ch, 88%);
+  padding: 0.6rem 0.9rem;
+  font-size: var(--step-0);
+  line-height: 1.5;
+  animation: rise calc(0.5s * var(--tempo)) ease-out both;
+}
+
+.arc-bubble--him {
+  justify-self: start;
+  color: #ece2ff;
+  background: #1d1830;
+  border: 2px solid #3a3155;
+  border-radius: 14px 14px 14px 3px;
+}
+
+.arc-bubble--you {
+  justify-self: end;
+  color: #12061f;
+  background: var(--gold);
+  border: 2px solid #000;
+  border-radius: 14px 14px 3px 14px;
+  font-weight: 600;
+}
+
+.arc-vn__prompt {
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  line-height: 1.5;
+  color: var(--ink-dim);
+  border-left: 3px solid var(--gold);
+  padding-left: 0.7rem;
+}
+
+.arc-vn__choices {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.arc-vn__choice {
+  display: flex;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.65rem 0.9rem;
+  text-align: left;
+  font-size: var(--step-0);
+  line-height: 1.45;
+  color: #ece2ff;
+  background: #140f22;
+  border: 2px solid #3a3155;
+  transition: background-color 140ms ease, border-color 140ms ease, transform 140ms ease;
+}
+
+.arc-vn__choice:hover {
+  transform: translateX(4px);
+  border-color: var(--gold);
+  background: #201731;
+}
+
+.arc-vn__choice-mark { color: var(--gold); }
+
+.arc-vn__after {
+  display: grid;
+  justify-items: start;
+  gap: 0.8rem;
+}
+
+.arc-vn__footnote {
+  font-size: var(--step-0);
+  line-height: 1.6;
+  color: #ded3f2;
+  padding: 0.8rem 1rem;
+  background: #100c1d;
+  border-left: 4px solid var(--gold);
+}
+
+.arc-vn__footnote-tag {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.4em;
+  color: var(--gold);
+}
+
+/* ==========================================================================
+   IV · THE SKY
+   ========================================================================== */
+
+.arc-sky {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: clamp(0.8rem, 2.5vw, 1.6rem);
+  min-height: min(74vh, 620px);
+  padding: clamp(0.8rem, 2.6vw, 1.6rem);
+  background: radial-gradient(70% 90% at 30% 20%, #1a0c3a, #05020e 75%);
+}
+
+@media (max-width: 780px) {
+  .arc-sky { grid-template-columns: 1fr; }
+}
+
+/* Once the chart is read the map has done its job: it stays on screen as the
+   thing you built, at a size that leaves room for the reading under it. */
+.arc-sky--done {
+  grid-template-columns: 1fr;
+  min-height: 0;
+}
+
+.arc-sky--done .arc-sky__map {
+  max-height: 230px;
+  min-height: 0;
+}
+
+.arc-sky__map {
+  width: 100%;
+  height: 100%;
+  min-height: 260px;
+}
+
+.arc-sky__star { cursor: default; }
+
+/* The global focus ring is a 3px dashed box drawn around the element's box,
+   which on a star inside a 0–100 viewBox is roughly the size of the whole
+   constellation. Ring the star itself instead. */
+.arc-sky__star:focus,
+.arc-sky__star:focus-visible {
+  outline: none !important;
+}
+
+.arc-sky__star:focus-visible > circle:first-of-type {
+  fill: none;
+  stroke: var(--cyan);
+  stroke-width: 0.5;
+  stroke-dasharray: 1.4 1.4;
+}
+.arc-sky__star--next,
+.arc-sky__star:not(.arc-sky__star--on) { cursor: pointer; }
+
+.arc-sky__star--next circle:last-of-type {
+  animation: throb calc(1.4s * var(--tempo)) ease-in-out infinite;
+}
+
+.arc-sky__num {
+  font-family: var(--f-mono);
+  font-size: 3.2px;
+  fill: #9d8fb8;
+  letter-spacing: 0.1px;
+}
+
+.arc-sky__star--next .arc-sky__num { fill: var(--violet); }
+
+.arc-sky__log {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 0.7rem;
+  padding: clamp(0.7rem, 2vw, 1.1rem);
+  background: #0c0620cc;
+  border: 2px solid #33245a;
+  max-height: min(70vh, 560px);
+}
+
+.arc-sky__log-head {
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.34em;
+  color: var(--violet);
+}
+
+.arc-sky__facts {
+  display: grid;
+  align-content: start;
+  gap: 0.7rem;
+  overflow-y: auto;
+  padding-right: 0.3rem;
+}
+
+.arc-sky__facts li {
+  display: grid;
+  gap: 0.15rem;
+  padding-left: 0.7rem;
+  border-left: 3px solid var(--violet);
+  animation: rise calc(0.5s * var(--tempo)) ease-out both;
+}
+
+.arc-sky__facts b {
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  color: #cfc4ff;
+}
+
+.arc-sky__facts span {
+  font-size: var(--step--1);
+  line-height: 1.55;
+  color: #ded3f2;
+}
+
+.arc-read {
+  grid-column: 1 / -1;
+  display: grid;
+  justify-items: center;
+  gap: 0.7rem;
+  text-align: center;
+  padding: clamp(0.8rem, 3vw, 1.6rem);
+}
+
+.arc-read__kicker {
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.5em;
+  color: var(--violet);
+}
+
+.arc-read__glyphs {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: clamp(2.4rem, 9vw, 4.4rem);
+  line-height: 1;
+}
+
+.arc-read__glyph {
+  color: #dcd0ff;
+  text-shadow: 0 0 10px #fff, 0 0 34px var(--violet), 0 0 70px var(--violet);
+}
+
+.arc-read__glyph--alt {
+  color: #ffd9f4;
+  text-shadow: 0 0 10px #fff, 0 0 34px var(--pink), 0 0 70px var(--pink);
+}
+
+.arc-read__vs {
+  font-family: var(--f-mono);
+  font-size: 0.4em;
+  color: var(--ink-dim);
+}
+
+.arc-read__stamp {
+  max-width: 60ch;
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  line-height: 1.6;
+  color: var(--ink-dim);
+}
+
+.arc-read__stamp b { color: var(--violet); }
+
+.arc-read__rows {
+  display: grid;
+  gap: 0.7rem;
+  max-width: 68ch;
+  text-align: left;
+  margin-block: 0.4rem 0.8rem;
+}
+
+.arc-read__rows li {
+  padding: 0.7rem 0.9rem;
+  background: #0f0925;
+  border-left: 4px solid var(--violet);
+}
+
+.arc-read__rows b {
+  display: block;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.28em;
+  color: var(--violet);
+  margin-bottom: 0.25rem;
+}
+
+.arc-read__rows span {
+  font-size: var(--step--1);
+  line-height: 1.6;
+  color: #ded3f2;
+}
+
+@keyframes alu-twinkle {
+  0%, 100% { opacity: 0.18; }
+  50% { opacity: 0.85; }
+}
+
+/* ==========================================================================
+   THE PRIZE COUNTER
+   ========================================================================== */
+
+.arc-till {
+  width: min(1180px, 100% - var(--gutter) * 2);
+  margin-inline: auto;
+  padding-top: clamp(1rem, 4vh, 2.2rem);
+}
+
+.arc-till__head {
+  padding: clamp(1rem, 3vw, 1.8rem);
+  background: linear-gradient(#1e0c2e, #120720);
+  border: 3px solid var(--gold);
+  box-shadow: 0 0 calc(12px + 30px * var(--chaos)) #ffd40033, 10px 12px 0 #00000055;
+}
+
+.arc-till__title {
+  font-family: var(--f-head);
+  font-size: clamp(1.6rem, 6vw, 3.2rem);
+  line-height: 0.95;
+  color: #fff;
+  text-shadow: 0 0 8px #fff, 0 0 30px var(--gold), 0 0 70px #ff8a00;
+}
+
+.arc-till__note {
+  max-width: 66ch;
+  margin-top: 0.6rem;
+  font-size: var(--step-0);
+  line-height: 1.55;
+  color: #ded3f2;
+}
+
+.arc-till__bank {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.arc-till__bank span {
+  padding: 0.24rem 0.8rem;
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.18em;
+  color: var(--ink-dim);
+  border: 2px solid #ffd40044;
+}
+
+.arc-till__bank b { color: var(--gold); }
+
+.arc-till__shelf {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: clamp(0.9rem, 2.2vw, 1.4rem);
+  margin-top: clamp(1.2rem, 3vw, 2rem);
+}
+
+.arc-prize {
+  display: grid;
+  gap: 0.6rem;
+  align-content: start;
+  padding: 0.9rem;
+  background: linear-gradient(#150c22, #0c0616);
+  border: 3px solid #3b2a52;
+  box-shadow: 8px 10px 0 #00000055;
+  transition: border-color 200ms ease, transform 200ms ease;
+}
+
+.arc-prize--owned {
+  border-color: var(--gold);
+  box-shadow: 0 0 26px #ffd40044, 8px 10px 0 #00000055;
+}
+
+.arc-prize--flash {
+  animation: prize-pop calc(0.9s * var(--tempo)) ease-out;
+}
+
+@keyframes prize-pop {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.04) rotate(-1deg); box-shadow: 0 0 60px var(--gold); }
+  100% { transform: scale(1); }
+}
+
+.arc-prize__art {
+  background: #05020a;
+  border: 2px solid #000;
+  box-shadow: 0 0 20px #ffffff11 inset;
+}
+
+.arc-prize__art svg { width: 100%; height: auto; display: block; }
+
+.arc-prize--owned .arc-prize__art { box-shadow: 0 0 26px #ffd40033 inset; }
+
+.arc-prize__cost {
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.28em;
+  color: var(--gold);
+}
+
+.arc-prize__name {
+  font-family: var(--f-head);
+  font-size: var(--step-0);
+  line-height: 1.15;
+  color: #fff;
+  margin-top: 0.2rem;
+}
+
+.arc-prize__caption {
+  margin-top: 0.4rem;
+  font-size: var(--step--1);
+  line-height: 1.55;
+  color: #c6b9e0;
+}
+
+.arc-prize__take {
+  --tube: var(--gold);
+  justify-self: start;
+}
+
+.arc-till__foot {
+  margin-top: 1.6rem;
+}
+
+/* ==========================================================================
+   RESPONSIVE + STILL
+   ========================================================================== */
+
+@media (max-width: 640px) {
+  .arc-cab__kana { display: none; }
+  .arc-picker__cat { width: 100%; }
+}
+
+:root[data-still='1'] .arc__bulbs i,
+:root[data-still='1'] .arc__sign-line {
+  animation: none;
+}

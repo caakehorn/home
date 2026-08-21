@@ -614,14 +614,14 @@ export const INSTRUMENTS: Instrument[] = [
     title: 'THE ATTENTION',
     kana: '注意',
     wing: 'WIKI',
-    corpus: '486 pages · every name in them',
+    corpus: '486 pages · words against mentions',
     blurb:
-      'Documentation debt. Words on a subject’s own page against the number of times other pages name it — the far corner is everything that gets talked about and never written up.',
-    method: 'Two counts per subject: words on its page, and mentions of it elsewhere. Both are counts; the diagonal is the only claim.',
-    status: 'UNBUILT',
-    origin: 'js/wiki-analytics.js · WIKI 15 · draw_attention',
-    needs:
-      'nothing from outside — both counts come out of the snapshot. What is missing is the instrument, and this is the one worth building first',
+      'What gets written up against what gets talked about. Words on a page against the number of other pages that name it; the far corner is for the reader to name.',
+    method:
+      'Two counts per page — words written on it, and how many other pages name it — plotted against each other. Both axes are logarithmic, because both distributions are heavy-tailed and a linear scale draws this as a line along the bottom with one dot in the corner; the transform is printed on the instrument. Neither axis is a ranking and the diagonal is a guide rather than a threshold.',
+    status: 'LIVE',
+    origin:
+      'js/wiki-analytics.js · WIKI 15 · draw_attention — minus the phrase "documentation debt", which is a reading and not a measurement',
   },
   {
     id: 'diction',

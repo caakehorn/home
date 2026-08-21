@@ -11,9 +11,9 @@ the room where both of those happened.
 > THESIS · ANTITHESIS · ANOTHER BUMP · SYNTHESIS · CITE YOUR SOURCES ·
 > LOSE THE ARGUMENT · LOG IT ANYWAY
 
-Six rooms off one hallway: the **wiki-brain** and its map, **THE LATTICE**,
-the **LEVIATHAN** instruments, **THE TRANSCRIPT**, **TRANSMISSIONS**, and
-**ALLY LUBIN'S ADVENTURE ARCADE**. All six are open.
+Seven rooms off one hallway: the **wiki-brain** and its map, **THE LATTICE**,
+the **LEVIATHAN** instruments, **THE GALLERY**, **THE TRANSCRIPT**,
+**TRANSMISSIONS**, and **ALLY LUBIN'S ADVENTURE ARCADE**. All seven are open.
 
 ### The arcade
 
@@ -149,6 +149,7 @@ the URL, gate or no gate:
 - `public/wiki/**` — the whole vendored wiki snapshot
 - `public/leviathan/**` — the instrument datasets
 - `public/transcript/**` — the whole message record, 134,348 messages
+- `public/gallery/**` — every plate on the gallery wall
 - every asset in the build
 
 And while this repository is public, all of it is readable on github.com
@@ -452,14 +453,14 @@ to check after re-running `sync-wiki`.
 ## LEVIATHAN
 
 `/leviathan` is the room where the old repo's visualizers get rebuilt. The
-original is thirty-seven instruments over two sections, each a hand-wired page
-that loaded its own payload and drew its own chrome. Here they get a rack:
+original is **thirty-seven instruments over two sections** — `◈ CORPUS` and
+`◈ WIKI`, sharing one tab bar — plus **six more** on `procurement.html`, an
+unlisted third page. Every one of the forty-three is in the registry here,
+beside the four this house built:
 
 - `src/leviathan/core.ts` — the registry (what an instrument *is*), the dataset
-  loader, and the dataset shapes. An instrument is a row of data until it has a
-  component, so the ones still waiting on a corpus are listed honestly rather
-  than pretended at: **LIVE** is wired to a dataset that ships with this site,
-  **SEALED** is declared and waiting on one that does not.
+  loader, and the dataset shapes. Each entry carries the file and module it came
+  from over there, so the port can be checked against the original.
 - `src/leviathan/Frame.tsx` — the chrome every instrument wears: numeral, name,
   what it was computed over, and — always, never optional — **how**. An
   instrument that cannot say how it got its numbers has no business being read.
@@ -473,23 +474,91 @@ keyword list, no threshold chosen because of what it would surface. Anything
 editorial would make the output a portrait of an argument; left alone, the
 counts make a portrait of the thing itself.
 
-Four instruments are built:
+### The five statuses, and why a rack lists what it cannot draw
 
-- **I · THE MASS** — where the corpus's weight actually sits. Nine domains by
-  word count, page-length distribution, heaviest pages; click a domain and the
-  panels below follow it.
-- **II · THE CHRONOLOGY** — every date the wiki names, mined out of its own
-  prose rather than off its timeline pages, binned by year across 1900→2026.
-  What it shows is not when things happened but when the record *says* things
-  happened, which is a different and more honest object. Open a year for its
-  months and every page that named it.
-- **III · THE PEN** — the chart recorder from the old console, four counts
-  against one axis, each lane scaled to its own maximum.
-- **VI · THE ACCRETION** — the wiki being built, against real time. See below.
+A rack that lists only what is finished is a showreel, and a showreel cannot
+tell you what is missing. The missing is most of the story, so every instrument
+declares which kind of dark it is:
+
+| | | |
+| --- | --- | --- |
+| **LIVE** | 5 | built here, wired to a dataset that ships |
+| **PORTED** | 4 | came across under this house's own name — the card links to where |
+| **UNBUILT** | 13 | the corpus is already here; nobody has built the instrument |
+| **SEALED** | 7 | waiting on a corpus this site does not carry |
+| **BARRED** | 18 | it makes a judgement, and THE RULE forbids one |
+
+**BARRED is the one that matters.** The corpus half of the old console was
+largely rhetorical scoring — LOVE, PROFANITY, APOLOGY, PLEADING, LOVE-BOMB,
+DENIAL, ASSERTING against DEFERRING — which is exactly what THE RULE was
+written against. Those do not come across. They are listed anyway, each with
+the specific sentence saying which part of the rule it breaks, because quietly
+dropping them would tell a nicer story about the old site than the old site
+tells. The six PROCUREMENT instruments are barred for the same reason and are
+additionally never photographed; see THE GALLERY below.
+
+**UNBUILT is the to-do list.** Thirteen instruments need nothing from outside —
+the record ships at `/transcript`, the snapshot ships at `/brain` — they are
+simply not built. THE PULSE, THE RINGS, THE SILENCE, THE ATTENTION and THE ECHO
+are the cheap ones.
+
+### What is built
+
+- **THE HOUSE · I · THE MASS** — where the corpus's weight actually sits. Nine
+  domains by word count, page-length distribution, heaviest pages; click a
+  domain and the panels below follow it.
+- **THE HOUSE · II · THE CHRONOLOGY** — every date the wiki names, mined out of
+  its own prose rather than off its timeline pages, binned by year across
+  1900→2026. What it shows is not when things happened but when the record
+  *says* things happened, which is a different and more honest object.
+- **THE HOUSE · III · THE PEN** — the chart recorder from the old console, four
+  counts against one axis, each lane scaled to its own maximum.
+- **THE HOUSE · IV · THE ACCRETION** — the wiki being built, against real time.
+  See below.
+- **◈ CORPUS · II · THE CLOCK** — see below.
 
 The dates come from the same matchers the brief visualiser uses
 (`mineDates` in `src/wiki/brief.ts`), so a date reads the same way on the
 instrument as it does on the page.
+
+### THE CLOCK, and the timezone
+
+```bash
+npm run clock          # reads public/transcript/, writes public/leviathan/clock.json
+```
+
+Eleven years of messages on one spiral: **angle is the hour of the day, radius
+is the date** — the first message at the centre, the last at the rim. One mark
+per message, all 134,348 of them, nothing sampled and nothing binned. The dark
+wedge across the small hours is somebody asleep, and the instrument says nothing
+about that; the reader can see it without being told.
+
+It was the first UNBUILT entry to be cleared, and it is the proof the status was
+worth having: the rack had been saying for months that this one needed *nothing
+from outside* — the corpus arrived with THE TRANSCRIPT — only the instrument.
+
+**Timestamps are sliced out of the `"YYYY-MM-DD HH:MM:SS"` string and never
+handed to `Date()`.** The export carries local wall-clock time with no zone on
+it, so parsing it makes the runtime guess one, and on an instrument whose entire
+axis is the hour of the day a guess in the wrong direction moves somebody's
+bedtime to the afternoon. The old repo did it this way and said so; so does this
+one. The build script also refuses to write a dataset whose message count
+disagrees with `public/transcript/index.json` — if the months and the spine are
+reading different records, the spiral would be quietly wrong rather than loudly
+missing.
+
+The file is 0.32 MB for 134,348 messages, because each one is packed into a
+single integer (`day * 2880 + minute * 2 + dir`) and the sequence is then
+delta-encoded. That is a compression of the *file*, not of the record: a prefix
+sum and two remainders put every message back, and the instrument does exactly
+that on load.
+
+Two channels — sent and received — and direction is the only thing colour
+encodes, so the pair has to separate in all five palettes. In RIOT it does not:
+that room has two inks and `--n1` and `--n3` are the same red twice through the
+machine. Where the ramp collapses the second channel falls back to bare paper,
+and the legend reads the resolved pair back off the canvas so a key can never
+disagree with the marks. The direction switch is the other half of the answer.
 
 ### THE ACCRETION, and the one dataset that is not derived from the snapshot
 
@@ -531,9 +600,85 @@ history has moved. It needs full history: the script refuses a shallow clone
 rather than silently reporting a corpus that begins four commits ago.
 
 The sealed instruments are what is left once the corpus question is settled.
-`IV · THE ASK` needs the classified ledger its rows were recounted from, which
-is a hand-audited reading of the record rather than the record, and is not
-vendored here. `V · THE CLOCK` needs nothing from outside any more — see below.
+`PROCUREMENT · VI · THE ASK` needs the classified ledger its rows were recounted
+from, which is a hand-audited reading of the record rather than the record, and
+is not vendored here — and it is barred as well as sealed, since a
+classification of one person's requests is a judgement whatever the ledger says.
+`◈ CORPUS · II · THE CLOCK` needed nothing from outside and is now built.
+
+## THE GALLERY
+
+`/gallery` is the room the old repo is hung in, and it is the only room here
+that is not a reading of something.
+
+Every other wing *rebuilt* the old work: took its dataset, dropped its chrome,
+redrew it in this house's type and colour. That is the right way to inherit a
+codebase and it loses the one thing a rebuild cannot carry, which is what the
+original looked like. So this room does not rebuild anything. It photographs —
+thirteen stills and five clips of VOID + LEVIATHAN running, in its own
+slime-green, 7.3 MB.
+
+```bash
+npm i --no-save playwright                       # a capture-time tool, not a dependency
+npm run gallery:capture -- ../leviathan          # shoots the plates
+npm run gallery                                  # writes public/gallery/index.json
+```
+
+- `scripts/capture-gallery.mjs` — serves a leviathan checkout over
+  `http://127.0.0.1`, drives a real browser at it, and shoots JPEG stills and
+  WebM motion plates with a poster frame each.
+- `scripts/build-gallery.mjs` — walks `public/gallery/media/` and writes the
+  manifest.
+- `src/gallery/` — the wall, the lightbox, the manifest loader.
+
+**A rig rather than a folder of PNGs**, on purpose. A screenshot pasted into a
+repository is an assertion; a rig that can be pointed at a commit is a method.
+Every plate carries what it is a picture of and what the camera was told to do,
+for the same reason every instrument owes a method line.
+
+### How a page that is behind a gate gets photographed
+
+THE GATE over there is a *render* gate — it hides `<body>` until a passphrase
+sticks — and both of its modules bail out early if their global already exists,
+so defining `window.LVGate` before the document runs is the whole bypass.
+Nothing is decrypted and nothing needs to be: every page captured reads
+plaintext data that ships in the open (`data/tree.json`, `data/wiki-data.json`,
+`js/*-data.js`).
+
+**The console itself is not capturable and is not attempted.** Its
+thirty-seven instruments read `data/leviathan.enc`, which needs the real
+passphrase. What is hung is PHASE 00, PHASE 01, and the pages that were never
+encrypted.
+
+The old pages pull React and Google Fonts off a CDN. Both are cached into
+`.gallery-vendor/` (gitignored) on the first run and served back from disk, so a
+capture is not at the mercy of a CDN and comes out the same on a second run.
+
+### What is deliberately not photographed
+
+THE DRUG LEDGER, THE FAMILY LEDGER, PROCUREMENT and THE ASK are all in the rack
+and none of them is here. They are pages of verbatim quotation and composite
+scoring about a named living person, they are **BARRED** for exactly that, and
+photographing one instead would be the same act with a camera in front of it.
+
+### Adding a picture that is not from the old repo
+
+Nothing about the wall is hard-coded. Drop a file into
+`public/gallery/media/<album>/`, optionally write a `<name>.json` sidecar beside
+it (`title`, `kana`, `caption`, `source`, `shot`, `order`), re-run
+`npm run gallery`, and it hangs. The album is the directory name; the id is the
+filename and is the deep link (`/gallery/the-gravity-well`). A video pairs with
+`<name>.poster.jpg` if one is there.
+
+Intrinsic sizes are parsed out of the file headers — JPEG SOF, PNG IHDR, GIF
+logical screen, WebP VP8/VP8L/VP8X — so every card knows how tall it will be
+before its media arrives and a wall of forty settles once instead of jolting
+forty times. A video's aspect comes off its poster, which is exact and means no
+container parsing and no ffmpeg on the path to run `npm run gallery`.
+
+**`public/gallery/**` is committed**, like `accretion.json` and
+`public/transcript/**`: it derives from a repository this one does not vendor,
+so there is nothing for CI to build it from.
 
 ## THE TRANSCRIPT
 
@@ -687,6 +832,7 @@ src/
   blog/              the transmissions and their markdown
   gate/              the four steps in front of everything, and the terms
   leviathan/         the instrument rack: registry, frame, datasets
+  gallery/           the wall, the lightbox, the manifest loader
   transcript/        the message record: spine, month reader, whole-record search
   wiki/              snapshot loading, markdown, charts, infoboxes, briefs, the map
 ```

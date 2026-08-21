@@ -25,6 +25,16 @@ export const SECTIONS: Section[] = [
     chant: banner('brain'),
   },
   {
+    slug: 'sage',
+    title: 'THE SAGE',
+    kana: '賢者',
+    blurb:
+      'The one room where you do the asking. Put a question about him to the record — what he did, why, or what it says he will do next — and it comes back with citations and dated quotes, including the ones that do not flatter him. Slow on purpose: nothing here improvises.',
+    status: 'LIVE',
+    accent: 4,
+    chant: banner('sage'),
+  },
+  {
     slug: 'lineage',
     title: 'THE LATTICE',
     kana: '血統',

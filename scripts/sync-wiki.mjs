@@ -448,6 +448,85 @@ writeFileSync(
   }),
 )
 
+// ---------------------------------------------------------------------------
+// sage.json — the questions put to the wiki from outside it
+//
+// `sage/questions/*.md` in wiki-brain, one file per question. A question is
+// parked by the portal and answered by a session working in that repository —
+// there is no model behind the box and no workflow calling one — so what this
+// derives is a log with two states in it: what has been asked, and what has been
+// answered with its citations.
+//
+// Read from the source repo rather than kept here for the same reason every
+// other dataset is: `public/wiki` is deleted and rebuilt on every sync, so
+// anything written into it directly is gone within the hour.
+
+function sageEntries() {
+  const dir = join(SOURCE, 'sage', 'questions')
+  if (!existsSync(dir)) return []
+  const section = (body, name) => {
+    const at = body.search(new RegExp(`^##\\s+${name}\\s*$`, 'im'))
+    if (at === -1) return ''
+    const rest = body.slice(at).replace(/^##.*\n/, '')
+    const next = rest.search(/^##\s/m)
+    return (next === -1 ? rest : rest.slice(0, next)).trim()
+  }
+  return readdirSync(dir)
+    .filter((f) => f.endsWith('.md'))
+    .map((f) => {
+      const { meta, lists, body } = parseFrontmatter(readFileSync(join(dir, f), 'utf8'))
+      return {
+        id: meta.id ?? f.replace(/\.md$/, ''),
+        asked: meta.asked ?? null,
+        // A blank `asker:` is a question asked anonymously, which the box
+        // allows on purpose. Null rather than "" so the UI has one thing to test.
+        asker: meta.asker || null,
+        status: meta.status ?? 'pending',
+        answered: meta.answered || null,
+        capture: meta.capture || null,
+        cites: lists?.cites ?? [],
+        question: section(body, 'Question'),
+        answer: section(body, 'Answer'),
+      }
+    })
+    // Newest first: the log is read from the top, and the thing just asked is
+    // the thing somebody is standing there waiting for.
+    .sort((a, b) => String(b.asked ?? b.id).localeCompare(String(a.asked ?? a.id)))
+}
+
+const sage = sageEntries()
+
+// A sealed page ships as ciphertext precisely so the site cannot read it out.
+// An answer that quotes one would publish through the back door exactly what the
+// seal exists to keep shut. Warned rather than failed: the answer is already
+// committed upstream by the time this runs, so stopping the build would take the
+// whole site down over one citation, and the fix belongs in the answer.
+for (const entry of sage) {
+  for (const cite of entry.cites) {
+    const slug = String(cite).replace(/^wiki\//, '').replace(/\.md$/, '')
+    if (locked.includes(slug)) {
+      console.warn(
+        `wiki: sage answer ${entry.id} cites "${slug}", which is sealed — ` +
+          `remove the citation upstream or unseal the page.`,
+      )
+    }
+  }
+}
+
+writeFileSync(
+  join(OUT, 'sage.json'),
+  JSON.stringify({
+    generatedAt: new Date().toISOString(),
+    counts: {
+      asked: sage.length,
+      pending: sage.filter((e) => e.status === 'pending').length,
+      answered: sage.filter((e) => e.status === 'answered').length,
+      declined: sage.filter((e) => e.status === 'declined').length,
+    },
+    entries: sage,
+  }),
+)
+
 // The snapshot is written in the clear and then sealed in place, rather than
 // pages being encrypted as they are written. One implementation of the seal,
 // used by both this and `npm run wiki:lock`, is worth the extra pass: two would
@@ -465,4 +544,8 @@ console.log(
     `${index.reduce((n, p) => n + p.charts, 0)} chartable tables · ` +
     `${index.filter((p) => p.brief).length} briefs · ${edges.length} mapped links -> public/wiki`,
 )
+if (sage.length) {
+  const pending = sage.filter((e) => e.status === 'pending').length
+  console.log(`wiki: ${sage.length} sage question(s), ${pending} awaiting an answer`)
+}
 if (seal.sealed.length) console.log(`wiki: ${seal.sealed.length} page${seal.sealed.length === 1 ? '' : 's'} sealed`)

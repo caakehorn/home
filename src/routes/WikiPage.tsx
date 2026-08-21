@@ -8,7 +8,7 @@ import { QuickAdd } from '../wiki/QuickAdd'
 import { Sealed } from '../wiki/Sealed'
 import { editableFrontmatter, humanize, useWikiPage, type WikiPage as Page } from '../wiki/data'
 import { relock, sealed } from '../wiki/locks'
-import { getDraft } from '../wiki/store'
+import { discardDraft, draftIsStale, getDraft } from '../wiki/store'
 import './wiki.css'
 import '../wiki/quick-add.css'
 
@@ -30,14 +30,42 @@ export function WikiPageRoute() {
 
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState<{ frontmatter: string; body: string } | null>(null)
+  /** A draft this browser holds that upstream has moved past. See `draftIsStale`. */
+  const [stale, setStale] = useState<{ savedAt: string; upstream: string } | null>(null)
 
-  // Prefer a local draft over the shipped snapshot.
+  // Prefer a local draft over the shipped snapshot — unless upstream has moved
+  // since the draft was forked, in which case preferring it is how a month of
+  // other people's work gets published away. Then the shipped page wins and the
+  // draft is offered rather than applied.
   useEffect(() => {
     if (!data) return
+    const shipped = { frontmatter: editableFrontmatter(data), body: data.body }
     const stored = getDraft(data.slug)
-    setDraft(stored ? splitMarkdown(stored.source) : { frontmatter: editableFrontmatter(data), body: data.body })
+    const upstream = data.meta?.date_modified
+    if (stored && draftIsStale(stored, upstream)) {
+      setStale({ savedAt: stored.savedAt.slice(0, 10), upstream: upstream ?? '' })
+      setDraft(shipped)
+    } else {
+      setStale(null)
+      setDraft(stored ? splitMarkdown(stored.source) : shipped)
+    }
     setEditing(false)
   }, [data])
+
+  /** Open the stale draft anyway — a deliberate act, never the default. */
+  const openStaleDraft = () => {
+    if (!data) return
+    const stored = getDraft(data.slug)
+    if (stored) setDraft(splitMarkdown(stored.source))
+    setStale(null)
+  }
+
+  const dropStaleDraft = () => {
+    if (!data) return
+    discardDraft(data.slug)
+    setDraft({ frontmatter: editableFrontmatter(data), body: data.body })
+    setStale(null)
+  }
 
   const edited = useMemo(() => {
     if (!data || !draft) return null
@@ -74,7 +102,7 @@ export function WikiPageRoute() {
   }, [edited, draft])
 
   const toc = useMemo(() => (view ? outline(view.body) : []), [view])
-  const isDraft = Boolean(data && getDraft(data.slug))
+  const isDraft = Boolean(data && getDraft(data.slug)) && !stale
   // A sealed page is not a page that failed to load: it loaded, and this is all
   // of it. The article below is never rendered for one, so there is no frame in
   // which a body exists on screen unlocked — there is no body to have.
@@ -150,11 +178,32 @@ export function WikiPageRoute() {
             </div>
           </header>
 
+          {stale && (
+            <div className="wiki__stale" role="status">
+              <b>This browser is holding an older draft of this page.</b>
+              <p>
+                It was saved on {stale.savedAt}, from a version of the page dated before{' '}
+                {stale.upstream} — so somebody has written to this page since you last had it
+                open. You are reading the current page, not your draft. Publishing the draft
+                would delete whatever landed in between.
+              </p>
+              <p className="wiki__stale-actions">
+                <button type="button" onClick={openStaleDraft}>
+                  OPEN MY DRAFT ANYWAY
+                </button>
+                <button type="button" onClick={dropStaleDraft}>
+                  DISCARD MY DRAFT
+                </button>
+              </p>
+            </div>
+          )}
+
           {editing && (
             <Editor
               page={view}
               frontmatter={draft.frontmatter}
               body={draft.body}
+              base={data?.meta?.date_modified}
               onChange={setDraft}
               onClose={() => setEditing(false)}
             />

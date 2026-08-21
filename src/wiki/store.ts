@@ -34,7 +34,20 @@ function migrate() {
 
 migrate()
 
-export type Draft = { slug: string; source: string; savedAt: string }
+export type Draft = {
+  slug: string
+  source: string
+  savedAt: string
+  /**
+   * The upstream `date_modified` this draft was forked from.
+   *
+   * Not decoration — this is what makes a lost update detectable. See
+   * `draftIsStale`. Optional because drafts written before this field existed
+   * are still sitting in browsers; those fall back to the `date_modified`
+   * inside their own frontmatter, which is the same value by another route.
+   */
+  base?: string
+}
 
 function read<T>(key: string, fallback: T): T {
   try {
@@ -58,10 +71,52 @@ function write(key: string, value: unknown) {
 export const allDrafts = () => read<Record<string, Draft>>(DRAFTS, {})
 export const getDraft = (slug: string): Draft | null => allDrafts()[slug] ?? null
 
-export function saveDraft(slug: string, source: string) {
+export function saveDraft(slug: string, source: string, base?: string) {
   const drafts = allDrafts()
-  drafts[slug] = { slug, source, savedAt: new Date().toISOString() }
+  // The base is recorded once, when the draft first appears. Re-stamping it on
+  // every autosave would quietly re-baseline a draft against whatever upstream
+  // happens to be at the moment you typed a character, which is precisely the
+  // check `draftIsStale` exists to make.
+  const existing = drafts[slug]
+  drafts[slug] = {
+    slug,
+    source,
+    savedAt: new Date().toISOString(),
+    base: existing?.base ?? base,
+  }
   return write(DRAFTS, drafts)
+}
+
+/** The `date_modified` written in a markdown frontmatter block, if it has one. */
+function modifiedIn(source: string): string | null {
+  const end = source.startsWith('---') ? source.indexOf('\n---', 3) : -1
+  const head = end === -1 ? source.slice(0, 2000) : source.slice(0, end)
+  return head.match(/^date_modified:\s*["']?([\d-]+)/m)?.[1] ?? null
+}
+
+/**
+ * Has upstream moved since this draft was forked from it?
+ *
+ * A draft used to win over the shipped snapshot unconditionally, and on
+ * 2026-08-21 that cost the wiki 30KB of prose, an infobox and 56 typed-edge
+ * claims: a browser holding a draft of `people/annie-ulmer` taken on 08-13
+ * published it over three later passes, and the only visible symptom was two
+ * frontmatter dates moving *backwards* in the commit. Nothing in this app
+ * noticed, because nothing was looking.
+ *
+ * `date_modified` is the comparison rather than `savedAt` because `savedAt` is
+ * when the browser last wrote the draft, which says nothing about how old the
+ * page it was forked from is — a draft typed this morning off a month-old
+ * snapshot is exactly the dangerous case, and its `savedAt` looks fresh.
+ *
+ * Day granularity, and strictly-greater on purpose: two edits on the same day
+ * are the ordinary case and must not raise this.
+ */
+export function draftIsStale(draft: Draft, upstreamModified?: string | null): boolean {
+  if (!upstreamModified) return false
+  const base = draft.base ?? modifiedIn(draft.source)
+  if (!base) return false
+  return upstreamModified > base
 }
 
 export function discardDraft(slug: string) {

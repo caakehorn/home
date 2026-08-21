@@ -574,13 +574,12 @@ export const INSTRUMENTS: Instrument[] = [
     title: 'THE GENESIS',
     kana: '創世',
     wing: 'WIKI',
-    corpus: '147 commits · 36 days',
-    blurb: 'The knowledge graph forming, in time-lapse — pages per day and edges per day, arriving.',
-    method: 'Nodes and edges present at each commit, replayed in order. Nothing smoothed.',
-    status: 'UNBUILT',
+    corpus: '147 commits · 36 days · 8 → 460 pages',
+    blurb: 'The knowledge graph forming, one commit at a time, with what each commit did printed as it lands.',
+    method:
+      'Pages and edges present at each commit, replayed one commit per frame. The playhead moves through commits rather than through time, so a commit that landed four days after the one before it gets the same frame — a different axis from IV · THE ACCRETION\u2019s, and the real date is printed on every frame so the compression is never hidden. Nothing is interpolated between two commits.',
+    status: 'LIVE',
     origin: 'js/wiki-modules.js · WIKI 12 · draw_genesis',
-    needs:
-      'nothing from outside — the per-commit counts are already baked into public/leviathan/accretion.json for IV · THE ACCRETION. What is missing is the replay',
   },
   {
     id: 'episteme',
@@ -1022,5 +1021,40 @@ export const DOMAIN_KANA: Record<string, string> = {
   places: '場所',
   health: '健康',
   legal: '法',
+}
+
+/**
+ * IV · THE ACCRETION and ◈ WIKI XII · THE GENESIS, which read the same file.
+ *
+ * One dataset, two axes: THE ACCRETION plots the four counts against real
+ * elapsed time, THE GENESIS steps through the commits one at a time. Sharing
+ * the type is what stops the two rooms disagreeing about what a commit is.
+ */
+export type AccretionPoint = {
+  sha: string
+  t: number
+  subject: string
+  pages: number
+  bytes: number
+  links: number
+  edges: number
+  /** What this commit changed, or null for the first one, which changed everything. */
+  d: { pages: number; bytes: number; links: number; edges: number } | null
+}
+
+export type AccretionSeries = {
+  id: keyof Pick<AccretionPoint, 'pages' | 'bytes' | 'links' | 'edges'>
+  label: string
+  unit: string
+  note: string
+}
+
+export type AccretionSet = {
+  built: string
+  branch: string
+  span: { from: number; to: number; days: number }
+  commits: number
+  series: AccretionSeries[]
+  points: AccretionPoint[]
 }
 

@@ -48,15 +48,25 @@ export function Editor({ page, frontmatter, body, onChange, onClose }: Props) {
   )
 
   // Autosave to this browser, debounced. There is no server to post to.
+  //
+  // Except for a sealed page: its draft would be the plaintext of a page that
+  // ships as a ciphertext, sitting in localStorage where nothing asks for a
+  // passphrase to read it. So a sealed page's edits stay in this tab, in memory,
+  // and PUBLISH is the only way out of it — which is said plainly, because an
+  // editor that silently does not save is worse than one that cannot.
   useEffect(() => {
     if (!dirty) return
+    if (page.locked) {
+      setStatus('sealed page — held in this tab only, not saved to this browser')
+      return
+    }
     window.clearTimeout(saved.current)
     saved.current = window.setTimeout(() => {
       const ok = saveDraft(page.slug, toSource(page, { frontmatter, body }))
       setStatus(ok ? `saved locally · ${new Date().toLocaleTimeString()}` : 'could not save — browser storage is full')
     }, 700)
     return () => window.clearTimeout(saved.current)
-  }, [frontmatter, body, dirty, page.slug])
+  }, [frontmatter, body, dirty, page.slug, page.locked])
 
   const addPicture = async (chosen: File) => {
     setBusy(true)

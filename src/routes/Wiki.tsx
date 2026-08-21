@@ -95,7 +95,8 @@ export function WikiIndexRoute() {
             {data.counts.pages.toLocaleString()} pages · {data.counts.words.toLocaleString()} words
             {data.counts.edges ? ` · ${data.counts.edges.toLocaleString()} links` : ''} ·{' '}
             {data.counts.chartables} tables drawn as charts
-            {data.counts.briefs ? ` · ${data.counts.briefs} briefs unpacked` : ''}.
+            {data.counts.briefs ? ` · ${data.counts.briefs} briefs unpacked` : ''}
+            {data.counts.sealed ? ` · ${data.counts.sealed} sealed` : ''}.
           </p>
         )}
       </header>
@@ -217,7 +218,7 @@ function PageCard({ page, draft }: { page: IndexEntry; draft: boolean }) {
         <h2 className="wiki__card-title">{page.title}</h2>
         {page.knownFor && <p className="wiki__card-blurb">{page.knownFor}</p>}
         <span className="wiki__card-meta">
-          <span>{page.words.toLocaleString()}w</span>
+          {page.locked ? <span className="wiki__card-seal">sealed</span> : <span>{page.words.toLocaleString()}w</span>}
           {page.charts > 0 && <span className="wiki__card-charts">{page.charts} charts</span>}
           {page.brief && <span className="wiki__card-brief">brief</span>}
           {page.links > 0 && <span>{page.links} links</span>}

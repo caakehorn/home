@@ -41,7 +41,15 @@ jobs:
       - run: npm ci
 
       # One implementation of the derivation, the same one a local sync runs.
+      #
+      # WIKI_LOCK_PASSPHRASE is what re-seals the pages named in
+      # wiki.locks.json. Without it a sync that has pages to seal stops instead
+      # of committing them in the clear — so if this step starts failing after
+      # a page was sealed, the missing repository secret is why, and adding it
+      # is the fix rather than removing the lock.
       - run: node scripts/sync-wiki.mjs .wiki-brain
+        env:
+          WIKI_LOCK_PASSPHRASE: ${{ secrets.WIKI_LOCK_PASSPHRASE }}
       - run: npm run leviathan
 
       - id: commit

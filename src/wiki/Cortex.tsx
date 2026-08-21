@@ -456,9 +456,15 @@ export function Cortex({ index, visible, domain, query, onClear }: Props) {
             </span>
             <h2 className="probe__title">{probe.page.title}</h2>
             <p className="probe__meta">
-              {probe.page.words.toLocaleString()} words · {probe.degree} links
-              {probe.page.charts > 0 && ` · ${probe.page.charts} charts`}
-              {probe.page.brief && ' · brief'}
+              {probe.page.locked ? (
+                'sealed · nothing about this page is on the map'
+              ) : (
+                <>
+                  {probe.page.words.toLocaleString()} words · {probe.degree} links
+                  {probe.page.charts > 0 && ` · ${probe.page.charts} charts`}
+                  {probe.page.brief && ' · brief'}
+                </>
+              )}
             </p>
             {probe.page.knownFor && <p className="probe__blurb">{probe.page.knownFor}</p>}
             {probe.neighbours.length > 0 && (

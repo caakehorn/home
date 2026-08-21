@@ -164,6 +164,23 @@ export async function requestResync(slug: string, repo: string = SITE_REPO) {
   })
 }
 
+/**
+ * Tell wiki-brain a question has been parked, so its drain runs today rather
+ * than on its next scheduled pass.
+ *
+ * Separate from `requestResync` because the two say different things to
+ * different repositories: that one asks the *site* to rebuild so the question
+ * becomes visible, this one asks the *wiki* to look at its work list. Either can
+ * fail without costing anything — the question is committed by the time both are
+ * called, the hourly sync publishes it regardless, and the daily drain finds it.
+ */
+export async function announceQuestion(id: string) {
+  await call(`/repos/${SOURCE_REPO}/dispatches`, {
+    method: 'POST',
+    body: JSON.stringify({ event_type: 'sage-asked', client_payload: { id } }),
+  })
+}
+
 // ---------------------------------------------------------------------------
 // pictures
 

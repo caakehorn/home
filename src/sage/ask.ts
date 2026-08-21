@@ -26,7 +26,7 @@
  */
 
 import { credential, configured } from '../wiki/keyring'
-import { publishFile, requestResync, SOURCE_REPO } from '../wiki/publish'
+import { announceQuestion, publishFile, requestResync, SOURCE_REPO } from '../wiki/publish'
 import { questionId, toMarkdown, validate, type Draft } from './format'
 
 export { MAX_ASKER, MAX_QUESTION, validate, type Draft } from './format'
@@ -63,14 +63,25 @@ export async function ask(
     `Ask the sage: ${draft.question.trim().slice(0, 60)}`,
   )
 
-  // The commit is the durable part. If the nudge fails the question is still
-  // upstream and the hourly sync will pick it up, so say what happened rather
-  // than reporting a failure that lost nothing.
+  // The commit is the durable part, and both nudges below are optimisations on
+  // top of schedules that already exist. If either fails the question is still
+  // upstream, the hourly sync still publishes it and the daily drain still finds
+  // it — so say what happened rather than reporting a failure that lost nothing.
   onProgress('asking the site to rebuild…')
   try {
     await requestResync(`sage/${id}`)
   } catch {
     onProgress('filed — it will appear in the log on the next scheduled sync')
+  }
+
+  // And tell the wiki to look at its work list today rather than tomorrow.
+  // Deliberately not awaited into the failure path above: a question that is
+  // visible but not yet drained is a much better outcome than the reverse, so
+  // this one is allowed to fail quietly.
+  try {
+    await announceQuestion(id)
+  } catch {
+    /* the daily drain picks it up */
   }
 
   return id

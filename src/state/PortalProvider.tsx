@@ -53,6 +53,7 @@ export function PortalProvider({ children }: { children: ReactNode }) {
     () => typeof window !== 'undefined' && window.matchMedia(REDUCE).matches,
   )
   const [motionPref, setMotionPref] = useState<boolean | null>(initial.current.motion)
+  const [headerCollapsed, setHeaderCollapsed] = useState(false)
 
   useEffect(() => {
     const mq = window.matchMedia(REDUCE)
@@ -104,6 +105,7 @@ export function PortalProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const pokeRig = useCallback((id: string) => setLastPoked(id), [])
+  const toggleHeaderCollapsed = useCallback(() => setHeaderCollapsed((c) => !c), [])
 
   const value = useMemo<PortalState>(
     () => ({
@@ -119,8 +121,10 @@ export function PortalProvider({ children }: { children: ReactNode }) {
       lastPoked,
       motion,
       setMotion: setMotionPref,
+      headerCollapsed,
+      toggleHeaderCollapsed,
     }),
-    [vibe, chaos, entered, enter, registerRig, rigs, pokeRig, lastPoked, motion],
+    [vibe, chaos, entered, enter, registerRig, rigs, pokeRig, lastPoked, motion, headerCollapsed, toggleHeaderCollapsed],
   )
 
   return <PortalContext.Provider value={value}>{children}</PortalContext.Provider>

@@ -10,6 +10,67 @@
   flex-wrap: wrap;
 }
 
+/* ---- collapse button ---------------------------------------------------- */
+
+.hctl__collapse {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  padding: 0;
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  background: none;
+  border: 2px solid color-mix(in srgb, var(--text-dim) 30%, transparent);
+  cursor: pointer;
+  transition: border-color 160ms ease, color 160ms ease;
+  flex: none;
+}
+
+.hctl__collapse:hover {
+  color: var(--text);
+  border-color: var(--n3);
+}
+
+.hctl__collapse-icon {
+  font-size: 0.6rem;
+  line-height: 1;
+}
+
+/* ---- sliding panel ------------------------------------------------------ */
+
+.hctl__panel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem 0.7rem;
+  flex-wrap: wrap;
+  max-height: 10rem;
+  opacity: 1;
+  overflow: hidden;
+  transition: max-height 240ms ease, opacity 240ms ease, margin 240ms ease, padding 240ms ease;
+}
+
+.hctl__panel--collapsed {
+  max-height: 0;
+  opacity: 0;
+  margin: 0;
+  padding: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hctl__panel {
+    transition: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .hctl__collapse {
+    order: 1;
+  }
+}
+
 .hctl__label,
 .hctl__read {
   font-family: var(--f-mono);

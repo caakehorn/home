@@ -71,6 +71,9 @@ export type PortalState = {
    */
   motion: boolean
   setMotion: (motion: boolean) => void
+  /** Whether the header bar is collapsed (slid up out of view) */
+  headerCollapsed: boolean
+  toggleHeaderCollapsed: () => void
 }
 
 export const PortalContext = createContext<PortalState | null>(null)

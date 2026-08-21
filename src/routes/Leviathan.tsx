@@ -11,6 +11,7 @@ import { Attention } from '../leviathan/instruments/Attention'
 import { Census } from '../leviathan/instruments/Census'
 import { Claims } from '../leviathan/instruments/Claims'
 import { Clock } from '../leviathan/instruments/Clock'
+import { Echo } from '../leviathan/instruments/Echo'
 import { Evidence } from '../leviathan/instruments/Evidence'
 import { Health } from '../leviathan/instruments/Health'
 import { Lexicon } from '../leviathan/instruments/Lexicon'
@@ -43,6 +44,7 @@ const BUILT: Record<string, typeof Mass> = {
   evidence: Evidence,
   attention: Attention,
   schema: Schema,
+  echo: Echo,
 }
 
 /**

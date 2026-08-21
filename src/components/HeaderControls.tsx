@@ -16,23 +16,10 @@ import './header-controls.css'
  * screen reader and by thumb, and the platform slider is all three for free.
  */
 export function HeaderControls() {
-  const { vibe, setVibe, chaos, setChaos, motion, setMotion, headerCollapsed, toggleHeaderCollapsed } = usePortal()
+  const { vibe, setVibe, chaos, setChaos, motion, setMotion, headerCollapsed } = usePortal()
 
   return (
-    <div className="hctl">
-      <button
-        type="button"
-        className="hctl__collapse"
-        onClick={toggleHeaderCollapsed}
-        aria-expanded={!headerCollapsed}
-        aria-label={headerCollapsed ? 'Expand header' : 'Collapse header'}
-        title={headerCollapsed ? 'Expand header' : 'Collapse header'}
-      >
-        <span className="hctl__collapse-icon" aria-hidden="true">
-          {headerCollapsed ? '▲' : '▼'}
-        </span>
-      </button>
-
+    <div className={`hctl${headerCollapsed ? ' hctl--collapsed' : ''}`} aria-hidden={headerCollapsed}>
       <div className={`hctl__panel${headerCollapsed ? ' hctl__panel--collapsed' : ''}`}>
         <label className="hctl__chaos">
           <span className="hctl__label">CHAOS</span>

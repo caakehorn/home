@@ -386,6 +386,67 @@ const STOP = new Set(
    is was has had also one two three new page wiki`.split(/\s+/).filter(Boolean),
 )
 
+// ---------------------------------------------------------------------------
+// XVI · THE DICTION — each domain's private vocabulary
+//
+// TF-IDF: term frequency in a domain, times the log of how many domains there
+// are over how many contain the term. The rack held this SEALED not for want
+// of data — every word ships at /brain — but on a question: THE RULE says
+// nothing weighted, and IDF is a weight.
+//
+// The ruling, now made: a weight that is **computed from the corpus** is not
+// the kind of weight THE RULE forbids. What the rule is written against is a
+// weight somebody *chose* — a keyword deciding in advance what matters. IDF
+// chooses nothing; it is a count of how many domains use a word, arithmetic
+// applied to it. Two readers running it over this corpus get the same number.
+//
+// And it is disclosed rather than assumed: the instrument prints the raw count
+// beside every score, so the ranking can be checked against the counting.
+
+const DOMAIN_WORD = /[a-z'-]{4,}/g
+
+const domainVocab = new Map()
+for (const page of pages) {
+  const bag = domainVocab.get(page.domain) ?? new Map()
+  for (const match of String(page.body ?? '').toLowerCase().matchAll(DOMAIN_WORD)) {
+    const word = match[0].replace(/^['-]+|['-]+$/g, '')
+    if (word.length < 4 || STOP.has(word)) continue
+    bag.set(word, (bag.get(word) ?? 0) + 1)
+  }
+  domainVocab.set(page.domain, bag)
+}
+
+/** How many domains use a word at all — the document frequency, over 9 documents. */
+const spread = new Map()
+for (const [, bag] of domainVocab) {
+  for (const word of bag.keys()) spread.set(word, (spread.get(word) ?? 0) + 1)
+}
+
+const domainCount = domainVocab.size
+const diction = [...domainVocab.entries()]
+  .map(([id, bag]) => {
+    const total = [...bag.values()].reduce((n, v) => n + v, 0)
+    const terms = [...bag.entries()]
+      .filter(([, count]) => count >= 3)
+      .map(([word, count]) => {
+        const domains = spread.get(word) ?? 1
+        return {
+          word,
+          count,
+          /** Uses of this word that land in this domain, over all its uses anywhere. */
+          exclusivity:
+            count /
+            [...domainVocab.values()].reduce((n, other) => n + (other.get(word) ?? 0), 0),
+          domains,
+          score: (count / Math.max(1, total)) * Math.log(domainCount / domains),
+        }
+      })
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 40)
+    return { id, words: total, distinct: bag.size, terms }
+  })
+  .sort((a, b) => b.words - a.words)
+
 const vocab = pages.map((page) => {
   const set = new Set()
   for (const match of String(page.body ?? '').toLowerCase().matchAll(/[a-z']{4,}/g)) {
@@ -462,6 +523,7 @@ const set = {
   // Every page, not a top-N. THE ATTENTION's whole subject is the shape of the
   // scatter, and a scatter with the tail cut off is a different shape.
   attention,
+  diction,
   schema,
   echo,
 }

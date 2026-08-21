@@ -418,3 +418,17 @@
 @media (max-width: 620px) {
   .cen__row { grid-template-columns: 6.5rem 1fr 3.8rem; }
 }
+
+/* ==========================================================================
+   ◈ WIKI XVI · THE DICTION — nine vocabularies side by side
+   ========================================================================== */
+
+.dic__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  gap: 0.6rem 1.6rem;
+}
+
+.dic__panel {
+  min-width: 0;
+}

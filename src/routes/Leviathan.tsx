@@ -12,6 +12,7 @@ import { Census } from '../leviathan/instruments/Census'
 import { Chronicle } from '../leviathan/instruments/Chronicle'
 import { Claims } from '../leviathan/instruments/Claims'
 import { Clock } from '../leviathan/instruments/Clock'
+import { Diction } from '../leviathan/instruments/Diction'
 import { Echo } from '../leviathan/instruments/Echo'
 import { Evidence } from '../leviathan/instruments/Evidence'
 import { Genesis } from '../leviathan/instruments/Genesis'
@@ -49,6 +50,7 @@ const BUILT: Record<string, typeof Mass> = {
   echo: Echo,
   genesis: Genesis,
   chronicle: Chronicle,
+  diction: Diction,
 }
 
 /**

@@ -629,13 +629,12 @@ export const INSTRUMENTS: Instrument[] = [
     title: 'THE DICTION',
     kana: '語法',
     wing: 'WIKI',
-    corpus: '630,514 words across nine domains',
+    corpus: 'nine domains · 630,514 words weighed against each other',
     blurb: 'Each domain’s private vocabulary — the words that are used here and essentially nowhere else in the corpus.',
-    method: 'Term frequency per domain against document frequency across all of them.',
-    status: 'SEALED',
+    method:
+      'Term frequency in a domain times the log of nine over the number of domains using the word, top forty per domain. The ruling THE RULE needed: a weight computed from the corpus is not a weight somebody chose, and IDF chooses nothing — it counts how many domains use a word and applies arithmetic. Every row prints its raw count, so the ranking can be checked against the counting.',
+    status: 'LIVE',
     origin: 'js/wiki-analytics.js · WIKI 16 · draw_diction',
-    needs:
-      'nothing from outside — every word ships at /brain. What it needs is a ruling: TF-IDF weights a count by how rare it is, and THE RULE says nothing weighted. Probably defensible, since the weight is computed rather than chosen, but nobody has argued it yet',
   },
   {
     id: 'schema',
@@ -976,6 +975,13 @@ export type WikiSet = {
     }[]
     uncited: number
   }
+
+  diction: {
+    id: string
+    words: number
+    distinct: number
+    terms: { word: string; count: number; exclusivity: number; domains: number; score: number }[]
+  }[]
 
   attention: {
     slug: string

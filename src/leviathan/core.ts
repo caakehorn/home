@@ -657,13 +657,13 @@ export const INSTRUMENTS: Instrument[] = [
     title: 'THE ECHO',
     kana: '谺',
     wing: 'WIKI',
-    corpus: '486 pages, pairwise',
-    blurb: 'Where the wiki repeats itself — the loudest overlaps between two pages, either side readable from the row.',
-    method: 'Shared-vocabulary overlap between every pair of pages, ranked.',
-    status: 'UNBUILT',
+    corpus: '59,586 pairs · 32 with identical vocabulary',
+    blurb:
+      'Where the wiki repeats itself — and the answer at the top is its own boilerplate, which is left there rather than filtered out.',
+    method:
+      'Jaccard over the distinct four-letter-or-longer words of two pages — the size of the intersection over the size of the union. A set operation: no embedding, no model, no similarity threshold. Ranked by the number rather than filtered by it, two ways, because the two rankings answer different questions.',
+    status: 'LIVE',
     origin: 'js/wiki-analytics.js · WIKI 18 · draw_echo',
-    needs:
-      'nothing from outside. Overlap between two texts is a count of what they share, so this one clears THE RULE — it is simply not built',
   },
 
   // -------------------------------------------------------------------------

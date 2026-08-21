@@ -31,6 +31,16 @@
   text-shadow: 0 0 calc(var(--glow-r) * 0.8) var(--n1);
 }
 
+.lev__mast-note a {
+  color: var(--n1);
+}
+
+.lev__mast-note b {
+  color: var(--text);
+  font-family: var(--f-mono);
+  letter-spacing: 0.14em;
+}
+
 .lev__mast-note {
   grid-column: 1 / -1;
   max-width: 70ch;
@@ -91,7 +101,9 @@
   box-shadow: 10px 10px 0 var(--edge), 0 0 var(--glow-r) color-mix(in srgb, var(--n1) 55%, transparent);
 }
 
-.lev__card--sealed {
+/* A dark instrument is still a card, and still legible — it is just not lit.
+   Fading it into the paper would make the rack a showreel again. */
+.lev__card--dark {
   background: color-mix(in srgb, var(--void-2) 55%, var(--void));
 }
 
@@ -141,10 +153,112 @@
   background: var(--n3);
 }
 
+/* Five states, five weights of ink. LIVE is the only one that gets a solid
+   block; PORTED points somewhere; UNBUILT and SEALED are outlines, because an
+   outline reads as an empty slot; BARRED is the one that argues back, so it
+   gets the spot red every other warning on this site uses. */
+.lev__badge--live {
+  color: var(--on-glow);
+  background: var(--n3);
+}
+
+.lev__badge--ported {
+  color: var(--on-glow);
+  background: var(--n4);
+}
+
+.lev__badge--unbuilt,
 .lev__badge--sealed {
   color: var(--text-dim);
   background: none;
   border: 1px solid color-mix(in srgb, var(--text-dim) 50%, transparent);
+}
+
+.lev__badge--unbuilt {
+  color: var(--n1);
+  border-color: color-mix(in srgb, var(--n1) 55%, transparent);
+}
+
+.lev__badge--barred {
+  color: var(--n5);
+  background: none;
+  border: 1px solid color-mix(in srgb, var(--n5) 65%, transparent);
+}
+
+/* ---- the legend --------------------------------------------------------- */
+
+.lev__legend {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 0.28rem;
+  margin: 0.7rem 0 0;
+  padding: 0;
+  max-width: 70ch;
+  list-style: none;
+}
+
+.lev__legend li {
+  display: grid;
+  grid-template-columns: 5.4rem 1fr auto;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+
+.lev__legend .lev__badge {
+  margin-top: 0;
+  justify-self: start;
+}
+
+.lev__legend-say {
+  font-size: var(--step--1);
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+.lev__legend-n {
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: var(--text);
+}
+
+/* ---- a wing ------------------------------------------------------------- */
+
+.lev__wing {
+  padding-top: 1.6rem;
+}
+
+.lev__wing-title {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin: 0;
+  font-family: var(--f-head);
+  font-size: var(--step-1);
+  line-height: 1.05;
+  border-bottom: var(--rule) solid var(--n1);
+  padding-bottom: 0.3rem;
+}
+
+.lev__wing-kana {
+  font-size: 0.72em;
+  color: var(--text-dim);
+}
+
+.lev__wing-n {
+  margin-left: auto;
+  font-family: var(--f-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.2em;
+  color: var(--n1);
+}
+
+.lev__wing-note {
+  max-width: 74ch;
+  margin: 0.5rem 0 0;
+  font-size: var(--step--1);
+  line-height: 1.6;
+  color: var(--text-dim);
 }
 
 /* ---- a room ------------------------------------------------------------- */
@@ -194,6 +308,34 @@
   font-family: var(--f-mono);
   letter-spacing: 0.16em;
   color: var(--n4);
+}
+
+.lev__needs--barred {
+  border-left-color: var(--n5);
+}
+
+.lev__needs--barred b {
+  color: var(--n5);
+}
+
+.lev__needs a {
+  color: var(--n4);
+}
+
+.lev__method,
+.lev__origin {
+  max-width: 66ch;
+  font-size: var(--step--1);
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+.lev__method b,
+.lev__origin b {
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  color: var(--n1);
 }
 
 .lev__back {

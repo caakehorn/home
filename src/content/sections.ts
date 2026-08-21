@@ -45,6 +45,16 @@ export const SECTIONS: Section[] = [
     chant: banner('leviathan'),
   },
   {
+    slug: 'gallery',
+    title: 'THE GALLERY',
+    kana: '画廊',
+    blurb:
+      'The old repo, photographed running. Every other room here rebuilt its work in this house’s colours; this one leaves it in its own — thirteen plates and five clips of VOID + LEVIATHAN, shot off a live checkout rather than remembered.',
+    status: 'LIVE',
+    accent: 2,
+    chant: banner('gallery'),
+  },
+  {
     slug: 'transcript',
     title: 'THE TRANSCRIPT',
     kana: '記録',

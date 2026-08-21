@@ -1,0 +1,10 @@
+{
+  "title": "CHAPEL III · THE CLOCK",
+  "kana": "時計",
+  "caption": "Eleven years of one person’s messages as a single spiral. Angle is the hour of the day, radius is the date — first message at the centre, last at the rim. Nothing is excluded, weighted or smoothed. The dark wedge is sleep.",
+  "source": "clock.html · js/annie.js",
+  "shot": "1600×1400, nine seconds after load — the spiral draws itself in and this is where it stops.",
+  "order": 10,
+  "w": 1600,
+  "h": 1400
+}

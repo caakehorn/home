@@ -14,6 +14,8 @@
     "leviathan": "node --experimental-strip-types scripts/build-leviathan.mjs",
     "transcript": "node scripts/sync-transcript.mjs",
     "accretion": "node --experimental-strip-types scripts/build-accretion.mjs",
+    "gallery": "node scripts/build-gallery.mjs",
+    "gallery:capture": "node scripts/capture-gallery.mjs",
     "gate:verify": "node scripts/make-verify.mjs",
     "keyring": "node scripts/make-keyring.mjs"
   },

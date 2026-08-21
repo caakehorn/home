@@ -1,0 +1,10 @@
+{
+  "title": "CHAPEL I · THE ORACLE",
+  "kana": "神託",
+  "caption": "The seeded oracle. A field, a deterministic random number generator and a sigil — the same question returns the same answer forever, which is the joke and also the method.",
+  "source": "oracle.html · js/temple.js",
+  "shot": "1600×1000, five seconds after load.",
+  "order": 14,
+  "w": 1600,
+  "h": 1000
+}

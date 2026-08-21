@@ -18,100 +18,777 @@ import { useEffect, useState } from 'react'
  * alone, the counts make a portrait of the thing itself.
  */
 
+/**
+ * The whole old console is in this list — all thirty-seven of it, both
+ * sections, plus the three the house built afterwards. That is deliberate and
+ * it is the point of the five statuses below: a rack that only lists what is
+ * finished is a showreel, and a showreel cannot tell you what is missing.
+ * Listing every instrument and saying, next to each one, exactly why it is or
+ * is not lit turns the same page into a map.
+ */
 export type InstrumentStatus =
-  /** Built, wired to a dataset that ships with the site. */
+  /** Built here, wired to a dataset that ships with the site. */
   | 'LIVE'
+  /**
+   * It came across, under this house's own name and in another room. The entry
+   * stays in its old wing so the old console can be read off this page whole,
+   * and points at wherever the thing it became actually lives.
+   */
+  | 'PORTED'
+  /** The corpus it reads already ships here. Nobody has built the instrument. */
+  | 'UNBUILT'
   /** Declared, and waiting on a corpus this site does not carry. */
   | 'SEALED'
+  /**
+   * It exists over there and it does not come across, because it makes a
+   * judgement — a keyword list, a sentiment score, a composite index — and
+   * THE RULE forbids one. Not a to-do. A decision, with its reason attached.
+   */
+  | 'BARRED'
+
+/**
+ * The old console had two sections, `◈ CORPUS` and `◈ WIKI`, sharing one tab
+ * bar. They are kept as wings rather than flattened, because which corpus an
+ * instrument reads is the first thing worth knowing about it.
+ */
+export type Wing =
+  /** Nineteen instruments over the message record. */
+  | 'CORPUS'
+  /** Eighteen over the second brain. */
+  | 'WIKI'
+  /** Six on the unlisted third page, all of them scoring. */
+  | 'PROCUREMENT'
+  /** Built in this building, with no counterpart over there. */
+  | 'HOUSE'
 
 export type Instrument = {
   id: string
-  /** Instruments are numbered in the old house style. */
+  /** Instruments are numbered in the old house style, restarting per wing. */
   numeral: string
   title: string
   kana: string
+  wing: Wing
   /** What it is computed over. */
   corpus: string
   blurb: string
   /** How the numbers were arrived at, in one sentence. Every instrument owes this. */
   method: string
   status: InstrumentStatus
-  /** For SEALED entries: what would have to arrive for it to light up. */
+  /** Where it came from in the old repo, so the port can be checked against it. */
+  origin?: string
+  /** For SEALED and UNBUILT entries: what would have to arrive for it to light up. */
   needs?: string
+  /** For BARRED entries: which part of THE RULE it breaks. */
+  bars?: string
+  /** For PORTED entries: the route it came across as. */
+  portedTo?: string
 }
 
+/** THE RULE, in the one sentence a BARRED instrument gets told it broke. */
+const JUDGEMENT = (what: string) =>
+  `${what} That is a judgement, not a count, and THE RULE does not bend for an instrument that looks good.`
+
 export const INSTRUMENTS: Instrument[] = [
+  // -------------------------------------------------------------------------
+  // THE HOUSE — built here. Four of these, and they are the only four.
+
   {
     id: 'mass',
     numeral: 'I',
     title: 'THE MASS',
     kana: '質量',
-    corpus: '458 wiki pages · 442,440 words',
+    wing: 'HOUSE',
+    corpus: '486 wiki pages · 630,514 words',
     blurb: 'Where the weight actually sits. Nine domains, by how much has been written in them.',
     method: 'Word counts per page, summed by domain. Nothing weighted, nothing excluded.',
     status: 'LIVE',
+    origin: 'the console’s WIKI 08 · MASS, rebuilt over this snapshot',
   },
   {
     id: 'chronology',
     numeral: 'II',
     title: 'THE CHRONOLOGY',
     kana: '年代',
+    wing: 'HOUSE',
     corpus: '4,987 dated mentions · 1900 → 2026',
     blurb:
       'Every date the wiki names, mined out of its own prose — not the timeline pages, the whole corpus. Where the record thickens, and where it goes quiet.',
     method:
       'Dates parsed from page bodies by the same matchers the brief visualiser uses, counted once per page per distinct date.',
     status: 'LIVE',
+    origin: 'no counterpart over there — this one is the house’s',
   },
   {
     id: 'pen',
     numeral: 'III',
     title: 'THE PEN',
     kana: '筆',
+    wing: 'HOUSE',
     corpus: '4,987 dated mentions · 1900 → 2026',
     blurb:
       'The chart recorder from the old console, with the lanes finally carrying something. Four counts against one axis, traced by a stylus that sits where the value is.',
     method:
       'Per year: mentions landing in it, distinct pages naming it, distinct domains among those pages, and pages whose earliest named date it is. Each lane scaled to its own maximum, which is printed beside it.',
     status: 'LIVE',
-  },
-  {
-    id: 'ask',
-    numeral: 'IV',
-    title: 'THE ASK',
-    kana: '請求',
-    corpus: 'the message record',
-    blurb: 'Every request, recounted from the raw corpus, in the order it was made.',
-    method: 'Ledger rows counted from the message export; citations, not claims.',
-    status: 'SEALED',
-    needs:
-      'the classified ledger behind it, which is not vendored here — the raw record now is (see THE TRANSCRIPT), but the ledger is a hand-audited reading of it and is a separate artefact',
-  },
-  {
-    id: 'clock',
-    numeral: 'V',
-    title: 'THE CLOCK',
-    kana: '時計',
-    corpus: 'eleven years of messages',
-    blurb: 'Every message placed by when it was sent. Angle is the hour, radius is the date.',
-    method: 'Timestamps read from the string, never through Date(), so no timezone can move an hour.',
-    status: 'SEALED',
-    needs:
-      'nothing from outside any more — the corpus it reads arrived with THE TRANSCRIPT and ships at /transcript. What is missing is the instrument, which is not built yet',
+    origin: 'js/pen-core.js — the scaffold POLYGRAPH, WEATHER, EPISTEME and CRUCIBLE all composed',
   },
   {
     id: 'accretion',
-    numeral: 'VI',
+    numeral: 'IV',
     title: 'THE ACCRETION',
     kana: '堆積',
+    wing: 'HOUSE',
     corpus: '147 commits · 36 days · 8 → 460 pages',
     blurb:
       'The wiki being built, plotted against real time. Four counts on one axis — and they disagree, which is the whole reading: the corpus arrived in a day and then deepened for five weeks.',
     method:
       'Per first-parent commit: files under wiki/ ending .md, the sum of their blob sizes, every [[wiki/…]] occurrence, and distinct page→page pairs. Read from git rather than the snapshot, since the snapshot only knows the present. Nothing smoothed, no commit excluded.',
     status: 'LIVE',
+    origin: 'the console’s WIKI 06 · ACCRETION, rebuilt off git instead of a build log',
+  },
+
+  // -------------------------------------------------------------------------
+  // ◈ CORPUS — nineteen instruments over the message record.
+  //
+  // Ten of them are BARRED, and that is not an accident of what shipped: the
+  // corpus half of the old console was largely built out of rhetorical
+  // scoring, and rhetorical scoring is exactly the thing THE RULE was written
+  // against. They are listed anyway. A rack that quietly dropped them would be
+  // making the same claim about the old site that a highlight reel makes.
+
+  {
+    id: 'pulse',
+    numeral: 'I',
+    title: 'THE PULSE',
+    kana: '脈',
+    wing: 'CORPUS',
+    corpus: '134,348 messages · 2015-11-28 → 2026-07-26',
+    blurb:
+      'The whole record as one scrubbable line, with the eras banded behind it — NYC ONE, UNIONTOWN, NYC TWO, RETURN. Throw it and it keeps moving.',
+    method: 'Messages per day, plotted on a draggable window with inertia. A count and a date, and nothing else.',
+    status: 'UNBUILT',
+    origin: 'void.html · MODULE 01 · draw_pulse',
+    needs:
+      'nothing from outside — the record it reads arrived with THE TRANSCRIPT and ships at /transcript. What is missing is the instrument',
+  },
+  {
+    id: 'clock',
+    numeral: 'II',
+    title: 'THE CLOCK',
+    kana: '時計',
+    wing: 'CORPUS',
+    corpus: '134,348 messages · 2015-11-28 → 2026-07-26',
+    blurb: 'Every message placed by when it was sent. Angle is the hour, radius is the date.',
+    method: 'Timestamps read from the string, never through Date(), so no timezone can move an hour.',
+    status: 'UNBUILT',
+    origin: 'void.html · MODULE 02 · draw_clock — and again, standalone, as clock.html',
+    needs:
+      'nothing from outside any more — the corpus it reads arrived with THE TRANSCRIPT and ships at /transcript. What is missing is the instrument, which is not built yet. There is a photograph of the old one in THE GALLERY',
+  },
+  {
+    id: 'orbits',
+    numeral: 'III',
+    title: 'THE ORBITS',
+    kana: '軌道',
+    wing: 'CORPUS',
+    corpus: 'every thread in the message record',
+    blurb:
+      'One body per correspondent, orbiting by how recently they were spoken to — talked yesterday at the centre, silent for a decade out at the rim. You can fling them.',
+    method: 'Days since the last message, and messages exchanged. Two counts, one of them a subtraction of dates.',
+    status: 'SEALED',
+    origin: 'void.html · MODULE 03 · draw_orbits',
+    needs:
+      'the multi-thread export. THE TRANSCRIPT ships one thread; this instrument is about all the others, and they are not vendored here',
+  },
+  {
+    id: 'atlas',
+    numeral: 'IV',
+    title: 'THE ATLAS',
+    kana: '地図',
+    wing: 'CORPUS',
+    corpus: '6,185 location fixes',
+    blurb:
+      'A decade of movement replayed over the north-east corridor, rivers and interstates drawn in by hand. Play it at ×1, ×4 or ×12 and watch a life move between two states.',
+    method: 'Each fix placed at its own coordinates on its own date. No path is interpolated between two of them.',
+    status: 'SEALED',
+    origin: 'void.html · MODULE 04 · draw_atlas',
+    needs: 'the location history, which is not vendored here and is not something this site is going to publish',
+  },
+  {
+    id: 'lexicon',
+    numeral: 'V',
+    title: 'THE LEXICON',
+    kana: '語彙',
+    wing: 'CORPUS',
+    corpus: '134,348 messages · 5,102,026 characters',
+    blurb:
+      'The vocabulary as physics — every word a body, sized by how often it is used, with a seismograph of shouting under it.',
+    method: 'Word frequencies and the share of messages in all caps. Both are counts; the physics is only how they are arranged.',
+    status: 'UNBUILT',
+    origin: 'void.html · MODULE 05 · draw_lexicon',
+    needs:
+      'nothing from outside — every word it counts ships at /transcript. What is missing is a token index, and the instrument on top of it',
+  },
+  {
+    id: 'shelf',
+    numeral: 'VI',
+    title: 'THE SHELF',
+    kana: '棚',
+    wing: 'CORPUS',
+    corpus: '1,121 rated works',
+    blurb:
+      'Music, books, films, art — everything ever rated, against what everybody else rated it. The diagonal is perfect agreement with the world and almost nothing sits on it.',
+    method: 'Two ratings per work, his and the aggregate, plotted against each other. Neither is adjusted.',
+    status: 'SEALED',
+    origin: 'void.html · MODULE 06 · draw_shelf',
+    needs: 'the ratings export, which is not vendored here',
+  },
+  {
+    id: 'weather',
+    numeral: 'VII',
+    title: 'THE WEATHER',
+    kana: '天気',
+    wing: 'CORPUS',
+    corpus: 'the message record joined to a weather series',
+    blurb:
+      'Real weather — cold, precipitation, travel — run underneath the record as four pens, with a needle you can drag through eleven years.',
+    method: 'Weekly weather observations joined to the record by date, against rhetorical rates per 100 messages.',
+    status: 'BARRED',
+    origin: 'void.html · MODULE 07 · draw_weather / draw_weatherStorm',
+    bars: JUDGEMENT('The pens are LOVE, PROFANITY, APOLOGY, HEDGING, COMMAND and SHOUT — six keyword lists asked to stand in for a mood, and then correlated against the sky.'),
+  },
+  {
+    id: 'polygraph',
+    numeral: 'VIII',
+    title: 'THE POLYGRAPH',
+    kana: '探知',
+    wing: 'CORPUS',
+    corpus: '181,650 messages · every thread',
+    blurb: 'The four-pen chart recorder, run over the whole record rather than one thread, with the fragments that moved each pen printed beside it verbatim.',
+    method: 'Rates per 100 messages per month on four channels, against a volume lane.',
+    status: 'BARRED',
+    origin: 'void.html · MODULE 08 · draw_annie',
+    bars: JUDGEMENT('The four pens are LOVE, PROFANITY, APOLOGY and SHOUT. The instrument is beautiful and the pens are keyword lists.'),
+  },
+  {
+    id: 'signal',
+    numeral: 'IX',
+    title: 'THE SIGNAL',
+    kana: '電波',
+    wing: 'CORPUS',
+    corpus: '12,863 YouTube watches',
+    blurb: 'A decade of listening as a spectrogram, with a tuner that walks the artists one at a time.',
+    method: 'Watches per artist per day. A count, binned by date.',
+    status: 'SEALED',
+    origin: 'void.html · MODULE 09 · draw_signal',
+    needs: 'the watch history, which is not vendored here',
+  },
+  {
+    id: 'mirror',
+    numeral: 'X',
+    title: 'THE MIRROR',
+    kana: '鏡',
+    wing: 'CORPUS',
+    corpus: 'every thread in the message record',
+    blurb: 'How he writes changes depending on who he is writing to. One point per correspondent, against the median of all of them.',
+    method: 'Affection and hedges per 100 sent messages, per thread.',
+    status: 'BARRED',
+    origin: 'void.html · MODULE 10 · draw_mirror',
+    bars: JUDGEMENT('“Affection per 100 sent” is a keyword list with a rate sign after it, and the instrument’s whole claim is a reading of what that rate means about a person.'),
+  },
+  {
+    id: 'gravity',
+    numeral: 'XI',
+    title: 'THE GRAVITY',
+    kana: '引力',
+    wing: 'CORPUS',
+    corpus: 'every thread in the message record',
+    blurb: 'Which people pull the same language out of him, clustered by how alike the writing gets around them.',
+    method: 'Rhetorical rate vectors per thread, clustered by distance between them.',
+    status: 'BARRED',
+    origin: 'void.html · MODULE 11 · draw_gravity',
+    bars: JUDGEMENT('Every axis of the space it clusters in is a keyword rate, so the clusters are groupings of a scoring choice.'),
+  },
+  {
+    id: 'forensic',
+    numeral: 'XII',
+    title: 'THE FORENSIC',
+    kana: '鑑識',
+    wing: 'CORPUS',
+    corpus: 'the message record, daily',
+    blurb: 'Four composite scores per day, each one clickable through to the messages that produced it.',
+    method: 'Four weighted indices over daily message text, with the top-scoring fragments pinned as evidence.',
+    status: 'BARRED',
+    origin: 'void.html · MODULE 12 · draw_forensic',
+    bars: JUDGEMENT('The four scores are PLEADING, APOLOGY, LOVE-BOMB and DENIAL. Naming a day’s messages “love-bomb” is a verdict about a person, computed.'),
+  },
+  {
+    id: 'rings',
+    numeral: 'XIII',
+    title: 'THE RINGS',
+    kana: '年輪',
+    wing: 'CORPUS',
+    corpus: '134,348 messages · 3,893 days',
+    blurb: 'Sixteen years coiled into circles, one ring per year, one mark per day. A silent day is a gap you can see from across the room.',
+    method: 'Messages per day, wrapped onto a ring per year. A count and a date.',
+    status: 'UNBUILT',
+    origin: 'void.html · MODULE 13 · draw_rings',
+    needs: 'nothing from outside — the record ships at /transcript. What is missing is the instrument',
+  },
+  {
+    id: 'silence',
+    numeral: 'XIV',
+    title: 'THE SILENCE',
+    kana: '沈黙',
+    wing: 'CORPUS',
+    corpus: '134,348 messages · 129 months, 91 of them covered',
+    blurb:
+      'The negative space of the record: every gap, how long it ran, and what broke it. The last one is still open.',
+    method: 'Elapsed time between consecutive messages, sorted. Nothing about a gap is inferred beyond its length and its ends.',
+    status: 'UNBUILT',
+    origin: 'void.html · MODULE 14 · draw_silence',
+    needs:
+      'nothing from outside — the record ships at /transcript, and its 38 missing months are already stated there rather than drawn over. What is missing is the instrument',
+  },
+  {
+    id: 'psyche',
+    numeral: 'XV',
+    title: 'THE PSYCHE',
+    kana: '精神',
+    wing: 'CORPUS',
+    corpus: '56 rated works × the language around them',
+    blurb: 'What was being listened to and read in the fortnights that read profane, tender, charged both ways, or quiet.',
+    method: 'Works rated within a window, cross-tabulated against that window’s rhetorical channels.',
+    status: 'BARRED',
+    origin: 'void.html · MODULE 15 · draw_psyche',
+    bars: JUDGEMENT('PROFANE, TENDER, CHARGED BOTH WAYS and QUIET are four buckets somebody chose, and then a taste is explained by them.'),
+  },
+  {
+    id: 'sync',
+    numeral: 'XVI',
+    title: 'THE SYNC',
+    kana: '同調',
+    wing: 'CORPUS',
+    corpus: 'every thread in the message record',
+    blurb: 'Linguistic style matching, him against each of them, over ten channels — first person, hedges, commands, questions, all-caps and the rest.',
+    method: 'Per-channel rate difference between the two sides of a thread, combined into one match score.',
+    status: 'BARRED',
+    origin: 'void.html · MODULE 16 · draw_sync',
+    bars: JUDGEMENT('Ten channels are ten keyword lists, and a single “style match” number on top of them is a composite index.'),
+  },
+  {
+    id: 'drift',
+    numeral: 'XVII',
+    title: 'THE DRIFT',
+    kana: '漂流',
+    wing: 'CORPUS',
+    corpus: 'the message record, monthly',
+    blurb: 'Every month against every other month, shaded by how much the writing sounds the same. The diagonal is a year of a voice changing.',
+    method: 'Cosine similarity between months over eight rhetorical rates.',
+    status: 'BARRED',
+    origin: 'void.html · MODULE 17 · draw_drift',
+    bars: JUDGEMENT('The similarity is computed in a space whose eight axes are keyword rates, so “sounds like” means “scores like”.'),
+  },
+  {
+    id: 'oracle',
+    numeral: 'XVIII',
+    title: 'THE ORACLE',
+    kana: '神託',
+    wing: 'CORPUS',
+    corpus: '181,650 messages · every thread',
+    blurb: 'The same six channels as a rotating radar rather than parallel lanes — one hexagon per month, with a ghosted trail of the months behind it.',
+    method: 'Six rhetorical rates per month, drawn as a radar polygon.',
+    status: 'BARRED',
+    origin: 'void.html · MODULE 18 · draw_oracle',
+    bars: JUDGEMENT('LOVE, APOLOGY, HEDGE, COMMAND, PROFANITY and SHOUT are the six spokes. Rotating them does not make them counts.'),
+  },
+  {
+    id: 'authority',
+    numeral: 'XIX',
+    title: 'THE AUTHORITY',
+    kana: '権威',
+    wing: 'CORPUS',
+    corpus: '181,650 messages · every thread',
+    blurb: 'Command against hedge, monthly, with a diverging lane between them that reads ASSERTING above the line and DEFERRING below it.',
+    method: 'Two rates per 100 messages per month, and their difference.',
+    status: 'BARRED',
+    origin: 'void.html · MODULE 19 · draw_authority',
+    bars: JUDGEMENT('It prints a verdict on a month — asserting or deferring — off two keyword lists.'),
+  },
+
+  // -------------------------------------------------------------------------
+  // ◈ WIKI — eighteen over the second brain.
+  //
+  // This is the wing where the port is nearly free: the corpus these read is
+  // the snapshot at /brain, which ships. Sixteen of them are UNBUILT rather
+  // than SEALED, and that list is the honest to-do.
+
+  {
+    id: 'reader',
+    numeral: 'I',
+    title: 'THE READER',
+    kana: '読解',
+    wing: 'WIKI',
+    corpus: '486 pages · 630,514 words · nine domains',
+    blurb: 'The prose itself, searchable, with the typed links resolved. The one instrument that is not a reading of the corpus but the corpus.',
+    method: 'Markdown rendered as written. Nothing summarised, nothing reordered.',
+    status: 'PORTED',
+    origin: 'wiki.html · js/wiki-reader.js',
+    portedTo: '/brain',
+  },
+  {
+    id: 'web',
+    numeral: 'II',
+    title: 'THE WEB',
+    kana: '網',
+    wing: 'WIKI',
+    corpus: '486 pages · 3,046 edges',
+    blurb: 'The entire second brain as one force graph — every page a node, every link a spring, nothing pinned.',
+    method: 'Distinct page→page pairs, laid out by force simulation. The layout is arbitrary; the edges are not.',
+    status: 'UNBUILT',
+    origin: 'js/wiki-modules.js · WIKI 02 · draw_web',
+    needs: 'nothing from outside — /brain already draws a map off the same edges. What is missing is this instrument’s version of it',
+  },
+  {
+    id: 'claims',
+    numeral: 'III',
+    title: 'THE CLAIMS',
+    kana: '主張',
+    wing: 'WIKI',
+    corpus: '3,046 typed edges',
+    blurb: 'The typed edges read back as a feed of assertions — this page says that about that one, in the wiki’s own words.',
+    method: 'Every edge printed with its type and its two endpoints. No edge is ranked.',
+    status: 'UNBUILT',
+    origin: 'js/wiki-modules.js · WIKI 03 · draw_claims',
+    needs: 'nothing from outside — the edges ship in the snapshot. What is missing is the instrument',
+  },
+  {
+    id: 'census',
+    numeral: 'IV',
+    title: 'THE CENSUS',
+    kana: '戸籍',
+    wing: 'WIKI',
+    corpus: '165 documented people',
+    blurb: 'Every documented human as a lifeline, laid on one time axis. Click one and the page opens.',
+    method: 'Dates of birth and death where the page states them, drawn as a span. Where it does not, nothing is drawn.',
+    status: 'UNBUILT',
+    origin: 'js/wiki-modules.js · WIKI 04 · draw_census',
+    needs: 'nothing from outside — the people pages ship at /brain, and /lineage already draws 515 of them on a real axis',
+  },
+  {
+    id: 'strata',
+    numeral: 'V',
+    title: 'THE STRATA',
+    kana: '地層',
+    wing: 'WIKI',
+    corpus: '4,987 dated mentions · 1900 → 2026',
+    blurb: 'What the wiki knows, plotted in time and stacked by domain — the record as sediment.',
+    method: 'Dated mentions binned by year and domain. A count and a date.',
+    status: 'PORTED',
+    origin: 'js/wiki-modules.js · WIKI 05 · draw_strata',
+    portedTo: '/leviathan/chronology',
+  },
+  {
+    id: 'accrete',
+    numeral: 'VI',
+    title: 'THE ACCRETION',
+    kana: '堆積',
+    wing: 'WIKI',
+    corpus: '147 commits · 36 days',
+    blurb: 'The wiki documenting itself: cumulative pages against the log of its own construction.',
+    method: 'Pages present at each entry in the build log.',
+    status: 'PORTED',
+    origin: 'js/wiki-modules.js · WIKI 06 · draw_accrete — rebuilt off git rather than the build log, which is the one change the port made',
+    portedTo: '/leviathan/accretion',
+  },
+  {
+    id: 'tagmap',
+    numeral: 'VII',
+    title: 'THE TAGS',
+    kana: '標識',
+    wing: 'WIKI',
+    corpus: 'every tag on every page',
+    blurb: 'Themes as gravity. Each tag pulls the pages that carry it, and the pages that carry two get torn between them.',
+    method: 'Tag counts per page, arranged by attraction. The count is the data; the arrangement is the drawing.',
+    status: 'UNBUILT',
+    origin: 'js/wiki-modules.js · WIKI 07 · draw_tagmap',
+    needs: 'nothing from outside — tags ship in the snapshot. What is missing is the instrument',
+  },
+  {
+    id: 'wiki-mass',
+    numeral: 'VIII',
+    title: 'THE MASS',
+    kana: '質量',
+    wing: 'WIKI',
+    corpus: '486 pages · 630,514 words',
+    blurb: 'The corpus by weight as a treemap — every page a rectangle sized by its word count, grouped into its domain.',
+    method: 'Word counts per page, squarified by domain. Nothing weighted, nothing excluded.',
+    status: 'PORTED',
+    origin: 'js/wiki-modules.js · WIKI 08 · draw_mass',
+    portedTo: '/leviathan/mass',
+  },
+  {
+    id: 'lattice',
+    numeral: 'IX',
+    title: 'THE HEALTH',
+    kana: '健全',
+    wing: 'WIKI',
+    corpus: '486 pages · 3,046 edges',
+    blurb:
+      'Graph forensics on the brain itself: reciprocity, the edge-type spectrum, and a ring of every page nothing else links to.',
+    method: 'Edge counts in both directions per page; an orphan is a page with no inbound prose link, which is a count of zero, not an opinion.',
+    status: 'UNBUILT',
+    origin: 'js/wiki-modules.js · WIKI 09 · draw_lattice',
+    needs: 'nothing from outside — /brain’s gaps panel already computes part of this. What is missing is the rest of it',
+  },
+  {
+    id: 'evidence',
+    numeral: 'X',
+    title: 'THE EVIDENCE',
+    kana: '証拠',
+    wing: 'WIKI',
+    corpus: 'every page, against its sources',
+    blurb:
+      'Pages against the raw material behind them — messages, Facebook, AI chats, location, documents, platform exports, genealogy. What is cited, and what is only asserted.',
+    method: 'Source references counted per page by kind. A page with none is drawn with none.',
+    status: 'SEALED',
+    origin: 'js/wiki-modules.js · WIKI 10 · draw_evidence',
+    needs: 'the raw/ tree the citations point into, which lives in wiki-brain and is not vendored here',
+  },
+  {
+    id: 'chronicle',
+    numeral: 'XI',
+    title: 'THE CHRONICLE',
+    kana: '年代記',
+    wing: 'WIKI',
+    corpus: 'the wiki’s own build log',
+    blurb: 'The wiki building itself as four pens — ingest, connect, write, maintain — against the same axis as THE ACCRETION.',
+    method: 'Commits classified into four kinds and counted per day.',
+    status: 'SEALED',
+    origin: 'js/wiki-modules.js · WIKI 11 · draw_chronicle',
+    needs:
+      'the build log. And then an argument this building has not had yet: sorting commits into ingest, connect, write and maintain is a classification, and THE RULE would want to know who wrote the rules for it',
+  },
+  {
+    id: 'genesis',
+    numeral: 'XII',
+    title: 'THE GENESIS',
+    kana: '創世',
+    wing: 'WIKI',
+    corpus: '147 commits · 36 days',
+    blurb: 'The knowledge graph forming, in time-lapse — pages per day and edges per day, arriving.',
+    method: 'Nodes and edges present at each commit, replayed in order. Nothing smoothed.',
+    status: 'UNBUILT',
+    origin: 'js/wiki-modules.js · WIKI 12 · draw_genesis',
+    needs:
+      'nothing from outside — the per-commit counts are already baked into public/leviathan/accretion.json for IV · THE ACCRETION. What is missing is the replay',
+  },
+  {
+    id: 'episteme',
+    numeral: 'XIII',
+    title: 'THE EPISTEME',
+    kana: '認識',
+    wing: 'WIKI',
+    corpus: '486 pages of prose',
+    blurb: 'How sure the record is of itself — where it hedges, where it asserts flatly, where it negates, and where it leaves a question open.',
+    method: 'Four rates per page from the prose, grouped by domain, with a volatility figure over them.',
+    status: 'BARRED',
+    origin: 'js/wiki-analytics.js · WIKI 13 · draw_episteme',
+    bars: JUDGEMENT('HEDGING, ASSERTION, NEGATION and OPEN QUESTION are four keyword lists, and calling their mixture “certainty” is the editorial step.'),
+  },
+  {
+    id: 'crucible',
+    numeral: 'XIV',
+    title: 'THE CRUCIBLE',
+    kana: '坩堝',
+    wing: 'WIKI',
+    corpus: 'every pair of pages that disagree',
+    blurb: 'Where the record contradicts itself, sorted by whether the contradiction was ever resolved.',
+    method: 'Page pairs scored for tension and contradiction, filtered to the unresolved ones.',
+    status: 'BARRED',
+    origin: 'js/wiki-analytics.js · WIKI 14 · draw_crucible',
+    bars: JUDGEMENT('Deciding that two pages contradict each other, and then that one of them healed it, is a reading of both. The wiki leaves its contradictions in on purpose; scoring them is not the same as keeping them.'),
+  },
+  {
+    id: 'attention',
+    numeral: 'XV',
+    title: 'THE ATTENTION',
+    kana: '注意',
+    wing: 'WIKI',
+    corpus: '486 pages · every name in them',
+    blurb:
+      'Documentation debt. Words on a subject’s own page against the number of times other pages name it — the far corner is everything that gets talked about and never written up.',
+    method: 'Two counts per subject: words on its page, and mentions of it elsewhere. Both are counts; the diagonal is the only claim.',
+    status: 'UNBUILT',
+    origin: 'js/wiki-analytics.js · WIKI 15 · draw_attention',
+    needs:
+      'nothing from outside — both counts come out of the snapshot. What is missing is the instrument, and this is the one worth building first',
+  },
+  {
+    id: 'diction',
+    numeral: 'XVI',
+    title: 'THE DICTION',
+    kana: '語法',
+    wing: 'WIKI',
+    corpus: '630,514 words across nine domains',
+    blurb: 'Each domain’s private vocabulary — the words that are used here and essentially nowhere else in the corpus.',
+    method: 'Term frequency per domain against document frequency across all of them.',
+    status: 'SEALED',
+    origin: 'js/wiki-analytics.js · WIKI 16 · draw_diction',
+    needs:
+      'nothing from outside — every word ships at /brain. What it needs is a ruling: TF-IDF weights a count by how rare it is, and THE RULE says nothing weighted. Probably defensible, since the weight is computed rather than chosen, but nobody has argued it yet',
+  },
+  {
+    id: 'schema',
+    numeral: 'XVII',
+    title: 'THE SCHEMA',
+    kana: '図式',
+    wing: 'WIKI',
+    corpus: 'the front-matter of 486 pages',
+    blurb: 'The shape of the metadata — which fields are filled in, which are not, and where the record is thin.',
+    method: 'Presence and absence of each field, counted. Nothing inferred into an empty one.',
+    status: 'UNBUILT',
+    origin: 'js/wiki-analytics.js · WIKI 17 · draw_schema',
+    needs: 'nothing from outside — the front-matter ships in the snapshot. What is missing is the instrument',
+  },
+  {
+    id: 'echo',
+    numeral: 'XVIII',
+    title: 'THE ECHO',
+    kana: '谺',
+    wing: 'WIKI',
+    corpus: '486 pages, pairwise',
+    blurb: 'Where the wiki repeats itself — the loudest overlaps between two pages, either side readable from the row.',
+    method: 'Shared-vocabulary overlap between every pair of pages, ranked.',
+    status: 'UNBUILT',
+    origin: 'js/wiki-analytics.js · WIKI 18 · draw_echo',
+    needs:
+      'nothing from outside. Overlap between two texts is a count of what they share, so this one clears THE RULE — it is simply not built',
+  },
+
+  // -------------------------------------------------------------------------
+  // PROCUREMENT — the unlisted third page, six instruments, all of them scoring.
+  //
+  // They are listed for completeness and every one of them is BARRED. The page
+  // is a hand-assembled pool of quotations sorted into lanes and tiers about a
+  // named living person; the sorting is the instrument. Nothing here reproduces
+  // its contents, and nothing in THE GALLERY photographs it.
+
+  {
+    id: 'proc-agency',
+    numeral: 'I',
+    title: 'THE AGENCY',
+    kana: '主体',
+    wing: 'PROCUREMENT',
+    corpus: '~55 hand-assembled records',
+    blurb: 'The pool played back in order as four pens, each line clicking through to its source row.',
+    method: 'Records counted into lanes chosen by hand.',
+    status: 'BARRED',
+    origin: 'procurement.html · js/procurement.js · I · AGENCY',
+    bars: JUDGEMENT('The lanes are a case. Every record was placed in one by a person making an argument about another person.'),
+  },
+  {
+    id: 'proc-ledger',
+    numeral: 'II',
+    title: 'THE LEDGER',
+    kana: '帳簿',
+    wing: 'PROCUREMENT',
+    corpus: 'the same pool, by day',
+    blurb: 'The same records re-sorted day by day and by direction.',
+    method: 'Records counted per day per sub-kind.',
+    status: 'BARRED',
+    origin: 'procurement.html · II · LEDGER — and standalone as ledger.html',
+    bars: JUDGEMENT('Re-sorting a hand-assembled case does not make it a count of anything but the case.'),
+  },
+  {
+    id: 'proc-uncond',
+    numeral: 'III',
+    title: 'THE UNCONDITIONAL',
+    kana: '無条件',
+    wing: 'PROCUREMENT',
+    corpus: 'the same pool',
+    blurb: 'Two series set against each other so that the flatness of one is the point.',
+    method: 'Two lanes counted over the same ordering.',
+    status: 'BARRED',
+    origin: 'procurement.html · III · UNCONDITIONAL',
+    bars: JUDGEMENT('An instrument built so that an empty lane proves something is an argument with axes.'),
+  },
+  {
+    id: 'proc-clock',
+    numeral: 'IV',
+    title: 'THE CLOCK',
+    kana: '時計',
+    wing: 'PROCUREMENT',
+    corpus: 'the same pool, monthly',
+    blurb: 'The whole span at month resolution, with one window shaded.',
+    method: 'Records binned by month; the shaded window is set by hand.',
+    status: 'BARRED',
+    origin: 'procurement.html · IV · CLOCK',
+    bars: JUDGEMENT('The shaded window is the claim, and it was drawn on before the data was.'),
+  },
+  {
+    id: 'proc-prov',
+    numeral: 'V',
+    title: 'THE PROVENANCE',
+    kana: '出所',
+    wing: 'PROCUREMENT',
+    corpus: 'the same pool, by evidence tier',
+    blurb: 'The same records re-sorted by how hard the evidence behind each one is — raw export rows first, one man’s uncorroborated word last.',
+    method: 'Records grouped by a hand-assigned provenance tier.',
+    status: 'BARRED',
+    origin: 'procurement.html · V · PROVENANCE',
+    bars: JUDGEMENT('This is the most honest instrument on that page and it is still a hand-assigned ranking of somebody’s own evidence.'),
+  },
+  {
+    id: 'ask',
+    numeral: 'VI',
+    title: 'THE ASK',
+    kana: '請求',
+    wing: 'PROCUREMENT',
+    corpus: '18,946 messages, recounted from the raw exports',
+    blurb: 'Every request, recounted from primary sources, in the order it was made — classified by speech-act frame and then read by hand.',
+    method: 'Ledger rows counted from the message export, with per-category precision measured by hand and printed on the instrument.',
+    status: 'BARRED',
+    origin: 'procurement.html · VI · THE ASK — and standalone as ask.html',
+    bars: JUDGEMENT(
+      'It is the most carefully built thing in the old repo — deduplicated, timezone-corrected, hand-audited, precision published. And what it publishes is a classification of one person’s requests.',
+    ),
+    needs: 'the classified ledger itself, which is a hand-audited reading of the record rather than the record, and is not vendored here',
   },
 ]
+
+/** The wings, in the order the rack draws them. */
+export const WINGS: { id: Wing; title: string; kana: string; note: string }[] = [
+  {
+    id: 'HOUSE',
+    title: 'THE HOUSE',
+    kana: '自作',
+    note: 'Built here. Four instruments, all of them wired to a dataset that ships with this site.',
+  },
+  {
+    id: 'CORPUS',
+    title: '◈ CORPUS',
+    kana: '記録',
+    note: 'Nineteen instruments over the message record. Ten of them make a judgement and do not come across; four need nothing but building.',
+  },
+  {
+    id: 'WIKI',
+    title: '◈ WIKI',
+    kana: '脳',
+    note: 'Eighteen over the second brain. The corpus these read is the snapshot at /brain, which ships — so most of this wing is a to-do list rather than a locked door.',
+  },
+  {
+    id: 'PROCUREMENT',
+    title: 'PROCUREMENT',
+    kana: '調達',
+    note: 'The unlisted third page. Six instruments, every one of them a sorting of hand-assembled quotations about a named living person. All six are barred and none of them is photographed.',
+  },
+]
+
+export const instrumentsIn = (wing: Wing) => INSTRUMENTS.filter((i) => i.wing === wing)
+
+export const countBy = (status: InstrumentStatus) => INSTRUMENTS.filter((i) => i.status === status).length
+
 
 export const instrumentById = (id: string) => INSTRUMENTS.find((i) => i.id === id)
 

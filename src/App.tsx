@@ -9,6 +9,7 @@ import { Gate } from './gate/Gate'
 import { ArcadeRoute } from './routes/Arcade'
 import { BlogRoute } from './routes/Blog'
 import { BlogPostRoute } from './routes/BlogPost'
+import { GalleryRoute } from './routes/Gallery'
 import { WritingDashboardRoute } from './routes/WritingDashboard'
 import { Home } from './routes/Home'
 import { LeviathanRoute } from './routes/Leviathan'
@@ -61,6 +62,8 @@ function Site() {
         <Route path="/blog/:slug" element={<BlogPostRoute />} />
         <Route path="/brain" element={<WikiIndexRoute />} />
         <Route path="/brain/*" element={<WikiPageRoute />} />
+        <Route path="/gallery" element={<GalleryRoute />} />
+        <Route path="/gallery/:id" element={<GalleryRoute />} />
         <Route path="/leviathan" element={<LeviathanRoute />} />
         <Route path="/leviathan/:id" element={<LeviathanRoute />} />
         <Route path="/transcript" element={<TranscriptRoute />} />

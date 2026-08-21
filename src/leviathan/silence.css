@@ -1,0 +1,269 @@
+/* ==========================================================================
+   ◈ CORPUS XIV · THE SILENCE
+
+   The only instrument in the rack with no canvas in it. Gaps are a ranked list
+   of lengths with two dates and a citation each, and a ranked list of lengths
+   with two dates and a citation each is a table — drawing it as a picture would
+   add nothing except a thing to squint at.
+   ========================================================================== */
+
+.sil {
+  display: grid;
+  grid-template-columns: minmax(340px, 1.4fr) minmax(280px, 1fr);
+  gap: clamp(1rem, 3vw, 2.4rem);
+  align-items: start;
+}
+
+@media (max-width: 980px) {
+  .sil { grid-template-columns: 1fr; }
+}
+
+.sil__sub {
+  margin: 0 0 0.4rem;
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  color: var(--n1);
+}
+
+.sil__readouts .sil__sub {
+  margin-top: 0.9rem;
+}
+
+.sil__note {
+  margin: 0 0 0.4rem;
+  font-size: var(--step--1);
+  line-height: 1.55;
+  color: var(--text-dim);
+}
+
+/* ---- the ranked silences ------------------------------------------------ */
+
+.sil__list {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sil__row {
+  display: grid;
+  grid-template-columns: 1.6rem 1fr 5.4rem;
+  grid-template-areas:
+    'rank bar  length'
+    '.    ends ends';
+  align-items: center;
+  gap: 0.1rem 0.5rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--text-dim) 22%, transparent);
+}
+
+.sil__rank {
+  grid-area: rank;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+}
+
+.sil__bar {
+  grid-area: bar;
+  position: relative;
+  display: block;
+  block-size: 1.1rem;
+  background: color-mix(in srgb, var(--text-dim) 16%, transparent);
+}
+
+.sil__bar--thin {
+  block-size: 0.62rem;
+}
+
+.sil__fill {
+  display: block;
+  block-size: 100%;
+  background: var(--n1);
+}
+
+.sil__fill--hist {
+  background: var(--n3);
+}
+
+/* Outside the bar, not on it. A label printed over a fill has to survive being
+   red on red in RIOT and cadmium on cadmium in DEN, and the blend-mode tricks
+   that nearly manage it all fail on some palette. A column of its own always
+   reads. */
+.sil__length {
+  grid-area: length;
+  text-align: right;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.sil__ends,
+.sil__cite {
+  grid-area: ends;
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+
+.sil__ends {
+  justify-self: start;
+}
+
+.sil__cite {
+  justify-self: end;
+  color: var(--n3);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.sil__cite:hover,
+.sil__cite:focus-visible {
+  text-decoration: underline;
+}
+
+@media (max-width: 560px) {
+  .sil__row {
+    grid-template-areas:
+      'rank bar  length'
+      '.    ends ends'
+      '.    cite cite';
+  }
+  .sil__cite { grid-area: cite; justify-self: start; }
+}
+
+/* ---- the histogram ------------------------------------------------------ */
+
+.sil__hist {
+  display: grid;
+  gap: 0.15rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sil__hist li {
+  display: grid;
+  grid-template-columns: 8.4rem 1fr 3.6rem;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sil__hist-label,
+.sil__hist-n {
+  font-family: var(--f-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+
+.sil__hist-n {
+  text-align: right;
+  color: var(--text);
+}
+
+/* ---- the holes ----------------------------------------------------------
+   Hatched, like the bands THE PULSE draws, so the two rooms agree about what
+   a missing export looks like. */
+
+.sil__holes {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0.2rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sil__holes li {
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.4rem 0.55rem;
+  background: repeating-linear-gradient(
+    45deg,
+    color-mix(in srgb, var(--text-dim) 20%, transparent) 0 1px,
+    transparent 1px 5px
+  );
+  border-left: var(--rule) solid color-mix(in srgb, var(--text-dim) 55%, transparent);
+}
+
+.sil__hole-span {
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: var(--text);
+}
+
+.sil__hole-ends,
+.sil__hole-tag {
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+
+.sil__hole-tag {
+  color: var(--n5);
+}
+
+/* ---- the facts ---------------------------------------------------------- */
+
+.sil__facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.15rem 0.8rem;
+  margin: 0.9rem 0 0;
+  font-size: var(--step--1);
+  line-height: 1.5;
+}
+
+.sil__facts dt {
+  padding-top: 0.15rem;
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  color: var(--n1);
+  white-space: nowrap;
+}
+
+.sil__facts dd {
+  margin: 0;
+  color: var(--text-dim);
+}
+
+/* ---- the depth switch --------------------------------------------------- */
+
+.sil__depths {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.sil__depth {
+  padding: 0.28rem 0.55rem;
+  font-family: var(--f-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.14em;
+  color: var(--text-dim);
+  background: transparent;
+  border: var(--staple) solid color-mix(in srgb, var(--text-dim) 45%, transparent);
+  cursor: pointer;
+  transition: color 140ms ease, border-color 140ms ease, background 140ms ease;
+}
+
+.sil__depth:hover,
+.sil__depth:focus-visible {
+  color: var(--text);
+  border-color: var(--n1);
+}
+
+.sil__depth--on {
+  color: var(--on-glow);
+  background: var(--n1);
+  border-color: var(--n1);
+}

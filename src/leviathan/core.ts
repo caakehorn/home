@@ -341,12 +341,11 @@ export const INSTRUMENTS: Instrument[] = [
     wing: 'CORPUS',
     corpus: '134,348 messages · 129 months, 91 of them covered',
     blurb:
-      'The negative space of the record: every gap, how long it ran, and what broke it. The last one is still open.',
-    method: 'Elapsed time between consecutive messages, sorted. Nothing about a gap is inferred beyond its length and its ends.',
-    status: 'UNBUILT',
+      'The negative space of the record: every gap, how long it ran, and the line that ended it — with the holes in the archive kept out of the ranking, because a missing export is not a silence.',
+    method:
+      'Elapsed time between consecutive messages, ranked. Nothing about a gap is inferred beyond its length and its two ends, and the message that ended one is cited by line number rather than quoted. Gaps that span a month the exports do not cover are listed apart, because a hole in an archive is not a silence.',
+    status: 'LIVE',
     origin: 'void.html · MODULE 14 · draw_silence',
-    needs:
-      'nothing from outside — the record ships at /transcript, and its 38 missing months are already stated there rather than drawn over. What is missing is the instrument',
   },
   {
     id: 'psyche',

@@ -482,9 +482,9 @@ declares which kind of dark it is:
 
 | | | |
 | --- | --- | --- |
-| **LIVE** | 6 | built here, wired to a dataset that ships |
+| **LIVE** | 7 | built here, wired to a dataset that ships |
 | **PORTED** | 4 | came across under this house's own name — the card links to where |
-| **UNBUILT** | 12 | the corpus is already here; nobody has built the instrument |
+| **UNBUILT** | 11 | the corpus is already here; nobody has built the instrument |
 | **SEALED** | 7 | waiting on a corpus this site does not carry |
 | **BARRED** | 18 | it makes a judgement, and THE RULE forbids one |
 
@@ -497,10 +497,10 @@ dropping them would tell a nicer story about the old site than the old site
 tells. The six PROCUREMENT instruments are barred for the same reason and are
 additionally never photographed; see THE GALLERY below.
 
-**UNBUILT is the to-do list.** Twelve instruments need nothing from outside —
+**UNBUILT is the to-do list.** Eleven instruments need nothing from outside —
 the record ships at `/transcript`, the snapshot ships at `/brain` — they are
-simply not built. THE RINGS, THE SILENCE, THE ATTENTION and THE ECHO are the
-cheap ones left.
+simply not built. THE RINGS, THE ATTENTION and THE ECHO are the cheap ones
+left.
 
 ### What is built
 
@@ -517,6 +517,7 @@ cheap ones left.
   See below.
 - **◈ CORPUS · I · THE PULSE** — see below.
 - **◈ CORPUS · II · THE CLOCK** — see below.
+- **◈ CORPUS · XIV · THE SILENCE** — see below.
 
 The dates come from the same matchers the brief visualiser uses
 (`mineDates` in `src/wiki/brief.ts`), so a date reads the same way on the
@@ -636,6 +637,41 @@ from, which is a hand-audited reading of the record rather than the record, and
 is not vendored here — and it is barred as well as sealed, since a
 classification of one person's requests is a judgement whatever the ledger says.
 `◈ CORPUS · II · THE CLOCK` needed nothing from outside and is now built.
+
+### THE SILENCE, and the difference between a gap and a hole
+
+The negative space of the record: every gap between two consecutive messages,
+how long it ran, and which line ended it. 66,454 of them.
+
+**There are two kinds of nothing in this record and they are not the same
+thing.** One is a silence: two people who could have written and did not. The
+other is a hole: an export that does not cover those months, so nobody can say
+what happened in them. Ranked together by length the holes take every position
+at the top — the longest is 29.5 months — and an instrument that presented that
+as its finding would be reporting the shape of a zip file as the shape of a
+relationship.
+
+So they are separated and both are shown. A gap whose span touches one of the 38
+not-exported months is listed apart, hatched, tagged `NOT EXPORTED`, and kept
+out of the ranking **and out of the histogram** — a distribution that includes a
+hole has a tail made of missing files. With them out, the longest actual silence
+is 1.3 months, and five silences run over a month.
+
+**Cited, never quoted.** The message that ended a gap is given as its line number
+in THE TRANSCRIPT and nothing else, linked. The words are one click away in the
+room whose whole job is to hold them; reprinting them here would make this
+instrument an argument about what broke a silence rather than a measurement of
+how long it ran.
+
+That citation only works because `scripts/build-clock.mjs` guarantees the marks
+stay in the order the messages were sent, which makes **the index of a mark plus
+one the global 1-based line number** — the identity the old repo's `#L1234`
+anchors used. The build checks it rather than sorting, and refuses to write a
+dataset that fails: re-ordering there would silently re-point every citation at
+the wrong message.
+
+One number on the page is not from the record and says so: **SINCE THE LAST
+MESSAGE** is counted from the last message to the day the page loaded.
 
 ## THE GALLERY
 

@@ -11,6 +11,7 @@ import { Clock } from '../leviathan/instruments/Clock'
 import { Mass } from '../leviathan/instruments/Mass'
 import { Pen } from '../leviathan/instruments/Pen'
 import { Pulse } from '../leviathan/instruments/Pulse'
+import { Silence } from '../leviathan/instruments/Silence'
 import './leviathan.css'
 
 /** The rack knows which component an id belongs to; the registry stays data. */
@@ -21,6 +22,7 @@ const BUILT: Record<string, typeof Mass> = {
   pen: Pen,
   clock: Clock,
   pulse: Pulse,
+  silence: Silence,
 }
 
 /**

@@ -1,0 +1,215 @@
+/* ==========================================================================
+   ◈ CORPUS I · THE PULSE
+
+   A trace you can throw, and the same span as counts beside it. The trace is
+   dark-mounted for the same reason the spiral is: half-transparent bars judged
+   against newsprint are bars with a colour cast, and the hatching that marks a
+   missing export has to read as absence rather than as texture.
+   ========================================================================== */
+
+.pulse {
+  display: grid;
+  grid-template-columns: minmax(340px, 1fr) minmax(280px, 24rem);
+  gap: clamp(1rem, 3vw, 2.4rem);
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .pulse { grid-template-columns: 1fr; }
+}
+
+.pulse__figure {
+  margin: 0;
+  display: grid;
+  gap: 0;
+}
+
+.pulse__canvas {
+  display: block;
+  width: 100%;
+  block-size: clamp(260px, 42vh, 420px);
+  background: #08070c;
+  border: var(--staple) solid var(--edge);
+  cursor: grab;
+  touch-action: none;
+}
+
+.pulse__canvas:active {
+  cursor: grabbing;
+}
+
+.pulse__legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 0.9rem;
+  padding: 0.5rem 0.7rem;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  color: #9a9384;
+  background: #08070c;
+  border: var(--staple) solid var(--edge);
+  border-top: 0;
+}
+
+.pulse__key::before {
+  content: '';
+  display: inline-block;
+  width: 0.6rem;
+  height: 0.6rem;
+  margin-right: 0.35rem;
+  background: var(--n1);
+}
+
+.pulse__key--gap::before {
+  background: repeating-linear-gradient(
+    45deg,
+    #9a9384 0 1px,
+    transparent 1px 4px
+  );
+}
+
+.pulse__key-say {
+  letter-spacing: 0.1em;
+  text-transform: none;
+}
+
+/* ---- the counts --------------------------------------------------------- */
+
+.pulse__readouts {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.pulse__span {
+  font-size: var(--step--1);
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+.pulse__span b {
+  font-family: var(--f-mono);
+  color: var(--text);
+}
+
+.pulse__note {
+  font-size: var(--step--1);
+  line-height: 1.55;
+  color: var(--text-dim);
+}
+
+.pulse__facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.15rem 0.8rem;
+  margin: 0.4rem 0 0;
+  font-size: var(--step--1);
+  line-height: 1.5;
+}
+
+.pulse__facts dt {
+  padding-top: 0.15rem;
+  font-family: var(--f-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.18em;
+  color: var(--n1);
+  white-space: nowrap;
+}
+
+.pulse__facts dd {
+  margin: 0;
+  color: var(--text-dim);
+}
+
+.pulse__sub {
+  margin: 0.7rem 0 0;
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.24em;
+  color: var(--n1);
+}
+
+.pulse__years {
+  display: grid;
+  gap: 0.15rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pulse__years button {
+  display: grid;
+  grid-template-columns: 3rem 1fr 4.2rem;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.1rem 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.pulse__years button:hover .pulse__fill,
+.pulse__years button:focus-visible .pulse__fill {
+  background: var(--n3);
+}
+
+.pulse__year-label,
+.pulse__year-n {
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+}
+
+.pulse__year-n {
+  text-align: right;
+  color: var(--text);
+}
+
+.pulse__bar {
+  display: block;
+  block-size: 0.62rem;
+  background: color-mix(in srgb, var(--text-dim) 18%, transparent);
+}
+
+.pulse__fill {
+  display: block;
+  block-size: 100%;
+  background: var(--n1);
+  transition: background 140ms ease;
+}
+
+/* ---- the window jumps --------------------------------------------------- */
+
+.pulse__jumps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.pulse__jump {
+  padding: 0.28rem 0.5rem;
+  font-family: var(--f-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  background: transparent;
+  border: var(--staple) solid color-mix(in srgb, var(--text-dim) 45%, transparent);
+  cursor: pointer;
+  transition: color 140ms ease, border-color 140ms ease, background 140ms ease;
+}
+
+.pulse__jump:hover,
+.pulse__jump:focus-visible {
+  color: var(--text);
+  border-color: var(--n1);
+}
+
+.pulse__jump--on {
+  color: var(--on-glow);
+  background: var(--n1);
+  border-color: var(--n1);
+}

@@ -162,14 +162,14 @@ export const INSTRUMENTS: Instrument[] = [
     title: 'THE PULSE',
     kana: '脈',
     wing: 'CORPUS',
-    corpus: '134,348 messages · 2015-11-28 → 2026-07-26',
+    corpus: '134,348 messages · 3,894 days · 91 of 129 months covered',
     blurb:
-      'The whole record as one scrubbable line, with the eras banded behind it — NYC ONE, UNIONTOWN, NYC TWO, RETURN. Throw it and it keeps moving.',
-    method: 'Messages per day, plotted on a draggable window with inertia. A count and a date, and nothing else.',
-    status: 'UNBUILT',
-    origin: 'void.html · MODULE 01 · draw_pulse',
-    needs:
-      'nothing from outside — the record it reads arrived with THE TRANSCRIPT and ships at /transcript. What is missing is the instrument',
+      'The whole record as one line you can throw — every day a bar, 3,894 of them, and the months the archive is missing hatched where they really fall.',
+    method:
+      'Messages per day over every day in the span, drawn as one bar each on a window you can drag and zoom. The 38 months the exports do not cover are hatched at their real width rather than drawn as silence.',
+    status: 'LIVE',
+    origin:
+      'void.html · MODULE 01 · draw_pulse — minus the four hand-drawn era bands, which were chosen rather than counted',
   },
   {
     id: 'clock',
@@ -876,6 +876,12 @@ export type ClockSet = {
   days: number
   hours: { all: number; sent: number; received: number }[]
   years: { year: number; count: number }[]
+  /**
+   * The runs of months the exports do not cover, in day indices off the same
+   * day zero as `marks`. THE PULSE draws them at their real width: a hole in an
+   * archive and a quiet month look identical if you only plot what survived.
+   */
+  gaps: { from: string; to: string; months: number; fromDay: number; toDay: number }[]
   marks: number[]
 }
 

@@ -77,6 +77,14 @@ const dayNumber = (stamp) => {
 
 const minuteOfDay = (stamp) => +stamp.slice(11, 13) * 60 + +stamp.slice(14, 16)
 
+/** `"2020-08"` → the day index of the 1st. */
+const monthStartDay = (bin) => Math.floor(Date.UTC(+bin.slice(0, 4), +bin.slice(5, 7) - 1, 1) / 86_400_000)
+
+/** `"2022-11"` → the day index of the last day of that month. */
+const monthEndDay = (bin) => Math.floor(Date.UTC(+bin.slice(0, 4), +bin.slice(5, 7), 0) / 86_400_000)
+
+const gaps = index.gaps ?? []
+
 // ---------------------------------------------------------------------------
 // pass one: read every message, in order
 
@@ -149,6 +157,22 @@ const set = {
   days: last - first + 1,
   hours,
   years: [...years.entries()].sort((a, b) => a[0] - b[0]).map(([year, count]) => ({ year, count })),
+  /**
+   * The runs of months the exports do not cover, carried over from the spine
+   * and converted to day indices off the same day zero as `marks`.
+   *
+   * This is not a nicety. A volume chart with nothing in it for twenty-eight
+   * months and no note draws a silence that never happened — the record went
+   * quiet in the archive, not in the relationship, and the two look identical
+   * if you only plot the months that survived. THE TRANSCRIPT states them; an
+   * instrument reading the same record has to state them too, at their real
+   * width, or it is making a claim the corpus does not support.
+   */
+  gaps: gaps.map((gap) => ({
+    ...gap,
+    fromDay: monthStartDay(gap.from) - first,
+    toDay: monthEndDay(gap.to) - first,
+  })),
   /** Delta-encoded `day * 2880 + minute * 2 + dir`. See the note at the top. */
   marks: packed,
 }

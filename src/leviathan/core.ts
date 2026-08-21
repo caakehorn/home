@@ -451,12 +451,13 @@ export const INSTRUMENTS: Instrument[] = [
     title: 'THE CLAIMS',
     kana: '主張',
     wing: 'WIKI',
-    corpus: '3,046 typed edges',
-    blurb: 'The typed edges read back as a feed of assertions — this page says that about that one, in the wiki’s own words.',
-    method: 'Every edge printed with its type and its two endpoints. No edge is ranked.',
-    status: 'UNBUILT',
-    origin: 'js/wiki-modules.js · WIKI 03 · draw_claims',
-    needs: 'nothing from outside — the edges ship in the snapshot. What is missing is the instrument',
+    corpus: '689 sentences that name another page',
+    blurb: 'The links read back as what they are — one page saying something about another, printed whole, in the wiki’s own words.',
+    method:
+      'Every sentence of prose that names another page, printed whole with both ends linked. Table rows, headings and lists of bare links are not sentences and are not here. Nothing is ranked — the feed is in page order, and the only filters are the ones the reader turns on.',
+    status: 'LIVE',
+    origin:
+      'js/wiki-modules.js · WIKI 03 · draw_claims — minus the edge types, which this snapshot does not carry and which are not invented here',
   },
   {
     id: 'census',

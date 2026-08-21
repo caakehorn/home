@@ -10,6 +10,7 @@ import { Chronology } from '../leviathan/instruments/Chronology'
 import { Census } from '../leviathan/instruments/Census'
 import { Claims } from '../leviathan/instruments/Claims'
 import { Clock } from '../leviathan/instruments/Clock'
+import { Evidence } from '../leviathan/instruments/Evidence'
 import { Health } from '../leviathan/instruments/Health'
 import { Lexicon } from '../leviathan/instruments/Lexicon'
 import { Mass } from '../leviathan/instruments/Mass'
@@ -37,6 +38,7 @@ const BUILT: Record<string, typeof Mass> = {
   census: Census,
   tagmap: Tags,
   lattice: Health,
+  evidence: Evidence,
 }
 
 /**

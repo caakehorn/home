@@ -482,9 +482,9 @@ declares which kind of dark it is:
 
 | | | |
 | --- | --- | --- |
-| **LIVE** | 5 | built here, wired to a dataset that ships |
+| **LIVE** | 6 | built here, wired to a dataset that ships |
 | **PORTED** | 4 | came across under this house's own name — the card links to where |
-| **UNBUILT** | 13 | the corpus is already here; nobody has built the instrument |
+| **UNBUILT** | 12 | the corpus is already here; nobody has built the instrument |
 | **SEALED** | 7 | waiting on a corpus this site does not carry |
 | **BARRED** | 18 | it makes a judgement, and THE RULE forbids one |
 
@@ -497,10 +497,10 @@ dropping them would tell a nicer story about the old site than the old site
 tells. The six PROCUREMENT instruments are barred for the same reason and are
 additionally never photographed; see THE GALLERY below.
 
-**UNBUILT is the to-do list.** Thirteen instruments need nothing from outside —
+**UNBUILT is the to-do list.** Twelve instruments need nothing from outside —
 the record ships at `/transcript`, the snapshot ships at `/brain` — they are
-simply not built. THE PULSE, THE RINGS, THE SILENCE, THE ATTENTION and THE ECHO
-are the cheap ones.
+simply not built. THE RINGS, THE SILENCE, THE ATTENTION and THE ECHO are the
+cheap ones left.
 
 ### What is built
 
@@ -515,11 +515,42 @@ are the cheap ones.
   counts against one axis, each lane scaled to its own maximum.
 - **THE HOUSE · IV · THE ACCRETION** — the wiki being built, against real time.
   See below.
+- **◈ CORPUS · I · THE PULSE** — see below.
 - **◈ CORPUS · II · THE CLOCK** — see below.
 
 The dates come from the same matchers the brief visualiser uses
 (`mineDates` in `src/wiki/brief.ts`), so a date reads the same way on the
 instrument as it does on the page.
+
+### THE PULSE, and the gaps it refuses to draw over
+
+The whole record as one line you can throw: messages per day, one bar each,
+3,894 of them, on a window that pans and zooms.
+
+**A volume chart is the easiest place on this site to lie by accident.** The
+exports cover 91 of the 129 months this record spans. Draw only the days they
+cover and the twenty-eight missing months in the middle render as twenty-eight
+months of silence between two people — which is a claim about a relationship,
+made by a hole in a zip file. So the gaps are drawn **at their real width,
+hatched and labelled**, exactly as THE TRANSCRIPT's rail draws them. Stating
+them is a fact about the archive; leaving them out would have been a claim about
+the thread. The runs come across in `clock.json`, converted to day indices off
+the same day zero as the marks.
+
+**The four era bands do not come across.** The old console banded NYC ONE,
+UNIONTOWN, NYC TWO and RETURN behind this chart. Those boundaries were chosen by
+hand and are not in the corpus, and a band drawn behind a volume curve is an
+invitation to read the curve as caused by the band. What is left is the count.
+
+It reads `clock.json` rather than a dataset of its own and folds the daily
+counts out of the same marks THE CLOCK draws. Two instruments over one record
+that load different files can disagree, and the only thing worse than a chart
+nobody checks is two charts that quietly contradict each other.
+
+Bars rather than a line, because a line between two days implies the days
+between them and there are none. At full span several days land in one pixel
+column and the tallest wins it, rather than the last — otherwise peaks appear
+and vanish as the window is resized.
 
 ### THE CLOCK, and the timezone
 

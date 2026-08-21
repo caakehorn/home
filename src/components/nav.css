@@ -30,10 +30,7 @@
   gap: 0.45rem;
   flex: none;
   padding: 0;
-  border: 0;
-  background: none;
   color: inherit;
-  cursor: pointer;
   text-decoration: none;
 }
 
@@ -49,6 +46,63 @@
   outline-offset: 4px;
 }
 
+/* --------------------------------------------------------------------------
+   THE COLLAPSE TOGGLE
+
+   Far right of the bar, and the only control that survives the collapse — by
+   the time the strip is shut, everything else in here is hidden, so this is
+   the re-open affordance too.
+   -------------------------------------------------------------------------- */
+.nav__collapse {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex: none;
+  /* Ordered onto the wordmark's row rather than left to wrap after the dials,
+     so the control is in the same corner whether the bar is open or shut.
+     `order` moves it for line-breaking as well as for painting, which is the
+     part `margin-left: auto` alone cannot do — that only claims the slack once
+     the line is already decided. Ahead of the links (3) and the dials (4), and
+     of the phone layout's reshuffle of the same two. */
+  order: 1;
+  margin-left: auto;
+  padding: 0.2rem 0.45rem;
+  color: var(--text);
+  border: 2px solid color-mix(in srgb, var(--n1) 55%, transparent);
+  background: color-mix(in srgb, var(--void-2) 70%, transparent);
+  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+
+.nav__collapse:hover {
+  background: var(--n1);
+  color: var(--on-glow);
+  border-color: var(--n1);
+}
+
+.nav__collapse-kana {
+  font-size: var(--step--1);
+  line-height: 1;
+  color: var(--n1);
+}
+
+.nav__collapse:hover .nav__collapse-kana {
+  color: var(--on-glow);
+}
+
+/* A chevron cut out of a square, pointing at what pressing it does: up to
+   shut the bar, down to bring it back. */
+.nav__collapse-caret {
+  width: 0;
+  height: 0;
+  border-inline: 5px solid transparent;
+  border-bottom: 6px solid currentColor;
+  transition: transform 240ms ease;
+}
+
+.nav--collapsed .nav__collapse-caret {
+  transform: rotate(180deg);
+}
+
 .nav__mark-kana {
   font-size: var(--step--1);
   color: var(--n2);
@@ -57,6 +111,7 @@
 }
 
 .nav__links {
+  order: 3;
   display: flex;
   gap: 0.35rem;
   flex-wrap: wrap;
@@ -109,10 +164,10 @@
   color: var(--on-glow);
 }
 
-/* Collapsed means literally the logo and nothing else: the links go, the dials
-   go, the kana goes, and what is left is a strip the height of a shrunken
-   wordmark. The logo is the re-open affordance, so there is no second button
-   left hanging in the bar.
+/* Collapsed means the logo and the toggle and nothing else: the links go, the
+   dials go, the kana goes, and what is left is a strip the height of a
+   shrunken wordmark with a way home at one end and a way back open at the
+   other.
 
    `flex-wrap: nowrap` matters as much as the hiding does. The zero-width items
    below still count as flex items, and on a wrapping row a stray one could
@@ -179,7 +234,8 @@
   .nav,
   .nav__links,
   .nav__mark-kana,
-  .nav__mark .logo {
+  .nav__mark .logo,
+  .nav__collapse-caret {
     transition: none;
   }
 

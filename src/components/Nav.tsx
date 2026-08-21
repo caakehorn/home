@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 import { HeaderControls } from './HeaderControls'
 import { Logo } from './Logo'
 import { SECTIONS } from '../content/sections'
@@ -10,19 +10,16 @@ export function Nav() {
 
   return (
     <nav className={`nav${headerCollapsed ? ' nav--collapsed' : ''}`} aria-label="Portal">
-      <button
-        type="button"
-        className="nav__mark"
-        onClick={toggleHeaderCollapsed}
-        aria-expanded={!headerCollapsed}
-        aria-label={headerCollapsed ? 'Expand header' : 'Collapse header'}
-        title={headerCollapsed ? 'Expand header' : 'Collapse header'}
-      >
+      {/* The wordmark is the way home, which is what a wordmark in the corner
+          of a header has meant since there were headers. It used to be the
+          collapse toggle instead, so the one thing on the page everybody
+          already knows how to use did something nobody expected. */}
+      <Link to="/" className="nav__mark">
         <Logo size="var(--nav-mark-size)" inline />
         <span className="nav__mark-kana jp" aria-hidden="true">
           薬窟
         </span>
-      </button>
+      </Link>
 
       <ul className="nav__links" aria-hidden={headerCollapsed}>
         {SECTIONS.map((section) => (
@@ -42,6 +39,23 @@ export function Nav() {
       </ul>
 
       <HeaderControls />
+
+      {/* Collapse now has a control of its own, at the far right of the bar.
+          It is the one thing that survives the collapse — everything else in
+          here is hidden by then, so this is also the re-open affordance. */}
+      <button
+        type="button"
+        className="nav__collapse"
+        onClick={toggleHeaderCollapsed}
+        aria-expanded={!headerCollapsed}
+        aria-label={headerCollapsed ? 'Expand the header' : 'Collapse the header'}
+        title={headerCollapsed ? 'Expand the header' : 'Collapse the header'}
+      >
+        <span className="nav__collapse-kana jp" aria-hidden="true">
+          {headerCollapsed ? '開' : '閉'}
+        </span>
+        <span className="nav__collapse-caret" aria-hidden="true" />
+      </button>
     </nav>
   )
 }

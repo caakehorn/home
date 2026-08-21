@@ -12,7 +12,7 @@
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { join, relative, resolve } from 'node:path'
 import { layoutWiki, undirectedEdges } from './graph-layout.mjs'
-import { MANIFEST, readManifest, requirePassphrase, sealSnapshot, staleDerived, warnStale } from './wiki-locks.mjs'
+import { MANIFEST, matcher, readManifest, requirePhrases, sealSnapshot, staleDerived, warnStale } from './wiki-locks.mjs'
 
 const SOURCE = resolve(process.argv[2] ?? process.env.WIKI_BRAIN ?? '../wiki-brain')
 const OUT = resolve('public/wiki')
@@ -158,10 +158,9 @@ if (!sourceStat.isDirectory()) process.exit(1)
 // The locks are read before the old snapshot is touched, so a manifest that
 // seals pages with no passphrase in the environment stops the sync where it
 // stands rather than halfway through rewriting public/wiki.
-const manifest = readManifest()
-let lockPhrase
+let manifest
 try {
-  lockPhrase = requirePassphrase(manifest)
+  manifest = requirePhrases(readManifest())
 } catch (err) {
   console.error(err.message)
   process.exit(1)
@@ -341,19 +340,37 @@ const pages = files.map((file) => {
   }
 })
 
-// A page can also ask to be sealed from its own frontmatter — `lock: true` in
-// the wiki-brain file — so the decision can live next to the writing instead of
-// only in a list over here. Both routes end in the same set.
-const declared = pages.filter((p) => /^(true|yes|private|sealed)$/i.test(p.meta.lock ?? '')).map((p) => p.slug)
-const locked = [...new Set([...manifest.locked, ...declared])]
-try {
-  // Re-checked with the frontmatter locks folded in: the pre-flight above only
-  // knew about the manifest, and a page that seals itself has the same claim on
-  // stopping the build as a line in the list does.
-  lockPhrase = requirePassphrase({ locked }, `${MANIFEST}, or \`lock:\` in the page's frontmatter`)
-} catch (err) {
-  console.error(err.message)
-  process.exit(1)
+// A page can also ask to be sealed from its own frontmatter — `lock: annie` in
+// the wiki-brain file, naming which lock, or a bare `lock: true` for the
+// default one — so the decision can live next to the writing instead of only in
+// a list over here. Both routes end in the same set of locks.
+const claimed = matcher(manifest.flatMap((lock) => lock.patterns))
+const declared = new Map()
+for (const page of pages) {
+  const value = (page.meta.lock ?? '').trim()
+  if (!value) continue
+  // A page named in the manifest as well keeps the manifest's lock: one place
+  // decides, and it is the one you can read without the other repository.
+  if (claimed(page.slug)) continue
+  const id = /^(true|yes|private|sealed)$/i.test(value) ? 'default' : value.toLowerCase()
+  if (!declared.has(id)) declared.set(id, [])
+  declared.get(id).push(page.slug)
+}
+
+let locks = manifest
+if (declared.size) {
+  try {
+    // Re-checked with the frontmatter locks folded in: the pre-flight above only
+    // knew about the manifest, and a page that seals itself has the same claim on
+    // stopping the build as a line in the list does.
+    locks = requirePhrases(
+      [...manifest, ...[...declared].map(([id, patterns]) => ({ id, patterns }))],
+      `${MANIFEST}, or \`lock:\` in the page's frontmatter`,
+    )
+  } catch (err) {
+    console.error(err.message)
+    process.exit(1)
+  }
 }
 // Everything above is a read. From here the snapshot is rebuilt.
 rmSync(OUT, { recursive: true, force: true })
@@ -456,7 +473,7 @@ writeFileSync(
 // The cost is a window where the plaintext is on disk. It is bounded by this
 // script: a sync that dies inside it exits non-zero, and both the workflow and
 // a person read that as "do not commit what is in public/wiki". Re-run it.
-const seal = await sealSnapshot(OUT, { locked, phrase: lockPhrase })
+const seal = await sealSnapshot(OUT, locks)
 for (const slug of seal.missing) console.warn(`wiki: ${MANIFEST} names "${slug}", which is not a page in the source.`)
 warnStale(staleDerived(new Set(seal.sealed)))
 

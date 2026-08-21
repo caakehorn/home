@@ -54,19 +54,31 @@ import { join } from 'node:path'
 
 const ITERATIONS = 250_000
 
-/** The list of what is sealed. Slugs, or a `prefix/*` for a whole branch. */
+/** What is sealed, and under which key. */
 export const MANIFEST = 'wiki.locks.json'
 
 /**
  * Read the manifest.
  *
- * A missing file means nothing is locked, which is the state this repository
- * shipped in for its whole life and has to keep working. A *malformed* one is
- * an error rather than an empty list: silently treating a typo'd manifest as
- * "lock nothing" is how a page you believe is sealed goes out in the clear.
+ * Two shapes, because there are two things people mean by "lock a page":
+ *
+ *   { "locked": { "annie": ["people/annie-ulmer"], "ally": ["people/ally-lubin"] } }
+ *   { "locked": ["self/concepts/a-page"] }
+ *
+ * The first is **named locks** — a lock is a keyring entry with its own
+ * passphrase, and pages are grouped under it. Two pages under two locks do not
+ * open each other, which is the whole point of naming them: one page you shared
+ * the phrase for does not hand over the next one.
+ *
+ * The second is the one-lock shorthand and reads as a single lock named
+ * `default`. Both end in the same structure.
+ *
+ * A missing file means nothing is locked. A *malformed* one is an error rather
+ * than an empty list: silently treating a typo'd manifest as "lock nothing" is
+ * how a page you believe is sealed goes out in the clear.
  */
 export function readManifest(file = MANIFEST) {
-  if (!existsSync(file)) return { locked: [] }
+  if (!existsSync(file)) return []
   let parsed
   try {
     parsed = JSON.parse(readFileSync(file, 'utf8'))
@@ -74,14 +86,32 @@ export function readManifest(file = MANIFEST) {
     throw new Error(`${file} is not valid JSON (${err.message}). Refusing to sync with a manifest I cannot read.`)
   }
   const locked = parsed.locked ?? []
-  if (!Array.isArray(locked) || locked.some((p) => typeof p !== 'string')) {
-    throw new Error(`${file}: "locked" must be an array of slug patterns.`)
+
+  const strings = (patterns, where) => {
+    if (!Array.isArray(patterns) || patterns.some((p) => typeof p !== 'string')) {
+      throw new Error(`${file}: ${where} must be an array of slug patterns.`)
+    }
+    return patterns
   }
-  return { locked }
+
+  if (Array.isArray(locked)) {
+    const patterns = strings(locked, '"locked"')
+    return patterns.length ? [{ id: 'default', patterns }] : []
+  }
+  if (typeof locked !== 'object') throw new Error(`${file}: "locked" must be an object of named locks, or an array.`)
+
+  return Object.entries(locked)
+    .map(([id, patterns]) => {
+      if (!/^[a-z0-9][a-z0-9-]*$/i.test(id)) {
+        throw new Error(`${file}: "${id}" is not a usable lock name — letters, digits and hyphens.`)
+      }
+      return { id, patterns: strings(patterns, `"locked"."${id}"`) }
+    })
+    .filter((lock) => lock.patterns.length)
 }
 
 /**
- * A matcher over the manifest's patterns.
+ * A matcher over one lock's patterns.
  *
  * Exact slugs, and `people/*` for a branch. Deliberately not a glob library:
  * the surface of what can be written here is the surface of what can be
@@ -93,30 +123,77 @@ export function matcher(patterns) {
   return (slug) => exact.has(slug) || prefixes.some((p) => slug.startsWith(p))
 }
 
-/** The passphrase sealed pages are encrypted under. Never read from argv. */
-export const passphrase = () => process.env.WIKI_LOCK_PASSPHRASE ?? null
+/** The environment variable a named lock's passphrase is read from. */
+export const envName = (id) =>
+  id === 'default' ? 'WIKI_LOCK_PASSPHRASE' : `WIKI_LOCK_PASSPHRASE_${id.toUpperCase().replace(/[^A-Z0-9]/g, '_')}`
+
+/**
+ * One lock's passphrase, from the environment and never from argv.
+ *
+ * Three places, in this order. `WIKI_LOCK_PASSPHRASES` is a JSON object of
+ * name → phrase and exists for CI: a workflow that has to name every lock in
+ * its `env:` block is a workflow that silently stops sealing the lock somebody
+ * forgot to add to it. One secret covers every lock, including ones added
+ * later.
+ */
+export function passphrase(id) {
+  const bundle = process.env.WIKI_LOCK_PASSPHRASES
+  if (bundle) {
+    let map
+    try {
+      map = JSON.parse(bundle)
+    } catch {
+      throw new Error('WIKI_LOCK_PASSPHRASES is set but is not valid JSON — it should be {"lock-name": "phrase"}.')
+    }
+    if (typeof map?.[id] === 'string' && map[id]) return map[id]
+  }
+  return process.env[envName(id)] || null
+}
 
 /**
  * Refuse to build a snapshot that would publish a page the manifest seals.
  *
  * Called before anything is written, so the failure mode of "locks configured,
- * passphrase forgotten" is a build that stops, not a build that leaks.
+ * passphrase forgotten" is a build that stops, not a build that leaks. Every
+ * missing phrase is reported at once rather than one per run — finding out
+ * about the second lock after fixing the first is a bad way to spend an hour.
+ *
+ * A short phrase is a warning and not a refusal. The KDF cost is the same
+ * either way and the arithmetic is in the header: this buys time against a
+ * guesser in proportion to how unguessable the phrase is, and whose page it is
+ * decides how much time is enough. Saying so once is the honest version;
+ * refusing to lock a page at all because the owner picked a word they will
+ * remember is how a page ends up not locked.
  */
-export function requirePassphrase({ locked }, where = MANIFEST) {
-  if (!locked.length) return null
-  const phrase = passphrase()
-  if (!phrase) {
+export function requirePhrases(locks, where = MANIFEST) {
+  const missing = []
+  const keyed = locks.map((lock) => {
+    const phrase = passphrase(lock.id)
+    if (!phrase) missing.push(lock)
+    return { ...lock, phrase }
+  })
+
+  if (missing.length) {
+    const pages = locks.reduce((n, l) => n + l.patterns.length, 0)
     throw new Error(
-      `${locked.length} page${locked.length === 1 ? ' is' : 's are'} sealed (${where}) and ` +
-        'WIKI_LOCK_PASSPHRASE is not set.\n' +
-        "  WIKI_LOCK_PASSPHRASE='…' npm run wiki:lock\n" +
-        'Refusing to write them in the clear.',
+      `${pages} page pattern${pages === 1 ? ' is' : 's are'} sealed (${where}) and ` +
+        `${missing.length === 1 ? 'a passphrase is' : 'passphrases are'} missing from the environment:\n` +
+        missing.map((l) => `  ${envName(l.id)}   (lock "${l.id}")`).join('\n') +
+        '\n' +
+        "  e.g. WIKI_LOCK_PASSPHRASE_ANNIE='…' npm run wiki:lock\n" +
+        'Refusing to write those pages in the clear.',
     )
   }
-  if (phrase.length < 8) {
-    throw new Error('That lock passphrase is too short to be worth the 250,000 iterations.')
+
+  for (const lock of keyed) {
+    if (lock.phrase.length < 10) {
+      console.warn(
+        `locks: the phrase for "${lock.id}" is ${lock.phrase.length} characters. The ciphertext is public, so ` +
+          'that is the whole cost of guessing it.',
+      )
+    }
   }
-  return phrase
+  return keyed
 }
 
 const b64 = (bytes) => Buffer.from(bytes).toString('base64')
@@ -176,14 +253,15 @@ function writeIfChanged(file, value) {
  * alone, so this can run after every sync, and running it twice by hand costs
  * nothing. Returns what it did, for the caller to print.
  */
-export async function sealSnapshot(dir, { locked, phrase }) {
-  if (!locked.length) return { sealed: [], missing: [], already: 0 }
+export async function sealSnapshot(dir, locks) {
+  if (!locks.length) return { sealed: [], missing: [], already: 0, byLock: new Map() }
 
-  const isLocked = matcher(locked)
+  const matchers = locks.map((lock) => ({ ...lock, matches: matcher(lock.patterns) }))
   const pagesDir = join(dir, 'pages')
   const files = readdirSync(pagesDir).filter((f) => f.endsWith('.json'))
 
   const sealed = []
+  const byLock = new Map(locks.map((l) => [l.id, []]))
   let already = 0
   const seen = new Set()
 
@@ -191,18 +269,39 @@ export async function sealSnapshot(dir, { locked, phrase }) {
     const path = join(pagesDir, file)
     const page = JSON.parse(readFileSync(path, 'utf8'))
     seen.add(page.slug)
-    if (!isLocked(page.slug)) continue
+
+    // First lock wins, and a page claimed by two is said out loud: silently
+    // picking one would mean the phrase that opens it is whichever lock
+    // happened to be higher up in a JSON object.
+    const owners = matchers.filter((lock) => lock.matches(page.slug))
+    if (!owners.length) continue
+    if (owners.length > 1) {
+      console.warn(
+        `locks: "${page.slug}" matches ${owners.map((l) => `"${l.id}"`).join(' and ')} — sealing it under ` +
+          `"${owners[0].id}". Narrow one of them.`,
+      )
+    }
+    const lock = owners[0]
+
+    // Already a ciphertext. Note that this is also why a *rotation* cannot
+    // happen here: nothing in this file can read a sealed page, so changing a
+    // lock's phrase means re-syncing from wiki-brain, where the plaintext is.
     if (page.lock) {
       already++
       sealed.push(page.slug)
+      byLock.get(lock.id).push(page.slug)
       continue
     }
+
     const [husk, secret] = split(page)
     writeFileSync(
       path,
       JSON.stringify({
         ...husk,
         locked: true,
+        /** Which lock opens it. Named so a tab that holds one phrase does not
+         *  spend a PBKDF2 derivation per sealed page finding out. */
+        lockId: lock.id,
         // A husk has to satisfy the same reader as an open page: empty rather
         // than absent, so nothing downstream has to learn a second shape.
         meta: {},
@@ -216,14 +315,18 @@ export async function sealSnapshot(dir, { locked, phrase }) {
         brief: false,
         gaps: [],
         staged: null,
-        lock: await encrypt(JSON.stringify(secret), phrase),
+        lock: await encrypt(JSON.stringify(secret), lock.phrase),
       }),
     )
     sealed.push(page.slug)
+    byLock.get(lock.id).push(page.slug)
   }
 
+  const missing = locks
+    .flatMap((lock) => lock.patterns)
+    .filter((p) => !p.endsWith('*') && !seen.has(p))
+
   const sealedSet = new Set(sealed)
-  const missing = locked.filter((p) => !p.endsWith('*') && !seen.has(p))
 
   // A sealed page's outbound links are inside its blob; the trace they left on
   // the pages they point at has to go too, or "Linked from: <sealed page>" says
@@ -240,7 +343,7 @@ export async function sealSnapshot(dir, { locked, phrase }) {
   redactIndex(join(dir, 'index.json'), sealedSet)
   redactGaps(join(dir, 'gaps.json'), sealedSet)
 
-  return { sealed, missing, already }
+  return { sealed, missing, already, byLock }
 }
 
 /**
@@ -351,26 +454,24 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     console.error(`No wiki snapshot to seal: ${dir}/index.json`)
     process.exit(1)
   }
-  let manifest
+
+  let locks
   try {
-    manifest = readManifest()
+    locks = requirePhrases(readManifest())
   } catch (err) {
     console.error(err.message)
     process.exit(1)
   }
-  if (!manifest.locked.length) {
+  if (!locks.length) {
     console.log(`locks: ${MANIFEST} seals nothing. Add a slug to "locked" and run this again.`)
     process.exit(0)
   }
-  let phrase
-  try {
-    phrase = requirePassphrase(manifest)
-  } catch (err) {
-    console.error(err.message)
-    process.exit(1)
-  }
-  const { sealed, missing, already } = await sealSnapshot(dir, { locked: manifest.locked, phrase })
+
+  const { sealed, missing, already, byLock } = await sealSnapshot(dir, locks)
   for (const slug of missing) console.warn(`locks: no page "${slug}" in the snapshot — typo, or not synced yet?`)
+  for (const [id, slugs] of byLock) {
+    console.log(`locks: "${id}" — ${slugs.length ? slugs.join(', ') : 'nothing matched'}`)
+  }
   warnStale(staleDerived(new Set(sealed)))
   console.log(
     `locks: ${sealed.length} page${sealed.length === 1 ? '' : 's'} sealed` +

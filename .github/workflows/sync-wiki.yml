@@ -42,14 +42,21 @@ jobs:
 
       # One implementation of the derivation, the same one a local sync runs.
       #
-      # WIKI_LOCK_PASSPHRASE is what re-seals the pages named in
-      # wiki.locks.json. Without it a sync that has pages to seal stops instead
-      # of committing them in the clear — so if this step starts failing after
-      # a page was sealed, the missing repository secret is why, and adding it
-      # is the fix rather than removing the lock.
+      # WIKI_LOCK_PASSPHRASES re-seals the pages named in wiki.locks.json: one
+      # JSON secret of lock name -> phrase, so adding a lock never needs this
+      # file edited. Without it a sync that has pages to seal stops instead of
+      # committing them in the clear — so if this step starts failing after a
+      # page was sealed, the missing repository secret is why, and adding it is
+      # the fix rather than removing the lock.
       - run: node scripts/sync-wiki.mjs .wiki-brain
         env:
+          WIKI_LOCK_PASSPHRASES: ${{ secrets.WIKI_LOCK_PASSPHRASES }}
           WIKI_LOCK_PASSPHRASE: ${{ secrets.WIKI_LOCK_PASSPHRASE }}
+
+      # The wiki instruments read the snapshot and are committed alongside it,
+      # so they have to be rebuilt in the same job a page gets sealed in —
+      # otherwise the words of a sealed page keep sitting in wiki.json.
+      - run: npm run wiki-instruments
       - run: npm run leviathan
 
       - id: commit

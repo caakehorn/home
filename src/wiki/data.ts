@@ -63,6 +63,8 @@ export type WikiPage = {
    */
   locked?: boolean
   lock?: Blob
+  /** Which named lock opens it — pages under different locks share no phrase. */
+  lockId?: string
   /** This page was sealed and this tab has opened it. */
   open?: boolean
 }

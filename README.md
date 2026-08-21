@@ -173,7 +173,7 @@ passphrase.
 
 A **sealed page ships as a ciphertext**. Its body, frontmatter, infobox, lists,
 counts, gaps and outbound links are AES-256-GCM under a PBKDF2-SHA256 key
-(250,000 iterations) derived from a *second* passphrase — the same protocol as
+(250,000 iterations) derived from its lock's passphrase — the same protocol as
 the gate, `make-verify.mjs` and the keyring. The file the browser fetches from
 `public/wiki/pages/` carries a slug, a domain, a title and the blob. There is no
 plaintext of it in the build, in the repository, or in the derived datasets, so
@@ -182,38 +182,65 @@ render.
 
 ### Sealing a page
 
-Name it in `wiki.locks.json` — slugs as they appear after `/brain/`, or a
-prefix ending in `*` for a whole branch:
+`wiki.locks.json` is a list of **named locks**. A lock has its own passphrase;
+its pages are slugs as they appear after `/brain/`, or a prefix ending in `*`
+for a whole branch:
 
 ```json
-{ "locked": ["self/concepts/a-page", "health/*"] }
+{
+  "locked": {
+    "annie": ["people/annie-ulmer"],
+    "ally": ["people/ally-lubin"]
+  }
+}
 ```
 
 ```bash
-WIKI_LOCK_PASSPHRASE='…' npm run wiki:lock    # seals public/wiki in place
+WIKI_LOCK_PASSPHRASE_ANNIE='…' WIKI_LOCK_PASSPHRASE_ALLY='…' npm run wiki:lock
 ```
+
+Named, because two locked pages are usually private from two different people.
+**Pages under different locks share no key**: the phrase for one page is not the
+phrase for the next one, so handing over a page hands over exactly that page. A
+lock named `annie` reads `WIKI_LOCK_PASSPHRASE_ANNIE`; a bare array —
+`{ "locked": [...] }` — is the one-lock shorthand and reads
+`WIKI_LOCK_PASSPHRASE`.
 
 That needs no wiki-brain checkout: it seals the snapshot this repository already
 carries, so locking a page is a thing the owner can do from here alone. A page
-can also ask for it from its own frontmatter upstream — `lock: true` in the
-wiki-brain file — which is the route to use when the decision belongs next to
-the writing. `sync-wiki.mjs` applies both, so a re-sync never unseals anything.
+can also ask for it from its own frontmatter upstream — `lock: annie`, or a bare
+`lock: true` for the default lock — which is the route to use when the decision
+belongs next to the writing. `sync-wiki.mjs` applies both, so a re-sync never
+unseals anything.
 
-**Use a different phrase from the door's.** A lock that opens to the key
-everyone in the building already has is a drawer.
+**Use different phrases from the door's.** A lock that opens to the key everyone
+in the building already has is a drawer.
 
-If the manifest names a page and `WIKI_LOCK_PASSPHRASE` is not set, the sync
-**stops before it writes anything** rather than publishing that page in the
-clear. That is the one failure mode worth designing for here.
+If a page is sealed and its lock's passphrase is not in the environment, the
+sync **stops before it writes anything** rather than publishing that page in the
+clear, and names every variable it is missing at once. That is the one failure
+mode worth designing for here.
+
+A short phrase is a warning, not a refusal — whose page it is decides how much
+time the KDF needs to buy. But the arithmetic does not care how memorable it
+is: the ciphertext is public, and a five-letter word is a few seconds of
+somebody's GPU.
+
+**Rotating** a lock means re-syncing from wiki-brain with the new phrase in the
+environment. Nothing in this repository can read a sealed page to re-encrypt
+it — which is the property that makes the seal worth anything — so the
+plaintext has to come from where it lives.
 
 ### Reading one
 
 The page shows THIS PAGE IS SEALED and a passphrase field. There is no separate
 verifier blob to check against — the page's own ciphertext is the check, the
-way the gate's is. One unlock covers the tab (`sessionStorage`, like the door),
-so a sealed branch can be read by following links through it; the decrypted
-pages are held in memory and never written anywhere. **SEAL AGAIN** on an
-opened page drops both, and is the analogue of the door's `#lock`.
+way the gate's is. A phrase that works is kept for the tab against **its lock**
+(`sessionStorage`, like the door), so a sealed branch can be read by following
+links through it while a page under another lock stays shut. The decrypted pages
+are held in memory and never written anywhere. **SEAL AGAIN** on an opened page
+drops the whole keyring — the point of that button is standing up from a
+borrowed laptop — and is the analogue of the door's `#lock`.
 
 Editing still works on an opened page, with one difference: its draft is **not**
 autosaved to this browser, because that draft is the plaintext of a page that
@@ -254,11 +281,22 @@ sealer checks for exactly that and names the files; the fix is
 ### In CI
 
 The hourly wiki sync re-derives the snapshot from `caakehorn/wiki-brain`, which
-means it re-seals too, which means it needs the phrase: put it in a
-**`WIKI_LOCK_PASSPHRASE` repository secret** and the workflow passes it through.
+means it re-seals too, which means it needs the phrases. One secret carries all
+of them: **`WIKI_LOCK_PASSPHRASES`**, a JSON object of lock name → phrase.
+
+```json
+{ "annie": "…", "ally": "…" }
+```
+
+The workflow passes it through, so adding a lock later needs no workflow edit —
+which is the point, since a workflow that has to name every lock is a workflow
+that silently stops sealing the one somebody forgot to add. Per-lock
+`WIKI_LOCK_PASSPHRASE_<NAME>` variables work too and win over nothing; the
+bundle is checked first.
+
 Without it that job fails once anything is sealed — deliberately. A sync that
-cannot seal is a sync that would publish those pages, and failing is the
-correct outcome.
+cannot seal is a sync that would publish those pages, and failing is the correct
+outcome.
 
 ## The type system
 

@@ -22,20 +22,30 @@
  * they are the thing the seal exists for, and 250,000 PBKDF2 iterations is
  * about a third of a second, which is a cheap price to pay again on reload.
  *
- * `relock()` drops both. It is what the SEAL AGAIN button on an opened page
- * calls, and it is the analogue of the door's `#lock`.
+ * `relock()` drops the whole keyring, not one lock. It is what the SEAL AGAIN
+ * button on an opened page calls, and it is the analogue of the door's `#lock`:
+ * the point of it is standing up from a borrowed laptop, and a version of that
+ * which leaves the other locks open is not that.
  */
 import { useSyncExternalStore } from 'react'
 import { decrypt, type Blob } from '../gate/protocol'
 import type { WikiPage } from './data'
 
-/** sessionStorage: the lock passphrase for this tab. */
-const KEY = 'danfrank:wiki:lock:v1'
+/** sessionStorage: the lock passphrases this tab has proved, by lock name. */
+const KEY = 'danfrank:wiki:locks:v1'
 
 /** The fields a seal takes out of a page and a decrypt puts back. */
 type Secret = Omit<WikiPage, 'slug' | 'domain' | 'title'>
 
-let phrase: string | null = restore()
+/**
+ * The keyring: lock name → passphrase, for the locks this tab has opened.
+ *
+ * Named locks rather than one phrase, because "lock some pages" turned out to
+ * mean pages that are private from *different* people. A phrase that opens one
+ * page should not open the next one, and a keyring keyed by lock is what makes
+ * a page you gave the phrase for stay the only page you gave away.
+ */
+let keyring: Record<string, string> = restore()
 const opened = new Map<string, WikiPage>()
 
 // A counter rather than a boolean: components re-read through
@@ -43,20 +53,22 @@ const opened = new Map<string, WikiPage>()
 let epoch = 0
 const listeners = new Set<() => void>()
 
-function restore(): string | null {
+function restore(): Record<string, string> {
   try {
-    return sessionStorage.getItem(KEY)
+    const raw = sessionStorage.getItem(KEY)
+    const parsed = raw ? (JSON.parse(raw) as unknown) : null
+    return parsed && typeof parsed === 'object' ? (parsed as Record<string, string>) : {}
   } catch {
-    return null
+    return {}
   }
 }
 
-function remember(value: string | null) {
+function remember() {
   try {
-    if (value === null) sessionStorage.removeItem(KEY)
-    else sessionStorage.setItem(KEY, value)
+    if (Object.keys(keyring).length) sessionStorage.setItem(KEY, JSON.stringify(keyring))
+    else sessionStorage.removeItem(KEY)
   } catch {
-    /* private mode: the phrase still holds for this page's lifetime */
+    /* private mode: the phrases still hold for this page's lifetime */
   }
 }
 
@@ -77,8 +89,8 @@ const subscribe = (listener: () => void) => {
  */
 export const useLockEpoch = () => useSyncExternalStore(subscribe, () => epoch, () => epoch)
 
-/** Is a phrase held for this tab? Not a claim that it is the right one. */
-export const held = () => phrase !== null
+/** Is a phrase held for this page's lock? Not a claim that it still works. */
+export const held = (page: WikiPage) => Boolean(page.lockId && keyring[page.lockId])
 
 /** Is this page a sealed one that has not been opened? */
 export const sealed = (page: WikiPage | null): boolean => Boolean(page?.locked && !page.open)
@@ -107,17 +119,31 @@ export async function open(page: WikiPage): Promise<WikiPage> {
   if (!page.locked || !page.lock) return page
   const already = opened.get(page.slug)
   if (already) return already
-  if (!phrase) return page
 
-  const result = await decode(page, page.lock, phrase)
-  if (!result) {
-    phrase = null
-    remember(null)
-    changed()
-    return page
+  // Its own lock's phrase first, then anything else on the keyring: a snapshot
+  // sealed before locks had names carries no `lockId`, and a lock that gets
+  // renamed should cost a second derivation rather than a second prompt.
+  const id = page.lockId ?? 'default'
+  const candidates = [keyring[id], ...Object.entries(keyring).filter(([k]) => k !== id).map(([, v]) => v)]
+
+  for (const candidate of candidates) {
+    if (!candidate) continue
+    const result = await decode(page, page.lock, candidate)
+    if (result) {
+      opened.set(page.slug, result)
+      return result
+    }
   }
-  opened.set(page.slug, result)
-  return result
+
+  // Nothing held opens it. A phrase for *this* lock that no longer works can
+  // only be stale — the page was re-sealed under a new one — so it is dropped
+  // rather than kept to fail again on every sealed page in the tab.
+  if (keyring[id]) {
+    delete keyring[id]
+    remember()
+    changed()
+  }
+  return page
 }
 
 /**
@@ -132,17 +158,17 @@ export async function unlock(page: WikiPage, candidate: string): Promise<WikiPag
   if (!page.lock) return null
   const result = await decode(page, page.lock, candidate)
   if (!result) return null
-  phrase = candidate
-  remember(candidate)
+  keyring[page.lockId ?? 'default'] = candidate
+  remember()
   opened.set(page.slug, result)
   changed()
   return result
 }
 
-/** Throw the bolt again: the phrase and every page it opened this tab. */
+/** Throw the bolt again: every phrase this tab holds and every page they opened. */
 export function relock() {
-  phrase = null
-  remember(null)
+  keyring = {}
+  remember()
   opened.clear()
   changed()
 }

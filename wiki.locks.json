@@ -1,4 +1,7 @@
 {
-  "_": "Pages sealed one at a time. Slugs as they appear after /brain/, or a prefix ending in * for a whole branch. Sealed pages ship as ciphertext and open in the browser for the WIKI_LOCK_PASSPHRASE the site was built with. See scripts/wiki-locks.mjs and the README.",
-  "locked": []
+  "_": "Named locks. Each key is a lock with its own passphrase, read from WIKI_LOCK_PASSPHRASE_<NAME> (or the WIKI_LOCK_PASSPHRASES JSON bundle); its pages are slugs as they appear after /brain/, or a prefix ending in * for a whole branch. Pages under different locks share no key. Seal with `npm run wiki:lock`. See scripts/wiki-locks.mjs and the README.",
+  "locked": {
+    "annie": ["people/annie-ulmer"],
+    "ally": ["people/ally-lubin"]
+  }
 }

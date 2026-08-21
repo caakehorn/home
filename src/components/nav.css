@@ -38,6 +38,7 @@
   font-size: var(--step--1);
   color: var(--n2);
   text-shadow: 0 0 10px var(--n2);
+  transition: opacity 200ms ease, width 200ms ease;
 }
 
 .nav__links {
@@ -100,6 +101,13 @@
   gap: 0;
 }
 
+.nav--collapsed .nav__mark-kana {
+  width: 0;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
 .nav--collapsed .nav__links {
   flex: 0 0 0;
   width: 0;
@@ -123,7 +131,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .nav,
-  .nav__links {
+  .nav__links,
+  .nav__mark-kana {
     transition: none;
   }
 }

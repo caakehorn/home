@@ -311,7 +311,11 @@ const evidence = {
 // ---------------------------------------------------------------------------
 // XV · THE ATTENTION — what gets talked about against what gets written up
 
-const NAME_MIN = 4
+// Every page. An earlier cut filtered titles shorter than four characters —
+// a leftover from a name-matching approach that was never used, since `named`
+// is an inbound link count and not a search for the title in prose. It quietly
+// dropped ten pages from a chart whose masthead said 486, which is the kind of
+// filter this building exists to not have.
 const attention = pages
   .map((page) => {
     const named = inbound.get(page.slug) ?? 0
@@ -324,7 +328,6 @@ const attention = pages
       backlinks: (page.backlinks ?? []).length,
     }
   })
-  .filter((row) => row.title.length >= NAME_MIN)
   .sort((a, b) => b.named - a.named || b.words - a.words)
 
 // ---------------------------------------------------------------------------
@@ -449,7 +452,9 @@ const set = {
   tags: tags.slice(0, 200),
   tagsTotal: tags.length,
   evidence,
-  attention: attention.slice(0, 400),
+  // Every page, not a top-N. THE ATTENTION's whole subject is the shape of the
+  // scatter, and a scatter with the tail cut off is a different shape.
+  attention,
   schema,
   echo,
 }

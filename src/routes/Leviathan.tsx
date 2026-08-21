@@ -7,6 +7,7 @@ import { INSTRUMENTS, WINGS, countBy, instrumentById, instrumentsIn } from '../l
 import type { Instrument, InstrumentStatus } from '../leviathan/core'
 import { Accretion } from '../leviathan/instruments/Accretion'
 import { Chronology } from '../leviathan/instruments/Chronology'
+import { Attention } from '../leviathan/instruments/Attention'
 import { Census } from '../leviathan/instruments/Census'
 import { Claims } from '../leviathan/instruments/Claims'
 import { Clock } from '../leviathan/instruments/Clock'
@@ -39,6 +40,7 @@ const BUILT: Record<string, typeof Mass> = {
   tagmap: Tags,
   lattice: Health,
   evidence: Evidence,
+  attention: Attention,
 }
 
 /**

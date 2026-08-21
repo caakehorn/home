@@ -1,0 +1,195 @@
+/* ==========================================================================
+   ◈ CORPUS II · THE CLOCK
+
+   A spiral and a table of counts, side by side on a wide screen and stacked on
+   a narrow one. They are not a chart and its caption — they are the same
+   instrument twice, once in a form you can see at a glance and once in a form
+   you can read out loud.
+   ========================================================================== */
+
+.clock {
+  display: grid;
+  grid-template-columns: minmax(320px, 1fr) minmax(280px, 26rem);
+  gap: clamp(1rem, 3vw, 2.4rem);
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .clock { grid-template-columns: 1fr; }
+}
+
+/* ---- the spiral --------------------------------------------------------- */
+
+.clock__figure {
+  margin: 0;
+  display: grid;
+  gap: 0.6rem;
+  justify-items: center;
+}
+
+.clock__figure > * {
+  min-width: 0;
+}
+
+.clock__canvas {
+  display: block;
+  width: 100%;
+  max-width: 760px;
+  aspect-ratio: 1;
+  /* The mount is dark in every palette: a spiral of half-transparent marks
+     judged against newsprint is a spiral with a colour cast, and RIOT's paper
+     would eat the low-alpha end of it entirely. */
+  background: #08070c;
+  border: var(--staple) solid var(--edge);
+}
+
+/* The legend sits on the same dark mount as the spiral rather than on the page.
+   It has to: in RIOT the RECEIVED channel resolves to bare paper, and a paper
+   swatch on a paper background is a key that cannot be read. Putting the strip
+   on the mount means every channel colour is judged against the ground it is
+   actually drawn on, which is the only comparison worth printing. */
+.clock__legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 0.9rem;
+  width: 100%;
+  max-width: 760px;
+  margin-top: -0.6rem;
+  padding: 0.5rem 0.7rem;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  color: #9a9384;
+  background: #08070c;
+  border: var(--staple) solid var(--edge);
+  border-top: 0;
+}
+
+.clock__key::before {
+  content: '';
+  display: inline-block;
+  width: 0.6rem;
+  height: 0.6rem;
+  margin-right: 0.35rem;
+  background: currentColor;
+}
+
+/* The spiral resolves the pair at paint time — RIOT's ramp collapses and the
+   second channel falls back to paper — and writes it back onto the canvas as
+   these two properties, so the keys can never disagree with the marks. */
+.clock__key--sent { color: var(--clock-sent, var(--n1)); }
+.clock__key--received { color: var(--clock-recv, var(--n3)); }
+.clock__key-say { letter-spacing: 0.1em; text-transform: none; }
+
+/* ---- the counts --------------------------------------------------------- */
+
+.clock__readouts {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.clock__span {
+  font-size: var(--step--1);
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+.clock__span b {
+  font-family: var(--f-mono);
+  color: var(--text);
+}
+
+.clock__sub {
+  margin: 0.6rem 0 0;
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.24em;
+  color: var(--n1);
+}
+
+.clock__hours,
+.clock__years {
+  display: grid;
+  gap: 0.15rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.clock__hours li,
+.clock__years li {
+  display: grid;
+  grid-template-columns: 2.6rem 1fr 4.2rem;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.clock__hour-label,
+.clock__year-label,
+.clock__hour-n {
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+}
+
+.clock__hour-n {
+  text-align: right;
+  color: var(--text);
+}
+
+.clock__hour-bar {
+  display: block;
+  block-size: 0.62rem;
+  background: color-mix(in srgb, var(--text-dim) 18%, transparent);
+}
+
+.clock__hour-fill {
+  display: block;
+  block-size: 100%;
+  background: var(--n1);
+}
+
+.clock__hour-fill--year {
+  background: var(--n3);
+}
+
+.clock__note {
+  margin-top: 0.3rem;
+  font-size: var(--step--1);
+  line-height: 1.55;
+  color: var(--text-dim);
+}
+
+/* ---- the direction switch ----------------------------------------------- */
+
+.clock__sides {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.clock__side {
+  padding: 0.3rem 0.6rem;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  color: var(--text-dim);
+  background: transparent;
+  border: var(--staple) solid color-mix(in srgb, var(--text-dim) 45%, transparent);
+  cursor: pointer;
+  transition: color 140ms ease, border-color 140ms ease, background 140ms ease;
+}
+
+.clock__side:hover,
+.clock__side:focus-visible {
+  color: var(--text);
+  border-color: var(--n1);
+}
+
+.clock__side--on {
+  color: var(--on-glow);
+  background: var(--n1);
+  border-color: var(--n1);
+}

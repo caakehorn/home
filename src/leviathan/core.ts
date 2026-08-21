@@ -162,14 +162,14 @@ export const INSTRUMENTS: Instrument[] = [
     title: 'THE PULSE',
     kana: '脈',
     wing: 'CORPUS',
-    corpus: '134,348 messages · 2015-11-28 → 2026-07-26',
+    corpus: '134,348 messages · 3,894 days · 91 of 129 months covered',
     blurb:
-      'The whole record as one scrubbable line, with the eras banded behind it — NYC ONE, UNIONTOWN, NYC TWO, RETURN. Throw it and it keeps moving.',
-    method: 'Messages per day, plotted on a draggable window with inertia. A count and a date, and nothing else.',
-    status: 'UNBUILT',
-    origin: 'void.html · MODULE 01 · draw_pulse',
-    needs:
-      'nothing from outside — the record it reads arrived with THE TRANSCRIPT and ships at /transcript. What is missing is the instrument',
+      'The whole record as one line you can throw — every day a bar, 3,894 of them, and the months the archive is missing hatched where they really fall.',
+    method:
+      'Messages per day over every day in the span, drawn as one bar each on a window you can drag and zoom. The 38 months the exports do not cover are hatched at their real width rather than drawn as silence.',
+    status: 'LIVE',
+    origin:
+      'void.html · MODULE 01 · draw_pulse — minus the four hand-drawn era bands, which were chosen rather than counted',
   },
   {
     id: 'clock',
@@ -177,13 +177,11 @@ export const INSTRUMENTS: Instrument[] = [
     title: 'THE CLOCK',
     kana: '時計',
     wing: 'CORPUS',
-    corpus: '134,348 messages · 2015-11-28 → 2026-07-26',
+    corpus: '134,348 messages · 3,894 days · 2015-11-28 → 2026-07-26',
     blurb: 'Every message placed by when it was sent. Angle is the hour, radius is the date.',
     method: 'Timestamps read from the string, never through Date(), so no timezone can move an hour.',
-    status: 'UNBUILT',
-    origin: 'void.html · MODULE 02 · draw_clock — and again, standalone, as clock.html',
-    needs:
-      'nothing from outside any more — the corpus it reads arrived with THE TRANSCRIPT and ships at /transcript. What is missing is the instrument, which is not built yet. There is a photograph of the old one in THE GALLERY',
+    status: 'LIVE',
+    origin: 'void.html · MODULE 02 · draw_clock — and again, standalone, as clock.html, which is photographed in THE GALLERY',
   },
   {
     id: 'orbits',
@@ -343,12 +341,11 @@ export const INSTRUMENTS: Instrument[] = [
     wing: 'CORPUS',
     corpus: '134,348 messages · 129 months, 91 of them covered',
     blurb:
-      'The negative space of the record: every gap, how long it ran, and what broke it. The last one is still open.',
-    method: 'Elapsed time between consecutive messages, sorted. Nothing about a gap is inferred beyond its length and its ends.',
-    status: 'UNBUILT',
+      'The negative space of the record: every gap, how long it ran, and the line that ended it — with the holes in the archive kept out of the ranking, because a missing export is not a silence.',
+    method:
+      'Elapsed time between consecutive messages, ranked. Nothing about a gap is inferred beyond its length and its two ends, and the message that ended one is cited by line number rather than quoted. Gaps that span a month the exports do not cover are listed apart, because a hole in an archive is not a silence.',
+    status: 'LIVE',
     origin: 'void.html · MODULE 14 · draw_silence',
-    needs:
-      'nothing from outside — the record ships at /transcript, and its 38 missing months are already stated there rather than drawn over. What is missing is the instrument',
   },
   {
     id: 'psyche',
@@ -857,3 +854,33 @@ export type ChronologySet = {
   months: { bin: string; year: number; month: number; count: number; pages: DateRef[] }[]
   years: { year: number; count: number; pages: number; sample: YearRef[] }[]
 }
+
+/**
+ * ◈ CORPUS II · THE CLOCK.
+ *
+ * `marks` is delta-encoded `day * 2880 + minute * 2 + dir` — see the note at
+ * the top of scripts/build-clock.mjs. It is a compression of the file, not of
+ * the record: all 134,348 messages are in it, one integer each.
+ */
+export type ClockSet = {
+  generatedAt: string
+  source: string
+  count: number
+  sent: number
+  received: number
+  /** ISO day of the first message — the centre of the spiral. */
+  from: string
+  /** ISO day of the last — the rim. */
+  to: string
+  days: number
+  hours: { all: number; sent: number; received: number }[]
+  years: { year: number; count: number }[]
+  /**
+   * The runs of months the exports do not cover, in day indices off the same
+   * day zero as `marks`. THE PULSE draws them at their real width: a hole in an
+   * archive and a quiet month look identical if you only plot what survived.
+   */
+  gaps: { from: string; to: string; months: number; fromDay: number; toDay: number }[]
+  marks: number[]
+}
+

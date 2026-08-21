@@ -504,12 +504,13 @@ export const INSTRUMENTS: Instrument[] = [
     title: 'THE TAGS',
     kana: '標識',
     wing: 'WIKI',
-    corpus: 'every tag on every page',
-    blurb: 'Themes as gravity. Each tag pulls the pages that carry it, and the pages that carry two get torn between them.',
-    method: 'Tag counts per page, arranged by attraction. The count is the data; the arrangement is the drawing.',
-    status: 'UNBUILT',
-    origin: 'js/wiki-modules.js · WIKI 07 · draw_tagmap',
-    needs: 'nothing from outside — tags ship in the snapshot. What is missing is the instrument',
+    corpus: '25 tags · 456 tagged pages',
+    blurb: 'Every theme the wiki files under, and what sits beneath it. Hold two and the answer is the pages filed under both.',
+    method:
+      'Every distinct tag in the corpus, counted, with the pages under it and the domains they fall across. Hold two tags and the pages carrying both are counted. The brackets a YAML array leaves in the raw front-matter are stripped, which is a parse; nothing is dropped for what it says.',
+    status: 'LIVE',
+    origin:
+      'js/wiki-modules.js · WIKI 07 · draw_tagmap — the gravity becomes an intersection, because a count is legible and a physics simulation of a count is a mood',
   },
   {
     id: 'wiki-mass',

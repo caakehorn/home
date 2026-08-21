@@ -16,6 +16,7 @@ import { Pen } from '../leviathan/instruments/Pen'
 import { Pulse } from '../leviathan/instruments/Pulse'
 import { Rings } from '../leviathan/instruments/Rings'
 import { Silence } from '../leviathan/instruments/Silence'
+import { Tags } from '../leviathan/instruments/Tags'
 import { Web } from '../leviathan/instruments/Web'
 import './leviathan.css'
 
@@ -33,6 +34,7 @@ const BUILT: Record<string, typeof Mass> = {
   web: Web,
   claims: Claims,
   census: Census,
+  tagmap: Tags,
 }
 
 /**

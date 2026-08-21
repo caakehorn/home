@@ -9,6 +9,7 @@ import { Accretion } from '../leviathan/instruments/Accretion'
 import { Chronology } from '../leviathan/instruments/Chronology'
 import { Attention } from '../leviathan/instruments/Attention'
 import { Census } from '../leviathan/instruments/Census'
+import { Chronicle } from '../leviathan/instruments/Chronicle'
 import { Claims } from '../leviathan/instruments/Claims'
 import { Clock } from '../leviathan/instruments/Clock'
 import { Echo } from '../leviathan/instruments/Echo'
@@ -47,6 +48,7 @@ const BUILT: Record<string, typeof Mass> = {
   schema: Schema,
   echo: Echo,
   genesis: Genesis,
+  chronicle: Chronicle,
 }
 
 /**

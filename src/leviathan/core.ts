@@ -560,13 +560,14 @@ export const INSTRUMENTS: Instrument[] = [
     title: 'THE CHRONICLE',
     kana: '年代記',
     wing: 'WIKI',
-    corpus: 'the wiki’s own build log',
-    blurb: 'The wiki building itself as four pens — ingest, connect, write, maintain — against the same axis as THE ACCRETION.',
-    method: 'Commits classified into four kinds and counted per day.',
-    status: 'SEALED',
-    origin: 'js/wiki-modules.js · WIKI 11 · draw_chronicle',
-    needs:
-      'the build log. And then an argument this building has not had yet: sorting commits into ingest, connect, write and maintain is a classification, and THE RULE would want to know who wrote the rules for it',
+    corpus: '147 commits · 17 prefixes · 36 days',
+    blurb:
+      'What the commits were. Every one of them under the word its author typed in front of it, and what each kind of work did to the corpus.',
+    method:
+      'Every commit with the prefix its author typed in front of it — feat, docs, ingest, rewrite, merge pull request — and what it did to the page, byte, link and edge counts. The prefix is a read of the string, not a reading of the work; commits with no prefix are grouped as having none rather than sorted into a bucket on their behalf.',
+    status: 'LIVE',
+    origin:
+      'js/wiki-modules.js · WIKI 11 · draw_chronicle — minus the four hand-sorted lanes, which are replaced by the prefix the commit\u2019s author actually typed',
   },
   {
     id: 'genesis',

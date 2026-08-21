@@ -82,11 +82,15 @@ export function GalleryRoute() {
         </p>
       </header>
 
-      {loading && <p className="wrap gal__state">Opening the room…</p>}
+      {loading && (
+        <div className="wrap">
+          <p className="gal__state">Opening the room…</p>
+        </div>
+      )}
       {error && (
-        <p className="wrap gal__state gal__state--bad">
-          The wall is empty: {error}
-        </p>
+        <div className="wrap">
+          <p className="gal__state gal__state--bad">The wall is empty: {error}</p>
+        </div>
       )}
 
       {data && (
@@ -141,17 +145,19 @@ export function GalleryRoute() {
             </p>
           </div>
 
-          {album !== 'all' && albumNote(album) && (
-            <p className="wrap gal__album-note">{albumNote(album)}</p>
-          )}
-          {album === 'all' &&
-            data.albums.map((a) =>
-              albumNote(a.id) ? (
-                <p key={a.id} className="wrap gal__album-note">
-                  <b>{albumTitle(a.id)}</b> — {albumNote(a.id)}
-                </p>
-              ) : null,
+          <div className="wrap">
+            {album !== 'all' && albumNote(album) && (
+              <p className="gal__album-note">{albumNote(album)}</p>
             )}
+            {album === 'all' &&
+              data.albums.map((a) =>
+                albumNote(a.id) ? (
+                  <p key={a.id} className="gal__album-note">
+                    <b>{albumTitle(a.id)}</b> — {albumNote(a.id)}
+                  </p>
+                ) : null,
+              )}
+          </div>
 
           <div className="wrap">
             <Wall pictures={shown} />
@@ -160,9 +166,11 @@ export function GalleryRoute() {
       )}
 
       {data && id && !open && (
-        <p className="wrap gal__state gal__state--bad">
-          No picture called “{id}” hangs here. <Link to="/gallery">Back to the wall.</Link>
-        </p>
+        <div className="wrap">
+          <p className="gal__state gal__state--bad">
+            No picture called “{id}” hangs here. <Link to="/gallery">Back to the wall.</Link>
+          </p>
+        </div>
       )}
 
       {open && (

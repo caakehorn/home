@@ -177,13 +177,11 @@ export const INSTRUMENTS: Instrument[] = [
     title: 'THE CLOCK',
     kana: '時計',
     wing: 'CORPUS',
-    corpus: '134,348 messages · 2015-11-28 → 2026-07-26',
+    corpus: '134,348 messages · 3,894 days · 2015-11-28 → 2026-07-26',
     blurb: 'Every message placed by when it was sent. Angle is the hour, radius is the date.',
     method: 'Timestamps read from the string, never through Date(), so no timezone can move an hour.',
-    status: 'UNBUILT',
-    origin: 'void.html · MODULE 02 · draw_clock — and again, standalone, as clock.html',
-    needs:
-      'nothing from outside any more — the corpus it reads arrived with THE TRANSCRIPT and ships at /transcript. What is missing is the instrument, which is not built yet. There is a photograph of the old one in THE GALLERY',
+    status: 'LIVE',
+    origin: 'void.html · MODULE 02 · draw_clock — and again, standalone, as clock.html, which is photographed in THE GALLERY',
   },
   {
     id: 'orbits',
@@ -857,3 +855,27 @@ export type ChronologySet = {
   months: { bin: string; year: number; month: number; count: number; pages: DateRef[] }[]
   years: { year: number; count: number; pages: number; sample: YearRef[] }[]
 }
+
+/**
+ * ◈ CORPUS II · THE CLOCK.
+ *
+ * `marks` is delta-encoded `day * 2880 + minute * 2 + dir` — see the note at
+ * the top of scripts/build-clock.mjs. It is a compression of the file, not of
+ * the record: all 134,348 messages are in it, one integer each.
+ */
+export type ClockSet = {
+  generatedAt: string
+  source: string
+  count: number
+  sent: number
+  received: number
+  /** ISO day of the first message — the centre of the spiral. */
+  from: string
+  /** ISO day of the last — the rim. */
+  to: string
+  days: number
+  hours: { all: number; sent: number; received: number }[]
+  years: { year: number; count: number }[]
+  marks: number[]
+}
+

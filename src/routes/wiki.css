@@ -225,6 +225,11 @@
   color: var(--n5);
 }
 
+.wiki__card-seal {
+  color: var(--spot);
+  letter-spacing: 0.16em;
+}
+
 /* ---- view switch + brief deck ------------------------------------------- */
 .wiki__views {
   display: flex;
@@ -377,6 +382,117 @@
   color: var(--edge);
   background: var(--n2);
   border-color: var(--n2);
+}
+
+/* ---- sealed pages -------------------------------------------------------
+ *
+ * The one place on the site that borrows the door's red. A sealed page is the
+ * same kind of thing as the front step — a boundary, not a feature — and it
+ * should read as the same colour of refusal.
+ */
+.wiki__chip--sealed {
+  color: var(--spot);
+  border-color: var(--spot);
+}
+
+.wiki__reseal {
+  cursor: pointer;
+  background: none;
+  letter-spacing: 0.12em;
+}
+
+.wiki__reseal:hover {
+  color: var(--edge);
+  background: var(--spot);
+}
+
+.wiki__sealed {
+  max-width: 42rem;
+  padding: 2.4rem 0 3rem;
+}
+
+.wiki__sealed-mark {
+  margin: 0 0 0.6rem;
+  font-size: clamp(3rem, 9vw, 5.5rem);
+  line-height: 0.9;
+  color: var(--spot);
+}
+
+.wiki__sealed h2 {
+  margin: 0 0 0.9rem;
+  font-family: var(--f-poster);
+  font-size: clamp(1.1rem, 3.4vw, 1.7rem);
+  letter-spacing: 0.05em;
+}
+
+.wiki__sealed-note {
+  margin: 0 0 1.6rem;
+  max-width: 34rem;
+  font-size: var(--step-0);
+  color: var(--text-dim);
+}
+
+.wiki__sealed-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.wiki__sealed-form label {
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.wiki__sealed-form input {
+  flex: 1 1 14rem;
+  min-width: 0;
+  padding: 0.5rem 0.7rem;
+  font-family: var(--f-mono);
+  font-size: 0.95rem;
+  letter-spacing: 0.14em;
+  color: var(--text);
+  background: color-mix(in srgb, var(--edge) 12%, transparent);
+  border: 3px solid var(--edge);
+}
+
+.wiki__sealed-form input:focus-visible {
+  outline: 3px solid var(--spot);
+  outline-offset: 2px;
+}
+
+.wiki__sealed-form button {
+  padding: 0.5rem 1.1rem;
+  font-family: var(--f-poster);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  color: var(--paper);
+  background: var(--spot);
+  border: 3px solid var(--edge);
+  box-shadow: 4px 4px 0 var(--edge);
+  transition: transform 130ms ease;
+}
+
+.wiki__sealed-form button:hover:not(:disabled) {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--edge);
+}
+
+.wiki__sealed-form button:disabled {
+  opacity: 0.45;
+  box-shadow: none;
+}
+
+.wiki__sealed-state {
+  min-height: 1.4rem;
+  margin: 0.8rem 0 1.6rem;
+  font-family: var(--f-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  color: var(--spot);
 }
 
 .wiki__edit {

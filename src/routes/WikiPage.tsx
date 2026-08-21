@@ -5,7 +5,9 @@ import { Editor } from '../wiki/Editor'
 import { Infobox } from '../wiki/Infobox'
 import { Markdown, outline } from '../wiki/Markdown'
 import { QuickAdd } from '../wiki/QuickAdd'
+import { Sealed } from '../wiki/Sealed'
 import { editableFrontmatter, humanize, useWikiPage, type WikiPage as Page } from '../wiki/data'
+import { relock, sealed } from '../wiki/locks'
 import { getDraft } from '../wiki/store'
 import './wiki.css'
 import '../wiki/quick-add.css'
@@ -73,6 +75,10 @@ export function WikiPageRoute() {
 
   const toc = useMemo(() => (view ? outline(view.body) : []), [view])
   const isDraft = Boolean(data && getDraft(data.slug))
+  // A sealed page is not a page that failed to load: it loaded, and this is all
+  // of it. The article below is never rendered for one, so there is no frame in
+  // which a body exists on screen unlocked — there is no body to have.
+  const locked = sealed(data)
 
   return (
     <div className="wiki">
@@ -92,7 +98,26 @@ export function WikiPageRoute() {
         </div>
       )}
 
-      {view && draft && (
+      {data && locked && (
+        <article className="wrap wiki__article">
+          <header className="wiki__head">
+            <nav className="wiki__crumbs" aria-label="Breadcrumb">
+              <Link to="/brain">WIKI-BRAIN</Link>
+              <span aria-hidden="true"> / </span>
+              <Link to={`/brain?domain=${data.domain}`}>{data.domain.toUpperCase()}</Link>
+            </nav>
+
+            <h1 className="wiki__title">{data.title}</h1>
+            <div className="wiki__meta">
+              <span className="wiki__chip wiki__chip--sealed">sealed</span>
+            </div>
+          </header>
+
+          <Sealed page={data} />
+        </article>
+      )}
+
+      {view && draft && !locked && (
         <article className="wrap wiki__article">
           <header className="wiki__head">
             <nav className="wiki__crumbs" aria-label="Breadcrumb">
@@ -109,6 +134,16 @@ export function WikiPageRoute() {
               <span className="wiki__chip">{view.words.toLocaleString()} words</span>
               {view.charts > 0 && <span className="wiki__chip wiki__chip--hot">{view.charts} charted</span>}
               {isDraft && <span className="wiki__chip wiki__chip--draft">local draft</span>}
+              {view.open && (
+                <button
+                  type="button"
+                  className="wiki__chip wiki__chip--sealed wiki__reseal"
+                  onClick={relock}
+                  title="Drop the lock passphrase this tab is holding"
+                >
+                  sealed · SEAL AGAIN
+                </button>
+              )}
               <button type="button" className="wiki__edit" onClick={() => setEditing((v) => !v)}>
                 {editing ? 'CLOSE EDITOR' : 'EDIT THIS PAGE'}
               </button>

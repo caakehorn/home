@@ -12,6 +12,7 @@
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { join, relative, resolve } from 'node:path'
 import { layoutWiki, undirectedEdges } from './graph-layout.mjs'
+import { MANIFEST, readManifest, requirePassphrase, sealSnapshot, staleDerived, warnStale } from './wiki-locks.mjs'
 
 const SOURCE = resolve(process.argv[2] ?? process.env.WIKI_BRAIN ?? '../wiki-brain')
 const OUT = resolve('public/wiki')
@@ -154,13 +155,17 @@ try {
 }
 if (!sourceStat.isDirectory()) process.exit(1)
 
-rmSync(OUT, { recursive: true, force: true })
-mkdirSync(join(OUT, 'pages'), { recursive: true })
-
-// Pictures published from the portal ride along with the prose; an `image:`
-// value of `assets/<slug>/<id>.jpg` resolves against this directory.
-const assets = join(SOURCE, 'wiki', 'assets')
-if (existsSync(assets)) cpSync(assets, join(OUT, 'assets'), { recursive: true })
+// The locks are read before the old snapshot is touched, so a manifest that
+// seals pages with no passphrase in the environment stops the sync where it
+// stands rather than halfway through rewriting public/wiki.
+const manifest = readManifest()
+let lockPhrase
+try {
+  lockPhrase = requirePassphrase(manifest)
+} catch (err) {
+  console.error(err.message)
+  process.exit(1)
+}
 
 const files = walk(join(SOURCE, 'wiki')).sort()
 const index = []
@@ -336,6 +341,29 @@ const pages = files.map((file) => {
   }
 })
 
+// A page can also ask to be sealed from its own frontmatter — `lock: true` in
+// the wiki-brain file — so the decision can live next to the writing instead of
+// only in a list over here. Both routes end in the same set.
+const declared = pages.filter((p) => /^(true|yes|private|sealed)$/i.test(p.meta.lock ?? '')).map((p) => p.slug)
+const locked = [...new Set([...manifest.locked, ...declared])]
+try {
+  // Re-checked with the frontmatter locks folded in: the pre-flight above only
+  // knew about the manifest, and a page that seals itself has the same claim on
+  // stopping the build as a line in the list does.
+  lockPhrase = requirePassphrase({ locked }, `${MANIFEST}, or \`lock:\` in the page's frontmatter`)
+} catch (err) {
+  console.error(err.message)
+  process.exit(1)
+}
+// Everything above is a read. From here the snapshot is rebuilt.
+rmSync(OUT, { recursive: true, force: true })
+mkdirSync(join(OUT, 'pages'), { recursive: true })
+
+// Pictures published from the portal ride along with the prose; an `image:`
+// value of `assets/<slug>/<id>.jpg` resolves against this directory.
+const assets = join(SOURCE, 'wiki', 'assets')
+if (existsSync(assets)) cpSync(assets, join(OUT, 'assets'), { recursive: true })
+
 for (const page of pages) {
   const file = `${page.slug.replace(/\//g, '__')}.json`
   writeFileSync(
@@ -420,8 +448,21 @@ writeFileSync(
   }),
 )
 
+// The snapshot is written in the clear and then sealed in place, rather than
+// pages being encrypted as they are written. One implementation of the seal,
+// used by both this and `npm run wiki:lock`, is worth the extra pass: two would
+// be two chances for the standalone one to redact a field the sync forgets.
+//
+// The cost is a window where the plaintext is on disk. It is bounded by this
+// script: a sync that dies inside it exits non-zero, and both the workflow and
+// a person read that as "do not commit what is in public/wiki". Re-run it.
+const seal = await sealSnapshot(OUT, { locked, phrase: lockPhrase })
+for (const slug of seal.missing) console.warn(`wiki: ${MANIFEST} names "${slug}", which is not a page in the source.`)
+warnStale(staleDerived(new Set(seal.sealed)))
+
 console.log(
   `wiki: ${index.length} pages · ${domains.length} domains · ` +
     `${index.reduce((n, p) => n + p.charts, 0)} chartable tables · ` +
     `${index.filter((p) => p.brief).length} briefs · ${edges.length} mapped links -> public/wiki`,
 )
+if (seal.sealed.length) console.log(`wiki: ${seal.sealed.length} page${seal.sealed.length === 1 ? '' : 's'} sealed`)

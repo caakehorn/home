@@ -160,6 +160,106 @@ blob ever committed; and make the repository private. Until those are done,
 this is a lock on the front door of a building with windows — which is worth
 having, and is not worth mistaking for something else.
 
+The first of those three is now done for the pages that need it most, one page
+at a time: see **[Sealed pages](#sealed-pages)**. The rest of the corpus still
+sits behind rendering only.
+
+## Sealed pages
+
+The gate is one boundary for the whole site: everyone who is inside is inside
+for everything. Some wiki pages are not that. They are in the wiki because the
+wiki is where thinking goes, and they are not for whoever else has the door's
+passphrase.
+
+A **sealed page ships as a ciphertext**. Its body, frontmatter, infobox, lists,
+counts, gaps and outbound links are AES-256-GCM under a PBKDF2-SHA256 key
+(250,000 iterations) derived from a *second* passphrase — the same protocol as
+the gate, `make-verify.mjs` and the keyring. The file the browser fetches from
+`public/wiki/pages/` carries a slug, a domain, a title and the blob. There is no
+plaintext of it in the build, in the repository, or in the derived datasets, so
+this one is not a lock on rendering: without the phrase there is nothing to
+render.
+
+### Sealing a page
+
+Name it in `wiki.locks.json` — slugs as they appear after `/brain/`, or a
+prefix ending in `*` for a whole branch:
+
+```json
+{ "locked": ["self/concepts/a-page", "health/*"] }
+```
+
+```bash
+WIKI_LOCK_PASSPHRASE='…' npm run wiki:lock    # seals public/wiki in place
+```
+
+That needs no wiki-brain checkout: it seals the snapshot this repository already
+carries, so locking a page is a thing the owner can do from here alone. A page
+can also ask for it from its own frontmatter upstream — `lock: true` in the
+wiki-brain file — which is the route to use when the decision belongs next to
+the writing. `sync-wiki.mjs` applies both, so a re-sync never unseals anything.
+
+**Use a different phrase from the door's.** A lock that opens to the key
+everyone in the building already has is a drawer.
+
+If the manifest names a page and `WIKI_LOCK_PASSPHRASE` is not set, the sync
+**stops before it writes anything** rather than publishing that page in the
+clear. That is the one failure mode worth designing for here.
+
+### Reading one
+
+The page shows THIS PAGE IS SEALED and a passphrase field. There is no separate
+verifier blob to check against — the page's own ciphertext is the check, the
+way the gate's is. One unlock covers the tab (`sessionStorage`, like the door),
+so a sealed branch can be read by following links through it; the decrypted
+pages are held in memory and never written anywhere. **SEAL AGAIN** on an
+opened page drops both, and is the analogue of the door's `#lock`.
+
+Editing still works on an opened page, with one difference: its draft is **not**
+autosaved to this browser, because that draft is the plaintext of a page that
+ships as a ciphertext. Sealed edits live in the tab until PUBLISH, and the
+editor says so.
+
+### What stays visible, on purpose
+
+The slug, the domain and the title. A sealed page keeps its URL and its place in
+the index, in LIST and on the map, marked SEALED — the site says *there is a
+page here and you cannot read it* rather than pretending it does not exist.
+Hiding a title while its slug sits in the address bar is theatre, and a hole in
+an index that counts itself is louder than a lock.
+
+Everything else is struck out: the counts, the blurb, the gaps, and every edge
+the map drew to it — an association is a fact about the page, so a sealed page
+is also removed from every other page's *Linked from*, and the whole agent
+surface (`llms.txt`, `llms-full.txt`, `/agent/*`) and every LEVIATHAN instrument
+skip it.
+
+### What it does not do
+
+The same arithmetic as the keyring. The ciphertext is public, so the page is
+only as private as the passphrase is unguessable; 250k iterations buys time
+against a guesser, not immunity, and nothing rate-limits someone who has already
+downloaded the file. Pick a phrase that survives a wordlist.
+
+**Sealing is not retroactive.** Git keeps every plaintext blob ever committed,
+so a page that has already been synced in the clear stays readable in this
+repository's history until that history is purged. Seal before the first sync,
+or purge, or accept that this closes the door in front of new readers only.
+
+The committed LEVIATHAN datasets are baked from the snapshot, so sealing a page
+leaves its words in `public/leviathan/*.json` until those are rebuilt. The
+sealer checks for exactly that and names the files; the fix is
+`npm run wiki-instruments && npm run leviathan`.
+
+### In CI
+
+The hourly wiki sync re-derives the snapshot from `caakehorn/wiki-brain`, which
+means it re-seals too, which means it needs the phrase: put it in a
+**`WIKI_LOCK_PASSPHRASE` repository secret** and the workflow passes it through.
+Without it that job fails once anything is sealed — deliberately. A sync that
+cannot seal is a sync that would publish those pages, and failing is the
+correct outcome.
+
 ## The type system
 
 Three voices, taken from the grounding references, plus supporting cast. All

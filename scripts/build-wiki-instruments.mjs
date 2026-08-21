@@ -42,9 +42,16 @@ if (!existsSync(join(IN, 'index.json'))) {
 const index = JSON.parse(readFileSync(join(IN, 'index.json'), 'utf8'))
 const files = readdirSync(join(IN, 'pages')).filter((f) => f.endsWith('.json'))
 
+// Sealed pages are dropped from both halves of the read. THE RULE says no
+// instrument makes a judgement; it does not say every instrument counts a page
+// it is not allowed to open, and a zero-word entry in THE MASS is a description
+// of a locked page all the same.
 /** @type {any[]} */
-const pages = files.map((f) => JSON.parse(readFileSync(join(IN, 'pages', f), 'utf8')))
+const pages = files
+  .map((f) => JSON.parse(readFileSync(join(IN, 'pages', f), 'utf8')))
+  .filter((p) => !p.locked)
 pages.sort((a, b) => a.slug.localeCompare(b.slug))
+index.pages = index.pages.filter((p) => !p.locked)
 
 const bySlug = new Map(pages.map((p) => [p.slug, p]))
 const indexBySlug = new Map(index.pages.map((p) => [p.slug, p]))

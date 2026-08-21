@@ -20,6 +20,7 @@
     "gallery": "node scripts/build-gallery.mjs",
     "gallery:capture": "node scripts/capture-gallery.mjs",
     "gate:verify": "node scripts/make-verify.mjs",
+    "wiki:lock": "node scripts/wiki-locks.mjs",
     "keyring": "node scripts/make-keyring.mjs"
   },
   "dependencies": {

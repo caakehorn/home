@@ -32,9 +32,14 @@ const BASE = (process.env.BASE_PATH ?? '/').replace(/\/*$/, '/')
 const url = (path) => `${SITE}${BASE}${path}`.replace(/([^:])\/{2,}/g, '$1/')
 
 const index = JSON.parse(readFileSync('public/wiki/index.json', 'utf8'))
+// A sealed page is a ciphertext in the snapshot and has no business in an
+// endpoint whose whole purpose is handing the corpus to a machine that will not
+// be typing a passphrase. It is dropped here rather than emitted empty: a
+// listing with a title, a URL and nothing to read is an invitation to ask why.
 const pages = readdirSync(PAGES)
   .filter((f) => f.endsWith('.json'))
   .map((f) => JSON.parse(readFileSync(join(PAGES, f), 'utf8')))
+  .filter((p) => !p.locked)
   .sort((a, b) => a.slug.localeCompare(b.slug))
 
 // ---------------------------------------------------------------------------

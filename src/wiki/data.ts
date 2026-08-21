@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import type { Blob } from '../gate/protocol'
+import { open, useLockEpoch } from './locks'
 
 export type IndexEntry = {
   slug: string
@@ -16,11 +18,21 @@ export type IndexEntry = {
   /** Map coordinates, baked at sync time. Roughly [-1, 1]. */
   x?: number
   y?: number
+  /** Sealed: this row is the whole entry, and the page is a ciphertext. */
+  locked?: boolean
 }
 
 export type WikiIndex = {
   generatedAt: string
-  counts: { pages: number; words: number; chartables: number; briefs?: number; edges?: number }
+  counts: {
+    pages: number
+    words: number
+    chartables: number
+    briefs?: number
+    edges?: number
+    /** How many of `pages` ship sealed. */
+    sealed?: number
+  }
   domains: { id: string; count: number }[]
   pages: IndexEntry[]
   /** Undirected links as index pairs into `pages`. */
@@ -43,6 +55,16 @@ export type WikiPage = {
   fmRaw?: string
   /** The leading `# Heading` line, stripped from `body` at sync time. */
   h1?: string | null
+  /**
+   * Sealed by `scripts/wiki-locks.mjs`. Everything but the slug, the domain and
+   * the title is inside `lock`, and the fields above are empty until `open()`
+   * in `./locks` puts them back — so a sealed page and an open one are the same
+   * shape, and nothing downstream has to learn a second one.
+   */
+  locked?: boolean
+  lock?: Blob
+  /** This page was sealed and this tab has opened it. */
+  open?: boolean
 }
 
 /**
@@ -120,19 +142,29 @@ export function useWikiIndex(): Async<WikiIndex> {
   return state
 }
 
+/**
+ * A page, decrypted if it is sealed and the tab holds the phrase.
+ *
+ * The cache above holds what was fetched — the ciphertext, for a sealed page —
+ * and the decrypt happens on the way out, on every read. That is what makes
+ * unlocking take effect on a page already on screen: the lock epoch changes,
+ * this runs again over the same cached fetch, and the second pass has a key.
+ */
 export function useWikiPage(slug: string | undefined): Async<WikiPage> {
   const [state, setState] = useState<Async<WikiPage>>({ data: null, error: null, loading: true })
+  const epoch = useLockEpoch()
   useEffect(() => {
     if (!slug) return
     let live = true
     setState({ data: null, error: null, loading: true })
     loadPage(slug)
+      .then(open)
       .then((data) => live && setState({ data, error: null, loading: false }))
       .catch((e: Error) => live && setState({ data: null, error: e.message, loading: false }))
     return () => {
       live = false
     }
-  }, [slug])
+  }, [slug, epoch])
   return state
 }
 

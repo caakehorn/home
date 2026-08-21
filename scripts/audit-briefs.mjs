@@ -21,6 +21,7 @@ let briefs = 0
 
 for (const file of readdirSync(PAGES).sort()) {
   const page = JSON.parse(readFileSync(join(PAGES, file), 'utf8'))
+  if (page.locked) continue // sealed: there is no body here to audit
   if (filter && !page.slug.includes(filter)) continue
 
   const found = segmentBriefs(page.body).filter((s) => s.kind === 'brief')

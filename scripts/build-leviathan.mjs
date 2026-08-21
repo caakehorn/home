@@ -21,9 +21,12 @@ import { mineDates, segmentBriefs } from '../src/wiki/brief.ts'
 const PAGES = 'public/wiki/pages'
 const OUT = 'public/leviathan'
 
+// Sealed pages are not counted. An instrument that reports a page with no
+// words, no links and no dates is publishing the shape of what it cannot read.
 const pages = readdirSync(PAGES)
   .filter((f) => f.endsWith('.json'))
   .map((f) => JSON.parse(readFileSync(join(PAGES, f), 'utf8')))
+  .filter((p) => !p.locked)
   .sort((a, b) => a.slug.localeCompare(b.slug))
 
 // ---------------------------------------------------------------------------

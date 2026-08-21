@@ -438,12 +438,12 @@ export const INSTRUMENTS: Instrument[] = [
     title: 'THE WEB',
     kana: '網',
     wing: 'WIKI',
-    corpus: '486 pages · 3,046 edges',
-    blurb: 'The entire second brain as one force graph — every page a node, every link a spring, nothing pinned.',
-    method: 'Distinct page→page pairs, laid out by force simulation. The layout is arbitrary; the edges are not.',
-    status: 'UNBUILT',
+    corpus: '486 pages · 3,536 links',
+    blurb: 'The entire second brain as one graph — every page a node, every link an edge, nothing pinned and nothing hidden.',
+    method:
+      'Every link one page makes to another, drawn as an edge. Node colour is the domain and node size is the word count, square-rooted so a 20,000-word page is not forty times the area of a 500-word one. The coordinates are the ones the map at /brain computed, not a simulation run here — the edges are the data and the layout is a drawing decision made once.',
+    status: 'LIVE',
     origin: 'js/wiki-modules.js · WIKI 02 · draw_web',
-    needs: 'nothing from outside — /brain already draws a map off the same edges. What is missing is this instrument’s version of it',
   },
   {
     id: 'claims',
@@ -903,5 +903,120 @@ export type LexiconSet = {
   top: LexiconWord[]
   topAll: LexiconWord[]
   months: { bin: string; count: number; shouts: number }[]
+}
+
+/**
+ * The ◈ WIKI wing, all of it, out of one file.
+ *
+ * Nine instruments read this. One dataset rather than nine because they are all
+ * over the same 486 pages, and nine files over one corpus is nine chances for
+ * two instruments to disagree about how many pages there are.
+ */
+export type WikiNode = {
+  slug: string
+  title: string
+  domain: string
+  words: number
+  out: number
+  in: number
+  x: number
+  y: number
+}
+
+export type WikiSet = {
+  generatedAt: string
+  source: string
+  counts: { pages: number; words: number; chartables: number; briefs: number; edges: number }
+  domains: { id: string; count: number }[]
+
+  web: { nodes: WikiNode[]; edges: [string, string][] }
+
+  health: {
+    pages: number
+    edges: number
+    reciprocal: number
+    orphans: { slug: string; title: string; domain: string; out: number }[]
+    outDegrees: { degree: number; count: number }[]
+    byDomain: { id: string; pages: number; out: number; in: number; orphans: number }[]
+  }
+
+  /** One sentence per link, in the wiki's own words. */
+  claims: { from: string; to: string; say: string }[]
+  claimsTotal: number
+
+  census: {
+    slug: string
+    title: string
+    from: string | null
+    to: string | null
+    words: number
+    knownFor: string | null
+    relationship: string | null
+  }[]
+
+  tags: { tag: string; count: number; pages: { slug: string; title: string; domain: string }[] }[]
+  tagsTotal: number
+
+  evidence: {
+    references: number
+    roots: { name: string; count: number }[]
+    collections: { name: string; count: number }[]
+    extensions: { name: string; count: number }[]
+    pages: {
+      slug: string
+      title: string
+      domain: string
+      words: number
+      sources: number
+      roots: { root: string; count: number }[]
+    }[]
+    uncited: number
+  }
+
+  attention: {
+    slug: string
+    title: string
+    domain: string
+    words: number
+    named: number
+    backlinks: number
+  }[]
+
+  schema: {
+    fields: { field: string; count: number; share: number }[]
+    byDomain: { id: string; pages: number; fields: number; per: number }[]
+    types: { type: string; count: number }[]
+  }
+
+  echo: {
+    measured: number
+    total: number
+    identical: number
+    byOverlap: EchoPair[]
+    byShared: EchoPair[]
+  }
+}
+
+export type EchoPair = {
+  a: string
+  aTitle: string
+  b: string
+  bTitle: string
+  shared: number
+  overlap: number
+  sameDomain: boolean
+}
+
+/** The nine domains, in the house's own shorthand. */
+export const DOMAIN_KANA: Record<string, string> = {
+  people: '人',
+  interests: '趣味',
+  mind: '心',
+  timeline: '年表',
+  self: '自己',
+  work: '仕事',
+  places: '場所',
+  health: '健康',
+  legal: '法',
 }
 

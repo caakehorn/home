@@ -438,12 +438,12 @@ export const INSTRUMENTS: Instrument[] = [
     title: 'THE WEB',
     kana: '網',
     wing: 'WIKI',
-    corpus: '486 pages · 3,046 edges',
-    blurb: 'The entire second brain as one force graph — every page a node, every link a spring, nothing pinned.',
-    method: 'Distinct page→page pairs, laid out by force simulation. The layout is arbitrary; the edges are not.',
-    status: 'UNBUILT',
+    corpus: '486 pages · 3,536 links',
+    blurb: 'The entire second brain as one graph — every page a node, every link an edge, nothing pinned and nothing hidden.',
+    method:
+      'Every link one page makes to another, drawn as an edge. Node colour is the domain and node size is the word count, square-rooted so a 20,000-word page is not forty times the area of a 500-word one. The coordinates are the ones the map at /brain computed, not a simulation run here — the edges are the data and the layout is a drawing decision made once.',
+    status: 'LIVE',
     origin: 'js/wiki-modules.js · WIKI 02 · draw_web',
-    needs: 'nothing from outside — /brain already draws a map off the same edges. What is missing is this instrument’s version of it',
   },
   {
     id: 'claims',
@@ -451,12 +451,13 @@ export const INSTRUMENTS: Instrument[] = [
     title: 'THE CLAIMS',
     kana: '主張',
     wing: 'WIKI',
-    corpus: '3,046 typed edges',
-    blurb: 'The typed edges read back as a feed of assertions — this page says that about that one, in the wiki’s own words.',
-    method: 'Every edge printed with its type and its two endpoints. No edge is ranked.',
-    status: 'UNBUILT',
-    origin: 'js/wiki-modules.js · WIKI 03 · draw_claims',
-    needs: 'nothing from outside — the edges ship in the snapshot. What is missing is the instrument',
+    corpus: '689 sentences that name another page',
+    blurb: 'The links read back as what they are — one page saying something about another, printed whole, in the wiki’s own words.',
+    method:
+      'Every sentence of prose that names another page, printed whole with both ends linked. Table rows, headings and lists of bare links are not sentences and are not here. Nothing is ranked — the feed is in page order, and the only filters are the ones the reader turns on.',
+    status: 'LIVE',
+    origin:
+      'js/wiki-modules.js · WIKI 03 · draw_claims — minus the edge types, which this snapshot does not carry and which are not invented here',
   },
   {
     id: 'census',
@@ -464,12 +465,12 @@ export const INSTRUMENTS: Instrument[] = [
     title: 'THE CENSUS',
     kana: '戸籍',
     wing: 'WIKI',
-    corpus: '165 documented people',
-    blurb: 'Every documented human as a lifeline, laid on one time axis. Click one and the page opens.',
-    method: 'Dates of birth and death where the page states them, drawn as a span. Where it does not, nothing is drawn.',
-    status: 'UNBUILT',
+    corpus: '117 spans of 165 people pages',
+    blurb: 'Every documented person the wiki gives a span to, as a line on one axis — and a count of the 48 it does not.',
+    method:
+      'The date range each page gives for its own record — date_range_start to date_range_end — drawn as a line on one axis. It is the span of the documentation, not a lifetime. A page with no dates gets no line rather than an invented one, and an open range is drawn open rather than capped at a guess.',
+    status: 'LIVE',
     origin: 'js/wiki-modules.js · WIKI 04 · draw_census',
-    needs: 'nothing from outside — the people pages ship at /brain, and /lineage already draws 515 of them on a real axis',
   },
   {
     id: 'strata',
@@ -503,12 +504,13 @@ export const INSTRUMENTS: Instrument[] = [
     title: 'THE TAGS',
     kana: '標識',
     wing: 'WIKI',
-    corpus: 'every tag on every page',
-    blurb: 'Themes as gravity. Each tag pulls the pages that carry it, and the pages that carry two get torn between them.',
-    method: 'Tag counts per page, arranged by attraction. The count is the data; the arrangement is the drawing.',
-    status: 'UNBUILT',
-    origin: 'js/wiki-modules.js · WIKI 07 · draw_tagmap',
-    needs: 'nothing from outside — tags ship in the snapshot. What is missing is the instrument',
+    corpus: '25 tags · 456 tagged pages',
+    blurb: 'Every theme the wiki files under, and what sits beneath it. Hold two and the answer is the pages filed under both.',
+    method:
+      'Every distinct tag in the corpus, counted, with the pages under it and the domains they fall across. Hold two tags and the pages carrying both are counted. The brackets a YAML array leaves in the raw front-matter are stripped, which is a parse; nothing is dropped for what it says.',
+    status: 'LIVE',
+    origin:
+      'js/wiki-modules.js · WIKI 07 · draw_tagmap — the gravity becomes an intersection, because a count is legible and a physics simulation of a count is a mood',
   },
   {
     id: 'wiki-mass',
@@ -529,13 +531,14 @@ export const INSTRUMENTS: Instrument[] = [
     title: 'THE HEALTH',
     kana: '健全',
     wing: 'WIKI',
-    corpus: '486 pages · 3,046 edges',
+    corpus: '486 pages · 3,536 links · 10 orphans',
     blurb:
-      'Graph forensics on the brain itself: reciprocity, the edge-type spectrum, and a ring of every page nothing else links to.',
-    method: 'Edge counts in both directions per page; an orphan is a page with no inbound prose link, which is a count of zero, not an opinion.',
-    status: 'UNBUILT',
-    origin: 'js/wiki-modules.js · WIKI 09 · draw_lattice',
-    needs: 'nothing from outside — /brain’s gaps panel already computes part of this. What is missing is the rest of it',
+      'Forensics on the graph rather than on what it says: which links go both ways, how the linking is spread, and the ring of pages nothing names.',
+    method:
+      'Link counts in both directions: how many pages each page names, how many name it, how many links have their reverse in the corpus, and which pages nothing names. An orphan is an inbound count of zero — a count, not a symptom. Nothing here is scored or thresholded.',
+    status: 'LIVE',
+    origin:
+      'js/wiki-modules.js · WIKI 09 · draw_lattice — the name is kept and the diagnosis is not: nothing here knows what a healthy wiki looks like',
   },
   {
     id: 'evidence',
@@ -903,5 +906,120 @@ export type LexiconSet = {
   top: LexiconWord[]
   topAll: LexiconWord[]
   months: { bin: string; count: number; shouts: number }[]
+}
+
+/**
+ * The ◈ WIKI wing, all of it, out of one file.
+ *
+ * Nine instruments read this. One dataset rather than nine because they are all
+ * over the same 486 pages, and nine files over one corpus is nine chances for
+ * two instruments to disagree about how many pages there are.
+ */
+export type WikiNode = {
+  slug: string
+  title: string
+  domain: string
+  words: number
+  out: number
+  in: number
+  x: number
+  y: number
+}
+
+export type WikiSet = {
+  generatedAt: string
+  source: string
+  counts: { pages: number; words: number; chartables: number; briefs: number; edges: number }
+  domains: { id: string; count: number }[]
+
+  web: { nodes: WikiNode[]; edges: [string, string][] }
+
+  health: {
+    pages: number
+    edges: number
+    reciprocal: number
+    orphans: { slug: string; title: string; domain: string; out: number }[]
+    outDegrees: { degree: number; count: number }[]
+    byDomain: { id: string; pages: number; out: number; in: number; orphans: number }[]
+  }
+
+  /** One sentence per link, in the wiki's own words. */
+  claims: { from: string; to: string; say: string }[]
+  claimsTotal: number
+
+  census: {
+    slug: string
+    title: string
+    from: string | null
+    to: string | null
+    words: number
+    knownFor: string | null
+    relationship: string | null
+  }[]
+
+  tags: { tag: string; count: number; pages: { slug: string; title: string; domain: string }[] }[]
+  tagsTotal: number
+
+  evidence: {
+    references: number
+    roots: { name: string; count: number }[]
+    collections: { name: string; count: number }[]
+    extensions: { name: string; count: number }[]
+    pages: {
+      slug: string
+      title: string
+      domain: string
+      words: number
+      sources: number
+      roots: { root: string; count: number }[]
+    }[]
+    uncited: number
+  }
+
+  attention: {
+    slug: string
+    title: string
+    domain: string
+    words: number
+    named: number
+    backlinks: number
+  }[]
+
+  schema: {
+    fields: { field: string; count: number; share: number }[]
+    byDomain: { id: string; pages: number; fields: number; per: number }[]
+    types: { type: string; count: number }[]
+  }
+
+  echo: {
+    measured: number
+    total: number
+    identical: number
+    byOverlap: EchoPair[]
+    byShared: EchoPair[]
+  }
+}
+
+export type EchoPair = {
+  a: string
+  aTitle: string
+  b: string
+  bTitle: string
+  shared: number
+  overlap: number
+  sameDomain: boolean
+}
+
+/** The nine domains, in the house's own shorthand. */
+export const DOMAIN_KANA: Record<string, string> = {
+  people: '人',
+  interests: '趣味',
+  mind: '心',
+  timeline: '年表',
+  self: '自己',
+  work: '仕事',
+  places: '場所',
+  health: '健康',
+  legal: '法',
 }
 

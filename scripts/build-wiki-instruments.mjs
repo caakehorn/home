@@ -127,33 +127,68 @@ const health = {
 // types, so rather than invent them the instrument shows the thing the type was
 // standing in for: the sentence the link sits inside, in the wiki's own words.
 
-const SENTENCE = /[^.!?\n]*[.!?]?/g
+/**
+ * A prose block: not a table, not a heading, not a bullet list of bare links.
+ *
+ * The old console showed the *type* on an edge; this snapshot does not carry
+ * types, so the instrument shows the thing the type stood in for — the sentence
+ * the link sits inside, in the wiki's own words. That only works if the
+ * sentence is a whole sentence, and these bodies are **hard-wrapped**: a
+ * newline lands mid-clause, so splitting on newlines cuts sentences in half.
+ * Paragraphs are split on blank lines and unwrapped first; the first cut of
+ * this did not, and produced 3,300 fragments ending mid-word.
+ *
+ * The filter drops rows of a table and keeps prose. It does not drop prose for
+ * what the prose says.
+ */
+const isProse = (block) => {
+  const t = block.trim()
+  if (t.length < 60) return false
+  const first = t.split('\n')[0].trim()
+  if (/^[|#>]/.test(first)) return false
+  if (/^[-*+]\s/.test(first)) return false
+  if (/^\d+\.\s/.test(first)) return false
+  if (t.includes('|')) return false
+  const linked = (t.match(/\[\[wiki\/[^\]]*\]\]/g) ?? []).join('').length
+  return linked / t.length < 0.4
+}
+
+const plain = (text) =>
+  text
+    .replace(/\[\[wiki\/([^\]|]+)(\|[^\]]*)?\]\]/g, (_, slug) => titleOf(slug))
+    .replace(/[*_`]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
 
 const claims = []
 for (const page of pages) {
   const body = String(page.body ?? '')
   if (!body) continue
-  for (const target of links.get(page.slug)) {
-    // Find where the page names the target, and take the sentence around it.
-    const needle = new RegExp(`\\[\\[wiki/${target.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[^\\]]*\\]\\]`)
-    const at = body.search(needle)
-    if (at < 0) continue
-    let start = body.lastIndexOf('.', at)
-    const nl = body.lastIndexOf('\n', at)
-    start = Math.max(start, nl) + 1
-    let end = body.slice(at).search(/[.!?\n]/)
-    end = end < 0 ? body.length : at + end + 1
-    const say = body
-      .slice(start, end)
-      .replace(/\[\[wiki\/([^\]|]+)(\|[^\]]*)?\]\]/g, (_, slug) => titleOf(slug))
-      .replace(/[*_`>#]/g, '')
-      .replace(/\s+/g, ' ')
-      .trim()
-    if (say.length < 24 || say.length > 400) continue
-    claims.push({ from: page.slug, to: target, say })
+  const seen = new Set()
+
+  for (const block of body.split(/\n\s*\n/)) {
+    if (!isProse(block)) continue
+    // Unwrap: the newlines inside a paragraph are typography, not structure.
+    const paragraph = block.replace(/\s*\n\s*/g, ' ').trim()
+
+    for (const sentence of paragraph.split(/(?<=[.!?])\s+(?=[A-Z"'(\[])/)) {
+      const named = [...sentence.matchAll(/\[\[wiki\/([^\]|]+)(?:\|[^\]]*)?\]\]/g)]
+        .map((m) => m[1])
+        .filter((slug) => links.get(page.slug).has(slug))
+      if (!named.length) continue
+      const say = plain(sentence)
+      // A claim that does not end in a full stop is a fragment, and a fragment
+      // attributed to somebody's wiki is a misquotation.
+      if (say.length < 50 || say.length > 340 || !/[.!?]$/.test(say)) continue
+      for (const target of new Set(named)) {
+        const key = `${page.slug}\u0000${target}`
+        if (seen.has(key)) continue
+        seen.add(key)
+        claims.push({ from: page.slug, to: target, say })
+      }
+    }
   }
 }
-void SENTENCE
 
 // ---------------------------------------------------------------------------
 // IV · THE CENSUS — every documented person on one axis
@@ -212,27 +247,44 @@ const tags = [...tagMap.values()]
 // directory they point into is a count of paths, which is a fact about the
 // wiki rather than about the material.
 
-const KIND = [
-  [/message-csv|imessage|messages?\b/i, 'MESSAGES'],
-  [/facebook/i, 'FACEBOOK'],
-  [/chatgpt|claude|\bai\b|llm/i, 'AI CHATS'],
-  [/location|places|maps?\b/i, 'LOCATION'],
-  [/gedcom|genealog|ancestry/i, 'GENEALOGY'],
-  [/\.csv$|\.json$|export/i, 'PLATFORM EXPORTS'],
-  [/\.pdf$|\.docx?$|\.txt$|document/i, 'DOCUMENTS'],
-]
+/**
+ * A citation is sorted by **the directory it points into and the file type it
+ * names**, both of which are facts about the path. The first cut of this used a
+ * table of regexes mapping paths onto categories like "AI CHATS" — which is a
+ * hand-made semantic guess about somebody else's filing, exactly the kind of
+ * mapping THE RULE is written against, and it dumped 546 of 1,170 references
+ * into OTHER besides. Reading the path is both more honest and more accurate.
+ */
+const rootOf = (path) => {
+  const parts = String(path).split('/').filter(Boolean)
+  return parts.length >= 2 ? `${parts[0]}/${parts[1]}` : (parts[0] ?? 'unfiled')
+}
 
-const kindOf = (path) => KIND.find(([re]) => re.test(path))?.[1] ?? 'OTHER'
+const collectionOf = (path) => {
+  const parts = String(path).split('/').filter(Boolean)
+  return parts.length >= 3 ? parts.slice(0, 3).join('/') : rootOf(path)
+}
 
-const evidenceKinds = new Map()
+const extOf = (path) => {
+  const match = String(path).match(/\.([A-Za-z0-9]{1,5})(?:[)\s]|$)/)
+  return match ? match[1].toLowerCase() : 'none'
+}
+
+const tally = (map, key) => map.set(key, (map.get(key) ?? 0) + 1)
+
+const roots = new Map()
+const collections = new Map()
+const extensions = new Map()
 const cited = []
+
 for (const page of pages) {
   const sources = page.lists?.sources ?? []
-  const kinds = new Map()
+  const mine = new Map()
   for (const source of sources) {
-    const kind = kindOf(String(source))
-    kinds.set(kind, (kinds.get(kind) ?? 0) + 1)
-    evidenceKinds.set(kind, (evidenceKinds.get(kind) ?? 0) + 1)
+    tally(roots, rootOf(source))
+    tally(collections, collectionOf(source))
+    tally(extensions, extOf(source))
+    tally(mine, rootOf(source))
   }
   cited.push({
     slug: page.slug,
@@ -240,12 +292,18 @@ for (const page of pages) {
     domain: page.domain,
     words: page.words ?? 0,
     sources: sources.length,
-    kinds: [...kinds].map(([kind, count]) => ({ kind, count })),
+    roots: [...mine].map(([root, count]) => ({ root, count })),
   })
 }
 
+const rank = (map) =>
+  [...map].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([name, count]) => ({ name, count }))
+
 const evidence = {
-  kinds: [...evidenceKinds].sort((a, b) => b[1] - a[1]).map(([kind, count]) => ({ kind, count })),
+  references: [...roots.values()].reduce((n, v) => n + v, 0),
+  roots: rank(roots),
+  collections: rank(collections).slice(0, 40),
+  extensions: rank(extensions),
   pages: cited.sort((a, b) => b.sources - a.sources || a.slug.localeCompare(b.slug)),
   uncited: cited.filter((p) => p.sources === 0).length,
 }
@@ -350,10 +408,30 @@ for (let i = 0; i < vocab.length; i++) {
     })
   }
 }
-echoPairs.sort((x, y) => y.overlap - x.overlap)
+/**
+ * Two rankings, because they answer different questions and the first one's
+ * answer is surprising.
+ *
+ * By **overlap** the top of the list is a wall of 1.000s between one-line
+ * concert-record stubs, which share a vocabulary because they share a template.
+ * That is a true fact about this corpus and it is left at the top rather than
+ * thresholded away — the wiki does repeat itself most in its own boilerplate,
+ * and an instrument that quietly filtered that out would be reporting a
+ * prettier corpus than the one that exists.
+ *
+ * By **shared words** the same measurement surfaces the long pages that
+ * genuinely cover the same ground. Neither ranking is filtered; they are the
+ * same pairs sorted by the two numbers already computed for each.
+ */
+const byOverlap = [...echoPairs].sort((x, y) => y.overlap - x.overlap || y.shared - x.shared)
+const byShared = [...echoPairs].sort((x, y) => y.shared - x.shared || y.overlap - x.overlap)
 const echo = {
   measured: vocab.filter((v) => v.set.size >= 40).length,
-  pairs: echoPairs.slice(0, 300),
+  total: echoPairs.length,
+  /** Pairs where the two vocabularies are identical — the template signature. */
+  identical: echoPairs.filter((p) => p.overlap === 1).length,
+  byOverlap: byOverlap.slice(0, 200),
+  byShared: byShared.slice(0, 200),
 }
 
 // ---------------------------------------------------------------------------

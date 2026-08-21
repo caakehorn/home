@@ -7,13 +7,18 @@ import { INSTRUMENTS, WINGS, countBy, instrumentById, instrumentsIn } from '../l
 import type { Instrument, InstrumentStatus } from '../leviathan/core'
 import { Accretion } from '../leviathan/instruments/Accretion'
 import { Chronology } from '../leviathan/instruments/Chronology'
+import { Census } from '../leviathan/instruments/Census'
+import { Claims } from '../leviathan/instruments/Claims'
 import { Clock } from '../leviathan/instruments/Clock'
+import { Health } from '../leviathan/instruments/Health'
 import { Lexicon } from '../leviathan/instruments/Lexicon'
 import { Mass } from '../leviathan/instruments/Mass'
 import { Pen } from '../leviathan/instruments/Pen'
 import { Pulse } from '../leviathan/instruments/Pulse'
 import { Rings } from '../leviathan/instruments/Rings'
 import { Silence } from '../leviathan/instruments/Silence'
+import { Tags } from '../leviathan/instruments/Tags'
+import { Web } from '../leviathan/instruments/Web'
 import './leviathan.css'
 
 /** The rack knows which component an id belongs to; the registry stays data. */
@@ -27,6 +32,11 @@ const BUILT: Record<string, typeof Mass> = {
   silence: Silence,
   rings: Rings,
   lexicon: Lexicon,
+  web: Web,
+  claims: Claims,
+  census: Census,
+  tagmap: Tags,
+  lattice: Health,
 }
 
 /**

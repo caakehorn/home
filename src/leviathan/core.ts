@@ -465,12 +465,12 @@ export const INSTRUMENTS: Instrument[] = [
     title: 'THE CENSUS',
     kana: '戸籍',
     wing: 'WIKI',
-    corpus: '165 documented people',
-    blurb: 'Every documented human as a lifeline, laid on one time axis. Click one and the page opens.',
-    method: 'Dates of birth and death where the page states them, drawn as a span. Where it does not, nothing is drawn.',
-    status: 'UNBUILT',
+    corpus: '117 spans of 165 people pages',
+    blurb: 'Every documented person the wiki gives a span to, as a line on one axis — and a count of the 48 it does not.',
+    method:
+      'The date range each page gives for its own record — date_range_start to date_range_end — drawn as a line on one axis. It is the span of the documentation, not a lifetime. A page with no dates gets no line rather than an invented one, and an open range is drawn open rather than capped at a guess.',
+    status: 'LIVE',
     origin: 'js/wiki-modules.js · WIKI 04 · draw_census',
-    needs: 'nothing from outside — the people pages ship at /brain, and /lineage already draws 515 of them on a real axis',
   },
   {
     id: 'strata',

@@ -332,3 +332,89 @@
 .pt-scroll--tall {
   max-height: 44rem;
 }
+
+/* ==========================================================================
+   ◈ WIKI IV · THE CENSUS — lifelines on one axis
+   ========================================================================== */
+
+.cen__axis {
+  position: relative;
+  height: 1.1rem;
+  margin-bottom: 0.2rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--text-dim) 35%, transparent);
+}
+
+.cen__tick {
+  position: absolute;
+  transform: translateX(-50%);
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+
+.cen__row {
+  display: grid;
+  grid-template-columns: 10rem 1fr 4.6rem;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cen__name {
+  font-family: var(--f-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cen__name:hover,
+.cen__name:focus-visible {
+  color: var(--n1);
+  text-decoration: underline;
+}
+
+.cen__track {
+  position: relative;
+  display: block;
+  block-size: 0.72rem;
+  background: color-mix(in srgb, var(--text-dim) 12%, transparent);
+}
+
+.cen__grid {
+  position: absolute;
+  inset-block: 0;
+  width: 1px;
+  background: color-mix(in srgb, var(--text-dim) 26%, transparent);
+}
+
+.cen__life {
+  position: absolute;
+  inset-block: 0.1rem;
+  background: var(--n1);
+  min-width: 2px;
+}
+
+/* Open-ended: hatched and uncapped, so it does not read as a span that ended. */
+.cen__life--open {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--n1) 0 4px,
+    transparent 4px 7px
+  );
+}
+
+.cen__years {
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.05em;
+  text-align: right;
+  color: var(--text-dim);
+}
+
+@media (max-width: 620px) {
+  .cen__row { grid-template-columns: 6.5rem 1fr 3.8rem; }
+}

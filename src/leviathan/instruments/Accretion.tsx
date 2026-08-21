@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Frame } from '../Frame'
-import { useSet, type Instrument } from '../core'
+import { useSet, type AccretionSet as Data, type Instrument } from '../core'
 import '../accretion.css'
 
 /**
@@ -30,27 +30,9 @@ import '../accretion.css'
  * moving average would file down into a gentle slope that never happened.
  */
 
-type Point = {
-  sha: string
-  t: number
-  subject: string
-  pages: number
-  bytes: number
-  links: number
-  edges: number
-  d: { pages: number; bytes: number; links: number; edges: number } | null
-}
-
-type Series = { id: keyof Pick<Point, 'pages' | 'bytes' | 'links' | 'edges'>; label: string; unit: string; note: string }
-
-type Data = {
-  built: string
-  branch: string
-  span: { from: number; to: number; days: number }
-  commits: number
-  series: Series[]
-  points: Point[]
-}
+// The dataset's shape lives in core.ts — ◈ WIKI XII · THE GENESIS reads the same
+// file, and two private copies of one shape is how two rooms start disagreeing
+// about what a commit is.
 
 const W = 1000
 const LANE_H = 116

@@ -27,3 +27,6 @@ public/agent/
 
 # THE GALLERY capture rig caches the CDN assets the old pages pull
 .gallery-vendor/
+
+# Scratch servers and capture scripts used while checking a build locally
+*.tmp.mjs

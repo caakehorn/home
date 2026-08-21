@@ -8,6 +8,7 @@
   gap: 0.5rem 0.7rem;
   flex: none;
   flex-wrap: wrap;
+  min-width: 0;
 }
 
 /* ---- collapse button ---------------------------------------------------- */
@@ -46,17 +47,33 @@
   align-items: center;
   gap: 0.5rem 0.7rem;
   flex-wrap: wrap;
+  min-width: 0;
   max-height: 10rem;
   opacity: 1;
   overflow: hidden;
-  transition: max-height 240ms ease, opacity 240ms ease, margin 240ms ease, padding 240ms ease;
+  transition:
+    max-height 240ms ease,
+    max-width 240ms ease,
+    flex-basis 240ms ease,
+    opacity 180ms ease,
+    margin 240ms ease,
+    padding 240ms ease;
 }
 
+/*
+ * max-height alone was not enough: flex items keep their intrinsic width even
+ * when their height is zero. On a crowded nav that meant the supposedly
+ * collapsed controls could still force the header onto another row. Collapse
+ * both axes so the nav actually gives the space back.
+ */
 .hctl__panel--collapsed {
+  flex-basis: 0;
+  max-width: 0;
   max-height: 0;
   opacity: 0;
   margin: 0;
   padding: 0;
+  pointer-events: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -68,6 +85,15 @@
 @media (max-width: 640px) {
   .hctl__collapse {
     order: 1;
+  }
+
+  .hctl__panel {
+    order: 2;
+    width: 100%;
+  }
+
+  .hctl__panel--collapsed {
+    width: 0;
   }
 }
 

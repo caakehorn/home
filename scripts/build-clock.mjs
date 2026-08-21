@@ -103,7 +103,25 @@ for (const file of months) {
   }
 }
 
-marks.sort((a, b) => a.day - b.day || a.minute - b.minute)
+// NOT SORTED, ON PURPOSE.
+//
+// The months are read in bin order and each month's rows are already in the
+// order they were sent, so the array is the record's own order — which makes
+// **the index of a mark, plus one, the global 1-based line number** THE
+// TRANSCRIPT uses and the old repo's `#L1234` anchors pointed at. XIV · THE
+// SILENCE cites gaps by that number, so the identity has to be a guarantee
+// rather than a coincidence: re-ordering here would silently re-point every
+// citation at the wrong message. Hence the check rather than a sort — if the
+// record is not in order, that is a fact about the export worth stopping for.
+for (let i = 1; i < marks.length; i++) {
+  const a = marks[i - 1]
+  const b = marks[i]
+  if (b.day < a.day || (b.day === a.day && b.minute < a.minute)) {
+    console.error(`Message ${i + 1} is earlier than the one before it.`)
+    console.error('The record is not in the order it was sent; line numbers cannot be trusted.')
+    process.exit(1)
+  }
+}
 
 // The spine already knows how many messages there are. If this pass disagrees
 // with it, the split and this instrument are reading different records and the
@@ -173,7 +191,10 @@ const set = {
     fromDay: monthStartDay(gap.from) - first,
     toDay: monthEndDay(gap.to) - first,
   })),
-  /** Delta-encoded `day * 2880 + minute * 2 + dir`. See the note at the top. */
+  /**
+   * Delta-encoded `day * 2880 + minute * 2 + dir`, in the order the messages
+   * were sent — so mark `i` is transcript line `i + 1`. See the note at the top.
+   */
   marks: packed,
 }
 

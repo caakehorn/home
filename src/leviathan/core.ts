@@ -546,13 +546,13 @@ export const INSTRUMENTS: Instrument[] = [
     title: 'THE EVIDENCE',
     kana: '証拠',
     wing: 'WIKI',
-    corpus: 'every page, against its sources',
+    corpus: '1,170 references · 347 citing pages',
     blurb:
-      'Pages against the raw material behind them — messages, Facebook, AI chats, location, documents, platform exports, genealogy. What is cited, and what is only asserted.',
-    method: 'Source references counted per page by kind. A page with none is drawn with none.',
-    status: 'SEALED',
+      'What the wiki cites, and where it points. The raw files are not vendored here — the citations are, and counting them is the instrument.',
+    method:
+      'Every source reference on every page, sorted by the directory its path names and the file type it ends in — both facts about the string, so nothing is classified by guessing what a file contains and nothing lands in an OTHER bucket. A count of citations is not a measure of rigour, and no page is ranked or flagged for having few.',
+    status: 'LIVE',
     origin: 'js/wiki-modules.js · WIKI 10 · draw_evidence',
-    needs: 'the raw/ tree the citations point into, which lives in wiki-brain and is not vendored here',
   },
   {
     id: 'chronicle',

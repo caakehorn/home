@@ -18,13 +18,13 @@ export function Nav() {
         aria-label={headerCollapsed ? 'Expand header' : 'Collapse header'}
         title={headerCollapsed ? 'Expand header' : 'Collapse header'}
       >
-        <Logo size="var(--step-1)" inline />
+        <Logo size="var(--nav-mark-size)" inline />
         <span className="nav__mark-kana jp" aria-hidden="true">
           薬窟
         </span>
       </button>
 
-      <ul className="nav__links">
+      <ul className="nav__links" aria-hidden={headerCollapsed}>
         {SECTIONS.map((section) => (
           <li key={section.slug}>
             <NavLink

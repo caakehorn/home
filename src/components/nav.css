@@ -1,4 +1,12 @@
 .nav {
+  /* The three numbers the collapse animates. Held as custom properties so the
+     collapsed rule restates values rather than re-declaring whole properties,
+     and the wordmark can be sized from CSS even though `Logo` writes its
+     font-size as an inline style. */
+  --nav-mark-size: var(--step-1);
+  --nav-pad-block: 0.5rem;
+  --nav-underline: 6px;
+
   position: sticky;
   /* Parks under the top crawl. `top: 0` would stick it beneath the bar, which
      is fixed and outranks it, and the links would disappear as you scrolled. */
@@ -8,12 +16,12 @@
   align-items: center;
   gap: 0.9rem;
   flex-wrap: wrap;
-  padding: 0.5rem clamp(0.6rem, 2vw, 1.4rem);
+  padding: var(--nav-pad-block) clamp(0.6rem, 2vw, 1.4rem);
   background: color-mix(in srgb, var(--void) 86%, transparent);
   backdrop-filter: blur(10px) saturate(1.4);
   border-bottom: var(--rule) solid var(--edge);
-  box-shadow: 0 6px 0 color-mix(in srgb, var(--n1) 45%, transparent);
-  transition: padding 240ms ease, gap 240ms ease;
+  box-shadow: 0 var(--nav-underline) 0 color-mix(in srgb, var(--n1) 45%, transparent);
+  transition: padding 240ms ease, gap 240ms ease, box-shadow 240ms ease;
 }
 
 .nav__mark {
@@ -27,6 +35,13 @@
   color: inherit;
   cursor: pointer;
   text-decoration: none;
+}
+
+/* The wordmark shrinks with the bar, so the collapsed strip is the height of
+   the logo and nothing else. `font-size` is the only thing worth animating:
+   every measurement inside `.logo` is em-derived from it. */
+.nav__mark .logo {
+  transition: font-size 240ms ease;
 }
 
 .nav__mark:focus-visible {
@@ -53,7 +68,7 @@
   margin-inline: auto;
   padding: 0;
   list-style: none;
-  transition: opacity 200ms ease, max-height 240ms ease;
+  transition: opacity 200ms ease, max-height 240ms ease, visibility 0s;
 }
 
 .nav__link {
@@ -94,45 +109,83 @@
   color: var(--on-glow);
 }
 
-/* Collapsed means literally the logo and nothing else. The logo is the
-   re-open affordance, so there is no second button left hanging in the bar. */
+/* Collapsed means literally the logo and nothing else: the links go, the dials
+   go, the kana goes, and what is left is a strip the height of a shrunken
+   wordmark. The logo is the re-open affordance, so there is no second button
+   left hanging in the bar.
+
+   `flex-wrap: nowrap` matters as much as the hiding does. The zero-width items
+   below still count as flex items, and on a wrapping row a stray one could
+   claim a second line — an empty second row is exactly the "it collapsed but
+   the bar is still fat" symptom this is meant to remove. */
 .nav--collapsed {
+  --nav-mark-size: var(--step-0);
+  --nav-pad-block: 0.25rem;
+  --nav-underline: 3px;
+
   justify-content: flex-start;
   gap: 0;
+  flex-wrap: nowrap;
 }
 
+/* Centred rather than baselined: with the kana squeezed to nothing there is no
+   second baseline left to align to, and `min-height` keeps the toggle a real
+   tap target even though the strip itself is barely taller than the wordmark. */
+.nav--collapsed .nav__mark {
+  align-items: center;
+  min-height: 1.75rem;
+}
+
+/*
+ * This is what kept the collapsed bar fat. Squeezing the kana to `width: 0`
+ * without stopping it wrapping left two glyphs stacked in a zero-width column:
+ * an invisible 39px-tall flex item, taller than the wordmark beside it, setting
+ * the height of the whole bar. `nowrap` stops the stacking and `max-height`
+ * takes the last of the height away, leaving the width transition to run.
+ */
 .nav--collapsed .nav__mark-kana {
   width: 0;
-  opacity: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.nav--collapsed .nav__links {
-  flex: 0 0 0;
-  width: 0;
   max-height: 0;
-  margin: 0;
-  overflow: hidden;
+  white-space: nowrap;
   opacity: 0;
+  overflow: hidden;
   pointer-events: none;
 }
 
+/*
+ * `opacity: 0` and `pointer-events: none` take these off the screen and away
+ * from the mouse, but a keyboard still walks straight into them: every link
+ * and every dial stayed in the tab order, focusable and invisible. `visibility`
+ * is the property that removes an element from the tab order and the
+ * accessibility tree both, and it is delayed by the length of the fade so the
+ * collapse still animates instead of snapping.
+ */
+.nav--collapsed .nav__links,
 .nav--collapsed .hctl {
   flex: 0 0 0;
   width: 0;
   max-width: 0;
   max-height: 0;
   margin: 0;
+  padding: 0;
   overflow: hidden;
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
+  transition: opacity 200ms ease, max-height 240ms ease, visibility 0s linear 240ms;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .nav,
   .nav__links,
-  .nav__mark-kana {
+  .nav__mark-kana,
+  .nav__mark .logo {
+    transition: none;
+  }
+
+  /* No fade to wait for, so the hiding may as well be immediate. */
+  .nav--collapsed .nav__links,
+  .nav--collapsed .hctl {
     transition: none;
   }
 }

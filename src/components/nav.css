@@ -13,14 +13,25 @@
   backdrop-filter: blur(10px) saturate(1.4);
   border-bottom: var(--rule) solid var(--edge);
   box-shadow: 0 6px 0 color-mix(in srgb, var(--n1) 45%, transparent);
+  transition: padding 240ms ease, gap 240ms ease;
 }
 
 .nav__mark {
   display: flex;
   align-items: baseline;
   gap: 0.45rem;
-  text-decoration: none;
   flex: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.nav__mark:focus-visible {
+  outline: 2px solid var(--n3);
+  outline-offset: 4px;
 }
 
 .nav__mark-kana {
@@ -41,6 +52,7 @@
   margin-inline: auto;
   padding: 0;
   list-style: none;
+  transition: opacity 200ms ease, max-height 240ms ease;
 }
 
 .nav__link {
@@ -79,6 +91,41 @@
 
 .nav__link--on .jp {
   color: var(--on-glow);
+}
+
+/* Collapsed means literally the logo and nothing else. The logo is the
+   re-open affordance, so there is no second button left hanging in the bar. */
+.nav--collapsed {
+  justify-content: flex-start;
+  gap: 0;
+}
+
+.nav--collapsed .nav__links {
+  flex: 0 0 0;
+  width: 0;
+  max-height: 0;
+  margin: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.nav--collapsed .hctl {
+  flex: 0 0 0;
+  width: 0;
+  max-width: 0;
+  max-height: 0;
+  margin: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav,
+  .nav__links {
+    transition: none;
+  }
 }
 
 @media (max-width: 640px) {

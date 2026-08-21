@@ -643,12 +643,13 @@ export const INSTRUMENTS: Instrument[] = [
     title: 'THE SCHEMA',
     kana: '図式',
     wing: 'WIKI',
-    corpus: 'the front-matter of 486 pages',
-    blurb: 'The shape of the metadata — which fields are filled in, which are not, and where the record is thin.',
-    method: 'Presence and absence of each field, counted. Nothing inferred into an empty one.',
-    status: 'UNBUILT',
-    origin: 'js/wiki-analytics.js · WIKI 17 · draw_schema',
-    needs: 'nothing from outside — the front-matter ships in the snapshot. What is missing is the instrument',
+    corpus: '21 fields · 11 page types · 486 pages',
+    blurb: 'The shape of the metadata rather than the prose — which fields are filled in, on how many pages, and how the page types are spread.',
+    method:
+      'Presence and absence of each front-matter field, counted. An empty string, a null and a missing key are all "not filled in", and none is inferred from anywhere else — the absence is the measurement. Page types and per-domain field counts alongside.',
+    status: 'LIVE',
+    origin:
+      'js/wiki-analytics.js · WIKI 17 · draw_schema — minus "where the record is thin", which is a reading: a field on 2% of pages may simply apply to 2% of pages',
   },
   {
     id: 'echo',

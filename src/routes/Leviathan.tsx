@@ -18,6 +18,7 @@ import { Mass } from '../leviathan/instruments/Mass'
 import { Pen } from '../leviathan/instruments/Pen'
 import { Pulse } from '../leviathan/instruments/Pulse'
 import { Rings } from '../leviathan/instruments/Rings'
+import { Schema } from '../leviathan/instruments/Schema'
 import { Silence } from '../leviathan/instruments/Silence'
 import { Tags } from '../leviathan/instruments/Tags'
 import { Web } from '../leviathan/instruments/Web'
@@ -41,6 +42,7 @@ const BUILT: Record<string, typeof Mass> = {
   lattice: Health,
   evidence: Evidence,
   attention: Attention,
+  schema: Schema,
 }
 
 /**

@@ -531,13 +531,14 @@ export const INSTRUMENTS: Instrument[] = [
     title: 'THE HEALTH',
     kana: '健全',
     wing: 'WIKI',
-    corpus: '486 pages · 3,046 edges',
+    corpus: '486 pages · 3,536 links · 10 orphans',
     blurb:
-      'Graph forensics on the brain itself: reciprocity, the edge-type spectrum, and a ring of every page nothing else links to.',
-    method: 'Edge counts in both directions per page; an orphan is a page with no inbound prose link, which is a count of zero, not an opinion.',
-    status: 'UNBUILT',
-    origin: 'js/wiki-modules.js · WIKI 09 · draw_lattice',
-    needs: 'nothing from outside — /brain’s gaps panel already computes part of this. What is missing is the rest of it',
+      'Forensics on the graph rather than on what it says: which links go both ways, how the linking is spread, and the ring of pages nothing names.',
+    method:
+      'Link counts in both directions: how many pages each page names, how many name it, how many links have their reverse in the corpus, and which pages nothing names. An orphan is an inbound count of zero — a count, not a symptom. Nothing here is scored or thresholded.',
+    status: 'LIVE',
+    origin:
+      'js/wiki-modules.js · WIKI 09 · draw_lattice — the name is kept and the diagnosis is not: nothing here knows what a healthy wiki looks like',
   },
   {
     id: 'evidence',

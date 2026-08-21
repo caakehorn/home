@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import type { Instrument } from './core'
 import './frame.css'
+import './parts.css'
 
 /**
  * The chrome every instrument wears.

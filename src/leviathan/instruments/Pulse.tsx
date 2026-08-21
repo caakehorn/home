@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Frame } from '../Frame'
 import { useSet, type ClockSet, type Instrument } from '../core'
 import { usePortal } from '../../state/usePortal'
+import { colourWith } from '../ink'
 import '../pulse.css'
 
 /**
@@ -404,15 +405,4 @@ function Trace({
       </figcaption>
     </figure>
   )
-}
-
-/** A hex colour at an alpha. Same four-line helper THE CLOCK uses. */
-function colourWith(colour: string, alpha: number) {
-  if (colour.startsWith('#')) {
-    const hex =
-      colour.length === 4 ? colour.slice(1).split('').map((c) => c + c).join('') : colour.slice(1)
-    const n = Number.parseInt(hex, 16)
-    return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`
-  }
-  return colour
 }

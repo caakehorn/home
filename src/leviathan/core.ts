@@ -218,14 +218,13 @@ export const INSTRUMENTS: Instrument[] = [
     title: 'THE LEXICON',
     kana: '語彙',
     wing: 'CORPUS',
-    corpus: '134,348 messages · 5,102,026 characters',
+    corpus: '134,348 messages · 965,583 words · 19,873 distinct',
     blurb:
       'The vocabulary as physics — every word a body, sized by how often it is used, with a seismograph of shouting under it.',
-    method: 'Word frequencies and the share of messages in all caps. Both are counts; the physics is only how they are arranged.',
-    status: 'UNBUILT',
-    origin: 'void.html · MODULE 05 · draw_lexicon',
-    needs:
-      'nothing from outside — every word it counts ships at /transcript. What is missing is a token index, and the instrument on top of it',
+    method:
+      'Every run of letters in every message, lowercased and counted; and the share of messages with three letters or more and no lowercase letter in them. Both are counts. The one filter is a closed-class stoplist, which ships inside the dataset and is printed in full on the instrument beside the unfiltered table.',
+    status: 'LIVE',
+    origin: 'void.html · MODULE 05 · draw_lexicon — the physics word cloud becomes a ranked table, because a cloud makes size hard to read and this owes exact counts',
   },
   {
     id: 'shelf',
@@ -328,10 +327,10 @@ export const INSTRUMENTS: Instrument[] = [
     wing: 'CORPUS',
     corpus: '134,348 messages · 3,893 days',
     blurb: 'Sixteen years coiled into circles, one ring per year, one mark per day. A silent day is a gap you can see from across the room.',
-    method: 'Messages per day, wrapped onto a ring per year. A count and a date.',
-    status: 'UNBUILT',
+    method:
+      'Messages per day wrapped onto one ring per year, January at the top. A count and a date. Days inside a month the exports do not cover are drawn hollow rather than left empty.',
+    status: 'LIVE',
     origin: 'void.html · MODULE 13 · draw_rings',
-    needs: 'nothing from outside — the record ships at /transcript. What is missing is the instrument',
   },
   {
     id: 'silence',
@@ -882,5 +881,27 @@ export type ClockSet = {
    */
   gaps: { from: string; to: string; months: number; fromDay: number; toDay: number }[]
   marks: number[]
+}
+
+/**
+ * ◈ CORPUS V · THE LEXICON.
+ *
+ * `stoplist` ships with the data on purpose: it is the only filter anywhere in
+ * this dataset, and a filter you can read is not the same object as one you
+ * cannot. `topAll` is the same table before it is applied.
+ */
+export type LexiconWord = { word: string; all: number; sent: number; received: number }
+
+export type LexiconSet = {
+  generatedAt: string
+  source: string
+  messages: number
+  tokens: number
+  distinct: number
+  shouts: number
+  stoplist: string[]
+  top: LexiconWord[]
+  topAll: LexiconWord[]
+  months: { bin: string; count: number; shouts: number }[]
 }
 

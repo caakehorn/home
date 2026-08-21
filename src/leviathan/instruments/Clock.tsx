@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Frame } from '../Frame'
 import { useSet, type ClockSet, type Instrument } from '../core'
 import { usePortal } from '../../state/usePortal'
+import { apart, colourWith } from '../ink'
 import '../clock.css'
 
 type Side = 'all' | 'sent' | 'received'
@@ -315,36 +316,6 @@ function Spiral({ data, marks, side }: { data: ClockSet; marks: Int32Array; side
       </figcaption>
     </figure>
   )
-}
-
-/**
- * Far enough apart to carry a channel each. A blunt RGB city-block distance is
- * the right amount of cleverness for a question with one real answer: RIOT's
- * two reds fail it, and the other four palettes clear it by a mile.
- */
-function apart(a: string, b: string) {
-  const rgb = (hex: string) => {
-    if (!hex.startsWith('#')) return null
-    const full = hex.length === 4 ? hex.slice(1).split('').map((c) => c + c).join('') : hex.slice(1)
-    const n = Number.parseInt(full, 16)
-    return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
-  }
-  const x = rgb(a)
-  const y = rgb(b)
-  if (!x || !y) return true
-  return Math.abs(x[0] - y[0]) + Math.abs(x[1] - y[1]) + Math.abs(x[2] - y[2]) > 180
-}
-
-/** A hex or rgb() colour at an alpha, without a colour library for four uses. */
-function colourWith(colour: string, alpha: number) {
-  if (colour.startsWith('#')) {
-    const hex = colour.length === 4
-      ? colour.slice(1).split('').map((c) => c + c).join('')
-      : colour.slice(1)
-    const n = Number.parseInt(hex, 16)
-    return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`
-  }
-  return colour
 }
 
 /** Whole days between two ISO dates, by calendar arithmetic on the parts. */

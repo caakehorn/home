@@ -8,9 +8,11 @@ import type { Instrument, InstrumentStatus } from '../leviathan/core'
 import { Accretion } from '../leviathan/instruments/Accretion'
 import { Chronology } from '../leviathan/instruments/Chronology'
 import { Clock } from '../leviathan/instruments/Clock'
+import { Lexicon } from '../leviathan/instruments/Lexicon'
 import { Mass } from '../leviathan/instruments/Mass'
 import { Pen } from '../leviathan/instruments/Pen'
 import { Pulse } from '../leviathan/instruments/Pulse'
+import { Rings } from '../leviathan/instruments/Rings'
 import { Silence } from '../leviathan/instruments/Silence'
 import './leviathan.css'
 
@@ -23,6 +25,8 @@ const BUILT: Record<string, typeof Mass> = {
   clock: Clock,
   pulse: Pulse,
   silence: Silence,
+  rings: Rings,
+  lexicon: Lexicon,
 }
 
 /**

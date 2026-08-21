@@ -3,7 +3,8 @@ import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
 import { SubHead } from '../components/Wordmark'
 import { sectionBySlug } from '../content/sections'
-import { INSTRUMENTS, instrumentById } from '../leviathan/core'
+import { INSTRUMENTS, WINGS, countBy, instrumentById, instrumentsIn } from '../leviathan/core'
+import type { Instrument, InstrumentStatus } from '../leviathan/core'
 import { Accretion } from '../leviathan/instruments/Accretion'
 import { Chronology } from '../leviathan/instruments/Chronology'
 import { Mass } from '../leviathan/instruments/Mass'
@@ -18,15 +19,30 @@ const BUILT: Record<string, typeof Mass> = {
   pen: Pen,
 }
 
+/**
+ * What each status means, in the one line the rack has room for. The long
+ * version is on the instrument's own card, in its own words: `needs` for the
+ * dark ones, `bars` for the ones that are not coming.
+ */
+const LEGEND: Record<InstrumentStatus, string> = {
+  LIVE: 'built here, wired to a dataset that ships',
+  PORTED: 'came across under another name — the card says where',
+  UNBUILT: 'the corpus is already here; nobody has built the instrument',
+  SEALED: 'waiting on a corpus this site does not carry',
+  BARRED: 'it makes a judgement, and THE RULE forbids one',
+}
+
 const section = sectionBySlug('leviathan')!
 
 /**
- * The wing: a rack of instruments and the room each one runs in.
+ * The wing: the whole old console as a rack, and the room each built one runs in.
  *
- * The old site opened on a console listing thirty-seven of these. This is the
- * same idea rebuilt as a registry — an instrument is a row of data until it
- * has a component, which means the ones still waiting on a corpus can be
- * listed honestly rather than pretended at.
+ * The original is thirty-seven instruments over two sections plus an unlisted
+ * third page, each one a hand-wired page that loaded its own payload and drew
+ * its own chrome. All of them are in this registry — not just the four that got
+ * rebuilt — because a rack that lists only what is finished cannot tell you
+ * what is missing, and the missing is most of the story. Every dark instrument
+ * says which kind of dark it is and why, in its own words.
  */
 export function LeviathanRoute() {
   const { id } = useParams()
@@ -35,7 +51,7 @@ export function LeviathanRoute() {
     const instrument = instrumentById(id)
     const View = instrument ? BUILT[instrument.id] : undefined
 
-    if (!instrument || (!View && instrument.status === 'LIVE')) {
+    if (!instrument) {
       return (
         <Wing>
           <div className="wrap lev__missing">
@@ -50,28 +66,7 @@ export function LeviathanRoute() {
       )
     }
 
-    if (!View) {
-      return (
-        <Wing>
-          <div className="wrap lev__sealed">
-            <span className="lev__numeral" aria-hidden="true">
-              {instrument.numeral}
-            </span>
-            <h1 className="lev__title">
-              <SubHead>{instrument.title}</SubHead>
-            </h1>
-            <p className="lev__blurb">{instrument.blurb}</p>
-            <p className="lev__needs">
-              <b>SEALED</b> — this instrument needs {instrument.needs}. The frame is built and the
-              rack is wired; it lights up the day the dataset lands, and not before.
-            </p>
-            <Link to="/leviathan" className="lev__back">
-              ← BACK TO THE RACK
-            </Link>
-          </div>
-        </Wing>
-      )
-    }
+    if (!View) return <Dark instrument={instrument} />
 
     return (
       <Wing>
@@ -81,8 +76,6 @@ export function LeviathanRoute() {
       </Wing>
     )
   }
-
-  const live = INSTRUMENTS.filter((i) => i.status === 'LIVE').length
 
   return (
     <Wing>
@@ -94,8 +87,12 @@ export function LeviathanRoute() {
           {section.kana}
         </span>
         <p className="lev__mast-note">
-          {section.blurb} {live} of {INSTRUMENTS.length} instruments are wired to a dataset that
-          ships with this site; the rest are declared and waiting on a corpus that does not.
+          {section.blurb} The whole old console is racked here — all{' '}
+          {INSTRUMENTS.filter((i) => i.wing !== 'HOUSE').length} of it, both sections and the
+          unlisted third page — beside the {countBy('LIVE')} this house built. {countBy('LIVE')} are
+          wired to a dataset that ships with this site. {countBy('UNBUILT')} need nothing but
+          building. {countBy('SEALED')} wait on a corpus that does not ship. {countBy('BARRED')} are
+          not coming, and say why.
         </p>
         <p className="lev__rule">
           <b>THE RULE</b> — no instrument here makes a judgement. Every number is a count, a date or
@@ -104,33 +101,122 @@ export function LeviathanRoute() {
           Anything editorial would make the output a portrait of an argument; left alone, the counts
           make a portrait of the thing itself.
         </p>
+        <p className="lev__mast-note">
+          The old site did not run that rule over its own corpus half, which is why eighteen of
+          these are <b>BARRED</b> rather than merely dark. There are photographs of a dozen of them
+          still running, in their own colours, in <Link to="/gallery">THE GALLERY</Link>.
+        </p>
+        <ul className="lev__legend">
+          {(Object.keys(LEGEND) as InstrumentStatus[]).map((status) => (
+            <li key={status}>
+              <span className={`lev__badge lev__badge--${status.toLowerCase()}`}>{status}</span>
+              <span className="lev__legend-say">{LEGEND[status]}</span>
+              <span className="lev__legend-n">{countBy(status)}</span>
+            </li>
+          ))}
+        </ul>
       </header>
 
-      <ol className="wrap lev__rack">
-        {INSTRUMENTS.map((i) => {
-          const sealed = i.status === 'SEALED'
-          return (
-            <li key={i.id}>
-              <Link to={`/leviathan/${i.id}`} className={`lev__card${sealed ? ' lev__card--sealed' : ''}`}>
-                <span className="lev__card-numeral" aria-hidden="true">
-                  {i.numeral}
-                </span>
-                <h2 className="lev__card-title">
-                  {i.title}
-                  <span className="jp lev__card-kana" aria-hidden="true">
-                    {i.kana}
-                  </span>
-                </h2>
-                <p className="lev__card-corpus">{i.corpus}</p>
-                <p className="lev__card-blurb">{i.blurb}</p>
-                <span className={`lev__badge${sealed ? ' lev__badge--sealed' : ''}`}>
-                  {sealed ? 'SEALED' : 'LIVE'}
-                </span>
-              </Link>
-            </li>
-          )
-        })}
-      </ol>
+      {WINGS.map((wing) => (
+        <section key={wing.id} className="wrap lev__wing">
+          <h2 className="lev__wing-title">
+            {wing.title}
+            <span className="jp lev__wing-kana" aria-hidden="true">
+              {wing.kana}
+            </span>
+            <span className="lev__wing-n">{instrumentsIn(wing.id).length}</span>
+          </h2>
+          <p className="lev__wing-note">{wing.note}</p>
+
+          <ol className="lev__rack">
+            {instrumentsIn(wing.id).map((i) => (
+              <li key={i.id}>
+                <Card instrument={i} />
+              </li>
+            ))}
+          </ol>
+        </section>
+      ))}
+    </Wing>
+  )
+}
+
+/**
+ * A card is a link to wherever the instrument actually is: its own room if it
+ * is built, the room it became if it was ported, and its reason page otherwise.
+ */
+function Card({ instrument: i }: { instrument: Instrument }) {
+  const lit = i.status === 'LIVE'
+  const to = i.status === 'PORTED' && i.portedTo ? i.portedTo : `/leviathan/${i.id}`
+  return (
+    <Link to={to} className={`lev__card${lit ? '' : ' lev__card--dark'}`}>
+      <span className="lev__card-numeral" aria-hidden="true">
+        {i.numeral}
+      </span>
+      <h3 className="lev__card-title">
+        {i.title}
+        <span className="jp lev__card-kana" aria-hidden="true">
+          {i.kana}
+        </span>
+      </h3>
+      <p className="lev__card-corpus">{i.corpus}</p>
+      <p className="lev__card-blurb">{i.blurb}</p>
+      <span className={`lev__badge lev__badge--${i.status.toLowerCase()}`}>{i.status}</span>
+    </Link>
+  )
+}
+
+/** Every instrument that does not draw gets the same page: what it is, and why it is dark. */
+function Dark({ instrument: i }: { instrument: Instrument }) {
+  return (
+    <Wing>
+      <div className="wrap lev__sealed">
+        <span className="lev__numeral" aria-hidden="true">
+          {i.wing} · {i.numeral}
+        </span>
+        <h1 className="lev__title">
+          <SubHead>{i.title}</SubHead>
+        </h1>
+        <p className="lev__blurb">{i.blurb}</p>
+        <p className="lev__method">
+          <b>METHOD</b> — {i.method}
+        </p>
+
+        {i.status === 'PORTED' && i.portedTo && (
+          <p className="lev__needs">
+            <b>PORTED</b> — this one came across. It runs in this building under this house's own
+            name and lives at <Link to={i.portedTo}>{i.portedTo}</Link>.
+          </p>
+        )}
+        {i.status === 'UNBUILT' && (
+          <p className="lev__needs">
+            <b>UNBUILT</b> — {i.needs}. The frame is built and the rack is wired; this one is
+            somebody sitting down and doing it.
+          </p>
+        )}
+        {i.status === 'SEALED' && (
+          <p className="lev__needs">
+            <b>SEALED</b> — this instrument needs {i.needs}. The frame is built and the rack is
+            wired; it lights up the day the dataset lands, and not before.
+          </p>
+        )}
+        {i.status === 'BARRED' && (
+          <p className="lev__needs lev__needs--barred">
+            <b>BARRED</b> — {i.bars} It is listed because leaving it out would be a nicer story than
+            the one the old repo actually tells.
+          </p>
+        )}
+
+        {i.origin && (
+          <p className="lev__origin">
+            <b>OVER THERE</b> — {i.origin}
+          </p>
+        )}
+
+        <Link to="/leviathan" className="lev__back">
+          ← BACK TO THE RACK
+        </Link>
+      </div>
     </Wing>
   )
 }

@@ -1,0 +1,10 @@
+{
+  "title": "THE GRAVITY WELL",
+  "kana": "重力",
+  "caption": "The cluster running untouched. Nothing here is a video loop or a shader — it is a CPU particle simulation being asked to hold a word.",
+  "source": "void.html · PHASE 00 · js/galaxy-cluster.js",
+  "shot": "1600×1000, six seconds after load, cluster left alone.",
+  "order": 3,
+  "w": 1280,
+  "h": 800
+}

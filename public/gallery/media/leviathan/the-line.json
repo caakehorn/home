@@ -1,0 +1,10 @@
+{
+  "title": "THE LINE",
+  "kana": "血統",
+  "caption": "The family tree as an hourglass around one focus person: ancestors climbing away above, descendants spreading below, spouses beside. 515 people, 218 families, 15 generations, 1575→2002, and it says out loud that 71% of it is sourced.",
+  "source": "tree.html · js/tree.js · data/tree.json",
+  "shot": "1600×1000, seven seconds after load, at the default focus.",
+  "order": 16,
+  "w": 1600,
+  "h": 1000
+}

@@ -24,3 +24,6 @@ public/agent/
 # It is a ciphertext: committing it leaks nothing but the cost of guessing.
 # To rotate, re-run `npm run gate:verify` with the new phrase in the
 # environment and commit the result.
+
+# THE GALLERY capture rig caches the CDN assets the old pages pull
+.gallery-vendor/

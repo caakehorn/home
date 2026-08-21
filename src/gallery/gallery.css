@@ -1,0 +1,414 @@
+/* ==========================================================================
+   THE GALLERY — the room the old repo is hung in.
+
+   A gallery is the one place in this building where the house style has to get
+   out of the way. Everything else here is xeroxed and stapled; the pictures are
+   somebody else's colours and they have to be allowed to be. So the chrome is
+   the flyer — hard shadows, spot ink, mono labels — and the frames are neutral:
+   a black mount, a hairline, nothing tinted, nothing overlaid.
+   ========================================================================== */
+
+.gal {
+  position: relative;
+  z-index: 1;
+  min-height: 100%;
+  padding-bottom: calc(var(--crawl-h) + 3rem);
+  background:
+    radial-gradient(75% 40% at 50% 0%, color-mix(in srgb, var(--glow) 20%, transparent), transparent 70%),
+    var(--void);
+}
+
+/* ---- masthead ----------------------------------------------------------- */
+
+.gal__masthead {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 0.3rem 1rem;
+  padding-block: clamp(1.6rem, 5vh, 3rem) 0.6rem;
+}
+
+.gal__mast-title {
+  font-size: clamp(1.7rem, 6vw, 4.2rem);
+  line-height: 0.95;
+}
+
+.gal__mast-kana {
+  font-size: clamp(1.6rem, 5vw, 3.4rem);
+  line-height: 1;
+  color: var(--glow);
+  text-shadow: 0 0 calc(var(--glow-r) * 0.8) var(--glow);
+}
+
+.gal__mast-note {
+  grid-column: 1 / -1;
+  max-width: 70ch;
+  font-size: var(--step--1);
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+.gal__mast-note--thin {
+  margin-top: 0.4rem;
+  opacity: 0.86;
+}
+
+/* The plaque, same furniture as THE RULE next door: this room owes its own
+   statement of method, and it is not the same statement. */
+.gal__rule {
+  grid-column: 1 / -1;
+  max-width: 70ch;
+  margin-top: 0.5rem;
+  padding: 0.6rem 0.8rem;
+  font-family: var(--f-ui);
+  font-size: var(--step--1);
+  line-height: 1.6;
+  color: var(--text-dim);
+  background: color-mix(in srgb, var(--void-2) 80%, transparent);
+  border-left: var(--rule) solid var(--glow);
+}
+
+.gal__rule b {
+  color: var(--glow);
+  font-family: var(--f-mono);
+  letter-spacing: 0.14em;
+}
+
+.gal__rule code {
+  font-family: var(--f-mono);
+  font-size: 0.92em;
+  color: var(--text);
+}
+
+.gal__rule a,
+.gal__mast-note a,
+.gal__state a {
+  color: var(--glow);
+}
+
+/* ---- controls ----------------------------------------------------------- */
+
+.gal__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1.2rem;
+  padding-block: 1.2rem 0.4rem;
+}
+
+.gal__filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.gal__chip {
+  padding: 0.34rem 0.7rem;
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.16em;
+  color: var(--text-dim);
+  background: transparent;
+  border: var(--staple) solid color-mix(in srgb, var(--text-dim) 45%, transparent);
+  border-radius: var(--slab);
+  cursor: pointer;
+  transition: color 140ms ease, border-color 140ms ease, background 140ms ease;
+}
+
+.gal__chip:hover,
+.gal__chip:focus-visible {
+  color: var(--text);
+  border-color: var(--glow);
+}
+
+.gal__chip--on {
+  color: var(--on-glow);
+  background: var(--glow);
+  border-color: var(--glow);
+}
+
+.gal__tally {
+  margin-left: auto;
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.14em;
+  color: var(--text-dim);
+}
+
+.gal__album-note {
+  max-width: 78ch;
+  margin-block: 0.2rem 0.6rem;
+  font-size: var(--step--1);
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+.gal__album-note b {
+  color: var(--text);
+  font-family: var(--f-mono);
+  letter-spacing: 0.14em;
+}
+
+.gal__state {
+  padding-block: 2rem;
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+}
+
+.gal__state--bad {
+  color: var(--n5);
+}
+
+/* ---- the wall ----------------------------------------------------------- */
+
+.gal__wall {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
+  gap: 1.1rem;
+  margin: 0;
+  padding: 0.8rem 0 3rem;
+  list-style: none;
+}
+
+.gal__card {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100%;
+  text-decoration: none;
+  color: var(--text);
+  background: var(--void-2);
+  border: var(--rule) solid var(--edge);
+  box-shadow: 6px 6px 0 var(--edge);
+  transition: transform 180ms cubic-bezier(0.2, 1.4, 0.4, 1), box-shadow 180ms ease;
+}
+
+.gal__card:hover,
+.gal__card:focus-visible {
+  transform: translate(-2px, -4px);
+  box-shadow: 10px 10px 0 var(--edge), 0 0 var(--glow-r) color-mix(in srgb, var(--glow) 55%, transparent);
+}
+
+/* The mount. Black whatever the palette is doing, because a picture judged
+   against newsprint is a picture with a colour cast. */
+.gal__frame {
+  position: relative;
+  display: block;
+  aspect-ratio: var(--ar, 1.6);
+  overflow: hidden;
+  background: #06060a;
+  border-bottom: var(--staple) solid color-mix(in srgb, var(--text-dim) 40%, transparent);
+}
+
+.gal__media {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+
+.gal__play {
+  position: absolute;
+  right: 0.5rem;
+  bottom: 0.5rem;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  font-size: 0.8rem;
+  color: var(--on-glow);
+  background: var(--glow);
+  border: var(--staple) solid var(--edge);
+  pointer-events: none;
+}
+
+.gal__card-bar {
+  display: grid;
+  align-content: start;
+  gap: 0.2rem;
+  padding: 0.6rem 0.75rem 0.7rem;
+}
+
+.gal__card-title {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  font-family: var(--f-head);
+  font-size: var(--step-0);
+  line-height: 1.1;
+}
+
+.gal__card-kana {
+  font-size: 0.72em;
+  color: var(--text-dim);
+}
+
+.gal__card-meta {
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  color: var(--text-dim);
+}
+
+.gal__empty {
+  padding-block: 3rem;
+  font-family: var(--f-mono);
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+}
+
+/* ---- the lightbox ------------------------------------------------------- */
+
+.gal__lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: clamp(0.6rem, 3vw, 2rem);
+  background: color-mix(in srgb, #04040a 92%, transparent);
+  backdrop-filter: blur(3px);
+}
+
+.gal__box {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 0;
+  width: min(1400px, 100%);
+  max-height: 100%;
+  background: var(--void);
+  border: var(--rule) solid var(--edge);
+  box-shadow: 10px 10px 0 var(--edge);
+}
+
+.gal__box:focus-visible {
+  outline: var(--staple) solid var(--glow);
+  outline-offset: 3px;
+}
+
+.gal__box-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  padding: clamp(0.5rem, 2vw, 1.2rem);
+  background: #06060a;
+}
+
+.gal__box-media {
+  display: block;
+  max-width: 100%;
+  max-height: min(70vh, 900px);
+  height: auto;
+  width: auto;
+  object-fit: contain;
+}
+
+.gal__step,
+.gal__shut {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  font-family: var(--f-mono);
+  font-size: 1rem;
+  color: var(--text);
+  background: color-mix(in srgb, #04040a 72%, transparent);
+  border: var(--staple) solid color-mix(in srgb, var(--text) 40%, transparent);
+  cursor: pointer;
+  transition: color 140ms ease, border-color 140ms ease, background 140ms ease;
+}
+
+.gal__step:hover,
+.gal__shut:hover,
+.gal__step:focus-visible,
+.gal__shut:focus-visible {
+  color: var(--on-glow);
+  background: var(--glow);
+  border-color: var(--glow);
+}
+
+.gal__step--prev { left: 0.6rem; }
+.gal__step--next { right: 0.6rem; }
+.gal__shut { top: 0.6rem; right: 0.6rem; }
+
+/* Video controls live along the bottom edge; the arrows must not sit on them. */
+.gal__box-stage:has(video) .gal__step {
+  top: clamp(1rem, 30%, 40%);
+}
+
+.gal__plate {
+  display: grid;
+  gap: 0.4rem;
+  max-height: 34vh;
+  overflow-y: auto;
+  padding: 0.9rem clamp(0.7rem, 2vw, 1.3rem) 1.1rem;
+  border-top: var(--rule) solid var(--edge);
+  background: var(--void-2);
+}
+
+.gal__plate-title {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin: 0;
+  font-family: var(--f-head);
+  font-size: var(--step-1);
+  line-height: 1.05;
+}
+
+.gal__plate-kana {
+  font-size: 0.68em;
+  color: var(--glow);
+}
+
+.gal__plate-say {
+  max-width: 82ch;
+  margin: 0;
+  font-size: var(--step--1);
+  line-height: 1.65;
+  color: var(--text);
+}
+
+.gal__plate-facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.15rem 0.8rem;
+  margin: 0.2rem 0 0;
+  font-size: var(--step--1);
+  line-height: 1.5;
+}
+
+.gal__plate-facts dt {
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  color: var(--glow);
+  padding-top: 0.15rem;
+}
+
+.gal__plate-facts dd {
+  margin: 0;
+  color: var(--text-dim);
+}
+
+.gal__plate-facts a {
+  color: var(--glow);
+}
+
+.gal__plate-count {
+  margin: 0.2rem 0 0;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  color: var(--text-dim);
+}
+
+@media (max-width: 720px) {
+  .gal__box-media { max-height: 52vh; }
+  .gal__plate { max-height: 42vh; }
+  .gal__tally { margin-left: 0; }
+}

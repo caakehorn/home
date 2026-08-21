@@ -1,0 +1,334 @@
+/* ==========================================================================
+   INSTRUMENT PARTS — the pieces every instrument turns out to need.
+
+   THE MASS, THE CHRONOLOGY and THE PEN each grew their own bar row, their own
+   fact list and their own chip switch, and the three drifted apart. Everything
+   built after them uses these instead. They are deliberately unopinionated
+   about layout — an instrument still decides its own shape — and they only
+   supply the furniture that was going to be copied anyway.
+
+   `pt-` for parts. Loaded once, by Frame.tsx.
+   ========================================================================== */
+
+/* ---- two columns, picture and counts ------------------------------------ */
+
+.pt-split {
+  display: grid;
+  grid-template-columns: minmax(320px, 1.3fr) minmax(280px, 1fr);
+  gap: clamp(1rem, 3vw, 2.4rem);
+  align-items: start;
+}
+
+.pt-split--wide {
+  grid-template-columns: minmax(340px, 1.7fr) minmax(260px, 1fr);
+}
+
+@media (max-width: 940px) {
+  .pt-split,
+  .pt-split--wide {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pt-stack {
+  display: grid;
+  gap: 0.5rem;
+  align-content: start;
+  min-width: 0;
+}
+
+/* ---- headings and notes -------------------------------------------------- */
+
+.pt-sub {
+  margin: 0.7rem 0 0.3rem;
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  color: var(--n1);
+}
+
+.pt-sub:first-child {
+  margin-top: 0;
+}
+
+.pt-note {
+  margin: 0 0 0.3rem;
+  font-size: var(--step--1);
+  line-height: 1.55;
+  color: var(--text-dim);
+}
+
+.pt-note b {
+  color: var(--text);
+  font-family: var(--f-mono);
+  font-size: 0.9em;
+  letter-spacing: 0.12em;
+}
+
+.pt-note a {
+  color: var(--n3);
+}
+
+/* ---- a bar row ----------------------------------------------------------
+   The workhorse. Label, bar, number — and the number is always printed,
+   because a bar you have to measure against another bar is a picture of a
+   ranking rather than a statement of a count. */
+
+.pt-rows {
+  display: grid;
+  gap: 0.16rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pt-row {
+  display: grid;
+  grid-template-columns: var(--pt-label, 7rem) 1fr var(--pt-value, 4.2rem);
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* A row that is also a button — same geometry, no button chrome. */
+.pt-row-btn {
+  display: grid;
+  grid-template-columns: var(--pt-label, 7rem) 1fr var(--pt-value, 4.2rem);
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.06rem 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+}
+
+.pt-row-btn:hover .pt-fill,
+.pt-row-btn:focus-visible .pt-fill {
+  background: var(--n3);
+}
+
+.pt-row-btn[aria-pressed='true'] .pt-fill {
+  background: var(--n3);
+}
+
+.pt-label,
+.pt-value {
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pt-value {
+  text-align: right;
+  color: var(--text);
+}
+
+.pt-bar {
+  display: block;
+  block-size: 0.62rem;
+  background: color-mix(in srgb, var(--text-dim) 18%, transparent);
+}
+
+.pt-bar--tall {
+  block-size: 1rem;
+}
+
+.pt-fill {
+  display: block;
+  block-size: 100%;
+  background: var(--n1);
+  transition: background 140ms ease;
+}
+
+.pt-fill--alt {
+  background: var(--n3);
+}
+
+.pt-fill--warn {
+  background: var(--n5);
+}
+
+/* ---- a fact list --------------------------------------------------------- */
+
+.pt-facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.15rem 0.8rem;
+  margin: 0.6rem 0 0;
+  font-size: var(--step--1);
+  line-height: 1.5;
+}
+
+.pt-facts dt {
+  padding-top: 0.15rem;
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  color: var(--n1);
+  white-space: nowrap;
+}
+
+.pt-facts dd {
+  margin: 0;
+  color: var(--text-dim);
+}
+
+.pt-facts dd a {
+  color: var(--n3);
+}
+
+/* ---- a chip switch ------------------------------------------------------- */
+
+.pt-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.pt-chip {
+  padding: 0.28rem 0.55rem;
+  font-family: var(--f-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  background: transparent;
+  border: var(--staple) solid color-mix(in srgb, var(--text-dim) 45%, transparent);
+  cursor: pointer;
+  transition: color 140ms ease, border-color 140ms ease, background 140ms ease;
+}
+
+.pt-chip:hover,
+.pt-chip:focus-visible {
+  color: var(--text);
+  border-color: var(--n1);
+}
+
+.pt-chip--on {
+  color: var(--on-glow);
+  background: var(--n1);
+  border-color: var(--n1);
+}
+
+/* ---- a dark mount, for anything drawn rather than written ----------------
+   Black in every palette on purpose: half-transparent marks judged against
+   newsprint are marks with a colour cast, and RIOT's paper eats the low end
+   of any ramp drawn on it. */
+
+.pt-mount {
+  display: block;
+  width: 100%;
+  background: #08070c;
+  border: var(--staple) solid var(--edge);
+}
+
+.pt-mount--square {
+  aspect-ratio: 1;
+}
+
+.pt-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 0.9rem;
+  padding: 0.5rem 0.7rem;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  color: #9a9384;
+  background: #08070c;
+  border: var(--staple) solid var(--edge);
+  border-top: 0;
+}
+
+.pt-key::before {
+  content: '';
+  display: inline-block;
+  width: 0.6rem;
+  height: 0.6rem;
+  margin-right: 0.35rem;
+  background: currentColor;
+}
+
+.pt-key-say {
+  letter-spacing: 0.08em;
+  text-transform: none;
+  color: #7d7768;
+}
+
+.pt-figure {
+  margin: 0;
+  display: grid;
+  gap: 0;
+  min-width: 0;
+}
+
+/* ---- a list of cited rows ------------------------------------------------ */
+
+.pt-cards {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pt-card {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.5rem 0.6rem;
+  background: color-mix(in srgb, var(--void) 55%, transparent);
+  border-left: var(--rule) solid color-mix(in srgb, var(--n1) 60%, transparent);
+}
+
+.pt-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 0.7rem;
+  font-family: var(--f-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.12em;
+  color: var(--n3);
+}
+
+.pt-card__head a {
+  color: var(--n3);
+  text-decoration: none;
+}
+
+.pt-card__head a:hover,
+.pt-card__head a:focus-visible {
+  text-decoration: underline;
+}
+
+.pt-card__say {
+  margin: 0;
+  font-size: var(--step--1);
+  line-height: 1.55;
+  color: var(--text);
+}
+
+.pt-card__meta {
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+}
+
+/* ---- scroll boxes, for the long ones ------------------------------------- */
+
+.pt-scroll {
+  max-height: 30rem;
+  overflow-y: auto;
+  padding-right: 0.3rem;
+}
+
+.pt-scroll--tall {
+  max-height: 44rem;
+}

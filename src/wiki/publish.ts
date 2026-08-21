@@ -149,8 +149,15 @@ export async function publishFile(path: string, text: string, message: string) {
   return putFile(SOURCE_REPO, path, encode(text), message)
 }
 
-/** Wake the sync workflow so the deployed snapshot catches up with the source. */
-async function dispatch(repo: string, slug: string) {
+/**
+ * Wake the sync workflow so the deployed snapshot catches up with the source.
+ *
+ * Exported because publishing a page is no longer the only thing that writes to
+ * wiki-brain from a browser — asking the sage commits a question file and wants
+ * the same nudge, and a second implementation of one API call is a second thing
+ * to forget to fix. The `slug` is only carried into the payload for the log.
+ */
+export async function requestResync(slug: string, repo: string = SITE_REPO) {
   await call(`/repos/${repo}/dispatches`, {
     method: 'POST',
     body: JSON.stringify({ event_type: 'wiki-updated', client_payload: { slug } }),
@@ -229,7 +236,7 @@ export async function publishPage(
   // upstream and the next scheduled sync will pick it up, so say what
   // happened rather than reporting a failure that did not lose anything.
   try {
-    await dispatch(SITE_REPO, slug)
+    await requestResync(slug)
   } catch {
     onProgress('published — the rebuild will run on its next scheduled pass')
   }

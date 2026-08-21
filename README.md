@@ -11,9 +11,38 @@ the room where both of those happened.
 > THESIS · ANTITHESIS · ANOTHER BUMP · SYNTHESIS · CITE YOUR SOURCES ·
 > LOSE THE ARGUMENT · LOG IT ANYWAY
 
-Seven rooms off one hallway: the **wiki-brain** and its map, **THE LATTICE**,
-the **LEVIATHAN** instruments, **THE GALLERY**, **THE TRANSCRIPT**,
-**TRANSMISSIONS**, and **ALLY LUBIN'S ADVENTURE ARCADE**. All seven are open.
+Eight rooms off one hallway: the **wiki-brain** and its map, **THE SAGE**,
+**THE LATTICE**, the **LEVIATHAN** instruments, **THE GALLERY**, **THE
+TRANSCRIPT**, **TRANSMISSIONS**, and **ALLY LUBIN'S ADVENTURE ARCADE**. All
+eight are open.
+
+### The sage
+
+`/sage` is the only room where the wiki is asked something rather than read.
+Type a question about Dan — what he did, why, or what the record says he will do
+next — and it is answered from the corpus with citations you can click and dated
+quotes from the message record, including the ones that do not flatter him.
+
+**Nothing on this site answers it.** There is no model behind the box, no API key
+in the deploy, and no workflow that calls one. Pressing ASK commits
+`sage/questions/<id>.md` to `caakehorn/wiki-brain` through the same keyring that
+publishes a page edit, and fires the sync so the question appears in the log a
+minute later marked *awaiting*. It is then priority 1 on that repository's
+`WORK.md`, and a session working there answers it properly — retrieval across 486
+pages plus `bin/mine-messages` over 134,348 messages — files the answer to
+`raw/self/sage/` as permanent record, and stages what it found onto every page it
+cited. Questions make the corpus bigger; that is the point of the loop.
+
+The latency is the design and the room says so before you ask rather than after.
+An answer here is one that read the sources and shows them.
+
+The log renders three states and hides none of them: **awaiting** questions show
+in full while they wait, **answered** ones carry their sources, and **declined**
+ones carry the reason. A question nobody wanted to answer is visible as one.
+
+Format details are in `sage/README.md` upstream. Three programs parse that file
+and none imports the others, so `npm run sage:check` guards the contract and runs
+in CI.
 
 ### The arcade
 

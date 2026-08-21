@@ -626,3 +626,58 @@
   background: var(--n3);
   color: var(--edge);
 }
+
+/* ---- a draft the page has moved past ------------------------------------
+ *
+ * The loudest thing on a wiki page, and it earns it. A local draft used to win
+ * over the shipped snapshot unconditionally; on 2026-08-21 that published a
+ * 08-13 draft of `people/annie-ulmer` over three later passes and deleted 30KB
+ * of prose, the infobox and 56 typed-edge claims. Nothing on screen said
+ * anything. This is what says it — and it appears above the editor, because by
+ * the time you have pressed PUBLISH it is too late to be told.
+ */
+.wiki__stale {
+  margin: 0 0 1.5rem;
+  padding: 1rem 1.25rem;
+  border: 2px solid var(--n2);
+  border-left-width: 6px;
+  background: color-mix(in srgb, var(--n2) 10%, transparent);
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  line-height: 1.5;
+}
+
+.wiki__stale b {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--n2);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.wiki__stale p {
+  margin: 0.5rem 0 0;
+  color: var(--text);
+}
+
+.wiki__stale-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.wiki__stale-actions button {
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--n2);
+  background: transparent;
+  color: var(--n2);
+  font: inherit;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+
+.wiki__stale-actions button:hover,
+.wiki__stale-actions button:focus-visible {
+  background: var(--n2);
+  color: var(--edge);
+}

@@ -14,6 +14,7 @@ import { WritingDashboardRoute } from './routes/WritingDashboard'
 import { Home } from './routes/Home'
 import { LeviathanRoute } from './routes/Leviathan'
 import { LineageRoute } from './routes/Lineage'
+import { SageRoute } from './routes/Sage'
 import { Splash } from './routes/Splash'
 import { TermsRoute } from './routes/Terms'
 import { TranscriptRoute } from './routes/Transcript'
@@ -66,6 +67,7 @@ function Site() {
         <Route path="/gallery/:id" element={<GalleryRoute />} />
         <Route path="/leviathan" element={<LeviathanRoute />} />
         <Route path="/leviathan/:id" element={<LeviathanRoute />} />
+        <Route path="/sage" element={<SageRoute />} />
         <Route path="/transcript" element={<TranscriptRoute />} />
         <Route path="/:slug" element={<Stub />} />
       </Routes>

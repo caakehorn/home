@@ -19,6 +19,16 @@ type Props = {
   page: WikiPage
   frontmatter: string
   body: string
+  /**
+   * The shipped page's `date_modified`, which is what a draft is stale against.
+   *
+   * Taken from upstream rather than from `page`, because `page` here is the
+   * *edited* view — its frontmatter has already been re-parsed from whatever is
+   * in the pane, so a person who edits `date_modified` before the first autosave
+   * fires would baseline their own draft against their own typing. See
+   * `draftIsStale`.
+   */
+  base?: string
   onChange: (next: { frontmatter: string; body: string }) => void
   onClose: () => void
 }
@@ -33,7 +43,7 @@ function setKey(frontmatter: string, key: string, value: string) {
   return lines.join('\n')
 }
 
-export function Editor({ page, frontmatter, body, onChange, onClose }: Props) {
+export function Editor({ page, frontmatter, body, base, onChange, onClose }: Props) {
   const [tab, setTab] = useState<'body' | 'frontmatter' | 'preview'>('body')
   const [status, setStatus] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -62,11 +72,14 @@ export function Editor({ page, frontmatter, body, onChange, onClose }: Props) {
     }
     window.clearTimeout(saved.current)
     saved.current = window.setTimeout(() => {
-      const ok = saveDraft(page.slug, toSource(page, { frontmatter, body }))
+      // The third argument is the upstream `date_modified` this draft forked
+      // from, and it is the whole of the lost-update guard: without it a draft
+      // has no way to know the page moved under it. See `draftIsStale`.
+      const ok = saveDraft(page.slug, toSource(page, { frontmatter, body }), base)
       setStatus(ok ? `saved locally · ${new Date().toLocaleTimeString()}` : 'could not save — browser storage is full')
     }, 700)
     return () => window.clearTimeout(saved.current)
-  }, [frontmatter, body, dirty, page.slug, page.locked])
+  }, [frontmatter, body, dirty, page.slug, page.locked, base])
 
   const addPicture = async (chosen: File) => {
     setBusy(true)

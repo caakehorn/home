@@ -9,7 +9,7 @@
  *
  *   0. THE TERMS      — an acceptance dialog. Per device, versioned, forever.
  *   1. THE QUIZ       — an empty submit passes. Anything else is a decoy.
- *   3. THE PASSPHRASE — the only one of the four that is an actual lock.
+ *   3. THE PADLOCK    — the only one of the four that is an actual lock.
  *
  * Steps 0, 1 and 2 are doormen. Step 3 is the boundary.
  *
@@ -62,7 +62,7 @@ export const MSG_MS = 3_000
 
 /** The line above the passphrase field. */
 export const GREETING =
-  'the door opens for a passphrase and for nothing else. you either have it or you do not.'
+  'the door opens for a combination and for nothing else. right, then left, then right.'
 
 // ---------------------------------------------------------------------------
 // the quiz

@@ -520,11 +520,50 @@ Three other things were costing more than they were worth and are gone:
   being scaled — so it re-rasterised every frame. It was blurring three radial
   gradients, which have no hard edges to blur; the stops are wider now and the
   drift is translate-only.
-- The cursor trail's rAF loop, which ran a full-viewport `clearRect` at 60fps
-  for the life of the session whether or not the pointer had moved in ten
-  minutes. It now sleeps when the last dot dies and wakes on `pointermove`, and
-  it samples one dot per *frame* rather than one per event — a high-polling
-  mouse was pushing a thousand a second into a buffer that could show sixty.
+- The cursor trail, entirely — see below.
+
+## The reticle
+
+`src/components/Cursor.tsx`. What was there before was a comet: up to 48 soft
+circles, radius up to 21px, drawn additively and fading at 0.045 of their life
+per frame. It *felt* slow without being slow — a 20px blob has no edge, so
+there is nothing for the eye to lock onto and check against the actual pointer,
+and softness reads as lag even at 60fps. It was also enormous, and it lied:
+one sample per frame joined by big round dots means a fast flick drew a dotted
+chord rather than the path your hand took.
+
+Hard edges, one-pixel lines, and the true path:
+
+- **The bracket** — four corner ticks of a small square, locked to the exact
+  last reported position with no smoothing whatsoever, rotated to the direction
+  of travel and splaying open with speed. Nothing interpolates, on purpose: a
+  hard corner sitting precisely on the hotspot is checkable, so a frame of lag
+  would be visible, so there is none. It stays parked when you stop — it is a
+  reticle, and marking where the pointer is sitting is the job.
+- **The blade** — a 1px tapering polyline through the recent 14 samples, drawn
+  only above a walking pace and retracting into the bracket when the hand
+  stops. Acid green at rest, magenta at speed.
+
+Three things make it cheaper as well as sharper. `getCoalescedEvents()` draws
+the real path from samples the browser had already captured, so a flick is a
+curve rather than a chord. `pointerrawupdate` where it exists fires ahead of
+the coalescing `pointermove` waits on. And it clears a **dirty rect** — the
+union of what it drew last frame and this one, a few thousand pixels around the
+pointer — instead of a full 1440×900 viewport every frame, and still sleeps
+completely when the blade has drained and the hand has stopped.
+
+Two bugs worth recording, because both are the same mistake. Speed was
+initially measured between the last two points in the trail, which is wrong in
+both directions: when the hand stops those two points stop changing, so the
+reading holds at whatever the final flick was — speed never decays, the blade
+never drains, and a parked pointer keeps a streak hanging off it. And when the
+hand is fast, a coalesced batch delivers a dozen samples in one frame and the
+gap between the last two is a twelfth of the real distance, so the reticle
+reads a sprint as a stroll. The sum of distance actually covered over the frame
+is simply the truth. The envelope on it is fast-attack/slow-release for the
+same reason the bracket does not interpolate: a symmetric filter opens the
+reticle several frames after you started moving, which is precisely the lag the
+comet was replaced for.
 
 Motion tokens live in `tokens.css`: `--spring`, `--spring-hard`, `--glide` and
 the `--snap` / `--pop` / `--settle` durations. They are only ever spent on

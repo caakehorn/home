@@ -29,6 +29,10 @@ import './gate.css'
  * passphrase, checked by the same decryption — but the keyspace is a dial's
  * rather than a sentence's, and `./combination` states what that costs
  * instead of glossing it.
+ *
+ * GATE DISABLED: The gate is currently bypassed and will directly render children
+ * without any authentication or terms checks. The infrastructure remains in place
+ * for future re-enablement.
  */
 
 type Step = 'boot' | 'terms' | 'declined' | 'quiz' | 'trap' | 'pass' | 'punish' | 'open'
@@ -60,6 +64,13 @@ const drop = (store: Storage | undefined, key: string) => {
 const wantsLock = () => /(^|[?&#])lock\b/.test(location.search + location.hash)
 
 export function Gate({ children }: { children: React.ReactNode }) {
+  // GATE DISABLED: Return children immediately, bypassing all checks
+  return <>{children}</>
+
+  // ============================================================================
+  // ARCHIVED CODE: The following code is preserved for future re-enablement
+  // ============================================================================
+
   // Compute initial UI state synchronously so the gate renders the correct
   // step on first paint instead of showing the empty "boot" placeholder.
   const computeInitial = (): { step: Step; until: number } => {

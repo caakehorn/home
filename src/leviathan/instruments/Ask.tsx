@@ -45,19 +45,18 @@ function stamp(row: PenRow) {
 /**
  * PROCUREMENT VI · THE ASK
  *
- * The one instrument in this building that scores, drawn at the owner's
- * instruction against THE RULE rather than under it.
+ * The most carefully built instrument in the old repo, brought across whole:
+ * 357 records drawn from 18,946 messages, merged out of every thread export,
+ * timezone-corrected, deduplicated, classified by speech-act frame plus named
+ * object, and then read by hand with the false positives struck.
  *
- * Everything about how it is presented follows from that. It is not dressed as
- * a measurement: it carries status SCORED, its frame prints the declaration
- * where every other instrument prints THE RULE, and **every lane shows the
- * precision of the hand audit behind it** — 100% on some, 57% on the worst.
- * Those numbers are the only thing that makes a classification checkable, and
- * an instrument that hides them is asking to be believed rather than read.
+ * **Every lane prints the precision of that hand audit** — 100% on some, 57%
+ * on the worst. That is the original's own arrangement and its own reason for
+ * it: a number nobody can check is not evidence. A lane is shown at the worst
+ * precision among the categories it folds, because a lane is only as good as
+ * its weakest member.
  *
- * The lanes are the original's, folded the way the original folded them. That
- * grouping is part of the classification and not a reading of it, so it is
- * reproduced rather than re-argued.
+ * The lane groupings are the original's, reproduced rather than re-argued.
  */
 export function Ask({ instrument }: { instrument: Instrument }) {
   const { data } = useSet<AskSet>('ask.json')
@@ -94,9 +93,8 @@ export function Ask({ instrument }: { instrument: Instrument }) {
         <p className="pen__note">
           Each lane is scaled to its own maximum and prints the worst hand-measured precision among
           the categories it folds. RUNNING TOTAL is the same records accumulated, so it only ever
-          climbs — it is a restatement of the other five, not a sixth finding. The lanes are the
-          original's groupings, reproduced rather than re-argued, because the grouping is part of
-          the classification.
+          climbs — it is a restatement of the other five, not a sixth finding. The lane groupings
+          are the original's, reproduced rather than re-argued.
         </p>
       )}
       after={() => (
@@ -105,8 +103,8 @@ export function Ask({ instrument }: { instrument: Instrument }) {
             <h2 className="ask__h">THE AUDIT</h2>
             <p className="ask__lede">
               Every hit was read by hand and the false positives struck. What survived is below, per
-              category, as measured against a full manual read. A category at 57% is wrong on close
-              to half of what it caught, and the lane it feeds is wrong with it.
+              category, as measured against a full manual read — the same table the original
+              published, for the same reason: a number nobody can check is not evidence.
             </p>
             <table className="ask__table">
               <thead>

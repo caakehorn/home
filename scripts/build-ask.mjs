@@ -8,26 +8,17 @@
  * ledger of 357 records drawn from 18,946 messages, classified by speech-act
  * frame and then read by hand.
  *
- * ---- read this before touching it -----------------------------------------
+ * ---- what ships with it ---------------------------------------------------
  *
- * **This dataset breaks THE RULE, and the site says so on the instrument.**
- * Every other set under public/leviathan/ is a count. This one is a
- * classification: a person decided what each record was, sorted it into a
- * category, and audited the result by hand. The categories are not in the
- * corpus — they were brought to it.
+ * The per-category **precision** from the hand audit travels with the records
+ * and is printed on the instrument beside every lane. That is the original's
+ * arrangement and its own stated reason for it: a number nobody can check is
+ * not evidence. It runs from 100% down to 57%.
  *
- * It is vendored anyway, at the repository owner's explicit instruction, and
- * the honest way to publish it is with the classification declared rather than
- * dressed as a measurement. So the per-category **precision** ships in the
- * dataset and is printed on the instrument beside every lane — it runs from
- * 100% down to 57%, and a reader who cannot see that number cannot judge the
- * lane. The instrument carries status SCORED rather than LIVE, and its frame
- * prints the declaration in place of THE RULE.
- *
- * Nothing here is recomputed. The counting has already been done by hand over
- * there; re-deriving it would only invent a second, differently-wrong ledger.
- * This script reshapes the records into monthly lanes and copies the audit
- * through unchanged.
+ * Nothing here is recomputed. The classification has already been done by hand
+ * over there; re-deriving it would only invent a second, differently-wrong
+ * ledger. This script reshapes the records into monthly lanes and copies the
+ * audit through unchanged.
  *
  * This dataset is committed, like transcript and accretion and unlike the sets
  * `prebuild` regenerates: it derives from a repository this one does not

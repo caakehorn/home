@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
+  GATE_ENABLED,
   KEYS,
   LOCKOUT_MS,
   MSG_MS,
@@ -30,9 +31,10 @@ import './gate.css'
  * rather than a sentence's, and `./combination` states what that costs
  * instead of glossing it.
  *
- * GATE DISABLED: The gate is currently bypassed and will directly render children
- * without any authentication or terms checks. The infrastructure remains in place
- * for future re-enablement.
+ * `GATE_ENABLED` in `./config` turns the whole thing off in one word. The flag
+ * is read in the wrapper rather than inside the flow so that "off" means the
+ * state machine never mounts — hooks and all — instead of mounting and then
+ * being told to stand down.
  */
 
 type Step = 'boot' | 'terms' | 'declined' | 'quiz' | 'trap' | 'pass' | 'punish' | 'open'
@@ -64,13 +66,11 @@ const drop = (store: Storage | undefined, key: string) => {
 const wantsLock = () => /(^|[?&#])lock\b/.test(location.search + location.hash)
 
 export function Gate({ children }: { children: React.ReactNode }) {
-  // GATE DISABLED: Return children immediately, bypassing all checks
-  return <>{children}</>
+  if (!GATE_ENABLED) return <>{children}</>
+  return <GateFlow>{children}</GateFlow>
+}
 
-  // ============================================================================
-  // ARCHIVED CODE: The following code is preserved for future re-enablement
-  // ============================================================================
-
+function GateFlow({ children }: { children: React.ReactNode }) {
   // Compute initial UI state synchronously so the gate renders the correct
   // step on first paint instead of showing the empty "boot" placeholder.
   const computeInitial = (): { step: Step; until: number } => {

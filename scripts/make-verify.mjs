@@ -1,7 +1,7 @@
 /**
  * Writes the blob the gate checks a passphrase against.
  *
- *   HOME_COMBINATION='12-34-05' node scripts/make-verify.mjs
+ *   HOME_COMBINATION='NN-NN-NN' node scripts/make-verify.mjs
  *   HOME_PASSPHRASE='…'         node scripts/make-verify.mjs
  *   npm run gate:verify
  *

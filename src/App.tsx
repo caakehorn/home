@@ -15,6 +15,7 @@ import { Home } from './routes/Home'
 import { LeviathanRoute } from './routes/Leviathan'
 import { LineageRoute } from './routes/Lineage'
 import { SageRoute } from './routes/Sage'
+import { StandardRoute } from './routes/Standard'
 import { Splash } from './routes/Splash'
 import { TermsRoute } from './routes/Terms'
 import { TranscriptRoute } from './routes/Transcript'
@@ -68,6 +69,7 @@ function Site() {
         <Route path="/leviathan" element={<LeviathanRoute />} />
         <Route path="/leviathan/:id" element={<LeviathanRoute />} />
         <Route path="/sage" element={<SageRoute />} />
+        <Route path="/standard" element={<StandardRoute />} />
         <Route path="/transcript" element={<TranscriptRoute />} />
         <Route path="/:slug" element={<Stub />} />
       </Routes>

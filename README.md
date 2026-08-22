@@ -64,6 +64,41 @@ rather than following the vibe switch — an arcade is dark inside whatever the
 weather is doing — and its classes are namespaced `arc-*` so nothing in
 `punk.css` repaints them.
 
+## The standard
+
+`/standard` is the editorial rule the wiki is written under, and it is public
+for the same reason the terms are: a record that documents people who can read
+it does not get to keep its rules private. Six of the eight clauses exist to
+be inconvenient to their author.
+
+- **§1** an entry is dated, not current — pages record what was established
+  when they were written, not how the operator feels now
+- **§2** correction is not revision — edits happen on evidence; a page is
+  never rewritten because its subject became inconvenient, or because a newer
+  subject would read better beside a worse version of an older one
+- **§3** archive, do not degrade — `archived` means the operator stopped
+  adding, not that the material is doubted; an archived page keeps its full
+  text, citations, connections and place in the chronology
+- **§4** one bar, every subject — the evidence threshold does not move with
+  how the operator currently feels about someone; nobody is rounded up
+- **§5** no unstated editorial rules — there is no private policy governing
+  this wiki, and a rule that could not survive being read by the people it is
+  about does not get adopted
+- **§6** the operator may stop — he can suspend any line of work for any
+  reason or none; suspension governs what gets *added* and never retires,
+  revises or starves what is already written, and every stop is logged in the
+  open so a gap reads as a decision rather than an omission
+
+The text lives in `src/content/standard.ts` as plain strings — same shape as
+`gate/terms.ts`, rendered as text and never as markup — with the standing
+notices appended below it as a dated, append-only log. `CLAUDE.md` restates
+the clauses that get violated first, because the fastest way to break §5 is to
+write the private rule into a file on the grounds that the file is not public.
+
+The same document is mirrored into the LEVIATHAN deployment as
+`js/standard.js` / `standard.html`. It belongs in `caakehorn/wiki-brain` too,
+which is where the prose is actually authored.
+
 ## Running it
 
 ```bash

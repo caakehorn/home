@@ -181,6 +181,31 @@
   color: var(--text-dim);
 }
 
+.foot__docs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+}
+
+.foot__docs a {
+  color: var(--n3);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--n3) 40%, transparent);
+}
+
+.foot__docs a:hover {
+  color: var(--n1);
+  border-bottom-color: var(--n1);
+}
+
+.foot__docs span {
+  color: var(--text-dim);
+}
+
 .foot__meta {
   display: flex;
   gap: 0.4rem;

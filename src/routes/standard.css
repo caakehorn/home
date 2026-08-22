@@ -1,0 +1,86 @@
+.standard {
+  position: relative;
+  z-index: 1;
+  min-height: 100%;
+  background: var(--void);
+}
+
+.standard__inner {
+  max-width: 68ch;
+  padding-block: clamp(1.4rem, 5vh, 3rem) 4rem;
+}
+
+.standard__title {
+  font-size: clamp(1.2rem, 3.4vw, 2.2rem);
+  line-height: 1.1;
+}
+
+.standard__meta {
+  margin: 0.4rem 0 1.6rem;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  color: var(--text-dim);
+}
+
+.standard__section h2 {
+  margin: 1.6rem 0 0.4rem;
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  color: var(--n3);
+}
+
+.standard__section p {
+  margin: 0 0 0.7rem;
+  font-family: var(--f-ui);
+  font-size: var(--step--1);
+  line-height: 1.7;
+  color: var(--text-dim);
+}
+
+/* The log is the part of this page that changes, so it is fenced off from the
+   part that does not. */
+.standard__log {
+  margin-top: 2.6rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid color-mix(in srgb, var(--n3) 28%, transparent);
+}
+
+.standard__log-note {
+  font-style: italic;
+  opacity: 0.8;
+}
+
+.standard__notice {
+  margin: 1.2rem 0 0;
+  padding-left: 0.9rem;
+  border-left: 2px solid color-mix(in srgb, var(--n3) 46%, transparent);
+}
+
+.standard__notice h3 {
+  margin: 0 0 0.4rem;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+  color: var(--n3);
+}
+
+.standard__notice time {
+  color: var(--text-dim);
+}
+
+.standard__back {
+  display: inline-block;
+  margin-top: 2rem;
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: var(--n3);
+  text-decoration: none;
+}
+
+.standard__back:hover {
+  color: var(--n1);
+}

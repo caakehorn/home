@@ -452,6 +452,7 @@ export function Terminal() {
         art(
           '/\n' +
             SECTIONS.map((s, i) => `${i === SECTIONS.length - 1 ? '└─' : '├─'} /${s.slug}  ${s.status}`).join('\n') +
+            '\n├─ /standard  the rules the record is written under' +
             '\n└─ /terms  the one door in front of the gate',
         )
       },

@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
 import { PortalCard } from '../components/PortalCard'
@@ -136,6 +137,15 @@ export function Home() {
           <p className="foot__note">
             弁証薬窟 · DAN'S DIALECTICAL DATABASE AND DRUG DEN · under construction, permanently ·
             built loud, on purpose · no permission asked
+          </p>
+          {/* The two documents that say what this building is allowed to do to
+              you. The standard is the one addressed to the people written
+              about rather than the people reading, which is why it does not
+              hide at the bottom of a legal link nobody clicks. */}
+          <p className="foot__docs">
+            <Link to="/standard">THE RECORD STANDARD</Link>
+            <span aria-hidden="true">·</span>
+            <Link to="/terms">TERMS OF SERVICE</Link>
           </p>
           <p className="foot__meta">
             <span>NO COOKIES</span>

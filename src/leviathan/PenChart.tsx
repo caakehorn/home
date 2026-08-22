@@ -56,7 +56,9 @@ export function PenChart({
   file,
   axis,
   speed = 14,
+  gutter = 96,
   footer,
+  after,
 }: {
   instrument: Instrument
   /** The dataset under /leviathan this drum is wound with. */
@@ -64,8 +66,12 @@ export function PenChart({
   axis: PenAxis
   /** Positions per second under ▶ RUN. */
   speed?: number
+  /** Room for the lane names. Widen it when they are long. */
+  gutter?: number
   /** The instrument's own reading of its lanes, given their maxima. */
   footer?: (maxima: Record<string, number>) => ReactNode
+  /** Anything the instrument wants under the readout — a table, a feed. */
+  after?: (readAt: number) => ReactNode
 }) {
   const { data, error, loading } = useSet<PenSet>(file)
   const [wrapRef, width] = useWidth<HTMLDivElement>(880, 320)
@@ -118,13 +124,13 @@ export function PenChart({
   }, [playing, n, speed])
 
   const geo = useMemo(() => {
-    const padL = 96
+    const padL = gutter
     const padR = 26
     const padT = 16
     const laneH = 64
     const laneGap = 12
     return { padL, padR, padT, laneH, laneGap, plotW: Math.max(40, width - padL - padR) }
-  }, [width])
+  }, [width, gutter])
 
   const height = geo.padT + lanes.length * (geo.laneH + geo.laneGap) + 30
 
@@ -361,6 +367,8 @@ export function PenChart({
               ))}
             </dl>
           )}
+
+          {after?.(readAt)}
         </div>
       )}
     </Frame>

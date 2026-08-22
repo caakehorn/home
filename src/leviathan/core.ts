@@ -45,6 +45,19 @@ export type InstrumentStatus =
    * THE RULE forbids one. Not a to-do. A decision, with its reason attached.
    */
   | 'BARRED'
+  /**
+   * It makes a judgement and it is drawn anyway, by a decision of the house
+   * taken against THE RULE rather than under it.
+   *
+   * This status exists so that the decision has somewhere to live in the open.
+   * A scored instrument could have been quietly relabelled LIVE and nobody
+   * reading the rack would know the difference — which is exactly why it is
+   * not. It keeps its `bars` sentence, its frame prints that sentence in place
+   * of THE RULE, and every lane it draws carries the precision of the hand
+   * audit behind it. The rack stays readable as a map only if a page that
+   * scores says on itself that it scores.
+   */
+  | 'SCORED'
 
 /**
  * The old console had two sections, `◈ CORPUS` and `◈ WIKI`, sharing one tab
@@ -686,10 +699,16 @@ export const INSTRUMENTS: Instrument[] = [
   // -------------------------------------------------------------------------
   // PROCUREMENT — the unlisted third page, six instruments, all of them scoring.
   //
-  // They are listed for completeness and every one of them is BARRED. The page
-  // is a hand-assembled pool of quotations sorted into lanes and tiers about a
-  // named living person; the sorting is the instrument. Nothing here reproduces
-  // its contents, and nothing in THE GALLERY photographs it.
+  // The page is a hand-assembled pool of quotations sorted into lanes and tiers
+  // about a named living person; the sorting is the instrument. Five of the six
+  // are BARRED for it and stay that way.
+  //
+  // THE ASK is the exception, and it is an exception by decision rather than by
+  // argument: it was brought across on the owner's instruction, and it scores.
+  // It carries SCORED rather than LIVE so the rack cannot be misread as saying
+  // the house changed its mind about what the instrument is. Its frame prints
+  // the declaration where every other page prints THE RULE, and its lanes carry
+  // the precision of the hand audit. Nothing in THE GALLERY photographs it.
 
   {
     id: 'proc-agency',
@@ -762,15 +781,15 @@ export const INSTRUMENTS: Instrument[] = [
     title: 'THE ASK',
     kana: '請求',
     wing: 'PROCUREMENT',
-    corpus: '18,946 messages, recounted from the raw exports',
-    blurb: 'Every request, recounted from primary sources, in the order it was made — classified by speech-act frame and then read by hand.',
-    method: 'Ledger rows counted from the message export, with per-category precision measured by hand and printed on the instrument.',
-    status: 'BARRED',
+    corpus: '357 classified records · drawn from 18,946 messages · 2025-02 → 2026-06',
+    blurb: 'Every request, recounted from primary sources, in the order it was made — classified by speech-act frame and then read by hand. The classification is the instrument, and it is declared rather than hidden.',
+    method:
+      'Records classified over there by speech-act frame plus named object, every hit then read by hand and the false positives struck. Counted into five lanes per month, plus the running total. The counting is not redone here — it was done by hand and re-deriving it would only invent a second, differently-wrong ledger — so what ships is the audit: each lane prints the worst hand-measured precision among the categories it folds, and they run from 100% down to 57%. A lane whose precision you cannot see is a lane you cannot judge.',
+    status: 'SCORED',
     origin: 'procurement.html · VI · THE ASK — and standalone as ask.html',
     bars: JUDGEMENT(
       'It is the most carefully built thing in the old repo — deduplicated, timezone-corrected, hand-audited, precision published. And what it publishes is a classification of one person’s requests.',
     ),
-    needs: 'the classified ledger itself, which is a hand-audited reading of the record rather than the record, and is not vendored here',
   },
 ]
 

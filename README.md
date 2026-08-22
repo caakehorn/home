@@ -619,7 +619,8 @@ declares which kind of dark it is:
 | **PORTED** | 4 | came across under this house's own name — the card links to where |
 | **UNBUILT** | 0 | the corpus is already here; nobody has built the instrument |
 | **SEALED** | 5 | waiting on a corpus this site does not carry |
-| **BARRED** | 18 | it makes a judgement, and THE RULE forbids one |
+| **BARRED** | 17 | it makes a judgement, and THE RULE forbids one |
+| **SCORED** | 1 | it makes a judgement and is drawn anyway — the page says so on itself |
 
 **BARRED is the one that matters.** The corpus half of the old console was
 largely rhetorical scoring — LOVE, PROFANITY, APOLOGY, PLEADING, LOVE-BOMB,
@@ -627,8 +628,20 @@ DENIAL, ASSERTING against DEFERRING — which is exactly what THE RULE was
 written against. Those do not come across. They are listed anyway, each with
 the specific sentence saying which part of the rule it breaks, because quietly
 dropping them would tell a nicer story about the old site than the old site
-tells. The six PROCUREMENT instruments are barred for the same reason and are
-additionally never photographed; see THE GALLERY below.
+tells. Five of the six PROCUREMENT instruments are barred for the same reason
+and are additionally never photographed; see THE GALLERY below. The sixth is
+THE ASK — see below, and see SCORED.
+
+**SCORED is one instrument and one decision.** It is not a loophole in THE RULE
+and it is not a softer BARRED: it is the status a scoring instrument gets when
+the house draws it anyway. It exists because the alternative was worse. THE ASK
+was brought across on the repository owner's explicit instruction, and the two
+honest ways to carry that were to relabel it LIVE — which would have made the
+rack lie about what it is — or to give the decision a name and put it on the
+card. This is the second. A SCORED entry keeps its `bars` sentence, its frame
+prints that sentence where every other instrument prints THE RULE, and its
+badge takes BARRED's red rather than LIVE's block. If a second one is ever
+added, the same applies; if this one is ever removed, the status goes with it.
 
 **UNBUILT is empty, and that is recent.** It used to be the to-do list: every
 instrument whose corpus was already in the building and which nobody had built.
@@ -732,6 +745,60 @@ that room has two inks and `--n1` and `--n3` are the same red twice through the
 machine. Where the ramp collapses the second channel falls back to bare paper,
 and the legend reads the resolved pair back off the canvas so a key can never
 disagree with the marks. The direction switch is the other half of the answer.
+
+### THE ASK, and the one instrument that scores
+
+```bash
+npm run ask -- ../leviathan   # vendors js/procurement-asks.js -> public/leviathan/ask.json
+```
+
+**Read the status before the instrument.** THE ASK is `SCORED`, not `LIVE`, and
+the difference is the whole point of carrying it. Every other instrument in this
+building is a count. This one is a **classification**: 357 records drawn from
+18,946 messages, sorted by speech-act frame plus named object into categories
+that are not in the corpus — they were brought to it — and then read by hand.
+
+It was BARRED, with a sentence saying why, and it was brought across anyway on
+the repository owner's explicit instruction. That sentence has not been deleted
+or softened. It still sits on the entry, it is what the instrument's frame
+prints in place of THE RULE, and the badge on its card is BARRED's red.
+
+**What makes it publishable rather than merely published is the audit.** Every
+hit was read by hand and the false positives struck, and the per-category
+precision that survived that read ships in the dataset and is printed on the
+instrument:
+
+| lane | folds | precision |
+| --- | --- | --- |
+| NAMES THE BUY SIZE | `denom` | 97% |
+| ASKS FOR IT | `want`, `order`, `chase`, `askSupply`, `askMoney`, `askOther` | **57%** |
+| RAISES THE MONEY | `fund`, `ask3p` | 96% |
+| HANDS OVER THE ATM CODE | `code` | 100% |
+| IS THE SOURCE AROUND | `see` | 100% |
+
+Each lane prints the **worst** precision among the categories it folds, because
+a lane is only as good as its weakest member. `ASKS FOR IT` at 57% is wrong on
+close to half of what it caught, and the lane it feeds is wrong with it — which
+is a fact about the instrument that the instrument itself has to say. A
+classification published without its error rate is asking to be believed; one
+published with it can be read. Low-precision numbers are marked with a symbol
+and an underline as well as ink, because the RIOT palette repeats its two inks
+and a warning carried only by colour vanishes there.
+
+The counting is **not** redone here. It was done by hand over there, and
+re-deriving it in this repo would only invent a second, differently-wrong
+ledger. `scripts/build-ask.mjs` reshapes the records into monthly lanes and
+copies the audit through unchanged; it slices the object literal out of the
+source file rather than evaluating it, so a build here cannot run whatever that
+repository happens to contain.
+
+The lane groupings are the original's, reproduced rather than re-argued — the
+grouping is part of the classification, not a reading of it. `RUNNING TOTAL` is
+the same records accumulated: a restatement of the other five, not a sixth
+finding.
+
+Like `transcript` and `accretion`, `ask.json` is committed rather than built in
+CI, because it derives from a repository this one does not vendor.
 
 ### THE RECORDER, and the pens that did not come across
 

@@ -6,6 +6,7 @@ import { sectionBySlug } from '../content/sections'
 import { INSTRUMENTS, WINGS, countBy, instrumentById, instrumentsIn } from '../leviathan/core'
 import type { Instrument, InstrumentStatus } from '../leviathan/core'
 import { Accretion } from '../leviathan/instruments/Accretion'
+import { Ask } from '../leviathan/instruments/Ask'
 import { Chronology } from '../leviathan/instruments/Chronology'
 import { Attention } from '../leviathan/instruments/Attention'
 import { Census } from '../leviathan/instruments/Census'
@@ -35,6 +36,7 @@ const BUILT: Record<string, typeof Mass> = {
   chronology: Chronology,
   pen: Pen,
   recorder: Recorder,
+  ask: Ask,
   clock: Clock,
   pulse: Pulse,
   silence: Silence,
@@ -64,6 +66,7 @@ const LEGEND: Record<InstrumentStatus, string> = {
   UNBUILT: 'the corpus is already here; nobody has built the instrument',
   SEALED: 'waiting on a corpus this site does not carry',
   BARRED: 'it makes a judgement, and THE RULE forbids one',
+  SCORED: 'it makes a judgement and is drawn anyway — the page says so on itself',
 }
 
 const section = sectionBySlug('leviathan')!

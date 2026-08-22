@@ -153,10 +153,16 @@
   background: var(--n3);
 }
 
-/* Five states, five weights of ink. LIVE is the only one that gets a solid
+/* Six states, six weights of ink. LIVE is the only one that gets a solid
    block; PORTED points somewhere; UNBUILT and SEALED are outlines, because an
    outline reads as an empty slot; BARRED is the one that argues back, so it
-   gets the spot red every other warning on this site uses. */
+   gets the spot red every other warning on this site uses.
+
+   SCORED is the loudest, and it has to be. Without a rule of its own it would
+   fall through to the base badge, which is the solid block LIVE wears — a
+   scoring instrument wearing the badge that means "this is a count" is the one
+   misreading this rack cannot afford. So it takes BARRED's red and fills it:
+   drawn, unlike a barred entry, and not a count, unlike a live one. */
 .lev__badge--live {
   color: var(--on-glow);
   background: var(--n3);
@@ -183,6 +189,12 @@
   color: var(--n5);
   background: none;
   border: 1px solid color-mix(in srgb, var(--n5) 65%, transparent);
+}
+
+.lev__badge--scored {
+  color: var(--on-glow);
+  background: var(--n5);
+  border: 1px solid var(--n5);
 }
 
 /* ---- the legend --------------------------------------------------------- */

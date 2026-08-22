@@ -2,7 +2,7 @@ import { Suspense, lazy } from 'react'
 import { Route, Routes, useLocation } from 'react-router-dom'
 import { Crawl } from './components/Crawl'
 import { CrownDefs } from './components/Crown'
-import { CursorTrail } from './components/CursorTrail'
+import { Cursor } from './components/Cursor'
 import { JET_FUEL, RATIO } from './content/crawls'
 import { Fx } from './components/Fx'
 import { Hud } from './components/Hud'
@@ -100,7 +100,7 @@ function Site() {
     <>
       <CrownDefs />
       <Fx />
-      <CursorTrail />
+      <Cursor />
 
       <Suspense fallback={<Arriving />}>
         <Routes>

@@ -66,6 +66,15 @@ export function CursorTrail() {
     const dots: Dot[] = []
     const dpr = Math.min(window.devicePixelRatio || 1, 2)
 
+    // The last position the pointer reported, and whether it is new. A high
+    // polling-rate mouse fires pointermove up to a thousand times a second and
+    // the old loop pushed a dot for every one of them — a thousand arcs a
+    // second into a 90-slot buffer, 940 of which were overwritten before they
+    // were ever drawn. One dot per FRAME is the most that can ever be seen.
+    let px = 0
+    let py = 0
+    let moved = false
+
     const resize = () => {
       canvas.width = Math.round(window.innerWidth * dpr)
       canvas.height = Math.round(window.innerHeight * dpr)
@@ -79,14 +88,21 @@ export function CursorTrail() {
     window.addEventListener('resize', resize)
 
     const onMove = (event: PointerEvent) => {
-      tone = (tone + 1) % 4
-      dots.push({ x: event.clientX, y: event.clientY, life: 1, tone })
-      if (dots.length > 90) dots.shift()
+      px = event.clientX
+      py = event.clientY
+      moved = true
+      // Asleep: the pointer has started moving again, so start the loop.
+      if (raf === 0) raf = requestAnimationFrame(frame)
     }
-    window.addEventListener('pointermove', onMove, { passive: true })
 
     const frame = () => {
-      raf = requestAnimationFrame(frame)
+      if (moved) {
+        tone = (tone + 1) % 4
+        dots.push({ x: px, y: py, life: 1, tone })
+        if (dots.length > 48) dots.shift()
+        moved = false
+      }
+
       ctx.clearRect(0, 0, window.innerWidth, window.innerHeight)
       const c = chaosRef.current
       ctx.globalCompositeOperation = 'lighter'
@@ -104,11 +120,24 @@ export function CursorTrail() {
         ctx.fill()
       }
       ctx.globalAlpha = 1
+
+      // Nothing left to draw and nothing new coming in: stop. The old loop ran
+      // a full-viewport clearRect at 60fps for the entire life of the session,
+      // whether or not the pointer had moved in the last ten minutes — on a
+      // page nobody is touching, that was the single largest thing the site
+      // was doing. `onMove` wakes it again.
+      if (dots.length === 0) {
+        raf = 0
+        return
+      }
+      raf = requestAnimationFrame(frame)
     }
+
+    window.addEventListener('pointermove', onMove, { passive: true })
     raf = requestAnimationFrame(frame)
 
     return () => {
-      cancelAnimationFrame(raf)
+      if (raf !== 0) cancelAnimationFrame(raf)
       window.removeEventListener('resize', resize)
       window.removeEventListener('pointermove', onMove)
     }

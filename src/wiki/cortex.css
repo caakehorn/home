@@ -261,3 +261,310 @@
     display: none;
   }
 }
+
+
+/* ==========================================================================
+   THE FIGURE — what you have pinned, and what it would take to close it.
+
+   Bottom-left, opposite the probe. The two are read against each other: the
+   probe is the star you are considering, this is what you have committed to.
+   ========================================================================== */
+.cortex__panels {
+  /* No box of its own on a wide screen: the probe and the figure keep the
+     opposite bottom corners they were designed for. See the phone rule at the
+     end of this file for what it becomes when there is only one corner. */
+  display: contents;
+}
+
+.figure {
+  position: absolute;
+  right: 0.7rem;
+  bottom: 0.7rem;
+  z-index: 6;
+  width: min(21rem, calc(100% - 1.4rem));
+  max-height: min(62%, 30rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.6rem 0.75rem 0.7rem;
+  background: color-mix(in srgb, var(--void) 94%, transparent);
+  border: 2px solid var(--n5);
+  box-shadow: 4px 4px 0 var(--edge);
+  animation: figure-in 260ms var(--spring) both;
+}
+
+@keyframes figure-in {
+  from { opacity: 0; transform: translate3d(0, 14px, 0) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Closed. The border switches to the strand colour, which is the same signal
+   the map itself just gave — the panel and the drawing agree. */
+.figure--closed {
+  border-color: var(--n3);
+  box-shadow:
+    4px 4px 0 var(--edge),
+    0 0 var(--glow-r) color-mix(in srgb, var(--n3) 45%, transparent);
+}
+
+.figure__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.figure__kana {
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--n5);
+}
+
+.figure--closed .figure__kana {
+  color: var(--n3);
+  text-shadow: 0 0 calc(var(--glow-r) * 0.5) var(--n3);
+}
+
+.figure__name {
+  font-family: var(--f-head);
+  font-size: 0.95rem;
+  line-height: 1.05;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.figure__state {
+  margin-top: 0.15rem;
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  color: var(--text-dim);
+}
+
+.figure--closed .figure__state {
+  color: var(--n3);
+}
+
+/* ---- the stars ---------------------------------------------------------- */
+.figure__stars {
+  display: grid;
+  gap: 1px;
+  margin-top: 0.5rem;
+}
+
+.figure__stars li {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.figure__star {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  min-width: 0;
+  padding: 0.16rem 0.3rem;
+  font-size: 0.72rem;
+  line-height: 1.3;
+  text-align: left;
+  color: var(--text);
+  border-left: 3px solid var(--n3);
+  transition: background-color var(--snap) linear, transform var(--snap) var(--spring);
+}
+
+.figure__star:hover {
+  transform: translateX(3px);
+  background: color-mix(in srgb, var(--n3) 22%, transparent);
+}
+
+.figure__star b {
+  flex: none;
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  color: var(--n3);
+}
+
+.figure__drop {
+  flex: none;
+  width: 1.1rem;
+  height: 1.1rem;
+  font-family: var(--f-mono);
+  font-size: 0.8rem;
+  line-height: 1;
+  color: var(--text-dim);
+  border: 1px solid transparent;
+  transition: color var(--snap) linear, border-color var(--snap) linear,
+    transform var(--snap) var(--spring);
+}
+
+.figure__drop:hover {
+  transform: scale(1.2);
+  color: var(--n2);
+  border-color: var(--n2);
+}
+
+/* ---- what is missing ---------------------------------------------------- */
+.figure__gap {
+  margin-top: 0.6rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed color-mix(in srgb, var(--n5) 60%, transparent);
+}
+
+.figure__gap h3 {
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  color: var(--n5);
+}
+
+.figure__gap .jp {
+  font-size: 0.9rem;
+}
+
+.figure__bridge {
+  margin-top: 0.3rem;
+  font-size: 0.68rem;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+.figure__bridge em {
+  font-style: normal;
+  color: var(--text);
+}
+
+/* The named page that would join two pieces — the single most useful thing
+   this map can tell you, so it is a control rather than a label. */
+.figure__bridge button {
+  padding: 0 0.2rem;
+  font: inherit;
+  color: var(--n5);
+  border-bottom: 1px dashed var(--n5);
+  transition: background-color var(--snap) linear, color var(--snap) linear;
+}
+
+.figure__bridge button:hover {
+  color: var(--on-glow);
+  background: var(--n5);
+}
+
+/* ---- actions ------------------------------------------------------------ */
+.figure__foot {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.7rem;
+}
+
+.figure__read,
+.figure__clear {
+  padding: 0.22rem 0.6rem;
+  font-family: var(--f-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.12em;
+  transition: transform var(--snap) var(--spring), background-color var(--snap) linear,
+    color var(--snap) linear;
+}
+
+.figure__read {
+  color: var(--on-glow);
+  background: var(--n3);
+  border: 2px solid var(--edge);
+  box-shadow: 3px 3px 0 var(--edge);
+}
+
+.figure__read:hover {
+  transform: translate(-2px, -3px);
+}
+
+.figure__clear {
+  margin-left: auto;
+  color: var(--text-dim);
+  border: 2px solid var(--text-dim);
+}
+
+.figure__clear:hover {
+  transform: scale(1.05);
+  color: var(--n2);
+  border-color: var(--n2);
+}
+
+/* ==========================================================================
+   THE PROBE'S PIN CONTROL
+   ========================================================================== */
+.probe__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.7rem;
+}
+
+.probe__pin {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.22rem 0.6rem;
+  font-family: var(--f-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.12em;
+  color: var(--n5);
+  border: 2px solid var(--n5);
+  transition: transform var(--snap) var(--spring), background-color var(--snap) linear,
+    color var(--snap) linear;
+}
+
+.probe__pin .jp {
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.probe__pin:hover {
+  transform: translateY(-2px) scale(1.04);
+  color: var(--on-glow);
+  background: var(--n5);
+}
+
+.probe__pin--on {
+  color: var(--on-glow);
+  background: var(--n3);
+  border-color: var(--n3);
+}
+
+.probe__pin--on:hover {
+  background: var(--n2);
+  border-color: var(--n2);
+}
+
+/* One bottom edge, two panels. The wrapper becomes a real column and both go
+   static inside it — the figure above the probe, because the figure is the
+   thing you are building and the probe is the thing you are considering for
+   it. Both get their own scroll so neither can push the other off the stage. */
+@media (max-width: 720px) {
+  .cortex__panels {
+    position: absolute;
+    left: 0.7rem;
+    right: 0.7rem;
+    bottom: 0.7rem;
+    z-index: 6;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    max-height: calc(100% - 5.5rem);
+    pointer-events: none;
+  }
+
+  .cortex__panels > * {
+    pointer-events: auto;
+  }
+
+  .figure,
+  .probe {
+    position: static;
+    width: auto;
+    max-height: 50%;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+:root[data-still='1'] .figure {
+  animation: none;
+}

@@ -4,7 +4,7 @@
 
 Three things under one roof, and they are the same thing. The **dialectic**:
 every position here got argued at, usually at an hour no argument should be
-trusted at. The **database**: it got written down anyway — 487 pages, cited,
+trusted at. The **database**: it got written down anyway — some 490 pages, cited,
 cross-linked, contradictions left in where they are load-bearing. The **den**:
 the room where both of those happened.
 
@@ -110,9 +110,45 @@ there is no frame in which the site exists on screen unlocked.
 1. **The quiz.** An empty submit passes. Anything else drops the visitor into a
    decoy that is always about to finish rebuilding an archive index and never
    does.
-2. **The passphrase.** The only one of the three that is an actual lock.
+2. **The padlock.** The only one of the three that is an actual lock.
 
 Steps 0 and 1 are doormen. Step 2 is the boundary.
+
+### The padlock
+
+The door is a combination dial, worked the way a real one is: spin **RIGHT** to
+the first number, **LEFT** to the second, **RIGHT** to the third, pull the
+shackle.
+
+A number is committed by **reversing**, not by clicking, and that is the whole
+reason this is a lock rather than three number pickers stacked up — on a
+physical padlock the direction change *is* the commit, and everything about how
+the object feels comes from that one fact. The third number has no reversal
+after it, so PULL is what commits it, which is also what a hand does. The same
+rule serves the keyboard for free: → and ← turn the dial, pressing the opposite
+arrow **is** the reversal, and Enter pulls. A minimum travel threshold stops the
+jitter at the start of a drag reading as a reversal and committing whatever
+number you were parked on before you had moved.
+
+**The combination is the passphrase.** The crypto below is untouched — the
+dialled numbers are formatted into one string and handed to the same
+decryption. What changes is the keyspace, and `src/gate/combination.ts` states
+the cost rather than glossing it: three numbers on forty positions is
+40³ = 64,000, grindable offline against a committed `verify.enc` in hours
+rather than centuries. That is roughly the security a physical combination
+padlock has ever offered, which is the point of the object. It does *not*
+weaken online guessing — a wrong combination still costs the 30-second lockout,
+so grinding 64,000 of them through the actual door is about 22 days of doing
+nothing else. If that trade is unwanted, `POSITIONS = 60` and `NUMBERS = 4` in
+that file is 12.9 million and needs no other change anywhere: the dial and the
+verifier both read those two constants.
+
+The format contract is the one genuinely breakable thing here — this file and
+`scripts/make-verify.mjs` must agree on one string exactly or the door never
+opens for anybody including its owner. So the rule is short, total, and stated
+in both places: **each number zero-padded to two digits, joined by hyphens**
+(`[12, 34, 5]` → `"12-34-05"`). The script normalises `HOME_COMBINATION` itself,
+so a stray space or a missing zero cannot brick a deployment.
 
 The lock is PBKDF2-SHA256 over the passphrase (250,000 iterations) and
 AES-256-GCM, and it checks an entry by *decrypting* a small blob: a wrong
@@ -136,8 +172,20 @@ nothing else in the codebase reads those strings.
 ### Building the verifier
 
 ```bash
-HOME_PASSPHRASE='…' npm run gate:verify   # writes public/gate/verify.enc
+HOME_COMBINATION='12-34-05' npm run gate:verify   # writes public/gate/verify.enc
+HOME_PASSPHRASE='…'         npm run gate:verify   # still works, passed through
 ```
+
+`HOME_COMBINATION` takes whatever is natural to type — `12-34-5`, `12 34 05`,
+`12,34,5` all normalise to the same string the dial produces. It rejects
+anything that is not three numbers in 0–39, because a combination that cannot
+be dialled is a door that cannot be opened.
+
+**Switching to the padlock means rebuilding the verifier.** The blob is keyed to
+whatever phrase built it, so a `verify.enc` made from the old typed passphrase
+will refuse every combination — indistinguishably from a wrong one, because
+that is what a wrong key looks like to GCM. Run the command above with the
+chosen combination before deploying the dial.
 
 The blob is a ciphertext, so committing it leaks nothing but the cost of
 guessing. The passphrase itself is never written anywhere and cannot be
@@ -421,11 +469,11 @@ over the door.
 
 ## The brain console
 
-The front page is a deployment portal for a 487-page wiki and it used to open
+The front page is a deployment portal for a wiki of some 490 pages and it used to open
 with three paragraphs on the meaning of the word *dialectic*, with the wiki as
 slot one of an eight-card grid. You could not search it from the front page.
 You could not resume it. The only answer to "where do I start" was `/brain`,
-which opens on a force-directed map of 487 unlabelled dots — an answer to a
+which opens on a force-directed map of several hundred unlabelled dots — an answer to a
 question you can only have once you have already read enough to ask it.
 
 `src/wiki/Console.tsx` goes above everything else on `/` and does four things:
@@ -433,7 +481,7 @@ question you can only have once you have already read enough to ask it.
 - **SEARCH** — scored, instant, keyboard-driven, `/` to focus from anywhere.
   Title hits outrank slug hits outrank blurb hits; weight is a tiebreak, not a
   ranking. Scored under `useDeferredValue`, so the field never waits on the
-  487-row pass.
+  full-corpus pass.
 - **RESUME** — `src/wiki/trail.ts` records every page this browser opens.
   One button, back where you were, and read pages are ticked everywhere they
   appear.

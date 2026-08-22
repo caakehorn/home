@@ -17,6 +17,7 @@
     "accretion": "node --experimental-strip-types scripts/build-accretion.mjs",
     "clock": "node scripts/build-clock.mjs",
     "lexicon": "node scripts/build-lexicon.mjs",
+    "recorder": "node scripts/build-recorder.mjs",
     "wiki-instruments": "node scripts/build-wiki-instruments.mjs",
     "gallery": "node scripts/build-gallery.mjs",
     "gallery:capture": "node scripts/capture-gallery.mjs",

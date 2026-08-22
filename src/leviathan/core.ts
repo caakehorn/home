@@ -90,7 +90,7 @@ const JUDGEMENT = (what: string) =>
 
 export const INSTRUMENTS: Instrument[] = [
   // -------------------------------------------------------------------------
-  // THE HOUSE — built here. Four of these, and they are the only four.
+  // THE HOUSE — built here. Five of these, and they are the only five.
 
   {
     id: 'mass',
@@ -145,6 +145,21 @@ export const INSTRUMENTS: Instrument[] = [
       'Per first-parent commit: files under wiki/ ending .md, the sum of their blob sizes, every [[wiki/…]] occurrence, and distinct page→page pairs. Read from git rather than the snapshot, since the snapshot only knows the present. Nothing smoothed, no commit excluded.',
     status: 'LIVE',
     origin: 'the console’s WIKI 06 · ACCRETION, rebuilt off git instead of a build log',
+  },
+  {
+    id: 'recorder',
+    numeral: 'V',
+    title: 'THE RECORDER',
+    kana: '記録計',
+    wing: 'HOUSE',
+    corpus: '134,348 messages · 129 months, 91 of them covered · 2015-11 → 2026-07',
+    blurb:
+      'THE POLYGRAPH’s drum, wound over the corpus the polygraph actually ran on. Four counts per month against one axis — and the 38 months the exports do not cover hatched, with the stylus lifted clean off the paper across them.',
+    method:
+      'Per month: messages sent, messages received, words across both, and distinct days carrying at least one message. A word is THE LEXICON’s word, so the two instruments cannot disagree about what they are both counting. Month and day are read out of the timestamp string rather than through Date(), for the reason THE CLOCK gives. Each lane scaled to its own maximum, which is printed beside it. Months with no export are emitted as blanks rather than zeroes, because a hole in an archive is not a quiet month.',
+    status: 'LIVE',
+    origin:
+      'void.html · MODULE 08 · draw_annie — the chart recorder, without the four keyword pens it was hung with',
   },
 
   // -------------------------------------------------------------------------
@@ -265,7 +280,9 @@ export const INSTRUMENTS: Instrument[] = [
     method: 'Rates per 100 messages per month on four channels, against a volume lane.',
     status: 'BARRED',
     origin: 'void.html · MODULE 08 · draw_annie',
-    bars: JUDGEMENT('The four pens are LOVE, PROFANITY, APOLOGY and SHOUT. The instrument is beautiful and the pens are keyword lists.'),
+    bars:
+      JUDGEMENT('The four pens are LOVE, PROFANITY, APOLOGY and SHOUT. The instrument is beautiful and the pens are keyword lists.') +
+      ' The drum came across on its own, as THE RECORDER, running the same record through four channels that are only ever counted.',
   },
   {
     id: 'signal',

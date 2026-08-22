@@ -1,0 +1,747 @@
+/* ==========================================================================
+   THE BRAIN CONSOLE — the front page's working end.
+   ========================================================================== */
+
+.con {
+  position: relative;
+  z-index: 3;
+  padding-block: clamp(1.1rem, 3vh, 2rem);
+}
+
+.con__head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  margin-bottom: 0.9rem;
+}
+
+.con__title {
+  font-family: var(--f-head);
+  font-size: clamp(1.6rem, 6vw, 4rem);
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: var(--text);
+  -webkit-text-stroke: calc(1px + 1px * var(--chaos)) var(--n3);
+  paint-order: stroke fill;
+}
+
+.con__title .jp {
+  color: var(--n3);
+  font-size: 0.5em;
+  -webkit-text-stroke: 0;
+  text-shadow: 0 0 calc(var(--glow-r) * 0.6) var(--n3);
+}
+
+.con__stats {
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+}
+
+/* --------------------------------------------------------------------------
+   THE SEARCH
+   -------------------------------------------------------------------------- */
+.con__search {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.7rem;
+  background: var(--void-2);
+  border: var(--rule) solid var(--n3);
+  box-shadow: 7px 7px 0 var(--edge);
+  transition: transform var(--snap) var(--spring), box-shadow var(--snap) linear;
+}
+
+.con__search:focus-within {
+  transform: translate(-2px, -3px);
+  box-shadow:
+    10px 10px 0 var(--edge),
+    0 0 var(--glow-r) color-mix(in srgb, var(--n3) 45%, transparent);
+}
+
+.con__search-kana {
+  flex: none;
+  font-size: clamp(0.9rem, 2vw, 1.2rem);
+  color: var(--n3);
+  text-shadow: 0 0 calc(var(--glow-r) * 0.5) var(--n3);
+}
+
+.con__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0.3rem 0;
+  font-family: var(--f-mono);
+  font-size: clamp(0.9rem, 2.2vw, 1.25rem);
+  letter-spacing: 0.02em;
+  color: var(--text);
+  background: none;
+  border: none;
+  outline: none;
+}
+
+.con__input::placeholder {
+  color: var(--text-dim);
+}
+
+/* The browser's own clear affordance on a `type=search` is a grey X that does
+   not belong to any palette here. */
+.con__input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+
+.con__slash {
+  flex: none;
+  padding: 0.05rem 0.4rem;
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  color: var(--edge);
+  background: var(--n3);
+  border: 2px solid var(--edge);
+}
+
+/* ---- results ------------------------------------------------------------ */
+.con__results {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: -3px;
+  right: -3px;
+  z-index: 30;
+  max-height: 60vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--void);
+  border: var(--rule) solid var(--n3);
+  box-shadow: 8px 8px 0 var(--edge);
+  animation: con-drop 200ms var(--spring) both;
+}
+
+@keyframes con-drop {
+  from { opacity: 0; transform: translate3d(0, -8px, 0) scaleY(0.96); }
+  to { opacity: 1; transform: none; }
+}
+
+.con__result {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.7rem;
+  width: 100%;
+  padding: 0.5rem 0.7rem;
+  text-align: left;
+  border-bottom: 1px solid color-mix(in srgb, var(--text-dim) 30%, transparent);
+  transition: background-color 90ms linear;
+}
+
+.con__result--on {
+  background: color-mix(in srgb, var(--n3) 20%, transparent);
+}
+
+.con__result-kana {
+  font-size: 1.1rem;
+  color: var(--n3);
+}
+
+.con__result-main {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.con__result-main b {
+  font-size: var(--step-0);
+  color: var(--text);
+}
+
+.con__result-main i {
+  overflow: hidden;
+  font-family: var(--f-ui);
+  font-style: normal;
+  font-size: var(--step--1);
+  line-height: 1.35;
+  color: var(--text-dim);
+  /* two lines of the blurb, then it stops */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.con__result-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  color: var(--text-dim);
+}
+
+.con__result-meta em {
+  padding: 0.05rem 0.35rem;
+  font-style: normal;
+  color: var(--edge);
+  background: var(--n5);
+}
+
+.con__error {
+  margin-top: 0.8rem;
+  padding: 0.5rem 0.7rem;
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  color: var(--n2);
+  border: 2px dashed var(--n2);
+}
+
+/* --------------------------------------------------------------------------
+   THE FOUR BUTTONS
+   -------------------------------------------------------------------------- */
+.con__jumps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: 0.6rem;
+  margin-top: 0.9rem;
+}
+
+.con__jump {
+  display: grid;
+  gap: 0.15rem;
+  align-content: start;
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  text-decoration: none;
+  color: var(--text);
+  background: var(--void-2);
+  border: 2px solid color-mix(in srgb, var(--n1) 60%, transparent);
+  box-shadow: 5px 5px 0 var(--edge);
+  transition: transform var(--snap) var(--spring), border-color var(--snap) linear;
+  will-change: transform;
+}
+
+.con__jump:hover:not(:disabled),
+.con__jump:focus-visible {
+  transform: translate(-3px, -4px);
+  border-color: var(--n3);
+}
+
+.con__jump:active:not(:disabled) {
+  transform: translate(2px, 2px) scale(0.99);
+  transition-duration: 60ms;
+}
+
+.con__jump:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.con__jump .jp {
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--n1);
+}
+
+.con__jump b {
+  font-family: var(--f-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.1em;
+}
+
+.con__jump i {
+  font-style: normal;
+  font-size: var(--step--1);
+  line-height: 1.4;
+  color: var(--text-dim);
+}
+
+.con__jump--resume {
+  border-color: var(--n3);
+  box-shadow: 5px 5px 0 var(--n3);
+}
+
+.con__jump--resume .jp {
+  color: var(--n3);
+}
+
+.con__jump--resume i {
+  color: var(--n3);
+}
+
+/* --------------------------------------------------------------------------
+   THE DOMAIN RAIL
+   -------------------------------------------------------------------------- */
+.con__domains {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.7rem;
+}
+
+.con__domain {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.55rem;
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  color: var(--text);
+  border: 2px solid color-mix(in srgb, var(--n1) 45%, transparent);
+  transition: transform var(--snap) var(--spring), background-color var(--snap) linear,
+    color var(--snap) linear;
+}
+
+.con__domain .jp {
+  color: var(--n3);
+}
+
+.con__domain b {
+  color: var(--n5);
+}
+
+.con__domain:hover {
+  transform: translateY(-3px) scale(1.05);
+  background: var(--n3);
+  color: var(--on-glow);
+}
+
+.con__domain:hover .jp,
+.con__domain:hover b {
+  color: var(--on-glow);
+}
+
+/* --------------------------------------------------------------------------
+   THE BLOCKS
+   -------------------------------------------------------------------------- */
+.con__block {
+  margin-top: clamp(1.4rem, 4vh, 2.4rem);
+}
+
+.con__sub {
+  font-family: var(--f-head);
+  font-size: clamp(1.1rem, 3.4vw, 2rem);
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.con__sub .jp {
+  color: var(--n3);
+  font-size: 0.62em;
+}
+
+.con__sub-note {
+  max-width: 68ch;
+  margin-top: 0.4rem;
+  font-size: var(--step--1);
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+/* ---- the routes --------------------------------------------------------- */
+.con__routes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  gap: clamp(0.7rem, 1.8vw, 1.1rem);
+  margin-top: 1rem;
+  /* Off-screen route cards are not laid out until they are near the viewport.
+     Four cards is not many, but this section sits above two more grids and a
+     rig console, and the cheapest layout is the one that does not happen. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 22rem;
+}
+
+.con__route {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 0.35rem;
+  padding: 0.9rem 0.9rem 1rem;
+  background: var(--void-2);
+  border: var(--rule) solid var(--glow, var(--n1));
+  box-shadow: 6px 6px 0 var(--edge);
+  transition: transform var(--pop) var(--spring);
+  will-change: transform;
+}
+
+.con__route:hover {
+  transform: translate(-3px, -5px) rotate(-0.4deg);
+}
+
+.con__route-num {
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  color: var(--glow, var(--n1));
+}
+
+.con__route-label {
+  font-family: var(--f-head);
+  font-size: clamp(1rem, 2.4vw, 1.35rem);
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.con__route-label .jp {
+  color: var(--glow, var(--n1));
+  font-size: 0.72em;
+}
+
+.con__route-note {
+  font-size: var(--step--1);
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+.con__stops {
+  display: grid;
+  gap: 0.2rem;
+  margin-top: 0.3rem;
+  padding-left: 0;
+  counter-reset: stop;
+}
+
+.con__stop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.15rem 0.3rem;
+  font-size: var(--step--1);
+  line-height: 1.35;
+  text-decoration: none;
+  color: var(--text);
+  border-left: 3px solid var(--glow, var(--n1));
+  transition: background-color var(--snap) linear, transform var(--snap) var(--spring);
+}
+
+.con__stop:hover {
+  transform: translateX(4px);
+  background: color-mix(in srgb, var(--glow, var(--n1)) 22%, transparent);
+}
+
+.con__stop em {
+  flex: none;
+  font-family: var(--f-mono);
+  font-style: normal;
+  font-size: 0.62rem;
+  color: var(--text-dim);
+}
+
+/* A page this browser has already opened. The corpus is 487 pages; the only
+   thing that stops a route reading as homework is being able to see which of
+   it you have already done. */
+.con__stop--read {
+  color: var(--text-dim);
+}
+
+.con__stop--read::after {
+  content: '✓';
+  color: var(--n3);
+}
+
+.con__stop-more {
+  padding-left: 0.3rem;
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+}
+
+.con__route-go {
+  justify-self: start;
+  margin-top: 0.5rem;
+  padding: 0.22rem 0.7rem;
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-decoration: none;
+  color: var(--on-glow);
+  background: var(--glow, var(--n1));
+  border: 2px solid var(--edge);
+  box-shadow: 4px 4px 0 var(--edge);
+  transition: transform var(--snap) var(--spring-hard);
+}
+
+.con__route-go:hover {
+  transform: translate(-2px, -3px) scale(1.05);
+}
+
+.con__route-cost {
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+}
+
+/* ---- the buried --------------------------------------------------------- */
+.con__buried {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+  gap: 0.6rem;
+  margin-top: 1rem;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 18rem;
+}
+
+.con__grave-link {
+  display: grid;
+  align-content: start;
+  gap: 0.25rem;
+  height: 100%;
+  padding: 0.65rem 0.7rem;
+  text-decoration: none;
+  color: var(--text);
+  background: var(--void-2);
+  /* Dashed, because none of these is a finished object. */
+  border: 2px dashed var(--glow, var(--n1));
+  transition: transform var(--snap) var(--spring), border-style var(--snap) linear,
+    background-color var(--snap) linear;
+}
+
+.con__grave-link:hover {
+  transform: translate(-3px, -4px) rotate(0.5deg);
+  border-style: solid;
+  background: var(--void-3);
+}
+
+.con__grave-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  justify-self: start;
+  padding: 0.1rem 0.4rem;
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  color: var(--on-glow);
+  background: var(--glow, var(--n1));
+}
+
+.con__grave-title {
+  font-size: var(--step-0);
+  line-height: 1.2;
+}
+
+.con__grave-why {
+  font-size: 0.7rem;
+  line-height: 1.45;
+  color: var(--text-dim);
+}
+
+.con__grave-meta {
+  margin-top: 0.15rem;
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+
+/* A sealed page is the one kind here that is deliberate, so it is the one kind
+   that gets a solid rule and a lit edge rather than a dashed one. */
+.con__grave--sealed .con__grave-link {
+  border-style: solid;
+  box-shadow: inset 0 0 calc(var(--glow-r) * 0.5) color-mix(in srgb, var(--glow) 30%, transparent);
+}
+
+@media (max-width: 620px) {
+  .con__search {
+    gap: 0.4rem;
+  }
+  .con__slash {
+    display: none;
+  }
+}
+
+:root[data-still='1'] .con__results,
+:root[data-still='1'] .con__route {
+  animation: none;
+  will-change: auto;
+}
+
+/* ==========================================================================
+   THE READING DESK — the same idea, folded flat, across the top of /brain.
+   ========================================================================== */
+.rail {
+  margin-block: 0.7rem 0.4rem;
+  border: 2px solid var(--n3);
+  box-shadow: 5px 5px 0 var(--edge);
+  background: var(--void-2);
+}
+
+.rail__bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.5rem 0.7rem;
+}
+
+.rail__title {
+  font-family: var(--f-head);
+  font-size: clamp(0.85rem, 2vw, 1.15rem);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.rail__title .jp {
+  color: var(--n3);
+  font-size: 0.8em;
+}
+
+.rail__resume,
+.rail__die,
+.rail__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.22rem 0.6rem;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  color: var(--text);
+  border: 2px solid color-mix(in srgb, var(--n1) 55%, transparent);
+  transition: transform var(--snap) var(--spring), background-color var(--snap) linear,
+    color var(--snap) linear, border-color var(--snap) linear;
+}
+
+.rail__resume .jp,
+.rail__die .jp {
+  color: var(--n3);
+}
+
+.rail__resume i {
+  max-width: 16rem;
+  overflow: hidden;
+  font-style: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--n3);
+}
+
+.rail__resume {
+  border-color: var(--n3);
+}
+
+.rail__resume:hover,
+.rail__die:hover,
+.rail__toggle:hover {
+  transform: translateY(-3px) scale(1.04);
+  background: var(--n3);
+  color: var(--on-glow);
+  border-color: var(--n3);
+}
+
+.rail__resume:hover .jp,
+.rail__resume:hover i,
+.rail__die:hover .jp {
+  color: var(--on-glow);
+}
+
+.rail__toggle {
+  margin-left: auto;
+}
+
+.rail__caret {
+  width: 0;
+  height: 0;
+  border-inline: 4px solid transparent;
+  border-top: 5px solid currentColor;
+  transition: transform 200ms var(--spring);
+}
+
+.rail--open .rail__caret {
+  transform: rotate(180deg);
+}
+
+.rail__routes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: 0.6rem;
+  padding: 0 0.7rem 0.7rem;
+  animation: con-drop 220ms var(--spring) both;
+}
+
+.rail__route {
+  padding: 0.6rem 0.7rem;
+  background: var(--void);
+  border-left: var(--oil) solid var(--glow, var(--n1));
+}
+
+.rail__route-label {
+  font-family: var(--f-head);
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.rail__route-label .jp {
+  color: var(--glow, var(--n1));
+  font-size: 0.8em;
+}
+
+.rail__route-note {
+  margin-top: 0.2rem;
+  font-size: 0.7rem;
+  line-height: 1.45;
+  color: var(--text-dim);
+}
+
+.rail__stops {
+  display: grid;
+  gap: 0.1rem;
+  margin-top: 0.45rem;
+}
+
+.rail__stop {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  padding: 0.12rem 0.25rem;
+  font-size: 0.76rem;
+  line-height: 1.35;
+  text-decoration: none;
+  color: var(--text);
+  transition: background-color var(--snap) linear, transform var(--snap) var(--spring);
+}
+
+.rail__stop:hover {
+  transform: translateX(4px);
+  background: color-mix(in srgb, var(--glow, var(--n1)) 22%, transparent);
+}
+
+.rail__stop b {
+  flex: none;
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  color: var(--glow, var(--n1));
+}
+
+.rail__stop em {
+  flex: none;
+  margin-left: auto;
+  font-family: var(--f-mono);
+  font-style: normal;
+  font-size: 0.6rem;
+  color: var(--text-dim);
+}
+
+@media (max-width: 640px) {
+  .rail__toggle {
+    margin-left: 0;
+  }
+  .rail__resume i {
+    display: none;
+  }
+}
+
+:root[data-still='1'] .rail__routes {
+  animation: none;
+}

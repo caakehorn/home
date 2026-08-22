@@ -7,8 +7,11 @@ import { banner } from '../content/slogans'
 import { BriefDeck } from '../wiki/BriefDeck'
 import { Cortex } from '../wiki/Cortex'
 import { Gaps } from '../wiki/Gaps'
+import { StartRail } from '../wiki/StartRail'
 import { useWikiIndex, type IndexEntry, type WikiIndex } from '../wiki/data'
+import { HIDDEN_LABELS, hiddenEntries, inboundCounts, readingTime, type HiddenKind } from '../wiki/entry'
 import { allDrafts } from '../wiki/store'
+import { hasRead } from '../wiki/trail'
 import './wiki.css'
 
 const DOMAIN_KANA: Record<string, string> = {
@@ -24,9 +27,30 @@ const VIEWS = [
   // wiki. MAP is what connects, LIST is what exists, BRIEFS is what it says,
   // GAPS is what it admits it does not know.
   { id: 'gaps', label: 'GAPS', kana: '空白' },
+  // The fifth way of reading the wiki, and the one it did not have: what is in
+  // here that nothing points at, nobody finished, or somebody sealed. LIST
+  // rendered all of those as the same card with a word count on it.
+  { id: 'buried', label: 'BURIED', kana: '深部' },
 ] as const
 
 type View = (typeof VIEWS)[number]['id']
+
+/**
+ * What kind of hidden a page is, or nothing if it is an ordinary page.
+ *
+ * Same vocabulary as the front page's BURIED rail, computed the same way, so a
+ * page badged ORPHAN on the home page is badged ORPHAN here. Order matters:
+ * sealed outranks everything (it is the only deliberate one), and a stub that
+ * is also an orphan reads as a stub, because unfinished is the more useful
+ * thing to know.
+ */
+function hiddenKind(page: IndexEntry, inbound: number): HiddenKind | null {
+  if (page.locked) return 'sealed'
+  if (page.status === 'stub' || page.words < 260) return 'stub'
+  if (page.status === 'archived' || page.status === 'closed') return 'archived'
+  if (inbound === 0 && page.type !== 'index' && !page.slug.endsWith('/index')) return 'orphan'
+  return null
+}
 
 /** The map needs coordinates; an older snapshot may not carry them. */
 const mappable = (data: WikiIndex) => Boolean(data.edges?.length && data.pages.some((p) => p.x !== undefined))
@@ -47,6 +71,13 @@ export function WikiIndexRoute() {
     else next.set(key, value)
     setParams(next)
   }
+
+  // Inbound link counts, for the orphan badge. Computed once per snapshot
+  // rather than per card: it is a full pass over 3,110 edges and the list
+  // re-renders on every keystroke in the search box.
+  const inbound = useMemo(() => (data ? inboundCounts(data) : new Map<string, number>()), [data])
+
+  const buried = useMemo(() => (data ? hiddenEntries(data, 24) : []), [data])
 
   const results = useMemo(() => {
     if (!data) return []
@@ -100,6 +131,14 @@ export function WikiIndexRoute() {
           </p>
         )}
       </header>
+
+      {/* Above the deck bar, because the first question on this page is "where
+          do I start" and the map is an answer to a later one. */}
+      {data && (
+        <div className="wrap">
+          <StartRail index={data} />
+        </div>
+      )}
 
       <div className="wrap wiki__deckbar">
         <div className="wiki__views" role="group" aria-label="View">
@@ -197,11 +236,54 @@ export function WikiIndexRoute() {
         </div>
       )}
 
+      {data && view === 'buried' && (
+        <div className="wrap wiki__results">
+          <p className="wiki__deck-note">
+            Four different kinds of hidden, which used to render as four identical cards with a
+            word count on them. <b>Sealed</b> is deliberate — the row is the whole entry until
+            somebody types the phrase. <b>Orphan</b> is an accident: finished, wired into the
+            corpus, and linked from nowhere, so you can only arrive on purpose. <b>Stub</b> is
+            unfinished. <b>Closed</b> is over. Nothing here is reachable by browsing, which is
+            exactly why it is worth reading.
+          </p>
+
+          <ul className="wiki__buried">
+            {buried.map(({ kind, page }) => {
+              const badge = HIDDEN_LABELS[kind]
+              return (
+                <li key={page.slug} style={{ ['--glow' as string]: `var(--n${badge.tone})` }}>
+                  <Link to={`/brain/${page.slug}`} className={`wiki__grave wiki__grave--${kind}`}>
+                    <span className="wiki__grave-badge">
+                      <span className="jp" aria-hidden="true">
+                        {badge.kana}
+                      </span>
+                      {badge.label}
+                    </span>
+                    <h2 className="wiki__grave-title">{page.title}</h2>
+                    {page.knownFor && <p className="wiki__grave-blurb">{page.knownFor}</p>}
+                    <p className="wiki__grave-why">{badge.note}</p>
+                    <span className="wiki__grave-meta">
+                      {page.domain} · {page.words.toLocaleString()}w · {readingTime(page.words)}
+                      {hasRead(page.slug) && <em>read</em>}
+                    </span>
+                  </Link>
+                </li>
+              )
+            })}
+          </ul>
+        </div>
+      )}
+
       {data && view === 'list' && (
         <div className="wrap wiki__results">
           <ul className="wiki__grid">
             {results.map((page) => (
-              <PageCard key={page.slug} page={page} draft={drafts.includes(page.slug)} />
+              <PageCard
+                key={page.slug}
+                page={page}
+                draft={drafts.includes(page.slug)}
+                kind={hiddenKind(page, inbound.get(page.slug) ?? 0)}
+              />
             ))}
           </ul>
         </div>
@@ -210,19 +292,51 @@ export function WikiIndexRoute() {
   )
 }
 
-function PageCard({ page, draft }: { page: IndexEntry; draft: boolean }) {
+function PageCard({
+  page,
+  draft,
+  kind,
+}: {
+  page: IndexEntry
+  draft: boolean
+  kind: HiddenKind | null
+}) {
+  const badge = kind ? HIDDEN_LABELS[kind] : null
+  const read = hasRead(page.slug)
+
   return (
     <li>
-      <Link to={`/brain/${page.slug}`} className="wiki__card">
-        <span className="wiki__card-domain">{page.domain}</span>
+      <Link
+        to={`/brain/${page.slug}`}
+        className={`wiki__card${badge ? ` wiki__card--${kind}` : ''}${read ? ' wiki__card--read' : ''}`}
+        style={badge ? { ['--glow' as string]: `var(--n${badge.tone})` } : undefined}
+      >
+        <span className="wiki__card-domain">
+          {page.domain}
+          {/* The one thing this grid of 487 identical cards never told you:
+              which of them are not ordinary. */}
+          {badge && (
+            <span className="wiki__card-kind" title={badge.note}>
+              <span className="jp" aria-hidden="true">
+                {badge.kana}
+              </span>
+              {badge.label}
+            </span>
+          )}
+        </span>
         <h2 className="wiki__card-title">{page.title}</h2>
         {page.knownFor && <p className="wiki__card-blurb">{page.knownFor}</p>}
         <span className="wiki__card-meta">
-          {page.locked ? <span className="wiki__card-seal">sealed</span> : <span>{page.words.toLocaleString()}w</span>}
+          {page.locked ? (
+            <span className="wiki__card-seal">sealed</span>
+          ) : (
+            <span>{readingTime(page.words)}</span>
+          )}
           {page.charts > 0 && <span className="wiki__card-charts">{page.charts} charts</span>}
           {page.brief && <span className="wiki__card-brief">brief</span>}
           {page.links > 0 && <span>{page.links} links</span>}
           {draft && <span className="wiki__card-draft">edited</span>}
+          {read && <span className="wiki__card-read">read</span>}
         </span>
       </Link>
     </li>

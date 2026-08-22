@@ -9,6 +9,7 @@ import { Sealed } from '../wiki/Sealed'
 import { editableFrontmatter, humanize, useWikiPage, type WikiPage as Page } from '../wiki/data'
 import { relock, sealed } from '../wiki/locks'
 import { discardDraft, draftIsStale, getDraft } from '../wiki/store'
+import { remember } from '../wiki/trail'
 import './wiki.css'
 import '../wiki/quick-add.css'
 
@@ -100,6 +101,13 @@ export function WikiPageRoute() {
       infobox: Object.keys(infobox).length ? infobox : edited.infobox,
     } satisfies Page
   }, [edited, draft])
+
+  // Mark the page read. Keyed off the loaded page rather than off the slug in
+  // the URL so a 404 or a failed fetch never enters the trail — "resume
+  // reading" pointing at a page that does not exist is worse than no resume.
+  useEffect(() => {
+    if (data) remember(data.slug, data.title)
+  }, [data])
 
   const toc = useMemo(() => (view ? outline(view.body) : []), [view])
   const isDraft = Boolean(data && getDraft(data.slug)) && !stale

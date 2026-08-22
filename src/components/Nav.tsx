@@ -26,7 +26,15 @@ export function Nav() {
           <li key={section.slug}>
             <NavLink
               to={`/${section.slug}`}
-              className={({ isActive }) => `nav__link${isActive ? ' nav__link--on' : ''}`}
+              /* The brain is not one of eight peers in this bar. It is what the
+                 other seven are instruments for, and it was previously the
+                 first of eight identical chips — which is the same as being
+                 unmarked. */
+              className={({ isActive }) =>
+                `nav__link${section.slug === 'brain' ? ' nav__link--primary' : ''}${
+                  isActive ? ' nav__link--on' : ''
+                }`
+              }
               style={{ ['--glow' as string]: `var(--n${section.accent})` }}
             >
               <span className="jp" aria-hidden="true">

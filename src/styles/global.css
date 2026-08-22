@@ -3,6 +3,9 @@
 @import './type.css';
 /* The punk pass runs over every palette. */
 @import './punk.css';
+/* The street pass runs after it and hands the lit rooms their colour back.
+   RIOT is excluded from every rule in it, so the photocopier is untouched. */
+@import './street.css';
 
 /* ==========================================================================
    RESET-ISH
@@ -78,6 +81,38 @@ a {
   text-underline-offset: 3px;
 }
 
+/* ==========================================================================
+   THE BOUNCE
+
+   Every interactive surface on the site overshoots and settles rather than
+   easing flatly into place, and it does it on `transform` so the compositor
+   owns it. This is the site-wide floor; components override the distance, not
+   the curve.
+   ========================================================================== */
+button,
+a,
+input,
+summary {
+  /* Taps do not wait 300ms to find out whether they were a double-tap, and a
+     drag on a rig is a drag rather than a page scroll where the rig says so. */
+  touch-action: manipulation;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .bouncy {
+    transition: transform var(--pop) var(--spring);
+  }
+
+  .bouncy:hover {
+    transform: translateY(-3px) scale(1.04);
+  }
+
+  .bouncy:active {
+    transform: translateY(0) scale(0.96);
+    transition-duration: 70ms;
+  }
+}
+
 img,
 canvas,
 svg {
@@ -121,6 +156,10 @@ svg {
   inset: 0;
   pointer-events: none;
   z-index: 9000;
+  /* Five of these are stacked over every page. `contain` tells the engine that
+     nothing inside them can affect anything outside, so none of them is ever
+     consulted during a layout pass on the page underneath. */
+  contain: strict;
 }
 
 .fx-scanlines {
@@ -149,16 +188,28 @@ svg {
   );
 }
 
+/* The chromatic haze that swims across the viewport.
+ *
+ * This used to be `filter: blur(40px)` on a full-viewport layer that was also
+ * being scaled and translated, forever. A 40px Gaussian over the whole screen
+ * is one of the most expensive things you can ask a compositor for, it was
+ * running on every page at all times, and it was re-rasterised on every frame
+ * of the drift because the scale changed.
+ *
+ * A radial gradient is ALREADY a soft edge — the blur was blurring something
+ * that had no hard edges in it. So the stops are widened to give the same
+ * softness for free, the filter is gone, and the drift is translate-only so
+ * the layer is rasterised once and then just moved. Visually near-identical,
+ * and it costs a fraction of a frame instead of most of one. */
 .fx-bleed {
-  /* chromatic haze that swims across the viewport */
   background:
-    radial-gradient(50% 40% at 15% 20%, color-mix(in srgb, var(--n1) 45%, transparent), transparent 70%),
-    radial-gradient(45% 45% at 85% 15%, color-mix(in srgb, var(--n3) 40%, transparent), transparent 70%),
-    radial-gradient(60% 50% at 70% 90%, color-mix(in srgb, var(--n2) 40%, transparent), transparent 70%);
-  filter: blur(40px);
+    radial-gradient(58% 48% at 15% 20%, color-mix(in srgb, var(--n1) 34%, transparent), transparent 78%),
+    radial-gradient(52% 52% at 85% 15%, color-mix(in srgb, var(--n3) 30%, transparent), transparent 78%),
+    radial-gradient(66% 58% at 70% 90%, color-mix(in srgb, var(--n2) 30%, transparent), transparent 78%);
   opacity: calc(0.18 + 0.42 * var(--chaos));
   mix-blend-mode: screen;
   animation: bleed-drift calc(26s * var(--tempo)) ease-in-out infinite alternate;
+  will-change: transform;
 }
 
 @keyframes grain-shift {
@@ -169,9 +220,12 @@ svg {
   100% { transform: translate(3%, 1%); }
 }
 
+/* Translate only. A `scale` in here forces a re-rasterisation of a
+   full-viewport gradient layer on every frame; a translate is a matrix the
+   compositor already has. */
 @keyframes bleed-drift {
-  0% { transform: translate3d(-4%, -2%, 0) scale(1.05); }
-  100% { transform: translate3d(5%, 4%, 0) scale(1.25); }
+  0% { transform: translate3d(-5%, -3%, 0); }
+  100% { transform: translate3d(6%, 5%, 0); }
 }
 
 /* ==========================================================================
@@ -207,6 +261,14 @@ svg {
   to { opacity: 1; transform: none; }
 }
 
+/* The crown never sits still. Shared because the front door and the masthead
+   both mount one and neither stylesheet is guaranteed to be present for the
+   other. */
+@keyframes crown-hover {
+  from { transform: translate3d(0, -3px, 0) rotate(-2deg); }
+  to { transform: translate3d(0, 4px, 0) rotate(2deg); }
+}
+
 /* ==========================================================================
    LAYOUT PRIMITIVES
    ========================================================================== */
@@ -228,4 +290,25 @@ svg {
   font-family: var(--f-jp);
   font-weight: 700;
   letter-spacing: 0.08em;
+}
+
+/* The interstitial while a lazily-loaded room arrives. Deliberately plain: it
+   is on screen for a couple of hundred milliseconds at most, and a spinner
+   that animates in that window reads as a stutter rather than as progress. */
+.arriving {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding-block: clamp(3rem, 20vh, 9rem);
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.arriving .jp {
+  font-size: 1.4em;
+  letter-spacing: 0.1em;
+  color: var(--n3);
 }

@@ -4,7 +4,7 @@
 
 Three things under one roof, and they are the same thing. The **dialectic**:
 every position here got argued at, usually at an hour no argument should be
-trusted at. The **database**: it got written down anyway — 458 pages, cited,
+trusted at. The **database**: it got written down anyway — 487 pages, cited,
 cross-linked, contradictions left in where they are load-bearing. The **den**:
 the room where both of those happened.
 
@@ -348,14 +348,21 @@ whole string is on the wrapper as an `aria-label` and every scrap is
 
 ## Palettes
 
-Five, swapped by `data-vibe` on `<html>`. **`riot` is the default and the
-house style**: the photocopier — toner on newsprint, one spot red, two inks and
-no third. The other four (`den` · `untitled` · `slime` · `kaiju`) are the neon
-rooms, and you have to ask for them.
+Five, swapped by `data-vibe` on `<html>`. **`void` is the default and the
+house style**: acid green and electric violet on a black with a cast to it,
+with whatever primary the next sign happens to be. The other four are
+`dmt` (everything at once), `hotel` (sodium through a window that does not
+open), `griptape` (the deck face down — black, bone, one acid stripe) and
+`riot`, the photocopier, which used to be the house style and is now one room
+off the street.
+
+In `void` the acid is `--n3` on purpose. `--n3` is what links, kana, focus
+rings and the default `.neon` all read from, so the green is the thing your eye
+follows through the building rather than a colour that merely appears in it.
 
 Defined as custom properties in `src/styles/tokens.css`; every component reads
 `--n1`…`--n5`, the `--void` and `--text` ramps, so nothing needs to know which
-palette is live. `riot` also seeds bare `:root`, so the first paint — before the
+palette is live. `void` also seeds bare `:root`, so the first paint — before the
 provider has written `[data-vibe]` onto `<html>` — is already the house style.
 
 `riot` puts an accent where the others put a light source, which breaks one
@@ -367,7 +374,164 @@ Anything whose background is `--glow` reads its text colour from it.
 
 A palette that is retired simply leaves `VIBES`: a stored `vibe` that no longer
 passes `isVibeId` falls back to the default on read, so nobody is stranded in a
-room that is not there any more and the storage key does not need a bump.
+room that is not there any more. The storage key was bumped to `v3` anyway, and
+for the opposite reason: `riot` *survived* the redesign as a room, so every
+returning visitor would have been handed back the palette the redesign
+replaced and would never have seen it.
+
+### The street layer
+
+`punk.css` was written when `riot` was the house style and it is unconditional
+— it repaints the logo in paper and spot red, flattens the wordmark to three
+inks and turns the heading bloom into a slab of red, with `!important`, in
+every palette. Correct when every room was a photocopy of one flyer; wrong once
+the default is a lit room.
+
+`src/styles/street.css` runs after it, scoped to `:not([data-vibe='riot'])`,
+and hands those four devices back their colour. Construction survives from
+punk everywhere — the scissors, the tape, the hazard bars, the hard offsets,
+the refusal to round a corner — because those are construction and not colour,
+and they are as much a skate deck as a 1977 flyer. `riot` keeps the
+photocopier exactly as it was.
+
+## The front door
+
+`/` shows the splash once a session, in front of the home page and behind the
+gate. It used to be a picture postcard — a crescent moon, a twinkling
+starfield, a pagoda, three paper lanterns and a row of crows on a tiled roof.
+Drawn well, and completely toothless: a tourist's idea of Tokyo in front of a
+building whose banner says EAT THE RICH.
+
+What replaced it is the other Tokyo — shot from a helicopter at 4am with the
+colour pushed until it hurts. Four layers, and between them they animate
+exactly two properties:
+
+| | layer | what moves |
+|---|---|---|
+| 1 | **the floor** | one element in perspective, translated a tile on Y forever |
+| 2 | **the bloom** | two conic gradients counter-rotating behind the mark |
+| 3 | **the signage** | six vertical kanji columns drifting on Y at four speeds |
+| 4 | **the barrage** | the title card, fourteen words on a `steps(1)` strobe |
+
+No blurs, no backdrop filters, no per-frame JavaScript. The old door ran a
+46-element starfield with a `drop-shadow` on every one of them — 46 blur passes
+a frame before the type had loaded. The Japanese stayed and got harder; the
+crown stayed and got promoted from a heading ornament to the thing directly
+over the door.
+
+## The brain console
+
+The front page is a deployment portal for a 487-page wiki and it used to open
+with three paragraphs on the meaning of the word *dialectic*, with the wiki as
+slot one of an eight-card grid. You could not search it from the front page.
+You could not resume it. The only answer to "where do I start" was `/brain`,
+which opens on a force-directed map of 487 unlabelled dots — an answer to a
+question you can only have once you have already read enough to ask it.
+
+`src/wiki/Console.tsx` goes above everything else on `/` and does four things:
+
+- **SEARCH** — scored, instant, keyboard-driven, `/` to focus from anywhere.
+  Title hits outrank slug hits outrank blurb hits; weight is a tiebreak, not a
+  ranking. Scored under `useDeferredValue`, so the field never waits on the
+  487-row pass.
+- **RESUME** — `src/wiki/trail.ts` records every page this browser opens.
+  One button, back where you were, and read pages are ticked everywhere they
+  appear.
+- **ROUTES** — four ordered ways in, in `src/wiki/entry.ts`, each one derived
+  from the index rather than hand-curated so none of them goes stale on the
+  next sync. They do not overlap: each claims its stops and the next picks from
+  what is left, so four routes cover twenty-four distinct pages instead of the
+  same three, three times. Reading times are computed, never asserted.
+- **THE BURIED** — see below.
+
+A slimmer version of the same thing (`src/wiki/StartRail.tsx`) sits across the
+top of `/brain`, above the map.
+
+## The buried
+
+"Hidden" is four different things in this corpus and the index rendered all
+four as the same card with a word count on it:
+
+| badge | what it means |
+|---|---|
+| **SEALED** 封 | encrypted in the snapshot; the row is the whole entry until somebody types the phrase |
+| **ORPHAN** 孤 | finished, wired in, and linked from nowhere — you can only arrive on purpose |
+| **STUB** 断 | started and not finished |
+| **CLOSED** 終 | over, and kept anyway |
+| **UNLIT** 暗 | long, finished, well-linked, and never on the obvious path |
+
+Orphans are the interesting case and they need the edge list to find: `links`
+on an index entry is the *outbound* count, and it is *inbound* that makes a
+page findable. `inboundCounts` in `src/wiki/entry.ts` counts them off
+`index.edges`.
+
+The badges appear on the list cards, and `BURIED` is a fifth view on `/brain`
+alongside MAP · LIST · BRIEFS · GAPS — the same act as the other four: MAP is
+what connects, LIST is what exists, BRIEFS is what it says, GAPS is what it
+admits it does not know, BURIED is what nothing points at.
+
+## The relics
+
+Ten Easter eggs — four on the front door, six on the main floor — each one a
+real thing out of `wiki/people/ally-lubin` and the arcade's cartridge data: a
+line she actually sent, a date the wiki derives rather than is told, a payment
+that is in a ledger with a timestamp. They are in `src/content/relics.ts` and
+the arcade's house rule applies to that file too: **the joke is never on her.**
+
+Each is a visible sticker with a hover state, not a pixel-hunt. Clicking one
+opens the line, the date, what it means, and a door into the room where the
+long version lives. Found state is in `localStorage` via
+`src/state/relics.ts`, published to React through `useSyncExternalStore` and
+deliberately *not* in `PortalProvider` — most of the site consumes
+`usePortal`, and it should not all re-render because somebody clicked a
+sticker. A counter in the bottom-left corner follows you off both pages,
+because "there are ten of these" is what turns a decoration into a hunt.
+
+**Photographs.** Every relic takes one the moment one exists: drop a file into
+`public/ally/` named for the relic's id (`top8.jpg`, `necklace.png`,
+`cats.webp`) and the panel picks it up on its next open, with no code change
+and no manifest to edit. `.jpg`, `.png` and `.webp` are probed in that order,
+lazily, only for a relic somebody has actually opened. Until then the drawn
+art in `src/components/RelicArt.tsx` stands in, and it is built to stand in
+permanently — nothing looks unfinished with the folder empty.
+`public/ally/README.md` carries the table and the one thing worth saying out
+loud about putting photographs of a real person on a public page.
+
+## What loads when
+
+Everything used to be one 729 kB bundle, of which the door and the home page
+use about a third; the rest is four arcade cabinets with their own game loops,
+thirty leviathan instruments, a 134,348-row transcript reader, a gallery
+lightbox and a markdown editor — all downloaded and parsed before the door
+would open.
+
+The eager set is now the critical path and nothing else: the door, the home
+page, the wiki index and a wiki page (a deployment portal that code-splits its
+own payload stutters on the one navigation everybody makes), plus the terms,
+which render in front of the gate. Everything else is `React.lazy`, fetched on
+arrival. Initial JS **729 kB → 451 kB**, initial CSS **231 kB → 132 kB**.
+
+Three other things were costing more than they were worth and are gone:
+
+- `backdrop-filter: blur()` on the sticky nav and the sticky transcript bar —
+  a re-blur of everything behind them on every frame of every scroll, for a
+  translucency that was invisible at 94% opacity over a black page.
+- `filter: blur(40px)` on the full-viewport `.fx-bleed` haze, which was also
+  being scaled — so it re-rasterised every frame. It was blurring three radial
+  gradients, which have no hard edges to blur; the stops are wider now and the
+  drift is translate-only.
+- The cursor trail's rAF loop, which ran a full-viewport `clearRect` at 60fps
+  for the life of the session whether or not the pointer had moved in ten
+  minutes. It now sleeps when the last dot dies and wakes on `pointermove`, and
+  it samples one dot per *frame* rather than one per event — a high-polling
+  mouse was pushing a thousand a second into a buffer that could show sixty.
+
+Motion tokens live in `tokens.css`: `--spring`, `--spring-hard`, `--glide` and
+the `--snap` / `--pop` / `--settle` durations. They are only ever spent on
+`transform` and `opacity`, which is the whole strategy — the compositor can
+animate those two without asking the main thread for a layout or a repaint, so
+the site is busier than it was on a frame budget it was previously blowing on
+blur.
 
 ## THE CRAWLS
 

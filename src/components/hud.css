@@ -11,8 +11,10 @@
   font-size: 0.68rem;
   letter-spacing: 0.1em;
   color: var(--text);
-  background: color-mix(in srgb, var(--void) 82%, transparent);
-  backdrop-filter: blur(6px);
+  /* No backdrop-filter. It is a fixed element over every scrolling page, so
+     the blur behind it was re-rasterised on every scroll frame for the sake of
+     a 4-line readout nobody is reading through. */
+  background: color-mix(in srgb, var(--void) 94%, transparent);
   border: 2px solid var(--n3);
   box-shadow:
     4px 4px 0 var(--edge),

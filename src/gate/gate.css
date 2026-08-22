@@ -533,6 +533,87 @@
   cursor: default;
 }
 
+/* ---- numeric input mode ------------------------------------------------- */
+
+.lock__numeric {
+  display: grid;
+  justify-items: center;
+  gap: 0.8rem;
+  width: 100%;
+}
+
+.lock__inputs {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: center;
+  width: 100%;
+}
+
+.lock__input {
+  width: clamp(3rem, 20vw, 4.5rem);
+  padding: 0.8rem 0.4rem;
+  font-family: var(--f-mono);
+  font-size: 1.4rem;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 0.1em;
+  color: var(--n3);
+  background: color-mix(in srgb, var(--void) 70%, transparent);
+  border: 2px solid color-mix(in srgb, var(--n3) 45%, transparent);
+  border-radius: 4px;
+  outline: none;
+  transition: border-color 140ms linear, box-shadow 140ms linear;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.lock__input:focus {
+  border-color: var(--n3);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--n3) 25%, transparent);
+}
+
+.lock__input:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* Remove default number input spinner buttons */
+.lock__input::-webkit-outer-spin-button,
+.lock__input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.lock__input[type='text'] {
+  -moz-appearance: textfield;
+}
+
+/* ---- mode toggle -------------------------------------------------------- */
+
+.lock__mode-toggle {
+  margin-top: 0.8rem;
+  padding: 0.5rem 0.8rem;
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--text-dim) 50%, transparent);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: color 140ms linear, border-color 140ms linear;
+}
+
+.lock__mode-toggle:hover:not(:disabled) {
+  color: var(--n2);
+  border-color: var(--n2);
+}
+
+.lock__mode-toggle:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
 :root[data-still='1'] .lock__shackle {
   transition: none;
 }

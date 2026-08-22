@@ -750,6 +750,50 @@ The browser gets a finished map: nothing simulates on load, and the wiki is in
 the same shape every time you walk into it. The canvas only repaints when
 something actually moves.
 
+## Constellations
+
+The map let you inspect one page at a time — click a star, read its probe,
+click one of its links, repeat. That is a walk, and a walk has no memory: the
+moment you click the second star the first is gone, so nothing on screen ever
+accumulated into an argument.
+
+**Shift-click** (or ⌘/Ctrl-click, or `P` on the focused star, or PIN in the
+probe) pins instead. Pinned stars stay lit and numbered, and the real edges
+between them light up as **strands**. A strand exists only where the wiki
+genuinely links those two pages, so what you are drawing is not decoration —
+it is a claim about the corpus that the corpus agreed to.
+
+### The end state
+
+A constellation **closes** when it has at least three stars and every star can
+be reached from every other *without leaving the figure*. That is a real graph
+property rather than a score, it is checkable at a glance once drawn, and it is
+what makes the thing you assembled mean something: a connected pinned subgraph
+is a set of pages that hang together, as opposed to a set of pages you happened
+to like.
+
+When it closes the map reforms — it dims the other 480 pages hard, flies to
+frame what you built, and **ignites the strands in sequence along the reading
+order** rather than snapping them all on at once, so closing a figure is an
+event you watch happen. The panel names the figure after what it is made of
+(one domain is a FIGURE, several is a CROSSING) and offers READ THE TRACK,
+which walks the pages in the order the figure runs.
+
+### The gap, named
+
+Until it closes the gap is shown rather than hidden. Every disconnected piece
+gets a **ghost route** to the main body along the shortest real path through
+the corpus, drawn as a crawling cadmium dash, and the unpinned pages on that
+route are named and clickable: *"Menore reaches the rest through Cocaine."*
+That is the answer to "what would join these two", which is the most useful
+question this map can be asked and previously could not be.
+
+Logic is in `src/wiki/constellation.ts` and is pure — components by BFS
+restricted to the pinned set, bridges by multi-source BFS over the whole graph,
+reading order by DFS from the most-connected member (depth-first because it
+runs *along* the figure like a path, where breadth-first hops back to the hub
+between every branch).
+
 ## Briefs
 
 The wiki writes an **LLM Quick Brief** on its load-bearing pages: every date,

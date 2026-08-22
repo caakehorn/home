@@ -6,6 +6,7 @@ import { sectionBySlug } from '../content/sections'
 import { INSTRUMENTS, WINGS, countBy, instrumentById, instrumentsIn } from '../leviathan/core'
 import type { Instrument, InstrumentStatus } from '../leviathan/core'
 import { Accretion } from '../leviathan/instruments/Accretion'
+import { Ask } from '../leviathan/instruments/Ask'
 import { Chronology } from '../leviathan/instruments/Chronology'
 import { Attention } from '../leviathan/instruments/Attention'
 import { Census } from '../leviathan/instruments/Census'
@@ -49,6 +50,7 @@ const BUILT: Record<string, typeof Mass> = {
   echo: Echo,
   genesis: Genesis,
   chronicle: Chronicle,
+  ask: Ask,
 }
 
 /**
@@ -134,7 +136,7 @@ export function LeviathanRoute() {
           make a portrait of the thing itself.
         </p>
         <p className="lev__mast-note">
-          The old site did not run that rule over its own corpus half, which is why eighteen of
+          The old site did not run that rule over its own corpus half, which is why seventeen of
           these are <b>BARRED</b> rather than merely dark. There are photographs of a dozen of them
           still running, in their own colours, in <Link to="/gallery">THE GALLERY</Link>.
         </p>

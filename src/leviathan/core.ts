@@ -82,6 +82,17 @@ export type Instrument = {
   bars?: string
   /** For PORTED entries: the route it came across as. */
   portedTo?: string
+  /**
+   * What the frame prints where it otherwise prints THE RULE.
+   *
+   * Every instrument in the rack gets the same closing line — no judgement,
+   * every number a count — and for twenty of them it is simply true. One
+   * instrument is not covered by it, and the honest fix is not to soften the
+   * rule for everybody: it is to let that one say, in its own footer, exactly
+   * which part of itself is a reading rather than a count, and what a reader
+   * can check it against.
+   */
+  rule?: string
 }
 
 /** THE RULE, in the one sentence a BARRED instrument gets told it broke. */
@@ -745,15 +756,15 @@ export const INSTRUMENTS: Instrument[] = [
     title: 'THE ASK',
     kana: '請求',
     wing: 'PROCUREMENT',
-    corpus: '18,946 messages, recounted from the raw exports',
-    blurb: 'Every request, recounted from primary sources, in the order it was made — classified by speech-act frame and then read by hand.',
-    method: 'Ledger rows counted from the message export, with per-category precision measured by hand and printed on the instrument.',
-    status: 'BARRED',
+    corpus: '357 messages out of 18,937 · 2025-02-01 → 2026-06-05',
+    blurb:
+      'The one instrument on the unlisted page that comes across — rebuilt as a chart recorder, and re-grounded in the record this building already serves. Five lanes over sixteen months, every fragment a link to the message in its own context.',
+    method:
+      'Only the categories came across, and they are a hand audit rather than a count. Everything under them is recounted here from /transcript: the text of every fragment is read back out of the record, each one carries the line it sits on, and the volume lane is her whole message traffic per day — so a lane that rises can be read against whether she was simply texting more. Lanes share one vertical scale.',
+    status: 'LIVE',
     origin: 'procurement.html · VI · THE ASK — and standalone as ask.html',
-    bars: JUDGEMENT(
-      'It is the most carefully built thing in the old repo — deduplicated, timezone-corrected, hand-audited, precision published. And what it publishes is a classification of one person’s requests.',
-    ),
-    needs: 'the classified ledger itself, which is a hand-audited reading of the record rather than the record, and is not vendored here',
+    rule:
+      'This is the one instrument in the rack that makes a judgement, and it is the reason the other twenty can say they do not. The categories are a reading of the record; nothing else here is. What stands in for THE RULE is that the reading is checkable — the per-category precision from the original’s full manual read is printed above, the volume it is measured against was recounted here rather than carried over, and every fragment links to the line it came from, so any reader can walk it back and disagree.',
   },
 ]
 
@@ -781,7 +792,7 @@ export const WINGS: { id: Wing; title: string; kana: string; note: string }[] = 
     id: 'PROCUREMENT',
     title: 'PROCUREMENT',
     kana: '調達',
-    note: 'The unlisted third page. Six instruments, every one of them a sorting of hand-assembled quotations about a named living person. All six are barred and none of them is photographed.',
+    note: 'The unlisted third page. Six instruments, every one of them a sorting of hand-assembled quotations about a named living person. Five are barred and none of the five is photographed. The sixth, THE ASK, came across — because it is the only one built over the message record itself rather than over the wiki’s prose about it, which means every line it draws can be walked back to a line at /transcript and disagreed with.',
   },
 ]
 
@@ -1059,3 +1070,60 @@ export type AccretionSet = {
   points: AccretionPoint[]
 }
 
+
+/**
+ * VI · THE ASK — `scripts/build-ask.mjs`.
+ *
+ * The one set in the wing that carries a reading as well as counts, and it is
+ * split down the middle so the two can be told apart. `records[].k` is the
+ * hand-audited category and is the only thing that came across from the old
+ * repo; `precision` is what that audit scored per category, printed on the
+ * instrument because a number nobody can check is not evidence. Everything
+ * else — the text, the line, `series`, `volume` — was recounted here from
+ * `public/transcript/**`, the record the site already serves.
+ */
+export type AskLane = {
+  key: string
+  label: string
+  unit: string
+  /** The categories this lane sums. */
+  kinds: string[]
+  count: number
+}
+
+export type AskRecord = {
+  /** `YYYY-MM-DD` */
+  d: string
+  /** `HH:MM`, off the record rather than off the old payload. */
+  t: string
+  /** The hand-audited category — a key of `kinds`. */
+  k: string
+  x: string
+  /** 1-based line in the record, so the fragment links to `/transcript#L…`. */
+  line: number
+}
+
+export type AskSet = {
+  generatedAt: string
+  source: string
+  from: string
+  to: string
+  /** Days in the window, inclusive. Every lane array and `volume` is this long. */
+  days: number
+  /** Her messages in the window, recounted here. */
+  herMessages: number
+  /** What the old payload claimed for the same window, on its own dedup pass. */
+  herMessagesClaimed: number
+  labelled: number
+  matched: number
+  dollarsStated: number
+  dollarMentions: number
+  atmRuns: number
+  precision: Record<string, number>
+  kinds: Record<string, string>
+  lanes: AskLane[]
+  series: Record<string, number[]>
+  volume: number[]
+  byKind: Record<string, number>
+  records: AskRecord[]
+}

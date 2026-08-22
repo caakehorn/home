@@ -48,9 +48,13 @@ export function Frame({
           <b>METHOD</b> {instrument.method}
         </p>
         {footer}
-        <p className="inst__rule">
-          No instrument here makes a judgement. Every number is a count, a date or a length, taken
-          over the whole corpus with nothing excluded and nothing weighted.
+        {/* THE RULE, unless the instrument has something more exact to say in
+            its place — see `Instrument.rule`. An instrument that does make a
+            judgement printing the boilerplate anyway would be the one lie the
+            wing cannot afford. */}
+        <p className={`inst__rule${instrument.rule ? ' inst__rule--own' : ''}`}>
+          {instrument.rule ??
+            'No instrument here makes a judgement. Every number is a count, a date or a length, taken over the whole corpus with nothing excluded and nothing weighted.'}
         </p>
         <Link to="/leviathan" className="inst__back">
           ← BACK TO THE RACK

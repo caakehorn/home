@@ -14,6 +14,7 @@
     "sage:check": "node --experimental-strip-types scripts/check-sage.mjs",
     "leviathan": "node --experimental-strip-types scripts/build-leviathan.mjs",
     "transcript": "node scripts/sync-transcript.mjs",
+    "ask": "node scripts/build-ask.mjs",
     "accretion": "node --experimental-strip-types scripts/build-accretion.mjs",
     "clock": "node scripts/build-clock.mjs",
     "lexicon": "node scripts/build-lexicon.mjs",

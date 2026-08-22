@@ -1,0 +1,49 @@
+/* ==========================================================================
+   VI · THE ASK
+
+   The recorder wears THE PEN's chrome — same canvas mount, same transport,
+   same readout — so `pen.css` carries all of it and this file only holds the
+   two things THE ASK has and THE PEN does not: the fragment feed under the
+   drum, and the footer that has three notes to make instead of one.
+   ========================================================================== */
+
+.ask {
+  display: grid;
+  gap: 1rem;
+}
+
+.ask__feed {
+  display: grid;
+  gap: 0.6rem;
+  padding-top: 0.4rem;
+  border-top: 2px solid color-mix(in srgb, var(--n1) 40%, transparent);
+}
+
+/* A fragment is somebody's sentence, so it is set in the reading face at a
+   reading size — not at the size of the metadata around it. */
+.ask__feed .pt-card__say {
+  font-family: var(--f-ui);
+  font-size: var(--step-0);
+  line-height: 1.5;
+  color: var(--text);
+}
+
+/* The line number is the instrument's whole claim to be checkable, so it is
+   the one thing in the card head that reads as a link. */
+.ask__feed .pt-card__head a {
+  font-variant-numeric: tabular-nums;
+  color: var(--n1);
+}
+
+.ask__notes {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.ask__notes b {
+  margin-right: 0.4rem;
+  font-family: var(--f-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.18em;
+  color: var(--n1);
+}

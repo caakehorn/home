@@ -105,6 +105,15 @@
   color: color-mix(in srgb, var(--text-dim) 75%, transparent);
 }
 
+/* An instrument that writes its own rule note is saying something the
+   boilerplate cannot, so it is not printed at boilerplate weight. */
+.inst__rule--own {
+  padding-left: 0.9rem;
+  border-left: 2px solid var(--n2);
+  font-size: var(--step--1);
+  color: var(--text-dim);
+}
+
 .inst__back {
   justify-self: start;
   font-family: var(--f-mono);

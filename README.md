@@ -611,11 +611,14 @@ declares which kind of dark it is:
 
 | | | |
 | --- | --- | --- |
-| **LIVE** | 7 | built here, wired to a dataset that ships |
+| **LIVE** | 21 | built here, wired to a dataset that ships |
 | **PORTED** | 4 | came across under this house's own name — the card links to where |
-| **UNBUILT** | 11 | the corpus is already here; nobody has built the instrument |
-| **SEALED** | 7 | waiting on a corpus this site does not carry |
-| **BARRED** | 18 | it makes a judgement, and THE RULE forbids one |
+| **UNBUILT** | 0 | the corpus is already here; nobody has built the instrument |
+| **SEALED** | 5 | waiting on a corpus this site does not carry |
+| **BARRED** | 17 | it makes a judgement, and THE RULE forbids one |
+
+The rack computes these off the registry with `countBy`, so the page is never
+wrong about itself; the table above is a snapshot and can be.
 
 **BARRED is the one that matters.** The corpus half of the old console was
 largely rhetorical scoring — LOVE, PROFANITY, APOLOGY, PLEADING, LOVE-BOMB,
@@ -623,13 +626,14 @@ DENIAL, ASSERTING against DEFERRING — which is exactly what THE RULE was
 written against. Those do not come across. They are listed anyway, each with
 the specific sentence saying which part of the rule it breaks, because quietly
 dropping them would tell a nicer story about the old site than the old site
-tells. The six PROCUREMENT instruments are barred for the same reason and are
-additionally never photographed; see THE GALLERY below.
+tells. Five of the six PROCUREMENT instruments are barred for the same reason
+and are additionally never photographed; see THE GALLERY below. The sixth is
+`VI · THE ASK`, which came across — on terms, and the terms are below.
 
-**UNBUILT is the to-do list.** Eleven instruments need nothing from outside —
-the record ships at `/transcript`, the snapshot ships at `/brain` — they are
-simply not built. THE RINGS, THE ATTENTION and THE ECHO are the cheap ones
-left.
+**UNBUILT was the to-do list**, and it is empty. Every instrument that needed
+nothing from outside — the record ships at `/transcript`, the snapshot ships at
+`/brain` — has been built. What is left dark is either waiting on a corpus that
+does not ship, or is not coming.
 
 ### What is built
 
@@ -647,6 +651,9 @@ left.
 - **◈ CORPUS · I · THE PULSE** — see below.
 - **◈ CORPUS · II · THE CLOCK** — see below.
 - **◈ CORPUS · XIV · THE SILENCE** — see below.
+- **PROCUREMENT · VI · THE ASK** — THE PEN's chrome over the message record,
+  and the one instrument in the rack that classifies rather than counts. See
+  below for what that costs and what it is checkable against.
 
 The dates come from the same matchers the brief visualiser uses
 (`mineDates` in `src/wiki/brief.ts`), so a date reads the same way on the
@@ -760,12 +767,12 @@ for the wiki snapshot itself. Re-run it against a wiki-brain checkout when the
 history has moved. It needs full history: the script refuses a shallow clone
 rather than silently reporting a corpus that begins four commits ago.
 
-The sealed instruments are what is left once the corpus question is settled.
-`PROCUREMENT · VI · THE ASK` needs the classified ledger its rows were recounted
-from, which is a hand-audited reading of the record rather than the record, and
-is not vendored here — and it is barred as well as sealed, since a
-classification of one person's requests is a judgement whatever the ledger says.
-`◈ CORPUS · II · THE CLOCK` needed nothing from outside and is now built.
+The sealed instruments are what is left once the corpus question is settled:
+five of them, every one waiting on a corpus this site does not carry.
+`◈ CORPUS · II · THE CLOCK` needed nothing from outside and is now built, and
+`PROCUREMENT · VI · THE ASK` — which used to sit here, needing a classified
+ledger that is a reading of the record rather than the record — is built too,
+on the terms set out below.
 
 ### THE SILENCE, and the difference between a gap and a hole
 
@@ -801,6 +808,64 @@ the wrong message.
 
 One number on the page is not from the record and says so: **SINCE THE LAST
 MESSAGE** is counted from the last message to the day the page loaded.
+
+### THE ASK, and the one instrument that does make a judgement
+
+```bash
+npm run ask -- ../leviathan   # writes public/leviathan/ask.json
+```
+
+`PROCUREMENT · VI · THE ASK` is the only instrument off the unlisted third page
+that comes across, and it is the only thing in the rack that THE RULE does not
+cover. It classifies: 357 of her messages sorted into five lanes over sixteen
+months, and which lane a message belongs in is a reading rather than a count.
+Everything else in the wing can say it makes no judgement *because* this one
+says, in its own footer, that it does — `Instrument.rule` exists so that the
+frame prints the exception in the instrument's own words instead of printing the
+boilerplate over the top of it.
+
+**Why this one and not the other five.** The five barred PROCUREMENT
+instruments sort hand-assembled quotations out of the wiki's prose *about* the
+record. THE ASK is built over the record itself, which this site already serves
+whole at `/transcript` — so every line it draws can be walked back to the
+message it came from and disagreed with. That is the difference, and it is the
+only thing the exception rests on.
+
+**Only the labels came across.** The old payload — `js/procurement-asks.js` in
+`caakehorn/leviathan` — carried the quotes, the counts *and* the classification
+in one file, which meant the reading could not be checked against the evidence.
+The build takes the date, the time and the category and nothing else. Then:
+
+- the **text** of every fragment is read back out of `public/transcript/**`, so
+  a quote that is not in the record cannot reach the instrument. All 357 were
+  found;
+- every fragment carries the **line** it sits on and links to
+  `/transcript#L…`, the same anchor identity THE CLOCK cites with;
+- the **denominator** — her whole message volume per day — is recounted here
+  and drawn as a sixth lane under the five, because a lane that rises in a week
+  she sent four hundred messages has not risen.
+
+**The recount does not agree with the original, and the instrument prints the
+gap**: 18,937 of her messages in the window here against the 18,946 the old
+payload claims, on a different dedup pass. A number that agrees with itself
+because it was copied has not been checked.
+
+**Per-category precision comes across unchanged** and is printed in the footer.
+Every hit in the original was read by hand and the false positives struck; what
+survived that audit ranges from 100% on the ATM-code and third-party lanes to
+57% on the loosest one. It is the only reason the categories are on the page.
+
+The chrome is THE PEN's — same canvas mount, same transport, same readout, and
+`pen.css` carries all of it. The one thing it does differently is the vertical
+scale: THE PEN gives each lane its own maximum because its lanes run 9 against
+741, and this one shares a single scale across all five because they run 22
+against 137 and five identical curves would be a lie in the other direction.
+Under every trace, the raw days are drawn as ticks, so the nine-day smoothing
+can never be the only claim on a lane.
+
+**This dataset is committed**, like `public/transcript/**` and
+`accretion.json`: it derives from a repository this one does not vendor, so
+there is nothing for CI to build it from.
 
 ## THE GALLERY
 
@@ -852,10 +917,15 @@ capture is not at the mercy of a CDN and comes out the same on a second run.
 
 ### What is deliberately not photographed
 
-THE DRUG LEDGER, THE FAMILY LEDGER, PROCUREMENT and THE ASK are all in the rack
-and none of them is here. They are pages of verbatim quotation and composite
-scoring about a named living person, they are **BARRED** for exactly that, and
+THE DRUG LEDGER, THE FAMILY LEDGER and PROCUREMENT are all in the rack and none
+of them is here. They are pages of verbatim quotation and composite scoring
+about a named living person, they are **BARRED** for exactly that, and
 photographing one instead would be the same act with a camera in front of it.
+
+THE ASK was on that list until it was rebuilt. It is not photographed either,
+and for a better reason than the others: there is no need for a picture of the
+old page when the instrument itself runs at `/leviathan/ask`, over a dataset
+this repository can rebuild and against a record it serves.
 
 ### Adding a picture that is not from the old repo
 
@@ -959,9 +1029,11 @@ rather than in the implication:
   (`llms.txt`, `agent/`) is built from `public/wiki/` only, so the record is
   not in it. Both are requests, not controls.
 
-`V · THE CLOCK` is the instrument that reads this corpus — Annie's 68,998
-messages, placed by when they were sent. It stays SEALED, but for a different
-reason than before: the corpus is here now, and the instrument is not built.
+`◈ CORPUS · II · THE CLOCK` is the instrument that reads this corpus — all
+134,348 messages, placed by when they were sent — and it is built, along with
+THE PULSE and THE SILENCE beside it. `PROCUREMENT · VI · THE ASK` reads it too,
+and is the one instrument here that classifies rather than counts; what that
+costs and what it is checkable against is set out in its own section above.
 
 ## TRANSMISSIONS
 

@@ -212,7 +212,7 @@ export function Padlock({ onOpen, onWrong }: Props) {
         <p className="gate__tag">THE DOOR</p>
         <p className="gate__note">
           No verifier has been built for this deployment, so there is nothing here to check a
-          combination against. Run <code>HOME_COMBINATION='12-34-05' npm run gate:verify</code> and
+          combination against. Run <code>HOME_COMBINATION='7-31-22' npm run gate:verify</code> and
           commit <code>public/gate/verify.enc</code>.
         </p>
         <button type="button" className="gate__go" onClick={() => onOpen('')}>

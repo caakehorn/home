@@ -585,11 +585,15 @@ to check after re-running `sync-wiki`.
 original is **thirty-seven instruments over two sections** — `◈ CORPUS` and
 `◈ WIKI`, sharing one tab bar — plus **six more** on `procurement.html`, an
 unlisted third page. Every one of the forty-three is in the registry here,
-beside the four this house built:
+beside the five this house built:
 
 - `src/leviathan/core.ts` — the registry (what an instrument *is*), the dataset
   loader, and the dataset shapes. Each entry carries the file and module it came
   from over there, so the port can be checked against the original.
+- `src/leviathan/PenChart.tsx` — the chart recorder, shared. The old
+  `js/pen-core.js` scaffold, with the stylus sitting where the value is instead
+  of where `Math.random()` put it. THE PEN winds it over the wiki's dated
+  mentions and THE RECORDER winds it over the message record.
 - `src/leviathan/Frame.tsx` — the chrome every instrument wears: numeral, name,
   what it was computed over, and — always, never optional — **how**. An
   instrument that cannot say how it got its numbers has no business being read.
@@ -611,10 +615,10 @@ declares which kind of dark it is:
 
 | | | |
 | --- | --- | --- |
-| **LIVE** | 7 | built here, wired to a dataset that ships |
+| **LIVE** | 21 | built here, wired to a dataset that ships |
 | **PORTED** | 4 | came across under this house's own name — the card links to where |
-| **UNBUILT** | 11 | the corpus is already here; nobody has built the instrument |
-| **SEALED** | 7 | waiting on a corpus this site does not carry |
+| **UNBUILT** | 0 | the corpus is already here; nobody has built the instrument |
+| **SEALED** | 5 | waiting on a corpus this site does not carry |
 | **BARRED** | 18 | it makes a judgement, and THE RULE forbids one |
 
 **BARRED is the one that matters.** The corpus half of the old console was
@@ -626,10 +630,11 @@ dropping them would tell a nicer story about the old site than the old site
 tells. The six PROCUREMENT instruments are barred for the same reason and are
 additionally never photographed; see THE GALLERY below.
 
-**UNBUILT is the to-do list.** Eleven instruments need nothing from outside —
-the record ships at `/transcript`, the snapshot ships at `/brain` — they are
-simply not built. THE RINGS, THE ATTENTION and THE ECHO are the cheap ones
-left.
+**UNBUILT is empty, and that is recent.** It used to be the to-do list: every
+instrument whose corpus was already in the building and which nobody had built.
+The record ships at `/transcript`, the snapshot ships at `/brain`, and the list
+has been worked through. What is left dark is dark for a reason it can state —
+SEALED wants a corpus this site does not carry, BARRED is not coming.
 
 ### What is built
 
@@ -644,6 +649,13 @@ left.
   counts against one axis, each lane scaled to its own maximum.
 - **THE HOUSE · IV · THE ACCRETION** — the wiki being built, against real time.
   See below.
+- **THE HOUSE · V · THE RECORDER** — the same chart recorder, wound over the
+  message record instead: SENT, RECEIVED, WORDS and DAYS per month across all
+  129 of them. THE POLYGRAPH's drum without THE POLYGRAPH's pens, which were
+  four keyword lists and stay barred. The 38 months no export covers are
+  hatched at their real width and the stylus lifts across them, because a hole
+  in an archive is not a quiet month. Built by `npm run recorder` out of
+  `public/transcript/`.
 - **◈ CORPUS · I · THE PULSE** — see below.
 - **◈ CORPUS · II · THE CLOCK** — see below.
 - **◈ CORPUS · XIV · THE SILENCE** — see below.
@@ -720,6 +732,50 @@ that room has two inks and `--n1` and `--n3` are the same red twice through the
 machine. Where the ramp collapses the second channel falls back to bare paper,
 and the legend reads the resolved pair back off the canvas so a key can never
 disagree with the marks. The direction switch is the other half of the answer.
+
+### THE RECORDER, and the pens that did not come across
+
+```bash
+npm run recorder       # reads public/transcript/, writes public/leviathan/recorder.json
+```
+
+The old console's `MODULE 08 · draw_annie` was THE POLYGRAPH: a four-pen chart
+recorder over the message record, and the best-looking thing on that site. It is
+BARRED here and it stays barred. Its four pens were **LOVE, PROFANITY, APOLOGY
+and SHOUT** — four keyword lists asked to stand in for a mood — and THE RULE
+does not bend for an instrument that looks good.
+
+**What comes across is the drum, not the pens.** THE PEN already wound
+`PenChart` over the wiki's dated mentions; this winds the same one over the
+corpus the polygraph actually ran on, with four channels that are only ever
+counted:
+
+| lane | what it counts |
+| --- | --- |
+| SENT | messages he sent that month |
+| RECEIVED | messages he was sent |
+| WORDS | runs of letters across both |
+| DAYS | distinct days carrying at least one message |
+
+A word is **THE LEXICON's word** — a run of letters and apostrophes, lowercased,
+trimmed of apostrophes at either end, two characters or more — reused verbatim
+rather than redefined, so the two instruments cannot disagree about what they
+are both counting. The total comes out at 965,583 either way, which is the
+check. Month and day are sliced out of the timestamp string and never handed to
+`Date()`, for the reason THE CLOCK gives. The build refuses to write a dataset
+whose message count disagrees with `public/transcript/index.json`.
+
+**The 38 months no export covers are hatched at their real width and the stylus
+lifts clean off the paper across them** — the same mark THE PULSE and THE RINGS
+use. A trace drawn through them would read as a zero, and a zero is a claim that
+nothing was said. What is true is that nothing was exported.
+
+Each lane is scaled to its own maximum, printed beside it: WORDS peaks at 65,278
+in a month and DAYS cannot exceed 31. Lanes are comparable in shape, never in
+height. SENT and RECEIVED are read against their own peaks too, so where the two
+traces part it is one side of the thread doing the writing; DAYS against either
+is the difference between a month that was busy and a month that was busy on
+four days.
 
 ### THE ACCRETION, and the one dataset that is not derived from the snapshot
 

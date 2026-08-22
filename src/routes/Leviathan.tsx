@@ -20,6 +20,7 @@ import { Lexicon } from '../leviathan/instruments/Lexicon'
 import { Mass } from '../leviathan/instruments/Mass'
 import { Pen } from '../leviathan/instruments/Pen'
 import { Pulse } from '../leviathan/instruments/Pulse'
+import { Recorder } from '../leviathan/instruments/Recorder'
 import { Rings } from '../leviathan/instruments/Rings'
 import { Schema } from '../leviathan/instruments/Schema'
 import { Silence } from '../leviathan/instruments/Silence'
@@ -33,6 +34,7 @@ const BUILT: Record<string, typeof Mass> = {
   accretion: Accretion,
   chronology: Chronology,
   pen: Pen,
+  recorder: Recorder,
   clock: Clock,
   pulse: Pulse,
   silence: Silence,
@@ -71,7 +73,7 @@ const section = sectionBySlug('leviathan')!
  *
  * The original is thirty-seven instruments over two sections plus an unlisted
  * third page, each one a hand-wired page that loaded its own payload and drew
- * its own chrome. All of them are in this registry — not just the four that got
+ * its own chrome. All of them are in this registry — not just the ones that got
  * rebuilt — because a rack that lists only what is finished cannot tell you
  * what is missing, and the missing is most of the story. Every dark instrument
  * says which kind of dark it is and why, in its own words.

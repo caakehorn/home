@@ -1,0 +1,196 @@
+/* ==========================================================================
+   PROCUREMENT VI · THE ASK
+   Everything below the chart is what makes the numbers checkable: the audit
+   table first, then the records themselves. Nothing is styled to look more
+   certain than it is — a lane under 80% precision is marked wherever its
+   number appears.
+   ========================================================================== */
+
+.ask {
+  display: grid;
+  gap: 1.4rem;
+  margin-top: 0.4rem;
+}
+
+.ask__h {
+  margin: 0 0 0.4rem;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  color: var(--n3);
+}
+
+.ask__lede {
+  margin: 0 0 0.7rem;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+/* ---- the audit ----------------------------------------------------------- */
+
+.ask__audit {
+  padding: 0.8rem 0.9rem;
+  background: var(--void-2);
+  border: 2px solid color-mix(in srgb, var(--n3) 45%, transparent);
+}
+
+.ask__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--f-mono);
+  font-size: 0.64rem;
+}
+
+.ask__table th,
+.ask__table td {
+  padding: 0.35rem 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid var(--void-3);
+  vertical-align: top;
+}
+
+.ask__table thead th {
+  font-size: 0.58rem;
+  letter-spacing: 0.16em;
+  color: var(--n3);
+}
+
+.ask__table tbody th {
+  font-weight: 400;
+  color: var(--text);
+}
+
+.ask__table td {
+  color: var(--text-dim);
+  word-break: break-word;
+}
+
+.ask__pc {
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+/* A category wrong on a fifth of what it caught should not read as a fact. */
+.ask__pc--weak {
+  color: var(--n2);
+}
+
+/* ---- the records --------------------------------------------------------- */
+
+.ask__filters {
+  display: grid;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.ask__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.ask__chip {
+  padding: 0.25rem 0.6rem;
+  font-family: var(--f-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  background: var(--void-3);
+  border: 1px solid color-mix(in srgb, var(--n3) 35%, transparent);
+  cursor: pointer;
+  transition: color 140ms ease, border-color 140ms ease;
+}
+
+.ask__chip:hover {
+  color: var(--text);
+  border-color: var(--n3);
+}
+
+.ask__chip--on {
+  color: var(--edge);
+  background: var(--n3);
+  border-color: var(--n3);
+}
+
+.ask__list {
+  display: grid;
+  gap: 1px;
+  max-height: 30rem;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+  background: var(--void-3);
+  border: 2px solid color-mix(in srgb, var(--n3) 45%, transparent);
+}
+
+.ask__row {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.55rem 0.7rem;
+  background: var(--void-2);
+}
+
+.ask__when {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-family: var(--f-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+
+.ask__when time {
+  color: var(--n3);
+  font-variant-numeric: tabular-nums;
+}
+
+.ask__kind {
+  color: var(--text-dim);
+}
+
+.ask__quote {
+  margin: 0;
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.ask__quote::before {
+  content: '“';
+  color: var(--text-dim);
+}
+
+.ask__quote::after {
+  content: '”';
+  color: var(--text-dim);
+}
+
+/* The RIOT palette has two inks and repeats them, so a warning carried only by
+   colour disappears there. Every weak-precision number gets a mark as well. */
+.ask__warn {
+  margin-right: 0.25rem;
+  font-style: normal;
+}
+
+.ask__pc--weak {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 0.2em;
+}
+
+/* Visible to a screen reader, not to the layout. */
+.ask__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

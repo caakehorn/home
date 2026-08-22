@@ -6,6 +6,7 @@ import { sectionBySlug } from '../content/sections'
 import { INSTRUMENTS, WINGS, countBy, instrumentById, instrumentsIn } from '../leviathan/core'
 import type { Instrument, InstrumentStatus } from '../leviathan/core'
 import { Accretion } from '../leviathan/instruments/Accretion'
+import { Ask } from '../leviathan/instruments/Ask'
 import { Chronology } from '../leviathan/instruments/Chronology'
 import { Attention } from '../leviathan/instruments/Attention'
 import { Census } from '../leviathan/instruments/Census'
@@ -35,6 +36,7 @@ const BUILT: Record<string, typeof Mass> = {
   chronology: Chronology,
   pen: Pen,
   recorder: Recorder,
+  ask: Ask,
   clock: Clock,
   pulse: Pulse,
   silence: Silence,

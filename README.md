@@ -619,7 +619,7 @@ declares which kind of dark it is:
 | **PORTED** | 4 | came across under this house's own name — the card links to where |
 | **UNBUILT** | 0 | the corpus is already here; nobody has built the instrument |
 | **SEALED** | 5 | waiting on a corpus this site does not carry |
-| **BARRED** | 18 | it makes a judgement, and THE RULE forbids one |
+| **BARRED** | 17 | it makes a judgement, and THE RULE forbids one |
 
 **BARRED is the one that matters.** The corpus half of the old console was
 largely rhetorical scoring — LOVE, PROFANITY, APOLOGY, PLEADING, LOVE-BOMB,
@@ -627,8 +627,9 @@ DENIAL, ASSERTING against DEFERRING — which is exactly what THE RULE was
 written against. Those do not come across. They are listed anyway, each with
 the specific sentence saying which part of the rule it breaks, because quietly
 dropping them would tell a nicer story about the old site than the old site
-tells. The six PROCUREMENT instruments are barred for the same reason and are
-additionally never photographed; see THE GALLERY below.
+tells. Five of the six PROCUREMENT instruments are barred for the same reason
+and are additionally never photographed; see THE GALLERY below. The sixth is
+THE ASK, which came across and is LIVE — see below.
 
 **UNBUILT is empty, and that is recent.** It used to be the to-do list: every
 instrument whose corpus was already in the building and which nobody had built.
@@ -732,6 +733,50 @@ that room has two inks and `--n1` and `--n3` are the same red twice through the
 machine. Where the ramp collapses the second channel falls back to bare paper,
 and the legend reads the resolved pair back off the canvas so a key can never
 disagree with the marks. The direction switch is the other half of the answer.
+
+### THE ASK
+
+```bash
+npm run ask -- ../leviathan   # vendors js/procurement-asks.js -> public/leviathan/ask.json
+```
+
+The most carefully built instrument in the old repo, brought across whole: 357
+records drawn from 18,946 messages, merged out of every thread export,
+timezone-corrected, deduplicated, classified by speech-act frame plus named
+object, and then read by hand with the false positives struck.
+
+**The audit ships with it.** The per-category precision that survived that
+manual read is in the dataset and is printed on the instrument — the same
+arrangement the original used, and its own stated reason for it: a number
+nobody can check is not evidence.
+
+| lane | folds | precision |
+| --- | --- | --- |
+| NAMES THE BUY SIZE | `denom` | 97% |
+| ASKS FOR IT | `want`, `order`, `chase`, `askSupply`, `askMoney`, `askOther` | **57%** |
+| RAISES THE MONEY | `fund`, `ask3p` | 96% |
+| HANDS OVER THE ATM CODE | `code` | 100% |
+| IS THE SOURCE AROUND | `see` | 100% |
+
+Each lane prints the **worst** precision among the categories it folds, because
+a lane is only as good as its weakest member. Low-precision numbers are marked
+with a symbol and an underline as well as ink, because the RIOT palette repeats
+its two inks and a warning carried only by colour vanishes there.
+
+The counting is **not** redone here. It was done by hand over there, and
+re-deriving it in this repo would only invent a second, differently-wrong
+ledger. `scripts/build-ask.mjs` reshapes the records into monthly lanes and
+copies the audit through unchanged; it slices the object literal out of the
+source file rather than evaluating it, so a build here cannot run whatever that
+repository happens to contain.
+
+The lane groupings are the original's, reproduced rather than re-argued — the
+grouping is part of the classification, not a reading of it. `RUNNING TOTAL` is
+the same records accumulated: a restatement of the other five, not a sixth
+finding.
+
+Like `transcript` and `accretion`, `ask.json` is committed rather than built in
+CI, because it derives from a repository this one does not vendor.
 
 ### THE RECORDER, and the pens that did not come across
 

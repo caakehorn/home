@@ -684,12 +684,17 @@ export const INSTRUMENTS: Instrument[] = [
   },
 
   // -------------------------------------------------------------------------
-  // PROCUREMENT — the unlisted third page, six instruments, all of them scoring.
+  // PROCUREMENT — the unlisted third page, six instruments.
   //
-  // They are listed for completeness and every one of them is BARRED. The page
-  // is a hand-assembled pool of quotations sorted into lanes and tiers about a
-  // named living person; the sorting is the instrument. Nothing here reproduces
-  // its contents, and nothing in THE GALLERY photographs it.
+  // The page is a hand-assembled pool of quotations sorted into lanes and tiers
+  // about a named living person; the sorting is the instrument. Five of the six
+  // are BARRED and stay that way.
+  //
+  // THE ASK came across and is LIVE. It is the most carefully built thing in
+  // the old repo — deduplicated, timezone-corrected, hand-audited — and the
+  // per-category precision from that audit ships with it and is printed beside
+  // every lane, which is the same arrangement the original used and the reason
+  // its numbers can be checked at all. Nothing in THE GALLERY photographs it.
 
   {
     id: 'proc-agency',
@@ -762,15 +767,12 @@ export const INSTRUMENTS: Instrument[] = [
     title: 'THE ASK',
     kana: '請求',
     wing: 'PROCUREMENT',
-    corpus: '18,946 messages, recounted from the raw exports',
-    blurb: 'Every request, recounted from primary sources, in the order it was made — classified by speech-act frame and then read by hand.',
-    method: 'Ledger rows counted from the message export, with per-category precision measured by hand and printed on the instrument.',
-    status: 'BARRED',
+    corpus: '357 classified records · drawn from 18,946 messages · 2025-02 → 2026-06',
+    blurb: 'Every request, recounted from primary sources, in the order it was made — classified by speech-act frame, then read by hand with the false positives struck. The precision that survived the audit is printed beside every lane.',
+    method:
+      'Every thread export merged, the UTC-stamped one converted to local, duplicates struck within a 120-second window. Records classified by speech-act frame plus named object, then every hit read by hand and the false positives removed. Counted into five lanes per month, plus the running total. The classification is not redone here: it was done by hand over there, and what ships alongside it is the audit — each lane prints the worst measured precision among the categories it folds, 100% down to 57%.',
+    status: 'LIVE',
     origin: 'procurement.html · VI · THE ASK — and standalone as ask.html',
-    bars: JUDGEMENT(
-      'It is the most carefully built thing in the old repo — deduplicated, timezone-corrected, hand-audited, precision published. And what it publishes is a classification of one person’s requests.',
-    ),
-    needs: 'the classified ledger itself, which is a hand-audited reading of the record rather than the record, and is not vendored here',
   },
 ]
 

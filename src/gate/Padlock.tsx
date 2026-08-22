@@ -49,6 +49,8 @@ type Props = {
   onWrong: () => void
 }
 
+type InputMode = 'dial' | 'numeric'
+
 export function Padlock({ onOpen, onWrong }: Props) {
   /** Accumulated rotation in degrees. Increasing is clockwise. */
   const [angle, setAngle] = useState(0)
@@ -58,6 +60,20 @@ export function Padlock({ onOpen, onWrong }: Props) {
   const [unconfigured, setUnconfigured] = useState(false)
   /** Set the moment the door opens, so the shackle can spring before it goes. */
   const [sprung, setSprung] = useState(false)
+  
+  // Numeric input mode state
+  const [inputMode, setInputMode] = useState<InputMode>('dial')
+  const [numericInput, setNumericInput] = useState<(number | null)[]>([null, null, null])
+  
+  // Detect mobile on mount
+  useEffect(() => {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    )
+    if (isMobile) {
+      setInputMode('numeric')
+    }
+  }, [])
 
   const dialRef = useRef<HTMLDivElement>(null)
   /**
@@ -157,6 +173,8 @@ export function Padlock({ onOpen, onWrong }: Props) {
   // ---- keyboard ---------------------------------------------------------
 
   const onKeyDown = (e: React.KeyboardEvent) => {
+    if (inputMode !== 'dial') return
+    
     if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
       e.preventDefault()
       turn(STEP)
@@ -166,6 +184,45 @@ export function Padlock({ onOpen, onWrong }: Props) {
     } else if (e.key === 'Enter' && done) {
       e.preventDefault()
       void pull()
+    }
+  }
+
+  // ---- numeric input mode -----------------------------------------------
+
+  const handleNumericInput = (index: number, value: string) => {
+    const num = value === '' ? null : Math.min(Math.max(parseInt(value, 10), 0), POSITIONS - 1)
+    setNumericInput((current) => {
+      const next = [...current]
+      next[index] = num
+      return next
+    })
+  }
+
+  const resetNumeric = () => {
+    setNumericInput([null, null, null])
+  }
+
+  const numericDone = numericInput.every((n) => n !== null)
+
+  const pullNumeric = async () => {
+    if (busy || sprung || !numericDone) return
+    
+    const numbers = numericInput as number[]
+    
+    setBusy(true)
+    setNote('TESTING THE SHACKLE…')
+    const verdict = await tryPassphrase(formatCombination(numbers))
+    setBusy(false)
+
+    if (verdict === 'open') {
+      setNote('')
+      setSprung(true)
+      window.setTimeout(() => onOpen(formatCombination(numbers)), 620)
+    } else if (verdict === 'unconfigured') {
+      setNote('')
+      setUnconfigured(true)
+    } else {
+      onWrong()
     }
   }
 
@@ -239,99 +296,161 @@ export function Padlock({ onOpen, onWrong }: Props) {
           />
         </svg>
 
-        {/* ---- the dial ---------------------------------------------- */}
-        <div className="lock__case">
-          <span className="lock__index" aria-hidden="true" />
-          <div
-            ref={dialRef}
-            className="lock__dial"
-            style={{ ['--turn' as string]: `${-angle}deg` }}
-            onPointerDown={onPointerDown}
-            onPointerMove={onPointerMove}
-            onPointerUp={endDrag}
-            onPointerCancel={endDrag}
-            onKeyDown={onKeyDown}
-            role="slider"
-            tabIndex={0}
-            aria-label={`Combination dial. Currently on ${at}. Spin ${directionWord(want)} for number ${Math.min(stage + 1, NUMBERS)} of ${NUMBERS}. Arrow keys turn it; press the opposite arrow to set a number; Enter pulls the shackle.`}
-            aria-valuenow={at}
-            aria-valuemin={0}
-            aria-valuemax={POSITIONS - 1}
-            aria-valuetext={`${at}`}
-          >
-            <svg viewBox="-100 -100 200 200" aria-hidden="true">
-              {Array.from({ length: POSITIONS }, (_, i) => {
-                const major = i % 5 === 0
-                return (
-                  <g key={i} transform={`rotate(${i * STEP})`}>
-                    <line
-                      className={major ? 'lock__tick lock__tick--major' : 'lock__tick'}
-                      x1="0"
-                      y1="-92"
-                      x2="0"
-                      y2={major ? -78 : -85}
-                    />
-                    {major && (
-                      <text className="lock__num" x="0" y="-62" textAnchor="middle">
-                        {i}
-                      </text>
-                    )}
-                  </g>
-                )
-              })}
-            </svg>
-          </div>
+        {inputMode === 'dial' ? (
+          <>
+            {/* ---- the dial ---------------------------------------------- */}
+            <div className="lock__case">
+              <span className="lock__index" aria-hidden="true" />
+              <div
+                ref={dialRef}
+                className="lock__dial"
+                style={{ ['--turn' as string]: `${-angle}deg` }}
+                onPointerDown={onPointerDown}
+                onPointerMove={onPointerMove}
+                onPointerUp={endDrag}
+                onPointerCancel={endDrag}
+                onKeyDown={onKeyDown}
+                role="slider"
+                tabIndex={0}
+                aria-label={`Combination dial. Currently on ${at}. Spin ${directionWord(want)} for number ${Math.min(stage + 1, NUMBERS)} of ${NUMBERS}. Arrow keys turn it; press the opposite arrow to commit.`}
+                aria-valuenow={at}
+                aria-valuemin={0}
+                aria-valuemax={POSITIONS - 1}
+                aria-valuetext={`${at}`}
+              >
+                <svg viewBox="-100 -100 200 200" aria-hidden="true">
+                  {Array.from({ length: POSITIONS }, (_, i) => {
+                    const major = i % 5 === 0
+                    return (
+                      <g key={i} transform={`rotate(${i * STEP})`}>
+                        <line
+                          className={major ? 'lock__tick lock__tick--major' : 'lock__tick'}
+                          x1="0"
+                          y1="-92"
+                          x2="0"
+                          y2={major ? -78 : -85}
+                        />
+                        {major && (
+                          <text className="lock__num" x="0" y="-62" textAnchor="middle">
+                            {i}
+                          </text>
+                        )}
+                      </g>
+                    )
+                  })}
+                </svg>
+              </div>
 
-          {/* The reading, held still in the middle while the face turns. */}
-          <span className="lock__read" aria-hidden="true">
-            {String(at).padStart(2, '0')}
-          </span>
-        </div>
+              {/* The reading, held still in the middle while the face turns. */}
+              <span className="lock__read" aria-hidden="true">
+                {String(at).padStart(2, '0')}
+              </span>
+            </div>
+
+            {/* ---- what it wants next -------------------------------------- */}
+            <div className="lock__steps">
+              {DIRECTIONS.slice(0, NUMBERS).map((d, i) => (
+                <span
+                  key={i}
+                  className={`lock__step${i < stage ? ' lock__step--set' : ''}${i === stage && !done ? ' lock__step--now' : ''}`}
+                >
+                  <b>{i < stage ? String(picked[i]).padStart(2, '0') : '––'}</b>
+                  {directionWord(d)}
+                </span>
+              ))}
+            </div>
+
+            <p className="lock__hint" aria-live="polite">
+              {note ||
+                (sprung
+                  ? 'OPEN.'
+                  : done || stage === NUMBERS - 1
+                    ? `SPIN ${directionWord(want)} · THEN PULL`
+                    : `SPIN ${directionWord(want)} · REVERSE TO SET`)}
+            </p>
+
+            <div className="lock__acts">
+              <button
+                type="button"
+                className="gate__go"
+                onClick={pull}
+                disabled={busy || sprung || stage < NUMBERS - 1}
+              >
+                {busy ? 'TESTING…' : 'PULL'}
+              </button>
+              <button
+                type="button"
+                className="lock__clear"
+                onClick={reset}
+                disabled={busy || sprung || stage === 0}
+              >
+                CLEAR
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* ---- numeric input mode ------------------------------------ */}
+            <div className="lock__numeric">
+              <div className="lock__inputs">
+                {Array.from({ length: NUMBERS }, (_, i) => (
+                  <input
+                    key={i}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength="2"
+                    value={numericInput[i] === null ? '' : String(numericInput[i]).padStart(2, '0')}
+                    onChange={(e) => handleNumericInput(i, e.target.value)}
+                    placeholder="--"
+                    className="lock__input"
+                    aria-label={`Number ${i + 1} (0-${POSITIONS - 1})`}
+                    disabled={busy || sprung}
+                  />
+                ))}
+              </div>
+
+              <p className="lock__hint" aria-live="polite">
+                {note || (sprung ? 'OPEN.' : `ENTER THREE NUMBERS: 0–${POSITIONS - 1}`)}
+              </p>
+
+              <div className="lock__acts">
+                <button
+                  type="button"
+                  className="gate__go"
+                  onClick={pullNumeric}
+                  disabled={busy || sprung || !numericDone}
+                >
+                  {busy ? 'TESTING…' : 'UNLOCK'}
+                </button>
+                <button
+                  type="button"
+                  className="lock__clear"
+                  onClick={resetNumeric}
+                  disabled={busy || sprung || numericInput.every((n) => n === null)}
+                >
+                  CLEAR
+                </button>
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
-      {/* ---- what it wants next -------------------------------------- */}
-      <div className="lock__steps">
-        {DIRECTIONS.slice(0, NUMBERS).map((d, i) => (
-          <span
-            key={i}
-            className={`lock__step${i < stage ? ' lock__step--set' : ''}${i === stage && !done ? ' lock__step--now' : ''}`}
-          >
-            <b>{i < stage ? String(picked[i]).padStart(2, '0') : '––'}</b>
-            {directionWord(d)}
-          </span>
-        ))}
-      </div>
-
-      <p className="lock__hint" aria-live="polite">
-        {note ||
-          (sprung
-            ? 'OPEN.'
-            : done || stage === NUMBERS - 1
-              ? // The last number has no reversal after it — the pull is its
-                // commit — so telling you to "reverse to set" here is telling
-                // you to do something that does not work.
-                `SPIN ${directionWord(want)} · THEN PULL`
-              : `SPIN ${directionWord(want)} · REVERSE TO SET`)}
-      </p>
-
-      <div className="lock__acts">
-        <button
-          type="button"
-          className="gate__go"
-          onClick={pull}
-          disabled={busy || sprung || stage < NUMBERS - 1}
-        >
-          {busy ? 'TESTING…' : 'PULL'}
-        </button>
-        <button
-          type="button"
-          className="lock__clear"
-          onClick={reset}
-          disabled={busy || sprung || stage === 0}
-        >
-          CLEAR
-        </button>
-      </div>
+      {/* ---- mode toggle ---------------------------------------- */}
+      <button
+        type="button"
+        className="lock__mode-toggle"
+        onClick={() => {
+          setInputMode(inputMode === 'dial' ? 'numeric' : 'dial')
+          reset()
+          resetNumeric()
+        }}
+        disabled={busy || sprung}
+        aria-label={`Switch to ${inputMode === 'dial' ? 'numeric' : 'dial'} mode`}
+      >
+        {inputMode === 'dial' ? 'USE NUMBERS' : 'USE DIAL'}
+      </button>
     </div>
   )
 }

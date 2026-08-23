@@ -161,6 +161,16 @@ too. It flashes at about 1.5 Hz, half the 3 Hz general-flash threshold in
 WCAG 2.3.1, and under `prefers-reduced-motion` it stops strobing but still
 takes the page for the whole 30 seconds.
 
+There are three ways to work the lock and they all hand one string to one
+decryption: **KEYPAD** (the default — type the three numbers, paste any format,
+Enter to pull), **DIAL** (the object: right, left, right, and a number commits
+when you reverse), and **PHRASE** (free text, above). Nothing downstream knows
+which one you used, so none of them can drift into skipping the lockout.
+
+`GATE_ENABLED` in `src/gate/config.ts` turns the whole door off in one word. It
+is read in a wrapper rather than inside the state machine, so `false` means the
+gate never mounts at all.
+
 One unlock covers the tab. Append `#lock` to any URL to throw the bolt again —
 it drops the stored passphrase, strips itself out of the URL and re-serves the
 door, so the owner can see their own front step without opening a new tab.
@@ -172,7 +182,7 @@ nothing else in the codebase reads those strings.
 ### Building the verifier
 
 ```bash
-HOME_COMBINATION='12-34-05' npm run gate:verify   # writes public/gate/verify.enc
+HOME_COMBINATION='NN-NN-NN' npm run gate:verify   # writes public/gate/verify.enc
 HOME_PASSPHRASE='…'         npm run gate:verify   # still works, passed through
 ```
 
@@ -186,6 +196,13 @@ whatever phrase built it, so a `verify.enc` made from the old typed passphrase
 will refuse every combination — indistinguishably from a wrong one, because
 that is what a wrong key looks like to GCM. Run the command above with the
 chosen combination before deploying the dial.
+
+Until that happens the door is not bricked: **PHRASE** mode passes free text
+straight to the same decryption, so a blob keyed to a sentence still opens for
+that sentence. That is the escape hatch for exactly this situation, and it is
+why the padlock is not a one-way door. It costs nothing in security — same
+blob, same 250k iterations — and once the verifier is rekeyed the numbers start
+working and the phrase stops.
 
 The blob is a ciphertext, so committing it leaks nothing but the cost of
 guessing. The passphrase itself is never written anywhere and cannot be

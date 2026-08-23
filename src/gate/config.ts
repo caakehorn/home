@@ -24,6 +24,21 @@
  * for something else.
  */
 
+/**
+ * THE MAIN SWITCH.
+ *
+ * `false` renders the site with no door at all — no terms, no lockout, no
+ * padlock. It exists because a door whose key has been lost is worse than no
+ * door: the failure mode of this design is that `public/gate/verify.enc` is
+ * keyed to something nobody can produce any more, and every attempt then
+ * costs a 30-second lockout on the way to finding that out.
+ *
+ * That escape hatch now has a cheaper version — PHRASE mode on the padlock
+ * keeps the old key working against an un-rekeyed blob — so this should stay
+ * `true`. It is one word if that ever stops being enough.
+ */
+export const GATE_ENABLED = true
+
 /** Bump to ask every device for the passphrase again on its next visit. */
 export const GATE_VERSION = 'v1'
 

@@ -80,3 +80,47 @@ export const positionAt = (angle: number) =>
   ((Math.round(angle / STEP) % POSITIONS) + POSITIONS) % POSITIONS
 
 export const directionWord = (d: 1 | -1) => (d === 1 ? 'RIGHT' : 'LEFT')
+
+/* --------------------------------------------------------------------------
+   TYPING IT IN
+
+   The dial is the object; typing is how anybody actually opens it. Both feed
+   the same `formatCombination`, so there is exactly one string format and no
+   second contract to keep in sync with the verifier.
+   -------------------------------------------------------------------------- */
+
+/** Highest number on the face. */
+export const HIGH = POSITIONS - 1
+
+/** Digits in the widest legal number, so a field knows when it is full. */
+export const WIDTH = String(HIGH).length
+
+/** Is this raw field text a number that exists on the dial? */
+export const inRange = (raw: string) => raw !== '' && Number(raw) <= HIGH
+
+/**
+ * A field is full when it cannot take another digit.
+ *
+ * Two ways that happens: it has WIDTH digits already, or the digit it has
+ * cannot be the first of a legal two-digit number — on a 40-position face
+ * nothing starts with 4 through 9, so typing one of those is unambiguous and
+ * the caret should move on without waiting for a second keystroke.
+ */
+export const isFull = (raw: string) => raw.length >= WIDTH || Number(raw) * 10 > HIGH
+
+/**
+ * Pull a combination out of pasted text.
+ *
+ * Accepts everything a person might have in their clipboard — `12-34-05`,
+ * `12 34 5`, `7,31,22`, or a bare `123405`. Separated forms are split on the
+ * separators first, because chunking `7-31-22` blindly into pairs gives
+ * `73 12 2` and quietly enters the wrong combination.
+ */
+export function parseTyped(text: string): string[] {
+  const parts = text.split(/[^0-9]+/).filter(Boolean)
+  const chunks =
+    parts.length >= NUMBERS
+      ? parts.slice(0, NUMBERS)
+      : (text.replace(/\D/g, '').match(new RegExp(`\\d{1,${WIDTH}}`, 'g')) ?? [])
+  return chunks.slice(0, NUMBERS).map((chunk) => String(Math.min(Number(chunk), HIGH)))
+}

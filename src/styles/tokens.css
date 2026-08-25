@@ -1,12 +1,14 @@
 /* ==========================================================================
    DAN'S DIALECTICAL DATABASE AND DRUG DEN — DESIGN TOKENS
 
-   The house style is a flyer: xeroxed, cut up and stapled back down, one
-   spot ink on whatever paper the machine was fed. The Tokyo neon is still
-   burning underneath, in the rooms that want it.
+   The house style is a Tokyo night shot from above at 4am: black that is not
+   quite black, magenta and cyan tubes bleeding into it, an acid green that
+   should not be in the same room as either. The xerox is still here — every
+   surface is still cut, taped and stapled — but it is a flyer stuck to a wet
+   wall under a sign, not a sheet on a desk.
 
-   Five palettes. Swap with [data-vibe] on <html>; RIOT is the default and the
-   house style, the other four are the neon rooms. The neon ramp
+   Five palettes. Swap with [data-vibe] on <html>; VOID is the default and the
+   house style, the other four are the rooms off it. The neon ramp
    (--n1..--n5) is the SIGNAGE layer; the paint ramp (--p-*) is the CANVAS
    layer underneath it, and they are deliberately different jobs — neon glows,
    paint does not, and toner does neither.
@@ -164,37 +166,48 @@
 }
 
 /* -------------------------------------------------------------------------
-   VIBE 04 — KAIJU DREAM  (ref: psychedelic oni + gumball maximalism)
+   VIBE 04 — ENTER THE VOID — the house style, and the default.
+
+   Shot from directly above, at the hour the trains have stopped. The ground
+   is not black, it is the colour black goes when there is a magenta tube
+   forty feet away and rain on the asphalt between you and it. Three lights
+   and they do not agree: hot magenta, cyan, and an acid green that reads as
+   a chemical rather than a colour.
+
+   As the default it also seeds bare :root, so the first paint — before the
+   provider has written [data-vibe] onto <html> — is already the house style.
    ---------------------------------------------------------------------- */
-:root[data-vibe='kaiju'] {
-  --void: #200607;
-  --void-2: #330d0c;
-  --void-3: #4a1513;
-  --edge: #0d0202;
+:root,
+:root[data-vibe='void'] {
+  --void: #05040a;
+  --void-2: #0c0716;
+  --void-3: #170c26;
+  --edge: #000000;
 
-  --n1: #ef8a1f; /* orange     */
-  --n2: #e8478f; /* hot pink   */
-  --n3: #6ff2d4; /* mint       */
-  --n4: #f5c400; /* cadmium    */
-  --n5: #1244c4; /* cobalt     */
+  --n1: #ff2ea6; /* magenta — the tube you can see from the end of the street */
+  --n2: #b4ff1a; /* acid    — the one that should not be in the room          */
+  --n3: #00eaff; /* cyan    — signage, links, every glyph that has to be read */
+  --n4: #7b2dff; /* violet  — the wash the whole city sits in                 */
+  --n5: #ff3b1f; /* sodium  — the streetlight, and the only warm thing here   */
 
-  --text: #ffeee6;
-  --text-dim: #c99b8a;
-  --vibe-name: 'KAIJU DREAM';
+  --text: #f3edff;
+  --text-dim: #8f83ad;
+  --vibe-name: 'ENTER THE VOID';
 }
 
 /* -------------------------------------------------------------------------
-   VIBE 05 — RIOT — the photocopier, and the default.
+   VIBE 05 — RIOT — the photocopier.
 
    Two inks and a sheet of paper, which is the entire budget a flyer has ever
    had. Everything here is toner on newsprint with one spot red, and the
    accent ramp does not go anywhere near a sixth hue: --n1 and --n4 are the
    same red at two weights on purpose, because a copy shop does not stock
    cadmium and the constraint is the aesthetic.
-   As the default it also seeds bare :root, so the first paint — before the
-   provider has written [data-vibe] onto <html> — is already the house style.
+
+   It is no longer the default — the default is the street the flyer got
+   stapled to — but it is still the whole DIY layer with the lights off, and
+   every device in punk.css was cut here first.
    ---------------------------------------------------------------------- */
-:root,
 :root[data-vibe='riot'] {
   --void: #e8e2d4;
   --void-2: #ddd6c5;

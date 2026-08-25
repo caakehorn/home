@@ -6,8 +6,10 @@
   display: grid;
   place-items: center;
   background:
-    radial-gradient(120% 80% at 50% 8%, color-mix(in srgb, var(--n4) 34%, transparent), transparent 62%),
-    linear-gradient(180deg, #05000d 0%, var(--void) 38%, var(--void-2) 78%, var(--void-3) 100%);
+    radial-gradient(80% 46% at 50% 4%, color-mix(in srgb, var(--n4) 40%, transparent), transparent 70%),
+    radial-gradient(70% 40% at 18% 84%, color-mix(in srgb, var(--n1) 22%, transparent), transparent 72%),
+    radial-gradient(60% 34% at 86% 78%, color-mix(in srgb, var(--n3) 16%, transparent), transparent 72%),
+    linear-gradient(180deg, var(--void-3) 0%, var(--void-2) 26%, var(--void) 62%, var(--edge) 100%);
   animation: splash-in 700ms ease both;
 }
 
@@ -37,12 +39,26 @@
   pointer-events: none;
 }
 
+/* Out-of-focus light, not a star. You cannot see stars from down here and
+   the sky is not what anybody is looking at anyway — these are the far end of
+   the street with nothing focused on it. */
 .splash__star {
   position: absolute;
-  background: #fff;
-  clip-path: polygon(50% 0%, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0% 50%, 39% 39%);
-  animation: spark-twinkle calc(3.2s * var(--tempo)) ease-in-out infinite;
-  filter: drop-shadow(0 0 5px var(--n3));
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 50%,
+    color-mix(in srgb, var(--glow, var(--n3)) 85%, #fff) 0 22%,
+    color-mix(in srgb, var(--glow, var(--n3)) 45%, transparent) 55%,
+    transparent 72%
+  );
+  opacity: calc(0.28 + 0.4 * var(--chaos));
+  filter: blur(1.5px);
+  animation: bokeh-breathe calc(9s * var(--tempo)) ease-in-out infinite alternate;
+}
+
+@keyframes bokeh-breathe {
+  from { transform: scale(0.82) translateY(3px); opacity: 0.22; }
+  to { transform: scale(1.18) translateY(-4px); opacity: 0.75; }
 }
 
 /* crescent = a disc with an offset disc masked out of it */
@@ -53,10 +69,11 @@
   width: clamp(60px, 9vw, 130px);
   aspect-ratio: 1;
   border-radius: 50%;
-  background: var(--n3);
+  background: color-mix(in srgb, var(--n3) 55%, var(--text));
   -webkit-mask-image: radial-gradient(circle at 118% 34%, transparent 0 62%, #000 62.5%);
   mask-image: radial-gradient(circle at 118% 34%, transparent 0 62%, #000 62.5%);
-  filter: drop-shadow(0 0 calc(var(--glow-r) * 1.6) var(--n3));
+  opacity: 0.24;
+  filter: blur(4px) drop-shadow(0 0 calc(var(--glow-r) * 1.6) var(--n3));
   animation: throb calc(7s * var(--tempo)) ease-in-out infinite;
 }
 
@@ -105,12 +122,40 @@
   opacity: 0.7;
 }
 
-.splash__pagoda path,
-.splash__pagoda rect {
-  fill: color-mix(in srgb, var(--void-2) 70%, transparent);
+/* ---- the capsule tower --------------------------------------------- */
+.splash__capsule rect {
+  fill: color-mix(in srgb, var(--void-2) 78%, transparent);
   stroke: var(--n5);
-  stroke-width: 2.5;
-  filter: drop-shadow(0 0 9px var(--n5));
+  stroke-width: 2;
+}
+
+.splash__capsule-eye {
+  fill: var(--n1);
+  stroke: none;
+  opacity: 0.55;
+  animation: flicker calc(11s * var(--tempo)) steps(1) infinite;
+}
+
+/* ---- the expressway ------------------------------------------------- */
+.splash__road path {
+  fill: none;
+  stroke: color-mix(in srgb, var(--void-3) 88%, var(--n4));
+  stroke-width: 22;
+  opacity: 0.95;
+}
+
+.splash__road .splash__road-line {
+  stroke: var(--n3);
+  stroke-width: 2;
+  stroke-dasharray: 26 22;
+  opacity: 0.9;
+  filter: drop-shadow(0 0 7px var(--n3));
+}
+
+.splash__piers rect {
+  fill: color-mix(in srgb, var(--void-3) 90%, transparent);
+  stroke: var(--n4);
+  stroke-width: 2;
 }
 
 /* ---- vertical signs ------------------------------------------------ */
@@ -155,36 +200,6 @@
   }
 }
 
-/* ---- lanterns ------------------------------------------------------ */
-.splash__lanterns {
-  position: absolute;
-  top: clamp(6%, 10vh, 16%);
-  right: clamp(4%, 12vw, 18%);
-  display: flex;
-  gap: 0.6rem;
-  pointer-events: none;
-}
-
-.splash__lantern {
-  display: grid;
-  place-items: center;
-  width: clamp(28px, 4.2vw, 48px);
-  aspect-ratio: 0.78;
-  border-radius: 46% 46% 46% 46% / 34% 34% 34% 34%;
-  font-size: clamp(0.7rem, 1.6vw, 1.1rem);
-  color: var(--void);
-  background: var(--n2);
-  border: 3px solid var(--edge);
-  box-shadow: 0 0 26px var(--n2);
-  animation: lantern-sway calc(5s * var(--tempo)) ease-in-out infinite alternate;
-  transform-origin: 50% -12px;
-}
-
-@keyframes lantern-sway {
-  from { transform: rotate(-7deg); }
-  to { transform: rotate(7deg); }
-}
-
 /* ---- core mark ----------------------------------------------------- */
 .splash__core {
   position: relative;
@@ -194,7 +209,9 @@
   gap: 0.6rem;
   padding: var(--gutter);
   text-align: center;
-  transform: translateY(-6vh);
+  /* clears the wire rig: the ENTER button and the top line were landing on the
+     same band of the viewport, and a crow standing on a button is a bug */
+  transform: translateY(-10vh);
 }
 
 .splash__venue {
@@ -304,29 +321,64 @@
   color: var(--text-dim);
 }
 
-/* ---- roof + crows --------------------------------------------------- */
-.splash__roof {
+/* ---- the street: wires, crows, fence -------------------------------- */
+.splash__street {
   position: absolute;
   inset: auto 0 0 0;
-  height: 26vh;
-  min-height: 150px;
-  z-index: 2;
+  height: 30vh;
+  min-height: 190px;
+  z-index: 3;
   pointer-events: none;
 }
 
-.splash__tiles {
+.splash__wires {
   position: absolute;
-  inset: 22% 0 0 0;
-  background:
+  left: 50%;
+  bottom: 19%;
+  width: min(1180px, 97vw);
+  height: auto;
+  transform: translateX(-50%);
+}
+
+.splash__pole rect {
+  fill: color-mix(in srgb, var(--edge) 88%, var(--void));
+  stroke: color-mix(in srgb, var(--n4) 70%, transparent);
+  stroke-width: 1.5;
+}
+
+.splash__pole-can {
+  fill: color-mix(in srgb, var(--void-3) 90%, transparent) !important;
+  stroke: var(--n5) !important;
+}
+
+.splash__lines path {
+  fill: none;
+  stroke: color-mix(in srgb, var(--n4) 62%, var(--text-dim));
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  opacity: 0.85;
+}
+
+/* The bottom of the frame is a fence with somebody's stickers on it — the
+   diamond is two crossed gradients, and the sticker layer is the same four
+   inks as everything else, at the size a hand can reach. */
+.splash__fence {
+  position: absolute;
+  inset: 74% 0 0 0;
+  border-top: 4px solid color-mix(in srgb, var(--n4) 80%, transparent);
+  background-image:
     repeating-linear-gradient(
-      90deg,
-      var(--n1) 0 4px,
-      color-mix(in srgb, var(--n4) 70%, var(--edge)) 4px 48px
-    );
-  border-top: 5px solid var(--n2);
-  box-shadow: 0 -12px 40px color-mix(in srgb, var(--n1) 55%, transparent);
-  transform: perspective(320px) rotateX(38deg);
-  transform-origin: 50% 0;
+      58deg,
+      transparent 0 13px,
+      color-mix(in srgb, var(--text-dim) 42%, transparent) 13px 15px
+    ),
+    repeating-linear-gradient(
+      -58deg,
+      transparent 0 13px,
+      color-mix(in srgb, var(--text-dim) 42%, transparent) 13px 15px
+    ),
+    linear-gradient(180deg, transparent, color-mix(in srgb, var(--edge) 80%, transparent));
+  opacity: 0.7;
 }
 
 .splash__crows {
@@ -339,14 +391,14 @@
 }
 
 .splash__crow-body {
-  fill: #05010a;
+  fill: color-mix(in srgb, var(--edge) 92%, var(--void));
   stroke: color-mix(in srgb, var(--n1) 85%, transparent);
   stroke-width: 1.5;
   filter: drop-shadow(0 0 10px color-mix(in srgb, var(--n1) 70%, transparent));
 }
 
 .splash__crow-legs {
-  stroke: #05010a;
+  stroke: color-mix(in srgb, var(--edge) 92%, var(--void));
   stroke-width: 3.5;
   stroke-linecap: round;
   fill: none;
@@ -367,6 +419,29 @@
   0%, 100% { transform: translateY(0) rotate(0deg); }
   40% { transform: translateY(-6px) rotate(-1.5deg); }
   70% { transform: translateY(2px) rotate(1deg); }
+}
+
+/* ---- the two of them ------------------------------------------------ */
+/* Not in the middle. The middle is a backing plate with the tagline on it, and
+   the plate is opaque, so a drawing centred behind it is a shoulder and a rumour.
+   They stand down on the corner instead, under the pole, at the size two people
+   actually are next to a building. */
+.splash__kiss {
+  position: absolute;
+  left: clamp(0.5rem, 2vw, 4rem);
+  bottom: 15vh;
+  z-index: 3;
+  width: min(430px, 33vw);
+  pointer-events: none;
+}
+
+@media (max-width: 900px) {
+  .splash__kiss {
+    left: -3vw;
+    bottom: 20vh;
+    width: 62vw;
+    opacity: 0.9;
+  }
 }
 
 /* ---- ticker --------------------------------------------------------- */

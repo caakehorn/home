@@ -8,6 +8,12 @@
    says EAT THE RICH. This layer takes it apart and puts a photocopier in its
    place.
 
+   The default room is now the street rather than the copy shop, and this layer
+   did not change when that happened: a flyer is a flyer under a streetlight
+   too, and the four devices below are what makes the neon read as DIY instead
+   of as a corporate lobby. RIOT is where the devices are seen with the lights
+   on; everywhere else they are the texture on top of the dark.
+
    Four devices, and they are all the same device seen from different angles:
 
      1. THE COPIER   halftone, dropout, misregistration, blown contrast
@@ -341,19 +347,24 @@
 
 /* --------------------------------------------------------------------------
    THE SPLASH
-   A twinkling starfield and a soft moon over a Tokyo skyline is a lovely
-   picture and the wrong front door. The stars stop twinkling and become
-   punched holes in the sheet; the moon stops glowing and becomes a hole with
-   an edge; the ✦ in the tagline is a ✕ (set in the markup).
+   Bokeh over a Tokyo skyline is a lovely picture and the wrong front door on
+   paper. Out-of-focus light becomes a punched hole in the sheet; the moon
+   stops glowing and becomes a hole with an edge; the ✦ in the tagline is a ✕
+   (set in the markup).
    -------------------------------------------------------------------------- */
-.splash__star {
+/* On paper only. Everywhere else the bokeh stays round and stays breathing —
+   an out-of-focus light is the one thing on this page that is genuinely a
+   light rather than a picture of one, and flattening it in the neon rooms
+   turned the sky into a scatter of black squares. */
+:root[data-vibe='riot'] .splash__star {
   animation: none !important;
   border-radius: 0 !important;
+  background: var(--edge) !important;
   filter: none !important;
   opacity: 0.7;
 }
 
-.splash__moon {
+:root[data-vibe='riot'] .splash__moon {
   animation: none !important;
 }
 
@@ -383,10 +394,11 @@
 /* ==========================================================================
    THE FRONT DOOR, ON PAPER
 
-   The splash is a Tokyo night: a graded sky, a glowing moon, neon signs, lit
-   windows, a lantern row. All of it assumes a dark room, and on newsprint the
-   gradient runs from midnight to cream and the whole scene turns into a pastel
-   wash — the one thing that palette must never look like.
+   The splash is a Tokyo night: a graded sky, a hazy moon, neon signs, lit
+   windows, an expressway, a pole strung with more wire than it was rated for.
+   All of it assumes a dark room, and on newsprint the gradient runs from
+   midnight to cream and the whole scene turns into a pastel wash — the one
+   thing that palette must never look like.
 
    So on paper it stops being a night and becomes a flyer OF a night: flat
    ground, ink silhouette, one spot colour, no light sources anywhere. Same
@@ -408,10 +420,30 @@
 }
 
 :root[data-vibe='riot'] .splash__towers rect,
-:root[data-vibe='riot'] .splash__pagoda path,
-:root[data-vibe='riot'] .splash__pagoda rect {
+:root[data-vibe='riot'] .splash__capsule rect,
+:root[data-vibe='riot'] .splash__piers rect {
   fill: var(--edge);
   stroke: var(--edge);
+  filter: none;
+}
+
+/* The one lit thing left on the sheet is the row of capsule windows, and on
+   paper they are knocked out of the ink rather than lit through it. */
+:root[data-vibe='riot'] .splash__capsule-eye {
+  fill: var(--void) !important;
+  animation: none;
+  opacity: 1;
+}
+
+/* An overpass drawn flat: one heavy rule for the deck, a dashed one for the
+   paint, and no glow on either because a road is not a light. */
+:root[data-vibe='riot'] .splash__road path {
+  stroke: var(--edge);
+  opacity: 1;
+}
+
+:root[data-vibe='riot'] .splash__road .splash__road-line {
+  stroke: var(--void);
   filter: none;
 }
 
@@ -437,17 +469,6 @@
   text-shadow: none;
   box-shadow: 6px 6px 0 var(--edge);
   animation: none;
-}
-
-:root[data-vibe='riot'] .splash__lantern {
-  color: var(--void);
-  background: var(--n2);
-  box-shadow: none;
-  border-radius: 0;
-}
-
-:root[data-vibe='riot'] .splash__lantern {
-  background: var(--spot);
 }
 
 :root[data-vibe='riot'] .splash__venue {
@@ -495,15 +516,23 @@
   background: var(--spot);
 }
 
-/* The roof stops being a lit neon floor and becomes a hazard bar. */
-:root[data-vibe='riot'] .splash__tiles {
-  background-image: repeating-linear-gradient(-45deg, var(--edge) 0 16px, var(--n1) 16px 32px);
-  border-top: 6px solid var(--edge);
-  box-shadow: none;
+/* Pole and wire go to flat ink; the fence becomes what a fence looks like on
+   a flyer, which is a hazard bar, because that is what every fence on every
+   flyer since 1977 has been. */
+:root[data-vibe='riot'] .splash__pole rect,
+:root[data-vibe='riot'] .splash__pole-can {
+  fill: var(--edge) !important;
+  stroke: var(--edge) !important;
 }
 
-:root[data-vibe='riot'] .splash__tiles {
+:root[data-vibe='riot'] .splash__lines path {
+  stroke: var(--edge);
+}
+
+:root[data-vibe='riot'] .splash__fence {
   background-image: repeating-linear-gradient(-45deg, var(--toner) 0 16px, var(--spot) 16px 32px);
+  border-top: 6px solid var(--edge);
+  opacity: 1;
 }
 
 /* Crows: solid ink, no halo, still bobbing. */

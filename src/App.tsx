@@ -1,7 +1,6 @@
-import { Route, Routes, useLocation } from 'react-router-dom'
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { Crawl } from './components/Crawl'
 import { CrownDefs } from './components/Crown'
-import { CursorTrail } from './components/CursorTrail'
 import { JET_FUEL, RATIO } from './content/crawls'
 import { Fx } from './components/Fx'
 import { Hud } from './components/Hud'
@@ -50,7 +49,6 @@ function Site() {
     <>
       <CrownDefs />
       <Fx />
-      <CursorTrail />
 
       <Routes>
         <Route path="/" element={<Home />} />
@@ -68,6 +66,12 @@ function Site() {
         <Route path="/leviathan" element={<LeviathanRoute />} />
         <Route path="/leviathan/:id" element={<LeviathanRoute />} />
         <Route path="/sage" element={<SageRoute />} />
+        {/* Three handles that were never links. They resolve rather than
+            404 because the room they point at is named after the person who
+            used them, and a door with her name on it should open. */}
+        <Route path="/alu" element={<Navigate to="/arcade" replace />} />
+        <Route path="/aluuuu" element={<Navigate to="/arcade/alu-08" replace />} />
+        <Route path="/top8" element={<Navigate to="/arcade/alu-08" replace />} />
         <Route path="/transcript" element={<TranscriptRoute />} />
         <Route path="/:slug" element={<Stub />} />
       </Routes>

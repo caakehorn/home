@@ -1,0 +1,115 @@
+/* ==========================================================================
+   THE KISS
+
+   Palette-driven, like everything else: the rims are the neon ramp, the fills
+   are the void, and the cut is the void again — which is the only reason the
+   cut works. If the cut were a fixed colour it would show as a grey outline
+   the moment somebody switched rooms.
+   ========================================================================== */
+
+.kiss {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.kiss__ink {
+  fill: color-mix(in srgb, var(--edge) 82%, var(--void));
+}
+
+/* The figure in front is separated from everything behind her by a stroke in
+   the background colour. `paint-order` puts that stroke UNDER the fill so it
+   only ever grows outward — stroked over the top it would eat four units off
+   her own silhouette and give her a soft edge. */
+.kiss__cut {
+  stroke: var(--void);
+  stroke-width: 8;
+  stroke-linejoin: round;
+  paint-order: stroke fill;
+}
+
+.kiss__bloom {
+  fill: var(--n4);
+  opacity: calc(0.16 + 0.3 * var(--chaos));
+  filter: blur(32px);
+}
+
+.kiss__sky {
+  fill: var(--n2);
+  stroke: var(--n2);
+  stroke-width: 0.8;
+  opacity: 0.34;
+}
+
+.kiss__rim {
+  fill: none;
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.kiss__rim--back {
+  stroke: var(--n1);
+  filter: drop-shadow(0 0 calc(2px + var(--glow-r) * 0.22) var(--n1));
+}
+
+.kiss__rim--front {
+  stroke: var(--n3);
+  filter: drop-shadow(0 0 calc(2px + var(--glow-r) * 0.22) var(--n3));
+}
+
+/* The necklace is a detail you are not meant to find on the first pass: one
+   unit of line at a third opacity, on a throat that is already dark. */
+.kiss__chain {
+  fill: none;
+  stroke: var(--n1);
+  stroke-width: 1;
+  opacity: 0.38;
+}
+
+.kiss__chain--bird {
+  fill: var(--n1);
+  stroke: none;
+  opacity: 0.5;
+}
+
+/* --------------------------------------------------------------------------
+   ON PAPER
+   No light source, so no rim — the drawing has to survive as pure shape. The
+   fills go to ink, the cut goes to paper, and the two faces are told apart by
+   the gap between them rather than by two colours of tube.
+   -------------------------------------------------------------------------- */
+:root[data-vibe='riot'] .kiss__ink {
+  fill: var(--edge);
+}
+
+:root[data-vibe='riot'] .kiss__cut {
+  stroke: var(--void);
+  stroke-width: 9;
+}
+
+:root[data-vibe='riot'] .kiss__bloom {
+  display: none;
+}
+
+:root[data-vibe='riot'] .kiss__sky {
+  stroke: var(--edge);
+  fill: var(--edge);
+  opacity: 0.25;
+}
+
+:root[data-vibe='riot'] .kiss__rim {
+  stroke: var(--void);
+  stroke-width: 2.4;
+  filter: none;
+}
+
+:root[data-vibe='riot'] .kiss__chain,
+:root[data-vibe='riot'] .kiss__chain--bird {
+  stroke: var(--void);
+  opacity: 0.55;
+}
+
+:root[data-vibe='riot'] .kiss__chain--bird {
+  fill: var(--void);
+}

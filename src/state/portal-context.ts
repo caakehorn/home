@@ -2,6 +2,13 @@ import { createContext } from 'react'
 
 export const VIBES = [
   {
+    id: 'void',
+    name: 'ENTER THE VOID',
+    kana: '虚空',
+    blurb: 'tokyo from directly above, 4am, every light smeared',
+    swatch: ['#ff2ea6', '#00eaff', '#b4ff1a'],
+  },
+  {
     id: 'riot',
     name: 'RIOT',
     kana: '暴動',
@@ -12,7 +19,7 @@ export const VIBES = [
     id: 'den',
     name: 'DRUG DEN',
     kana: '薬窟',
-    blurb: 'back-room neon, crows on the roof, 4am and still arguing',
+    blurb: 'back-room neon, crows on the wire, still arguing',
     swatch: ['#f5c400', '#ff2bd6', '#1244c4'],
   },
   {
@@ -28,13 +35,6 @@ export const VIBES = [
     kana: '滴',
     blurb: 'wet letterforms, chartreuse, turquoise wall',
     swatch: ['#b4ff1a', '#ff2d95', '#14e6e6'],
-  },
-  {
-    id: 'kaiju',
-    name: 'KAIJU DREAM',
-    kana: '怪獣夢',
-    blurb: 'gumball planets, oni gate, too much of everything',
-    swatch: ['#ef8a1f', '#e8478f', '#f5c400'],
   },
 ] as const
 
@@ -81,5 +81,5 @@ export const PortalContext = createContext<PortalState | null>(null)
 // A stored vibe that is no longer in VIBES fails `isVibeId` on read and falls
 // back to the default, so retiring a palette does not need a key bump: nobody
 // gets stranded on a room that is not there any more.
-export const STORAGE_KEY = 'danfrank:prefs:v2'
+export const STORAGE_KEY = 'danfrank:prefs:v3'
 export const SESSION_KEY = 'danfrank:entered:v1'

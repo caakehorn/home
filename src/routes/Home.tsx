@@ -1,3 +1,4 @@
+import { Kiss } from '../components/Kiss'
 import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
 import { PortalCard } from '../components/PortalCard'
@@ -5,7 +6,6 @@ import { Rig } from '../components/Rig'
 import { Logo } from '../components/Logo'
 import { SubHead } from '../components/Wordmark'
 import { ChaosDial } from '../components/rigs/ChaosDial'
-import { StickerSlab } from '../components/rigs/StickerSlab'
 import { Terminal } from '../components/rigs/Terminal'
 import { VibeSwitch } from '../components/rigs/VibeSwitch'
 import { SECTIONS } from '../content/sections'
@@ -72,8 +72,10 @@ export function Home() {
             館内
           </span>
           <p className="section__note">
-            {SECTIONS.length} rooms off one hallway. {DARK === 1 ? 'One is' : `${DARK} are`} still
-            being wired — the door opens, there is just scaffolding and a smell in there.
+            {SECTIONS.length} rooms off one hallway.{' '}
+            {DARK === 0
+              ? 'All of them are open, which has never been true before and will not stay true.'
+              : `${DARK === 1 ? 'One is' : `${DARK} are`} still being wired — the door opens, there is just scaffolding and a smell in there.`}
           </p>
         </div>
 
@@ -93,6 +95,35 @@ export function Home() {
         lean={-0.6}
       />
 
+      {/* ---- the void ------------------------------------------------- */}
+      <section className="void-band" aria-labelledby="void-title">
+        <div className="void-band__wash" aria-hidden="true" />
+        <div className="wrap void-band__inner">
+          <Kiss className="void-band__art" label="Two people in profile, kissing, lit from behind" />
+
+          <div className="void-band__say">
+            <span className="void-band__kana jp" aria-hidden="true">
+              虚空
+            </span>
+            <h2 id="void-title" className="void-band__title">
+              <SubHead venn={false}>ENTER THE VOID</SubHead>
+            </h2>
+            <p className="void-band__note">
+              Everything else in this building is one man arguing with a record at an hour the
+              record should not be trusted at. This is the other thing. It is two people under a
+              light on a street that does not care, at the end of a night that went on too long,
+              and it is the only part of the whole operation that was never a citation.
+            </p>
+            <p className="void-band__meta">
+              <span>NO PERMISSION ASKED</span>
+              <span>NO APOLOGY OFFERED</span>
+              {/* not 4am. 4:11:43 AM, which is a timestamp in a payments ledger. */}
+              <span>4:11 AM</span>
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* ---- the console --------------------------------------------- */}
       <section className="wrap section" aria-labelledby="console-title">
         <div className="section__head">
@@ -103,7 +134,7 @@ export function Home() {
             操作卓
           </span>
           <p className="section__note">
-            Four things you can actually grab. They are wired to each other and to the rest of
+            Three things you can actually grab. They are wired to each other and to the rest of
             the building — the dial and the palette drive every page you visit after this one,
             and the shell knows more verbs than it admits to.
           </p>
@@ -118,12 +149,8 @@ export function Home() {
             <VibeSwitch />
           </Rig>
 
-          <Rig index={3} title="SHELL" kana="端末" hint="type at it · it answers · it navigates" accent={5} wide>
+          <Rig index={3} title="SHELL" kana="端末" hint="type at it · it answers · it navigates" accent={3} wide>
             <Terminal />
-          </Rig>
-
-          <Rig index={4} title="STICKER SLAB" kana="貼札" hint="drag · fling · they bounce" accent={2}>
-            <StickerSlab />
           </Rig>
         </div>
       </section>

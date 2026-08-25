@@ -11,9 +11,10 @@ import {
 /** `motion: null` means nobody has chosen — follow the OS, and keep following it. */
 type Prefs = { vibe: VibeId; chaos: number; motion: boolean | null }
 
-// RIOT is the house palette: toner on newsprint, one spot red, no glow. The
-// neon rooms are still there, but you have to ask for them.
-const DEFAULTS: Prefs = { vibe: 'riot', chaos: 0.55, motion: null }
+// VOID is the house palette: Tokyo at 4am from above, magenta and cyan into
+// black. The other rooms are still there — RIOT among them, with the whole DIY
+// layer and the lights off — but you have to ask for them.
+const DEFAULTS: Prefs = { vibe: 'void', chaos: 0.55, motion: null }
 
 const REDUCE = '(prefers-reduced-motion: reduce)'
 

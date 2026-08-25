@@ -13,13 +13,56 @@ const BANNER: Line[] = [
   { kind: 'out', text: 'type `help` for the verbs. most of them are not in `help`.' },
 ]
 
-const RAMEN = String.raw`
-   ( ( (
-    ) ) )
-  .-------.
-  |CUP    |   カップ
-  |RAMEN  |   ラーメン
-  '-------'   3 min. no lid.
+/* --------------------------------------------------------------------------
+   THE ARCADE'S TENANT
+
+   Everything in this block is sourced from `wiki/people/ally-lubin`, by way of
+   `src/arcade/content.ts`, and it obeys the same house rule that room does:
+   the joke is never on her, Dan is the recurring obstacle, and the 2019
+   material stays in the wiki where it belongs. None of these verbs are listed
+   by `help`. They are not supposed to be found on the first night.
+   -------------------------------------------------------------------------- */
+
+const ALU08 = String.raw`
+  +-------------------------------+
+  |   A L U   ' 0 8               |
+  |   -------------------------   |
+  |   TOP 8 · ap.net · BUZZNET    |
+  |   SIDE BANGS · A BURNED CD    |
+  |   AWAY MESSAGE · MYSPACE HTML |
+  |   LIVEJOURNAL · A BLACK HEART |
+  +-------------------------------+
+   "i peaked in 2008" — said about
+   herself, unprompted, eighteen
+   years later. filed as corroboration.
+`
+
+const TOP8 = String.raw`
+   +------+------+------+------+
+   |  1.  |  2.  |  3.  |  4.  |
+   |  ALU |      |      |      |
+   +------+------+------+------+
+   |  5.  |  6.  |  7.  |  8.  |
+   |      |      |      |      |
+   +------+------+------+------+
+   seven vacancies. it was never
+   going to be a contest.
+`
+
+const EDGAR = String.raw`
+    /\_/\      EDGAR
+   ( o.o )     all black, broad, unhurried
+    > ^ <      wide paddle, slow hands
+   /|   |\
+  (_|   |_)    did not consent to being caught
+`
+
+const SYLVIA = String.raw`
+    /\_/\      SYLVIA
+   ( -.- )     tuxedo, white bib, four white socks
+    > w <      narrow paddle, fast hands
+   /|:::|\
+  (_|:::|_)    named like a poet. behaves like a cat.
 `
 
 const CROWS = String.raw`
@@ -28,7 +71,7 @@ const CROWS = String.raw`
    \\_//)           \\_//)           \\_//)
     \_/_)            \_/_)            \_/_)
      _|_              _|_              _|_
-  three crows on the ridge, waiting for you to ship
+  three crows on the wire, waiting for you to ship
 `
 
 const GLYPHS = 'アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789ｱｲｳｴｵ▓▒░'
@@ -107,6 +150,14 @@ export function Terminal() {
     loadIndex()
       .then((data) => fn(data.pages))
       .catch(() => err('the corpus is not reachable from here.'))
+  }
+
+  /** Two names, one cluster: `praesepe` and `m44` are the same object. */
+  const beehive = () => {
+    out('PRAESEPE · M44 · THE BEEHIVE CLUSTER — in Cancer, and wired to nothing.')
+    out('a thousand stars that read as one smudge until somebody points a real')
+    out('instrument at them. it connects to no corner of the figure. it is just')
+    out('there, in the middle of her, being a thousand things at once.')
   }
 
   const open = (slug: string) => {
@@ -479,8 +530,57 @@ export function Terminal() {
     },
     exit: { blurb: 'leave', run: () => err('there is no exit. there is a door, and you came in through it.') },
     echo: { blurb: 'say it back', run: (arg) => out(arg) },
-    ramen: { blurb: 'cup ramen', run: () => art(RAMEN) },
     crows: { blurb: 'three crows', run: () => art(CROWS) },
+
+    // ---- the arcade's tenant, unlisted -----------------------------------
+    alu: {
+      blurb: 'the year the internet was good',
+      run: () => {
+        art(ALU08)
+        later(() => out('the whole cabinet is at /arcade/alu-08.'), 320)
+      },
+    },
+    aluuuu: {
+      blurb: 'an institution',
+      run: () => {
+        out('ALU. an institution, and two grown men once discussed it like a university:')
+        out('  "i sent my transcripts to ALU, but got a rejection letter in the mail."')
+        out('admissions remain closed. the faculty is one person and she did not apply.')
+      },
+    },
+    top8: { blurb: 'the old ranking', run: () => art(TOP8) },
+    edgar: { blurb: 'a cat', run: () => art(EDGAR) },
+    sylvia: { blurb: 'the other cat', run: () => art(SYLVIA) },
+    praesepe: { blurb: 'M44', run: beehive },
+    m44: { blurb: 'praesepe', run: beehive },
+    cancer: {
+      blurb: 'cardinal water',
+      run: () => {
+        out('CANCER · 蟹 · JUNE 26 · cardinal water, ruled by the moon.')
+        out('cardinal means it starts things. water means it does not explain why')
+        out('afterwards. the moon is the only ruler that changes shape every night')
+        out('and gets blamed for everything.')
+        out('')
+        out('Altarf is the brightest star in it. Cancer is one of the faintest')
+        out('constellations in the sky. read that however you want — it was going to')
+        out('be about her either way.')
+      },
+    },
+    catbird: {
+      blurb: 'still owed',
+      run: () => {
+        out('"Get me this for being brave." — October 30, 2023.')
+        err('one catbird necklace. OUTSTANDING.')
+        out('this site keeps an extremely good record of things nobody did anything about.')
+      },
+    },
+    dunkies: {
+      blurb: '7:24 AM',
+      run: () => {
+        out('"Good morning my queen. What do you want from dunkies?" — 7:24 AM.')
+        out('the question was sincere. it is still open.')
+      },
+    },
     moon: { blurb: 'the moon', run: () => art('     ☾     ✦        ✧\n  the den is open. it is always 4am here.') },
     credits: {
       blurb: 'who did this',

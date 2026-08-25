@@ -37,13 +37,30 @@
 
 /* The crown hangs above the letters, so the heading has to leave room for it —
    in em, off the heading's own size, or it collides with the mark above it at
-   the top of the scale and floats miles clear at the bottom. */
-:root[data-vibe='riot'] .crowned {
+   the top of the scale and floats miles clear at the bottom.
+
+   It used to be drawn in RIOT only, on the theory that an oil-stick crown is a
+   printed mark and printing is what RIOT does. That was backwards: the crown
+   is the one thing on this site that is nobody's palette and everybody's mark,
+   and hiding it in four rooms out of five made it a palette detail. It is
+   drawn everywhere now — in ink on paper, and lit like a tube on the street. */
+.crowned {
   margin-top: 0.72em;
 }
 
-:root[data-vibe='riot'] .crowned > .crown {
+.crowned > .crown {
   display: block;
   z-index: 2;
+}
+
+/* On the street it is a tube: magenta, and it throws light on what it sits
+   over. On paper it is the spot ink and it throws nothing, because ink does
+   not emit. */
+:root:not([data-vibe='riot']) .crowned > .crown {
+  color: var(--n1);
+  filter: url(#oilstick) drop-shadow(0 0 calc(var(--glow-r) * 0.5) var(--n1));
+}
+
+:root[data-vibe='riot'] .crowned > .crown {
   color: var(--spot);
 }

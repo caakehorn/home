@@ -337,7 +337,10 @@ devices, which are the same device from four angles:
 
 It is applied to the classes the site already had rather than by rewriting
 components, and it runs in **every** palette: punk is not a colour scheme, it
-is what happens to the surface.
+is what happens to the surface. The default room moved from the copy shop to
+the street and this layer did not change when it did — a flyer is a flyer under
+a streetlight too, and these four devices are what keeps the neon reading as DIY
+instead of as a corporate lobby.
 
 The one new component is **`<Ransom>`** (`src/components/Ransom.tsx`) — cut-up
 headline type, six scraps from six sources. It is *seeded*, so a headline gets
@@ -348,15 +351,23 @@ whole string is on the wrapper as an `aria-label` and every scrap is
 
 ## Palettes
 
-Five, swapped by `data-vibe` on `<html>`. **`riot` is the default and the
-house style**: the photocopier — toner on newsprint, one spot red, two inks and
-no third. The other four (`den` · `untitled` · `slime` · `kaiju`) are the neon
-rooms, and you have to ask for them.
+Five, swapped by `data-vibe` on `<html>`. **`void` is the default and the house
+style**: ENTER THE VOID — Tokyo from directly above at the hour the trains have
+stopped, magenta and cyan and an acid green that reads as a chemical rather than
+a colour, over a black that is not quite black. The other four (`riot` · `den` ·
+`untitled` · `slime`) are the rooms off it, and you have to ask for them.
+
+`riot` — the photocopier, toner on newsprint, one spot red and no third ink —
+used to be the default. It is still the whole DIY layer with the lights off, and
+every device in `punk.css` was cut there first; it is just no longer the room you
+arrive in. `kaiju` is retired: an oni gate and gumball planets is a costume, and
+the building wanted a street.
 
 Defined as custom properties in `src/styles/tokens.css`; every component reads
 `--n1`…`--n5`, the `--void` and `--text` ramps, so nothing needs to know which
-palette is live. `riot` also seeds bare `:root`, so the first paint — before the
-provider has written `[data-vibe]` onto `<html>` — is already the house style.
+palette is live. `void` also seeds bare `:root`, so the first paint — before the
+provider has written `[data-vibe]` onto `<html>` — is already the house style,
+and `index.html` ships `data-vibe="void"` on the element for the same reason.
 
 `riot` puts an accent where the others put a light source, which breaks one
 assumption the rest of the site made everywhere: that text sitting **on** an
@@ -367,7 +378,10 @@ Anything whose background is `--glow` reads its text colour from it.
 
 A palette that is retired simply leaves `VIBES`: a stored `vibe` that no longer
 passes `isVibeId` falls back to the default on read, so nobody is stranded in a
-room that is not there any more and the storage key does not need a bump.
+room that is not there any more and the storage key does not need a bump. That
+is what happened to `kaiju`. The key **was** bumped (`v2` → `v3`) for the
+redesign itself, on the separate grounds that a returning visitor holding a
+stored `riot` would never have seen it.
 
 ## THE CRAWLS
 
@@ -1106,22 +1120,96 @@ instead of a hard-coded number.
 
 1. **CHAOS DIAL** — draggable/arrow-keyed knob, 0 to 11, drives `--chaos`
 2. **VIBE SWITCH** — the five palettes
-3. **SHELL** — 34 verbs, 8 of them listed in `help`; reads the corpus (`grep`,
+3. **SHELL** — 55 verbs, 8 of them listed in `help`; reads the corpus (`grep`,
    `whois`, `cite`, `hegel`), drives the site (`chaos`, `vibe`, `goto`,
    `overdose`, `narcan`), and takes the screen apart (`invert`, `flip`,
    `scanlines`, `nap`, `strobe`). `man <verb>` documents any of them and Tab
-   completes over all of them.
-4. **STICKER SLAB** — drag, fling, bounce, with momentum
+   completes over all of them. Ten of the unlisted ones are in **THE ALU SET**
+   below.
+
+There used to be a fourth — a slab of draggable stickers with momentum, which
+read as a fridge magnet set and undercut every other thing in the room. It is
+gone, and so is the pointer trail that used to follow the cursor around: a
+comet made of coloured circles is a screensaver, not a building.
 
 The chaos dial and the palette switch also ride in the header on every page —
 the console keeps the big versions, both surfaces drive the same state.
+
+## The kiss
+
+`src/components/Kiss.tsx` — two figures in profile, kissing, cut out of the
+dark. It is the front door's lower-left corner and it is the whole of the VOID
+band on the home page, and it is the one thing on this site that is a picture
+rather than a list.
+
+Two profiles facing each other cannot both keep their noses: a nose sticks out
+further than a mouth does, so the moment the lips touch in a flat side view the
+noses are in the same square inch of canvas and the drawing collapses into one
+blob with two ears. Tilting the heads only moves the collision. So it is not
+solved, it is staged — one figure is **in front of** the other, and the one in
+front carries a thick stroke in the background colour, a *cut*, that separates
+her from everything behind her. Where the silhouettes overlap you get a hairline
+of void instead of a merge, which is what makes two people read as two people.
+The figure behind sits seven units to the left, so after the cut takes its four
+there are three units of night between one mouth and the other. That gap is the
+whole drawing; any wider and they are talking.
+
+Nothing in it is filled with a colour. The fills are void, the cut is void
+again — which is the only reason the cut survives a palette switch — and the
+only colour is a rim on each face, magenta behind and cyan in front, standing in
+for a light source between them and the viewer. On `riot` there is no light
+source, so there is no rim: the fills go to ink, the cut goes to paper, and the
+two faces are told apart by the gap alone.
+
+## THE ALU SET
+
+Eighteen references to Ally Lubin, none of them signposted, all of them sourced
+from `wiki/people/ally-lubin` by way of `src/arcade/content.ts`. They obey the
+arcade's house rule — **the joke is never on her**, Dan is the recurring
+obstacle, and everything the page files under crisis stays in the wiki where it
+belongs.
+
+Ten are unlisted shell verbs:
+
+| verb | what it is |
+| --- | --- |
+| `alu` | the ALU '08 card — TOP 8, ap.net, BUZZNET, side bangs, a burned CD |
+| `aluuuu` | the handle, and the transcripts-and-a-rejection-letter line |
+| `top8` | the old ranking, one slot filled, seven vacancies |
+| `edgar` | all black, broad, unhurried; did not consent to being caught |
+| `sylvia` | tuxedo, white bib, four white socks; named like a poet |
+| `cancer` | 蟹 · June 26 · cardinal water, ruled by the moon |
+| `praesepe` / `m44` | the Beehive, wired to nothing, being a thousand things at once |
+| `catbird` | "Get me this for being brave." October 30 2023. Outstanding. |
+| `dunkies` | 7:24 AM, and the question is still open |
+
+The other eight are not verbs:
+
+- **The sky behind the kiss** is Cancer, drawn from the same `CANCER` and
+  `CANCER_EDGES` the WATER SIGNS cabinet uses — imported rather than copied, so
+  the sky over the drawing cannot drift out of agreement with the sky in the
+  arcade. It is at a fifth brightness, which is roughly what Cancer looks like
+  anyway.
+- **The figure behind wears a catbird necklace**, one unit of line at a third
+  opacity, on a throat that is already dark.
+- **A fifth neon sign** — 蟹 — lights on the splash on June 26 and no other day
+  of the year.
+- **`chaos 6.26`** at the shell adds a row to the HUD. The dial rounds to a
+  tenth, so that value is not reachable by dragging it: the only way in is to
+  already know what the number is.
+- **`/alu`, `/aluuuu` and `/top8`** resolve to the arcade instead of 404ing,
+  because the room is named after the person who used those handles.
+- **The VOID band's third chip** on the home page reads `4:11 AM`, not `4AM`.
+  4:11:43 is a timestamp in a payments ledger.
+- **The devtools banner**, for the person who opens the console.
+- **An HTML comment in `index.html`**, for the person who reads the markup.
 
 ## Layout
 
 ```
 src/
-  components/        chrome (nav, marquee, crawl, HUD, cursor trail, FX, Ransom)
-    rigs/            the six interactive elements
+  components/        chrome (nav, marquee, crawl, HUD, FX, Ransom, the kiss)
+    rigs/            the three interactive elements
   content/           section definitions, banner slogans, the crawls
   routes/            Splash, Home, Stub, blog index + post, wiki index + page
   state/             palette + chaos context, persisted

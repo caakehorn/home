@@ -60,3 +60,13 @@
     display: none;
   }
 }
+
+/* The row that is not normally there. See Hud.tsx — it is a date, not a
+   reading, and it only appears for somebody who typed the date in. */
+.hud__row--found {
+  color: var(--n2);
+  border-top: 1px dashed color-mix(in srgb, var(--n2) 60%, transparent);
+  margin-top: 0.2rem;
+  padding-top: 0.2rem;
+  animation: flicker calc(4s * var(--tempo)) steps(1) infinite;
+}

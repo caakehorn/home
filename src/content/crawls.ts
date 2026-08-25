@@ -173,6 +173,7 @@ const RATIO_SOURCE = [
   'Cap radar going off',
   'This has capped out',
   'farmed',
+  'So Ass',
   'Engagement farming detected',
   'Clapped',
   'Ratio farm',

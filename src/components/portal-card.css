@@ -56,8 +56,14 @@
 .portal__title {
   grid-area: title;
   margin-top: 0.3rem;
-  font-size: var(--step-2);
+  /* Capped below --step-2. "ALLY LUBIN'S ADVENTURE ARCADE" and
+     "TRANSMISSIONS" are both longer than a 270px card can hold at 2.4rem in a
+     heavy grotesque, and they were running out past the card's own rule. */
+  font-size: clamp(1.35rem, 1.15rem + 0.9vw, 1.95rem);
   line-height: 0.95;
+  /* A single word longer than the column breaks rather than escaping it. */
+  overflow-wrap: anywhere;
+  hyphens: auto;
 }
 
 .portal__blurb {

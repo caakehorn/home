@@ -17,11 +17,18 @@
   gap: 0.9rem;
   flex-wrap: wrap;
   padding: var(--nav-pad-block) clamp(0.6rem, 2vw, 1.4rem);
-  background: color-mix(in srgb, var(--void) 86%, transparent);
-  backdrop-filter: blur(10px) saturate(1.4);
+  /* No backdrop-filter.
+   *
+   * This bar is `position: sticky` over every scrolling page on the site, and
+   * `backdrop-filter: blur(10px)` on a sticky element means the compositor
+   * re-blurs everything behind it on every frame of every scroll — the single
+   * most expensive thing that was on this site, paid on the one interaction
+   * that happens constantly. The bar is near-opaque instead, which reads
+   * almost identically over a black page and costs nothing. */
+  background: color-mix(in srgb, var(--void) 94%, transparent);
   border-bottom: var(--rule) solid var(--edge);
-  box-shadow: 0 var(--nav-underline) 0 color-mix(in srgb, var(--n1) 45%, transparent);
-  transition: padding 240ms ease, gap 240ms ease, box-shadow 240ms ease;
+  box-shadow: 0 var(--nav-underline) 0 var(--n1);
+  transition: padding 240ms var(--glide), gap 240ms var(--glide);
 }
 
 .nav__mark {
@@ -137,7 +144,10 @@
   text-decoration: none;
   color: var(--text);
   border: 2px solid color-mix(in srgb, var(--glow) 60%, transparent);
-  transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+  transition:
+    background-color var(--snap) linear,
+    color var(--snap) linear,
+    transform var(--snap) var(--spring);
 }
 
 .nav__link .jp {
@@ -147,7 +157,29 @@
 .nav__link:hover {
   background: var(--glow);
   color: var(--on-glow);
-  transform: translateY(-2px);
+  transform: translateY(-3px) scale(1.05);
+}
+
+.nav__link:active {
+  transform: translateY(0) scale(0.96);
+  transition-duration: 60ms;
+}
+
+/* THE BRAIN. Filled rather than outlined, so the one destination the building
+   exists to serve is not the leftmost of eight identical chips. */
+.nav__link--primary {
+  color: var(--on-glow);
+  background: var(--glow);
+  border-color: var(--edge);
+  box-shadow: 3px 3px 0 var(--edge);
+}
+
+.nav__link--primary .jp {
+  color: var(--on-glow);
+}
+
+.nav__link--primary:hover {
+  box-shadow: 5px 5px 0 var(--edge);
 }
 
 .nav__link:hover .jp {

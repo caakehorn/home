@@ -1,0 +1,191 @@
+/* ==========================================================================
+   THE STREET LAYER
+   TOKYO · SKATE · SLAP · GRIP
+
+   The punk pass that runs above this file was written when RIOT was the house
+   style, and it is unconditional: it repaints the logo in paper and spot red,
+   flattens the wordmark's band ramp to three inks, turns the heading bloom
+   into a slab of red, and does all of that with `!important` in every palette.
+   That was right when every room was a photocopy of the same flyer.
+
+   It is wrong now. VOID is the house style and the punk pass would have the
+   front door's identity printed in xerox red on a black acid-green page.
+
+   So this runs after it, scoped to `:not([data-vibe='riot'])`, and hands the
+   four devices back their colour. RIOT keeps the photocopier exactly as it
+   was — every rule in punk.css still applies there, untouched.
+
+   What survives from punk everywhere: the scissors, the tape, the hazard bars,
+   the hard offsets, the refusal to round a corner. Those are construction, not
+   colour, and they are as much a skate deck as they are a 1977 flyer.
+   ========================================================================== */
+
+:root:not([data-vibe='riot']) {
+  /* --paper and --toner are the copy shop's two constants and the punk layer
+     paints identity with them. In a lit room they are the wrong two objects:
+     bone and black become the acid and the void. */
+  --slap: var(--n3);
+  --slap-2: var(--n1);
+}
+
+/* --------------------------------------------------------------------------
+   THE LOGO — back off the photocopier
+
+   punk.css sets `--gold: var(--paper)` and drops a spot-red stack under it.
+   Here it is bone on black with an acid drop, which is a deck graphic rather
+   than a flyer.
+   -------------------------------------------------------------------------- */
+:root:not([data-vibe='riot']) .logo {
+  --gold: #f4f2ea;
+  --shade-1: var(--n3);
+  --shade-2: var(--n1);
+}
+
+:root:not([data-vibe='riot']) .logo__line {
+  background: var(--edge);
+  text-shadow:
+    0.028em 0.028em 0 var(--n3),
+    0.042em 0.042em 0 var(--n1),
+    0.056em 0.056em 0 var(--edge);
+}
+
+:root:not([data-vibe='riot']) .logo--inline .logo__line {
+  text-shadow:
+    0.022em 0.022em 0 var(--n3),
+    0.034em 0.034em 0 var(--n1);
+}
+
+/* --------------------------------------------------------------------------
+   THE WORDMARK — three inks, but the room's three
+
+   punk.css collapses the seven-band arcade ramp to paper / spot / toner. The
+   collapse is right — seven hues is a gumball machine — but the three should
+   be the ones burning in this room.
+   -------------------------------------------------------------------------- */
+:root:not([data-vibe='riot']) .wordmark__face {
+  background-image: linear-gradient(
+    180deg,
+    #ffffff 0 26%,
+    var(--n3) 26% 58%,
+    var(--n1) 58% 100%
+  ) !important;
+}
+
+:root:not([data-vibe='riot']) .wordmark {
+  filter:
+    drop-shadow(0.05em 0.05em 0 var(--edge))
+    drop-shadow(0 0 calc(var(--glow-r) * 0.5) var(--n3));
+}
+
+/* The copier blots go back to being sparks — but hard-edged ones, on the
+   room's own tubes rather than the pastel five they started as. */
+:root:not([data-vibe='riot']) .wordmark-set__spark {
+  background: var(--n3) !important;
+  opacity: 1;
+}
+
+:root:not([data-vibe='riot']) .wordmark-set__spark:nth-child(3n) {
+  background: var(--n2) !important;
+}
+
+:root:not([data-vibe='riot']) .wordmark-set__spark:nth-child(4n) {
+  background: var(--n5) !important;
+}
+
+/* --------------------------------------------------------------------------
+   THE HEADING SLAB
+
+   punk.css turns the three blurred RGB lobes into one hard slab of spot red.
+   Keep the slab — it is the better object — and make it the room's violet,
+   cut on the same wrong angle.
+   -------------------------------------------------------------------------- */
+:root:not([data-vibe='riot']) .subhead-set__lobe:nth-child(1) {
+  background: var(--n1);
+}
+
+:root:not([data-vibe='riot']) .subhead {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.62' numOctaves='4' seed='9'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='0 0 0 0 0 1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23c)'/%3E%3C/svg%3E"),
+    linear-gradient(180deg, #ffffff, #dfe9d4);
+}
+
+/* --------------------------------------------------------------------------
+   THE SIGN — lit, not printed
+
+   punk.css narrows .firetext to a cold fluorescent tube in a squat, which is
+   the right instinct and the wrong hue: this room's sign is acid.
+   -------------------------------------------------------------------------- */
+:root:not([data-vibe='riot']) .firetext {
+  --fire-1: #f6ffe6;
+  --fire-2: var(--n3);
+  --fire-3: var(--n1);
+  filter:
+    drop-shadow(0.02em 0.02em 0 rgb(0 0 0 / 0.95))
+    drop-shadow(0 0 0.04em var(--n3))
+    drop-shadow(0 0 calc(0.1em + 0.08em * var(--chaos)) var(--n1));
+}
+
+/* --------------------------------------------------------------------------
+   THE HAZARD BAR
+
+   Under every section heading, in every palette. On paper it is black and spot
+   red; here it is black and acid, which is the same object and the reason
+   grip tape and hazard tape have always looked like each other.
+   -------------------------------------------------------------------------- */
+:root:not([data-vibe='riot']) .section__head::after {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--edge) 0 10px,
+    var(--n3) 10px 20px
+  );
+}
+
+/* --------------------------------------------------------------------------
+   THE SLAP
+
+   Cards are stickers on a board: they sit a degree or two off true, they lift
+   under a pointer, and they come back down on a spring. Applied to the
+   surfaces the site already has rather than by rewriting the components.
+   -------------------------------------------------------------------------- */
+:root:not([data-vibe='riot']) .portal {
+  transition: transform var(--pop) var(--spring);
+  will-change: transform;
+}
+
+:root:not([data-vibe='riot']) .portal:hover {
+  transform: translate3d(-3px, -6px, 0) rotate(calc(var(--lean, 0) * 0.6deg)) scale(1.02);
+}
+
+:root:not([data-vibe='riot']) .portal:active {
+  transform: translate3d(2px, 2px, 0) scale(0.99);
+  transition-duration: 70ms;
+}
+
+/* --------------------------------------------------------------------------
+   THE TONER LAYER
+
+   punk.css already flips the halftone to a screened white dot in the lit
+   rooms. It reads as CRT rather than as xerox at that polarity, which is
+   correct here — but at chaos 11 it was fogging the acid. Held back a little
+   so the page underneath keeps its edge.
+   -------------------------------------------------------------------------- */
+:root:not([data-vibe='riot']) .fx-toner {
+  opacity: calc(0.16 + 0.26 * var(--chaos));
+}
+
+/* --------------------------------------------------------------------------
+   SELECTION AND FOCUS
+
+   punk.css hard-sets both to spot red for every palette. Focus especially has
+   to be the room's own high-contrast tube, not an ink that may be invisible
+   against it.
+   -------------------------------------------------------------------------- */
+:root:not([data-vibe='riot']) ::selection {
+  background: var(--n3);
+  color: var(--edge);
+}
+
+:root:not([data-vibe='riot']) :focus-visible {
+  outline: 3px solid var(--n3);
+  outline-offset: 2px;
+}

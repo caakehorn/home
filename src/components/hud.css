@@ -11,8 +11,10 @@
   font-size: 0.68rem;
   letter-spacing: 0.1em;
   color: var(--text);
-  background: color-mix(in srgb, var(--void) 82%, transparent);
-  backdrop-filter: blur(6px);
+  /* No backdrop-filter. It is a fixed element over every scrolling page, so
+     the blur behind it was re-rasterised on every scroll frame for the sake of
+     a 4-line readout nobody is reading through. */
+  background: color-mix(in srgb, var(--void) 94%, transparent);
   border: 2px solid var(--n3);
   box-shadow:
     4px 4px 0 var(--edge),
@@ -59,14 +61,4 @@
   .hud {
     display: none;
   }
-}
-
-/* The row that is not normally there. See Hud.tsx — it is a date, not a
-   reading, and it only appears for somebody who typed the date in. */
-.hud__row--found {
-  color: var(--n2);
-  border-top: 1px dashed color-mix(in srgb, var(--n2) 60%, transparent);
-  margin-top: 0.2rem;
-  padding-top: 0.2rem;
-  animation: flicker calc(4s * var(--tempo)) steps(1) infinite;
 }

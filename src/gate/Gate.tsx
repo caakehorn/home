@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
-  GREETING,
+  GATE_ENABLED,
   KEYS,
   LOCKOUT_MS,
   MSG_MS,
@@ -10,7 +10,7 @@ import {
   TRAP_ROWS,
   TRAP_ROW_MS,
 } from './config'
-import { loadChallenge, tryPassphrase } from './protocol'
+import { Padlock } from './Padlock'
 import { TERMS_EFFECTIVE, TERMS_SECTIONS, TERMS_TITLE, TERMS_VERSION } from './terms'
 import './gate.css'
 
@@ -24,6 +24,17 @@ import './gate.css'
  * `#lock` on any URL throws the bolt again — an unlock lasts as long as the
  * tab, which otherwise means the owner cannot see their own front door without
  * opening a new one.
+ *
+ * The last step is a combination padlock (`./Padlock`) rather than a typed
+ * passphrase. The crypto is unchanged — the dialled combination IS the
+ * passphrase, checked by the same decryption — but the keyspace is a dial's
+ * rather than a sentence's, and `./combination` states what that costs
+ * instead of glossing it.
+ *
+ * `GATE_ENABLED` in `./config` turns the whole thing off in one word. The flag
+ * is read in the wrapper rather than inside the flow so that "off" means the
+ * state machine never mounts — hooks and all — instead of mounting and then
+ * being told to stand down.
  */
 
 type Step = 'boot' | 'terms' | 'declined' | 'quiz' | 'trap' | 'pass' | 'punish' | 'open'
@@ -55,6 +66,11 @@ const drop = (store: Storage | undefined, key: string) => {
 const wantsLock = () => /(^|[?&#])lock\b/.test(location.search + location.hash)
 
 export function Gate({ children }: { children: React.ReactNode }) {
+  if (!GATE_ENABLED) return <>{children}</>
+  return <GateFlow>{children}</GateFlow>
+}
+
+function GateFlow({ children }: { children: React.ReactNode }) {
   // Compute initial UI state synchronously so the gate renders the correct
   // step on first paint instead of showing the empty "boot" placeholder.
   const computeInitial = (): { step: Step; until: number } => {
@@ -140,7 +156,7 @@ export function Gate({ children }: { children: React.ReactNode }) {
       {step === 'declined' && <Declined />}
       {step === 'quiz' && <QuizStep onPass={() => setStep('pass')} onFail={() => setStep('trap')} />}
       {step === 'trap' && <Trap />}
-      {step === 'pass' && <Passphrase onOpen={open} onWrong={punish} />}
+      {step === 'pass' && <Padlock onOpen={open} onWrong={punish} />}
       {step === 'punish' && (
         <Punish
           until={until}
@@ -269,86 +285,6 @@ function Trap() {
         ))}
       </ol>
     </div>
-  )
-}
-
-// ---------------------------------------------------------------------------
-// 3 · THE PASSPHRASE — the only one of the four that is a lock
-
-function Passphrase({
-  onOpen,
-  onWrong,
-}: {
-  onOpen: (phrase: string) => void
-  onWrong: () => void
-}) {
-  const [phrase, setPhrase] = useState('')
-  const [busy, setBusy] = useState(false)
-  const [note, setNote] = useState('')
-  const [unconfigured, setUnconfigured] = useState(false)
-  const field = useRef<HTMLInputElement>(null)
-
-  useEffect(() => field.current?.focus(), [])
-
-  // If no verifier was ever built there is nothing to check against. Say so
-  // rather than standing in front of a door with no lock in it.
-  useEffect(() => {
-    loadChallenge().then((blob) => setUnconfigured(blob === null))
-  }, [])
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    // An empty field is not a guess. Charging thirty seconds for a stray
-    // Enter would only ever punish someone who already has the passphrase.
-    if (busy || !phrase) return
-    setBusy(true)
-    setNote('CHECKING…')
-    const verdict = await tryPassphrase(phrase)
-    setBusy(false)
-    setNote('')
-    if (verdict === 'open') onOpen(phrase)
-    else if (verdict === 'unconfigured') setUnconfigured(true)
-    else onWrong()
-  }
-
-  return (
-    <form className="gate__box" onSubmit={submit}>
-      <p className="gate__tag">THE DOOR</p>
-      <p className="gate__say">{GREETING}</p>
-
-      {unconfigured ? (
-        <>
-          <p className="gate__note">
-            No verifier has been built for this deployment, so there is nothing here to check a
-            passphrase against. Run <code>npm run gate:verify</code> with the passphrase in the
-            environment and commit <code>public/gate/verify.enc</code>.
-          </p>
-          <button type="button" className="gate__go" onClick={() => onOpen('')}>
-            ENTER ANYWAY
-          </button>
-        </>
-      ) : (
-        <>
-          <input
-            ref={field}
-            className="gate__field"
-            type="password"
-            value={phrase}
-            onChange={(e) => setPhrase(e.target.value)}
-            aria-label="Passphrase"
-            autoComplete="off"
-            spellCheck={false}
-            disabled={busy}
-          />
-          <p className="gate__err" aria-live="polite">
-            {note}
-          </p>
-          <button type="submit" className="gate__go" disabled={busy || !phrase}>
-            {busy ? 'CHECKING…' : 'ENTER'}
-          </button>
-        </>
-      )}
-    </form>
   )
 }
 

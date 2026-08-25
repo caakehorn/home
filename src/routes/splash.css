@@ -1,3 +1,14 @@
+/* ==========================================================================
+   THE FRONT DOOR — ENTER THE VOID
+
+   Every animation in this file runs on `transform` or `opacity` and nothing
+   else. There is one `filter` on the whole screen and it is on the crown,
+   which is a 60px SVG that does not move. That is deliberate: the door is the
+   first paint of the session, it is competing with a font load and a wiki
+   index fetch, and the old one spent its entire frame budget on 46 drop-shadow
+   passes before the type had arrived.
+   ========================================================================== */
+
 .splash {
   position: fixed;
   inset: 0;
@@ -6,11 +17,10 @@
   display: grid;
   place-items: center;
   background:
-    radial-gradient(80% 46% at 50% 4%, color-mix(in srgb, var(--n4) 40%, transparent), transparent 70%),
-    radial-gradient(70% 40% at 18% 84%, color-mix(in srgb, var(--n1) 22%, transparent), transparent 72%),
-    radial-gradient(60% 34% at 86% 78%, color-mix(in srgb, var(--n3) 16%, transparent), transparent 72%),
-    linear-gradient(180deg, var(--void-3) 0%, var(--void-2) 26%, var(--void) 62%, var(--edge) 100%);
-  animation: splash-in 700ms ease both;
+    radial-gradient(120% 74% at 50% 108%, color-mix(in srgb, var(--n1) 30%, transparent), transparent 64%),
+    radial-gradient(90% 60% at 50% -8%, color-mix(in srgb, var(--n3) 16%, transparent), transparent 66%),
+    var(--edge);
+  animation: splash-in 460ms var(--glide) both;
 }
 
 @keyframes splash-in {
@@ -18,165 +28,191 @@
   to { opacity: 1; }
 }
 
-/* leaving: iris + glitch out */
+/* Leaving: the iris shuts and the whole thing gets shoved through it. The
+   invert flashes are two frames of the film's own grammar and they are cheap —
+   a filter on an element that is about to be unmounted. */
 .splash--out {
-  animation: splash-out 900ms cubic-bezier(0.7, 0, 0.3, 1) forwards;
+  animation: splash-out 760ms cubic-bezier(0.7, 0, 0.25, 1) forwards;
 }
 
 @keyframes splash-out {
-  0% { clip-path: circle(140% at 50% 50%); filter: none; opacity: 1; }
-  22% { filter: invert(1) hue-rotate(90deg) saturate(3); }
-  30% { filter: none; transform: translateX(-8px); }
-  36% { filter: invert(1); transform: translateX(9px); }
+  0% { clip-path: circle(140% at 50% 50%); filter: none; transform: none; }
+  18% { filter: invert(1) hue-rotate(120deg) saturate(4); }
+  26% { filter: none; transform: translate3d(-10px, 0, 0) scale(1.02); }
+  34% { filter: invert(1); transform: translate3d(11px, 0, 0) scale(1.01); }
   44% { filter: none; transform: none; }
-  100% { clip-path: circle(0% at 50% 46%); opacity: 0.2; }
+  100% { clip-path: circle(0% at 50% 46%); opacity: 0.15; transform: scale(1.16); }
 }
 
-/* ---- sky ---------------------------------------------------------- */
-.splash__sky {
+/* ==========================================================================
+   1 · THE FLOOR — the city grid, from above, running away
+   ========================================================================== */
+.splash__floor {
+  position: absolute;
+  inset: 42% 0 0 0;
+  overflow: hidden;
+  perspective: 260px;
+  perspective-origin: 50% 0%;
+  pointer-events: none;
+  /* Fades into the horizon rather than ending on a hard line. A mask is a
+     paint-time operation on a static element; it costs nothing per frame. */
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 22%, #000 78%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0, #000 22%, #000 78%, transparent 100%);
+}
+
+.splash__grid {
+  position: absolute;
+  inset: -60% -50% -120% -50%;
+  background-image:
+    linear-gradient(90deg, color-mix(in srgb, var(--n1) 65%, transparent) 0 2px, transparent 2px 100%),
+    linear-gradient(180deg, color-mix(in srgb, var(--n3) 55%, transparent) 0 2px, transparent 2px 100%);
+  background-size: 78px 78px;
+  transform: rotateX(74deg) translateZ(0);
+  transform-origin: 50% 0;
+  animation: grid-run calc(3.4s * var(--tempo)) linear infinite;
+}
+
+/* One tile of travel, then it snaps back to a position that looks identical.
+   The seam is invisible because the pattern repeats at exactly 78px. */
+@keyframes grid-run {
+  to { transform: rotateX(74deg) translate3d(0, 78px, 0); }
+}
+
+/* ==========================================================================
+   THE CITY — blocks you are flying over
+   ========================================================================== */
+.splash__city {
+  position: absolute;
+  inset: auto 0 26% 0;
+  height: 34vh;
+  min-height: 160px;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.splash__block {
+  position: absolute;
+  bottom: 0;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--glow) 26%, transparent),
+    color-mix(in srgb, var(--edge) 92%, transparent) 62%
+  );
+  border-top: 2px solid var(--glow);
+  border-inline: 1px solid color-mix(in srgb, var(--glow) 45%, transparent);
+  /* The lit windows, as a background pattern rather than as elements. The old
+     door drew 108 of these as individual <rect>s. */
+  box-shadow: inset 0 0 0 100px color-mix(in srgb, var(--edge) 62%, transparent);
+  animation: block-breathe calc(9s * var(--tempo)) ease-in-out infinite alternate;
+  will-change: opacity;
+}
+
+@keyframes block-breathe {
+  from { opacity: 0.45; }
+  to { opacity: 1; }
+}
+
+/* ==========================================================================
+   2 · THE BLOOM — the fractal ceiling, behind the mark
+   ========================================================================== */
+.splash__bloom {
+  position: absolute;
+  top: 32%;
+  left: 50%;
+  width: min(140vh, 130vw);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  pointer-events: none;
+  opacity: calc(0.2 + 0.34 * var(--chaos));
+  mix-blend-mode: screen;
+}
+
+.splash__bloom-ring {
   position: absolute;
   inset: 0;
-  pointer-events: none;
+  border-radius: 50%;
+  -webkit-mask-image: radial-gradient(circle, #000 0 34%, transparent 62%);
+  mask-image: radial-gradient(circle, #000 0 34%, transparent 62%);
+  will-change: transform;
 }
 
-/* Out-of-focus light, not a star. You cannot see stars from down here and
-   the sky is not what anybody is looking at anyway — these are the far end of
-   the street with nothing focused on it. */
-.splash__star {
-  position: absolute;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle at 50% 50%,
-    color-mix(in srgb, var(--glow, var(--n3)) 85%, #fff) 0 22%,
-    color-mix(in srgb, var(--glow, var(--n3)) 45%, transparent) 55%,
-    transparent 72%
+/* Two conic gradients turning against each other. A conic gradient is painted
+   once and then only ever rotated, which is the cheapest possible way to get
+   something on screen that reads as fractal. */
+.splash__bloom-ring--a {
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    var(--n3) 22deg,
+    transparent 44deg,
+    var(--n1) 66deg,
+    transparent 92deg,
+    var(--n2) 118deg,
+    transparent 146deg,
+    var(--n4) 178deg,
+    transparent 210deg,
+    var(--n3) 250deg,
+    transparent 286deg,
+    var(--n1) 320deg,
+    transparent 360deg
   );
-  opacity: calc(0.28 + 0.4 * var(--chaos));
-  filter: blur(1.5px);
-  animation: bokeh-breathe calc(9s * var(--tempo)) ease-in-out infinite alternate;
+  animation: bloom-spin calc(44s * var(--tempo)) linear infinite;
 }
 
-@keyframes bokeh-breathe {
-  from { transform: scale(0.82) translateY(3px); opacity: 0.22; }
-  to { transform: scale(1.18) translateY(-4px); opacity: 0.75; }
-}
-
-/* crescent = a disc with an offset disc masked out of it */
-.splash__moon {
-  position: absolute;
-  top: clamp(4%, 7vh, 12%);
-  left: clamp(8%, 16vw, 22%);
-  width: clamp(60px, 9vw, 130px);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--n3) 55%, var(--text));
-  -webkit-mask-image: radial-gradient(circle at 118% 34%, transparent 0 62%, #000 62.5%);
-  mask-image: radial-gradient(circle at 118% 34%, transparent 0 62%, #000 62.5%);
-  opacity: 0.24;
-  filter: blur(4px) drop-shadow(0 0 calc(var(--glow-r) * 1.6) var(--n3));
-  animation: throb calc(7s * var(--tempo)) ease-in-out infinite;
-}
-
-/* ---- skyline ------------------------------------------------------- */
-.splash__skyline {
-  position: absolute;
-  inset: auto 0 15vh 0;
-  width: 100%;
-  height: min(44vh, 360px);
-  opacity: 0.6;
-  pointer-events: none;
-}
-
-.splash__towers rect {
-  fill: color-mix(in srgb, var(--void-3) 82%, transparent);
-  stroke: var(--n1);
-  stroke-width: 2.5;
-  filter: drop-shadow(0 0 8px var(--n1));
-}
-
-.splash__windows rect {
-  fill: var(--n3);
-  opacity: 0.55;
-  animation: flicker calc(6s * var(--tempo)) steps(1) infinite;
-}
-
-.splash__windows rect:nth-child(3n) {
-  fill: var(--n2);
-  animation-delay: -2s;
-}
-.splash__windows rect:nth-child(5n) {
-  opacity: 0.2;
-  animation-delay: -4s;
-}
-
-.splash__tower {
-  fill: none;
-  stroke: var(--n2);
-  stroke-width: 3;
-  filter: drop-shadow(0 0 10px var(--n2));
-}
-
-.splash__tower-x {
-  stroke: var(--n2);
-  stroke-width: 2;
+.splash__bloom-ring--b {
+  background: conic-gradient(
+    from 180deg,
+    transparent 0deg,
+    var(--n5) 30deg,
+    transparent 70deg,
+    var(--n2) 120deg,
+    transparent 170deg,
+    var(--n4) 220deg,
+    transparent 280deg,
+    var(--n1) 330deg,
+    transparent 360deg
+  );
+  animation: bloom-spin calc(31s * var(--tempo)) linear infinite reverse;
   opacity: 0.7;
 }
 
-/* ---- the capsule tower --------------------------------------------- */
-.splash__capsule rect {
-  fill: color-mix(in srgb, var(--void-2) 78%, transparent);
-  stroke: var(--n5);
-  stroke-width: 2;
+@keyframes bloom-spin {
+  to { transform: rotate(360deg); }
 }
 
-.splash__capsule-eye {
-  fill: var(--n1);
-  stroke: none;
-  opacity: 0.55;
-  animation: flicker calc(11s * var(--tempo)) steps(1) infinite;
-}
-
-/* ---- the expressway ------------------------------------------------- */
-.splash__road path {
-  fill: none;
-  stroke: color-mix(in srgb, var(--void-3) 88%, var(--n4));
-  stroke-width: 22;
-  opacity: 0.95;
-}
-
-.splash__road .splash__road-line {
-  stroke: var(--n3);
-  stroke-width: 2;
-  stroke-dasharray: 26 22;
-  opacity: 0.9;
-  filter: drop-shadow(0 0 7px var(--n3));
-}
-
-.splash__piers rect {
-  fill: color-mix(in srgb, var(--void-3) 90%, transparent);
-  stroke: var(--n4);
-  stroke-width: 2;
-}
-
-/* ---- vertical signs ------------------------------------------------ */
+/* ==========================================================================
+   3 · THE SIGNAGE — vertical, lit, drifting
+   ========================================================================== */
 .splash__sign {
   position: absolute;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.1em;
-  font-size: clamp(1.2rem, 3vw, 2.4rem);
-  line-height: 1.05;
-  padding: 0.4em 0.3em;
+  gap: 0.08em;
+  padding: 0.4em 0.28em;
+  font-size: clamp(1.1rem, 2.8vw, 2.2rem);
+  line-height: 1.02;
   color: var(--glow);
-  background: color-mix(in srgb, var(--void) 62%, transparent);
-  border: 3px solid var(--glow);
-  text-shadow: 0 0 6px #fff, 0 0 22px var(--glow), 0 0 44px var(--glow);
+  background: color-mix(in srgb, var(--edge) 72%, transparent);
+  border: 2px solid var(--glow);
+  text-shadow:
+    0 0 4px #fff,
+    0 0 18px var(--glow),
+    0 0 40px var(--glow);
   box-shadow:
-    0 0 26px color-mix(in srgb, var(--glow) 60%, transparent),
-    inset 0 0 20px color-mix(in srgb, var(--glow) 25%, transparent);
-  animation: flicker calc(9s * var(--tempo)) steps(1) infinite;
+    0 0 22px color-mix(in srgb, var(--glow) 50%, transparent),
+    inset 0 0 16px color-mix(in srgb, var(--glow) 22%, transparent);
+  animation:
+    sign-drift var(--drift, 30s) ease-in-out infinite alternate,
+    flicker calc(11s * var(--tempo)) steps(1) infinite;
   pointer-events: none;
+  will-change: transform;
+}
+
+@keyframes sign-drift {
+  from { transform: translate3d(0, -3vh, 0); }
+  to { transform: translate3d(0, 4vh, 0); }
 }
 
 .splash__sign-glyph {
@@ -184,119 +220,140 @@
 }
 
 .splash__sign--left {
-  left: clamp(0.4rem, 3vw, 3rem);
+  left: clamp(0.3rem, 2.6vw, 3rem);
 }
 .splash__sign--right {
-  right: clamp(0.4rem, 3vw, 3rem);
+  right: clamp(0.3rem, 2.6vw, 3rem);
 }
 
-@media (max-width: 760px) {
+@media (max-width: 860px) {
   .splash__sign {
-    opacity: 0.5;
-    font-size: 1.1rem;
+    font-size: 1rem;
+    opacity: 0.6;
   }
   .splash__sign--minor {
     display: none;
   }
 }
 
-/* ---- core mark ----------------------------------------------------- */
+/* ==========================================================================
+   4 · THE CORE — barrage, crown, mark, door
+   ========================================================================== */
 .splash__core {
   position: relative;
-  z-index: 3;
+  z-index: 5;
   display: grid;
   justify-items: center;
-  gap: 0.6rem;
+  gap: 0.45rem;
   padding: var(--gutter);
   text-align: center;
-  /* clears the wire rig: the ENTER button and the top line were landing on the
-     same band of the viewport, and a crow standing on a button is a bug */
-  transform: translateY(-10vh);
+  transform: translateY(-4vh);
+}
+
+/* ---- the barrage: the credits, too fast to read --------------------- */
+.splash__barrage {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 1.5em;
+  margin-bottom: 0.4rem;
+  font-family: var(--f-head);
+  font-size: clamp(0.85rem, 2.4vw, 1.5rem);
+  letter-spacing: 0.16em;
+}
+
+/* Every word is stacked in the same place and each one is visible for one
+   fourteenth of the cycle. `steps(1)` means it cuts rather than fades, which
+   is the difference between a title card and a slideshow. */
+.splash__barrage-word {
+  position: absolute;
+  color: var(--glow);
+  text-shadow: 0 0 10px var(--glow), 0 0 30px var(--glow);
+  opacity: 0;
+  white-space: nowrap;
+  animation: barrage calc(5.6s * var(--tempo)) steps(1) infinite;
+  animation-delay: calc(var(--i) * 0.4s * var(--tempo));
+}
+
+@keyframes barrage {
+  0%, 7.1% { opacity: 1; }
+  7.2%, 100% { opacity: 0; }
+}
+
+/* ---- the crown ------------------------------------------------------
+   Kept, and promoted: it used to be a small mark beside a heading and it is
+   now the thing directly over the door. */
+.splash__crown-mount {
+  display: block;
+  width: clamp(46px, 9vw, 92px);
+  color: var(--n5);
+  filter: drop-shadow(0 0 12px var(--n5));
+  animation: crown-hover calc(6s * var(--tempo)) ease-in-out infinite alternate;
+}
+
+.splash__crown {
+  width: 100%;
+  height: auto;
 }
 
 .splash__venue {
-  font-size: clamp(1.4rem, 4vw, 2.6rem);
-  letter-spacing: 0.4em;
-  padding-left: 0.4em;
-  color: var(--n2);
-  text-shadow: 0 0 8px #fff, 0 0 26px var(--n2), 0 0 60px var(--n2);
-  animation: flicker calc(7s * var(--tempo)) steps(1) infinite;
-}
-
-/* backing plate: the skyline behind this is busy on purpose, the words
-   still have to win */
-.splash__tagline {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  flex-wrap: wrap;
-  justify-content: center;
-  max-width: min(38rem, 92vw);
-  margin-top: 1.4rem;
-  padding: 0.5rem 1.1rem 0.6rem;
-  font-size: clamp(1.15rem, 3vw, 2.1rem);
-  background: color-mix(in srgb, var(--void) 78%, transparent);
-  backdrop-filter: blur(7px);
-  border: 3px solid color-mix(in srgb, var(--n3) 55%, transparent);
-  box-shadow: 0 0 30px color-mix(in srgb, var(--void) 90%, transparent);
-}
-
-.splash__tagline-sep {
+  margin-top: 0.3rem;
+  font-size: clamp(1rem, 3vw, 1.9rem);
+  letter-spacing: 0.5em;
+  padding-left: 0.5em;
   color: var(--n3);
-  text-shadow: 0 0 12px var(--n3);
+  text-shadow: 0 0 6px #fff, 0 0 22px var(--n3), 0 0 52px var(--n3);
+  animation: flicker calc(8s * var(--tempo)) steps(1) infinite;
+}
+
+.splash__tagline {
+  display: grid;
+  gap: 0.3rem;
+  justify-items: center;
+  max-width: min(42rem, 92vw);
+  margin-top: 0.9rem;
+  padding: 0.5rem 1.1rem 0.6rem;
+  font-size: clamp(1rem, 2.6vw, 1.8rem);
+  background: color-mix(in srgb, var(--edge) 76%, transparent);
+  border-block: 2px solid var(--n1);
 }
 
 .splash__tagline-alt {
   font-family: var(--f-mono);
-  font-size: 0.72em;
-  letter-spacing: 0.18em;
+  font-size: clamp(0.58rem, 1.3vw, 0.76rem);
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--text-dim);
 }
 
-/* ---- enter --------------------------------------------------------- */
+/* ---- the door ------------------------------------------------------- */
 .splash__enter {
   position: relative;
-  margin-top: 1.2rem;
-  padding: 0.55rem 2.6rem 0.65rem;
+  margin-top: 1.1rem;
+  padding: 0.55rem 2.2rem 0.65rem;
   font-family: var(--f-head);
-  font-size: clamp(1.4rem, 3.6vw, 2.6rem);
-  letter-spacing: 0.24em;
-  text-indent: 0.24em;
-  color: var(--void);
+  font-size: clamp(1.1rem, 3.2vw, 2.2rem);
+  letter-spacing: 0.18em;
+  text-indent: 0.18em;
+  color: var(--edge);
   background: var(--n3);
   border: 4px solid var(--edge);
   box-shadow:
-    9px 9px 0 var(--edge),
-    0 0 calc(var(--glow-r) * 1.4) var(--n3);
-  transition: transform 160ms cubic-bezier(0.2, 1.5, 0.4, 1), background-color 160ms ease;
-  overflow: hidden;
+    9px 9px 0 var(--n1),
+    0 0 calc(var(--glow-r) * 1.2) var(--n3);
+  transition: transform var(--pop) var(--spring-hard), background-color var(--snap) linear;
+  will-change: transform;
 }
 
 .splash__enter:hover {
   background: var(--n2);
-  transform: translate(-3px, -5px) scale(1.03);
-  box-shadow:
-    14px 14px 0 var(--edge),
-    0 0 calc(var(--glow-r) * 2) var(--n2);
+  transform: translate3d(-4px, -6px, 0) scale(1.05);
 }
 
 .splash__enter:active {
-  transform: translate(4px, 4px) scale(0.99);
-  box-shadow: 0 0 0 var(--edge);
-}
-
-.splash__enter-glow {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(100deg, transparent 20%, rgb(255 255 255 / 0.85) 50%, transparent 80%);
-  transform: translateX(-120%);
-  animation: enter-sheen calc(3.4s * var(--tempo)) ease-in-out infinite;
-}
-
-@keyframes enter-sheen {
-  0%, 60% { transform: translateX(-120%); }
-  100% { transform: translateX(120%); }
+  transform: translate3d(4px, 4px, 0) scale(0.97);
+  transition-duration: 70ms;
 }
 
 .splash__enter-label {
@@ -307,148 +364,123 @@
   position: absolute;
   top: 2px;
   right: 8px;
-  font-size: 0.4em;
+  font-size: 0.36em;
   letter-spacing: 0;
-  opacity: 0.65;
+  opacity: 0.6;
 }
 
 .splash__hint {
   margin-top: 0.5rem;
   font-family: var(--f-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.2em;
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--text-dim);
 }
 
-/* ---- the street: wires, crows, fence -------------------------------- */
-.splash__street {
+.splash__hint b {
+  color: var(--n5);
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   THE RELICS — four, in the corners the composition leaves empty
+   ========================================================================== */
+.splash__relics {
   position: absolute;
-  inset: auto 0 0 0;
-  height: 30vh;
-  min-height: 190px;
-  z-index: 3;
+  inset: 0;
+  z-index: 30;
   pointer-events: none;
 }
 
-.splash__wires {
+.splash__relics .relic {
   position: absolute;
-  left: 50%;
-  bottom: 19%;
-  width: min(1180px, 97vw);
-  height: auto;
-  transform: translateX(-50%);
+  pointer-events: auto;
+  animation: relic-land 620ms var(--spring) both;
 }
 
-.splash__pole rect {
-  fill: color-mix(in srgb, var(--edge) 88%, var(--void));
-  stroke: color-mix(in srgb, var(--n4) 70%, transparent);
-  stroke-width: 1.5;
+@keyframes relic-land {
+  from { opacity: 0; transform: translate3d(0, -14px, 0) rotate(-14deg) scale(0.7); }
 }
 
-.splash__pole-can {
-  fill: color-mix(in srgb, var(--void-3) 90%, transparent) !important;
-  stroke: var(--n5) !important;
+.splash__relic--1 {
+  top: 13%;
+  left: clamp(3.5rem, 12vw, 12rem);
+  animation-delay: 300ms;
+}
+.splash__relic--2 {
+  top: 25%;
+  right: clamp(3.5rem, 11vw, 11rem);
+  animation-delay: 420ms;
+}
+.splash__relic--3 {
+  bottom: 22%;
+  left: clamp(3.5rem, 14vw, 14rem);
+  animation-delay: 540ms;
+}
+.splash__relic--4 {
+  bottom: 30%;
+  right: clamp(3.5rem, 13vw, 13rem);
+  animation-delay: 660ms;
 }
 
-.splash__lines path {
-  fill: none;
-  stroke: color-mix(in srgb, var(--n4) 62%, var(--text-dim));
-  stroke-width: 2.4;
-  stroke-linecap: round;
-  opacity: 0.85;
-}
+/* On a phone the corners are where the signage already is, so the relics come
+   off the walls and sit in a row under the door instead. */
+@media (max-width: 720px) {
+  .splash__relics {
+    inset: auto 0 calc(var(--crawl-h) + 2.6rem) 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    justify-content: center;
+    padding-inline: 0.8rem;
+  }
 
-/* The bottom of the frame is a fence with somebody's stickers on it — the
-   diamond is two crossed gradients, and the sticker layer is the same four
-   inks as everything else, at the size a hand can reach. */
-.splash__fence {
-  position: absolute;
-  inset: 74% 0 0 0;
-  border-top: 4px solid color-mix(in srgb, var(--n4) 80%, transparent);
-  background-image:
-    repeating-linear-gradient(
-      58deg,
-      transparent 0 13px,
-      color-mix(in srgb, var(--text-dim) 42%, transparent) 13px 15px
-    ),
-    repeating-linear-gradient(
-      -58deg,
-      transparent 0 13px,
-      color-mix(in srgb, var(--text-dim) 42%, transparent) 13px 15px
-    ),
-    linear-gradient(180deg, transparent, color-mix(in srgb, var(--edge) 80%, transparent));
-  opacity: 0.7;
-}
-
-.splash__crows {
-  position: absolute;
-  left: 50%;
-  bottom: 18%;
-  width: min(560px, 82vw);
-  transform: translateX(-50%);
-  z-index: 2;
-}
-
-.splash__crow-body {
-  fill: color-mix(in srgb, var(--edge) 92%, var(--void));
-  stroke: color-mix(in srgb, var(--n1) 85%, transparent);
-  stroke-width: 1.5;
-  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--n1) 70%, transparent));
-}
-
-.splash__crow-legs {
-  stroke: color-mix(in srgb, var(--edge) 92%, var(--void));
-  stroke-width: 3.5;
-  stroke-linecap: round;
-  fill: none;
-}
-
-.splash__crow {
-  animation: crow-bob calc(4.5s * var(--tempo)) ease-in-out infinite;
-  transform-origin: 50% 100%;
-}
-
-.splash__crow-eye {
-  fill: var(--n3);
-  filter: drop-shadow(0 0 6px var(--n3));
-  animation: flicker calc(5s * var(--tempo)) steps(1) infinite;
-}
-
-@keyframes crow-bob {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  40% { transform: translateY(-6px) rotate(-1.5deg); }
-  70% { transform: translateY(2px) rotate(1deg); }
-}
-
-/* ---- the two of them ------------------------------------------------ */
-/* Not in the middle. The middle is a backing plate with the tagline on it, and
-   the plate is opaque, so a drawing centred behind it is a shoulder and a rumour.
-   They stand down on the corner instead, under the pole, at the size two people
-   actually are next to a building. */
-.splash__kiss {
-  position: absolute;
-  left: clamp(0.5rem, 2vw, 4rem);
-  bottom: 15vh;
-  z-index: 3;
-  width: min(430px, 33vw);
-  pointer-events: none;
-}
-
-@media (max-width: 900px) {
-  .splash__kiss {
-    left: -3vw;
-    bottom: 20vh;
-    width: 62vw;
-    opacity: 0.9;
+  .splash__relics .relic {
+    position: static;
+    /* 9rem clipped "it's personal lol" to "it's personal —", which turns a
+       quotation into a typo. The row wraps to two lines instead. */
+    max-width: min(11rem, 46vw);
+    font-size: 0.58rem;
   }
 }
 
-/* ---- ticker --------------------------------------------------------- */
+/* ==========================================================================
+   THE TICKER
+   ========================================================================== */
 .splash__ticker {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
   z-index: 4;
+}
+
+/* ==========================================================================
+   STILL
+
+   The global brake slows every animation to one 3-second pass; on the door
+   that leaves the barrage frozen on whichever word it stopped at and the grid
+   parked mid-tile. Both are pinned to a legible resting state instead.
+   ========================================================================== */
+:root[data-still='1'] .splash__grid,
+:root[data-still='1'] .splash__bloom-ring,
+:root[data-still='1'] .splash__sign,
+:root[data-still='1'] .splash__block,
+:root[data-still='1'] .splash__crown-mount,
+:root[data-still='1'] .splash__venue,
+:root[data-still='1'] .splash__relics .relic {
+  animation: none !important;
+  opacity: 1;
+  will-change: auto;
+}
+
+/* One word, held, rather than fourteen stacked on top of each other. */
+:root[data-still='1'] .splash__barrage-word {
+  animation: none !important;
+  opacity: 0;
+}
+
+:root[data-still='1'] .splash__barrage-word:nth-child(4) {
+  opacity: 1;
 }

@@ -3,10 +3,31 @@ import { createContext } from 'react'
 export const VIBES = [
   {
     id: 'void',
-    name: 'ENTER THE VOID',
+    name: 'VOID',
     kana: '虚空',
-    blurb: 'tokyo from directly above, 4am, every light smeared',
-    swatch: ['#ff2ea6', '#00eaff', '#b4ff1a'],
+    blurb: 'acid green, electric violet, black with a cast to it',
+    swatch: ['#9dff00', '#b026ff', '#030308'],
+  },
+  {
+    id: 'dmt',
+    name: 'DMT',
+    kana: '幻',
+    blurb: 'the ceiling, from the floor, everything at once',
+    swatch: ['#ff2df7', '#c6ff00', '#00fff0'],
+  },
+  {
+    id: 'hotel',
+    name: 'LOVE HOTEL',
+    kana: '連込',
+    blurb: 'sodium through a window that does not open',
+    swatch: ['#ff2e88', '#ff8a00', '#8c00ff'],
+  },
+  {
+    id: 'griptape',
+    name: 'GRIPTAPE',
+    kana: '砂紙',
+    blurb: 'the deck face down, bone and one acid stripe',
+    swatch: ['#0a0a0a', '#f2f0e6', '#7cff2b'],
   },
   {
     id: 'riot',
@@ -14,27 +35,6 @@ export const VIBES = [
     kana: '暴動',
     blurb: 'photocopied twice, stapled to a lamppost, still wet',
     swatch: ['#e8e2d4', '#e01b12', '#111110'],
-  },
-  {
-    id: 'den',
-    name: 'DRUG DEN',
-    kana: '薬窟',
-    blurb: 'back-room neon, crows on the wire, still arguing',
-    swatch: ['#f5c400', '#ff2bd6', '#1244c4'],
-  },
-  {
-    id: 'untitled',
-    name: 'UNTITLED 1982',
-    kana: '無題',
-    blurb: 'cadmium, cobalt, bone, and a lot of black',
-    swatch: ['#ffd400', '#ef2b1c', '#2a6df5'],
-  },
-  {
-    id: 'slime',
-    name: 'SLIME DRIP',
-    kana: '滴',
-    blurb: 'wet letterforms, chartreuse, turquoise wall',
-    swatch: ['#b4ff1a', '#ff2d95', '#14e6e6'],
   },
 ] as const
 
@@ -81,5 +81,12 @@ export const PortalContext = createContext<PortalState | null>(null)
 // A stored vibe that is no longer in VIBES fails `isVibeId` on read and falls
 // back to the default, so retiring a palette does not need a key bump: nobody
 // gets stranded on a room that is not there any more.
+//
+// v3 is a bump anyway, and for the opposite reason. RIOT survived the redesign
+// as a room, so `isVibeId('riot')` is still true — which means every returning
+// visitor would have been handed back the palette the redesign was meant to
+// replace and would never have seen it. The bump is one-time amnesia on
+// purpose: everybody arrives in VOID once, and anybody who wants the
+// photocopier back is two clicks from it.
 export const STORAGE_KEY = 'danfrank:prefs:v3'
 export const SESSION_KEY = 'danfrank:entered:v1'

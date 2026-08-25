@@ -9,7 +9,7 @@
  *
  *   0. THE TERMS      — an acceptance dialog. Per device, versioned, forever.
  *   1. THE QUIZ       — an empty submit passes. Anything else is a decoy.
- *   3. THE PASSPHRASE — the only one of the four that is an actual lock.
+ *   3. THE PADLOCK    — the only one of the four that is an actual lock.
  *
  * Steps 0, 1 and 2 are doormen. Step 3 is the boundary.
  *
@@ -23,6 +23,21 @@
  * building with windows — which is worth having, and is not worth mistaking
  * for something else.
  */
+
+/**
+ * THE MAIN SWITCH.
+ *
+ * `false` renders the site with no door at all — no terms, no lockout, no
+ * padlock. It exists because a door whose key has been lost is worse than no
+ * door: the failure mode of this design is that `public/gate/verify.enc` is
+ * keyed to something nobody can produce any more, and every attempt then
+ * costs a 30-second lockout on the way to finding that out.
+ *
+ * That escape hatch now has a cheaper version — PHRASE mode on the padlock
+ * keeps the old key working against an un-rekeyed blob — so this should stay
+ * `true`. It is one word if that ever stops being enough.
+ */
+export const GATE_ENABLED = true
 
 /** Bump to ask every device for the passphrase again on its next visit. */
 export const GATE_VERSION = 'v1'
@@ -62,7 +77,7 @@ export const MSG_MS = 3_000
 
 /** The line above the passphrase field. */
 export const GREETING =
-  'the door opens for a passphrase and for nothing else. you either have it or you do not.'
+  'the door opens for a combination and for nothing else. right, then left, then right.'
 
 // ---------------------------------------------------------------------------
 // the quiz

@@ -1,8 +1,15 @@
 /* ==========================================================================
    THE CROWN — the mark itself, and the slot it hangs in.
 
-   Positioning is palette-independent; whether a crown is *shown* is not, and
-   that is decided per palette below.
+   It used to be `display: none` by default and switched back on only under
+   `[data-vibe='riot']`, which was defensible while RIOT was the house style
+   and every other palette was a side room. It is not defensible now: the
+   crown is the oldest piece of the identity, it is explicitly a keeper, and
+   under the new default it was invisible on every screen of the site.
+
+   So it is on everywhere, it takes the room's own tube, and the two places
+   that mount one deliberately — the front door and the masthead — size and
+   light it themselves.
    ========================================================================== */
 
 .crown__defs {
@@ -13,54 +20,44 @@
 }
 
 .crown {
-  display: none;
+  display: block;
   width: 1.1em;
   height: 0.68em;
-  color: var(--n1);
+  color: var(--n5);
+  /* The oil-stick displacement: a feTurbulence + feDisplacementMap that gives
+     the stroke a hand-drawn wobble. It is a filter, which this codebase is
+     otherwise cutting — it stays because it is on a ~60px static SVG that
+     rasterises once and never animates, which is the one shape of filter that
+     costs nothing per frame. */
   filter: url(#oilstick);
   overflow: visible;
 }
 
 .crowned {
   position: relative;
+  /* The crown hangs above the letters, so the heading has to leave room for it
+     — in em, off the heading's own size, or it collides with the mark above it
+     at the top of the scale and floats miles clear at the bottom. */
+  margin-top: 0.72em;
 }
 
 .crowned > .crown {
   position: absolute;
   top: -0.62em;
   left: -0.1em;
+  z-index: 2;
   width: 0.9em;
   height: 0.56em;
   transform: rotate(-9deg);
   pointer-events: none;
 }
 
-/* The crown hangs above the letters, so the heading has to leave room for it —
-   in em, off the heading's own size, or it collides with the mark above it at
-   the top of the scale and floats miles clear at the bottom.
-
-   It used to be drawn in RIOT only, on the theory that an oil-stick crown is a
-   printed mark and printing is what RIOT does. That was backwards: the crown
-   is the one thing on this site that is nobody's palette and everybody's mark,
-   and hiding it in four rooms out of five made it a palette detail. It is
-   drawn everywhere now — in ink on paper, and lit like a tube on the street. */
-.crowned {
-  margin-top: 0.72em;
-}
-
-.crowned > .crown {
-  display: block;
-  z-index: 2;
-}
-
-/* On the street it is a tube: magenta, and it throws light on what it sits
-   over. On paper it is the spot ink and it throws nothing, because ink does
-   not emit. */
-:root:not([data-vibe='riot']) .crowned > .crown {
-  color: var(--n1);
-  filter: url(#oilstick) drop-shadow(0 0 calc(var(--glow-r) * 0.5) var(--n1));
-}
-
-:root[data-vibe='riot'] .crowned > .crown {
+/* On paper it is stamped in the one spot colour rather than lit. */
+:root[data-vibe='riot'] .crown {
   color: var(--spot);
+}
+
+/* Everywhere else it burns. */
+:root:not([data-vibe='riot']) .crowned > .crown {
+  filter: url(#oilstick) drop-shadow(0 0 6px var(--n5));
 }

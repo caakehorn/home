@@ -1,17 +1,16 @@
 /* ==========================================================================
    DAN'S DIALECTICAL DATABASE AND DRUG DEN — DESIGN TOKENS
 
-   The house style is a Tokyo night shot from above at 4am: black that is not
-   quite black, magenta and cyan tubes bleeding into it, an acid green that
-   should not be in the same room as either. The xerox is still here — every
-   surface is still cut, taped and stapled — but it is a flyer stuck to a wet
-   wall under a sign, not a sheet on a desk.
+   The house style is a Tokyo backstreet at 4am shot from above: black that
+   is never neutral, acid green and electric violet burning through it, and
+   whatever primary the next sign happens to be. Xerox is still in the rack —
+   it is one palette now, not the house.
 
    Five palettes. Swap with [data-vibe] on <html>; VOID is the default and the
-   house style, the other four are the rooms off it. The neon ramp
-   (--n1..--n5) is the SIGNAGE layer; the paint ramp (--p-*) is the CANVAS
-   layer underneath it, and they are deliberately different jobs — neon glows,
-   paint does not, and toner does neither.
+   house style, and every other room is a different tube in the same street.
+   The neon ramp (--n1..--n5) is the SIGNAGE layer; the paint ramp (--p-*) is
+   the CANVAS layer underneath it, and they are deliberately different jobs —
+   neon glows, paint does not, and toner does neither.
    ========================================================================== */
 
 :root {
@@ -101,98 +100,117 @@
   --slab: 0px; /* stickers do not get rounded corners */
   --hard: 8px 8px 0 var(--edge);
 
+  /* -- motion -------------------------------------------------------------
+     Bounce is a house property, not a per-component decision. Everything the
+     pointer touches overshoots and settles on --spring; anything that travels
+     a long way glides on --glide, because a 400px slide that overshoots reads
+     as a bug rather than as a spring.
+
+     These are only ever spent on `transform` and `opacity`. That is the whole
+     performance strategy: the compositor can animate those two without asking
+     the main thread for a layout or a repaint, so the site can be busier than
+     it was and still hold a frame budget it was previously blowing on blur. */
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --spring-hard: cubic-bezier(0.18, 1.92, 0.32, 1);
+  --glide: cubic-bezier(0.16, 1, 0.3, 1);
+  --snap: 140ms;
+  --pop: 320ms;
+  --settle: 620ms;
+
   color-scheme: dark;
 }
 
 /* -------------------------------------------------------------------------
-   VIBE 01 — DRUG DEN — the fusion.
-   Raw black canvas, cadmium and cobalt slabs, Tokyo neon burning on top.
-   ---------------------------------------------------------------------- */
-:root[data-vibe='den'] {
-  --void: #0b0a09;
-  --void-2: #17120c;
-  --void-3: #241a10;
-  --edge: #000000;
+   VIBE 01 — VOID — the house style, and the default.
 
-  --n1: #f5c400; /* cadmium — the loudest thing in the room */
-  --n2: #ff2bd6; /* magenta — the signage that survived from Tokyo */
-  --n3: #00eaff; /* cyan    — ditto */
-  --n4: #1244c4; /* cobalt  */
-  --n5: #dd2a17; /* ferrari red */
-
-  --text: #f0e9d8;
-  --text-dim: #a89880;
-  --vibe-name: 'DRUG DEN';
-}
-
-/* -------------------------------------------------------------------------
-   VIBE 02 — UNTITLED 1982  (ref: neo-expressionist skulls on black)
-   ---------------------------------------------------------------------- */
-:root[data-vibe='untitled'] {
-  --void: #080807;
-  --void-2: #141310;
-  --void-3: #221f18;
-  --edge: #000000;
-
-  --n1: #ffd400; /* cadmium  */
-  --n2: #ef2b1c; /* red      */
-  --n3: #2a6df5; /* cobalt   */
-  --n4: #f6f2e6; /* bone     */
-  --n5: #2f9c45; /* grass    */
-
-  --text: #f8f4e7;
-  --text-dim: #b0a58e;
-  --vibe-name: 'UNTITLED 1982';
-}
-
-/* -------------------------------------------------------------------------
-   VIBE 03 — SLIME DRIP  (ref: dripping graffiti letterforms)
-   ---------------------------------------------------------------------- */
-:root[data-vibe='slime'] {
-  --void: #06170f;
-  --void-2: #0a2618;
-  --void-3: #0f3722;
-  --edge: #010a06;
-
-  --n1: #b4ff1a; /* chartreuse */
-  --n2: #ff2d95; /* hot pink   */
-  --n3: #14e6e6; /* turquoise  */
-  --n4: #ffd400; /* cadmium    */
-  --n5: #dd2a17; /* red        */
-
-  --text: #eafff2;
-  --text-dim: #7fb497;
-  --vibe-name: 'SLIME DRIP';
-}
-
-/* -------------------------------------------------------------------------
-   VIBE 04 — ENTER THE VOID — the house style, and the default.
-
-   Shot from directly above, at the hour the trains have stopped. The ground
-   is not black, it is the colour black goes when there is a magenta tube
-   forty feet away and rain on the asphalt between you and it. Three lights
-   and they do not agree: hot magenta, cyan, and an acid green that reads as
-   a chemical rather than a colour.
+   Black with a violet cast, acid green burning through it, electric violet
+   behind that, and a primary showing up wherever a sign happens to be. The
+   green is --n3 on purpose: --n3 is what links, kana, focus rings and the
+   default .neon all read from, so the acid is the thing your eye follows
+   through the building rather than a colour that happens to be in it.
 
    As the default it also seeds bare :root, so the first paint — before the
    provider has written [data-vibe] onto <html> — is already the house style.
    ---------------------------------------------------------------------- */
 :root,
 :root[data-vibe='void'] {
-  --void: #05040a;
-  --void-2: #0c0716;
-  --void-3: #170c26;
+  --void: #030308;
+  --void-2: #0a0616;
+  --void-3: #150a28;
   --edge: #000000;
 
-  --n1: #ff2ea6; /* magenta — the tube you can see from the end of the street */
-  --n2: #b4ff1a; /* acid    — the one that should not be in the room          */
-  --n3: #00eaff; /* cyan    — signage, links, every glyph that has to be read */
-  --n4: #7b2dff; /* violet  — the wash the whole city sits in                 */
-  --n5: #ff3b1f; /* sodium  — the streetlight, and the only warm thing here   */
+  --n1: #b026ff; /* electric violet — structure, frames, the underlit edge */
+  --n2: #ff00a8; /* magenta        — signage */
+  --n3: #9dff00; /* acid green     — links, kana, focus. the thing you follow */
+  --n4: #00e5ff; /* cyan           — the sporadic primary */
+  --n5: #ffe500; /* cadmium        — the other one */
 
-  --text: #f3edff;
-  --text-dim: #8f83ad;
-  --vibe-name: 'ENTER THE VOID';
+  --text: #ecffdd;
+  --text-dim: #7f9470;
+  --vibe-name: 'VOID';
+}
+
+/* -------------------------------------------------------------------------
+   VIBE 02 — DMT — the ceiling, seen from the floor.
+   Everything at once, nothing where you left it.
+   ---------------------------------------------------------------------- */
+:root[data-vibe='dmt'] {
+  --void: #07030f;
+  --void-2: #150425;
+  --void-3: #26063d;
+  --edge: #030006;
+
+  --n1: #ff2df7; /* magenta   */
+  --n2: #c6ff00; /* lime      */
+  --n3: #00fff0; /* turquoise */
+  --n4: #ff5c00; /* orange    */
+  --n5: #7b2dff; /* violet    */
+
+  --text: #fdefff;
+  --text-dim: #9d7fb0;
+  --vibe-name: 'DMT';
+}
+
+/* -------------------------------------------------------------------------
+   VIBE 03 — LOVE HOTEL — sodium through a window that does not open.
+   ---------------------------------------------------------------------- */
+:root[data-vibe='hotel'] {
+  --void: #10020c;
+  --void-2: #21051a;
+  --void-3: #360a2a;
+  --edge: #060004;
+
+  --n1: #ff2e88; /* hot pink  */
+  --n2: #ff8a00; /* sodium    */
+  --n3: #ff4de0; /* orchid    */
+  --n4: #8c00ff; /* deep violet */
+  --n5: #ffd000; /* bulb      */
+
+  --text: #ffe9f6;
+  --text-dim: #b3819e;
+  --vibe-name: 'LOVE HOTEL';
+}
+
+/* -------------------------------------------------------------------------
+   VIBE 04 — GRIPTAPE — the deck, face down.
+   Black, bone, and one acid stripe. The one palette here that is quiet, and
+   it is quiet the way grip tape is: because it is for standing on.
+   ---------------------------------------------------------------------- */
+:root[data-vibe='griptape'] {
+  --void: #0a0a0a;
+  --void-2: #141414;
+  --void-3: #1f1f1f;
+  --edge: #000000;
+
+  --n1: #f2f0e6; /* bone       */
+  --n2: #ff3b00; /* safety orange */
+  --n3: #7cff2b; /* acid       */
+  --n4: #2f6bff; /* blue       */
+  --n5: #f2f0e6; /* bone, again — there is no fifth ink on a deck */
+
+  --text: #f4f2ea;
+  --text-dim: #8a887f;
+  --vibe-name: 'GRIPTAPE';
 }
 
 /* -------------------------------------------------------------------------
@@ -204,9 +222,10 @@
    same red at two weights on purpose, because a copy shop does not stock
    cadmium and the constraint is the aesthetic.
 
-   It is no longer the default — the default is the street the flyer got
-   stapled to — but it is still the whole DIY layer with the lights off, and
-   every device in punk.css was cut here first.
+   It used to seed bare :root as the house style. VOID does that now; this is
+   one room off the street rather than the street, and the ~80 rules elsewhere
+   that key off [data-vibe='riot'] to turn the light sources off are exactly
+   what makes it survive as a room.
    ---------------------------------------------------------------------- */
 :root[data-vibe='riot'] {
   --void: #e8e2d4;

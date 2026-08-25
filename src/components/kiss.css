@@ -29,14 +29,14 @@
 }
 
 .kiss__bloom {
-  fill: var(--n4);
+  fill: var(--n1);
   opacity: calc(0.16 + 0.3 * var(--chaos));
   filter: blur(32px);
 }
 
 .kiss__sky {
-  fill: var(--n2);
-  stroke: var(--n2);
+  fill: var(--n3);
+  stroke: var(--n3);
   stroke-width: 0.8;
   opacity: 0.34;
 }
@@ -49,10 +49,12 @@
 }
 
 .kiss__rim--back {
-  stroke: var(--n1);
-  filter: drop-shadow(0 0 calc(2px + var(--glow-r) * 0.22) var(--n1));
+  stroke: var(--n2);
+  filter: drop-shadow(0 0 calc(2px + var(--glow-r) * 0.22) var(--n2));
 }
 
+/* The one in front takes --n3, which in this house is the colour the eye is
+   trained to follow — links, kana, focus rings. It should land on her. */
 .kiss__rim--front {
   stroke: var(--n3);
   filter: drop-shadow(0 0 calc(2px + var(--glow-r) * 0.22) var(--n3));
@@ -62,13 +64,13 @@
    unit of line at a third opacity, on a throat that is already dark. */
 .kiss__chain {
   fill: none;
-  stroke: var(--n1);
+  stroke: var(--n2);
   stroke-width: 1;
   opacity: 0.38;
 }
 
 .kiss__chain--bird {
-  fill: var(--n1);
+  fill: var(--n2);
   stroke: none;
   opacity: 0.5;
 }

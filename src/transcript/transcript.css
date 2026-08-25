@@ -36,8 +36,10 @@
   gap: 0.5rem;
   align-items: center;
   padding: 0.7rem 0;
-  background: color-mix(in srgb, var(--void) 94%, transparent);
-  backdrop-filter: blur(6px);
+  /* Sticky over a 134,348-row list. A backdrop blur here is re-rasterised on
+     every frame of the longest scroll on the site; at 94% opacity there was
+     almost nothing showing through it to blur in the first place. */
+  background: color-mix(in srgb, var(--void) 97%, transparent);
   border-bottom: var(--rule) solid var(--edge);
 }
 

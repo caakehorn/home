@@ -4,7 +4,7 @@
 
 Three things under one roof, and they are the same thing. The **dialectic**:
 every position here got argued at, usually at an hour no argument should be
-trusted at. The **database**: it got written down anyway — 458 pages, cited,
+trusted at. The **database**: it got written down anyway — some 490 pages, cited,
 cross-linked, contradictions left in where they are load-bearing. The **den**:
 the room where both of those happened.
 
@@ -110,9 +110,45 @@ there is no frame in which the site exists on screen unlocked.
 1. **The quiz.** An empty submit passes. Anything else drops the visitor into a
    decoy that is always about to finish rebuilding an archive index and never
    does.
-2. **The passphrase.** The only one of the three that is an actual lock.
+2. **The padlock.** The only one of the three that is an actual lock.
 
 Steps 0 and 1 are doormen. Step 2 is the boundary.
+
+### The padlock
+
+The door is a combination dial, worked the way a real one is: spin **RIGHT** to
+the first number, **LEFT** to the second, **RIGHT** to the third, pull the
+shackle.
+
+A number is committed by **reversing**, not by clicking, and that is the whole
+reason this is a lock rather than three number pickers stacked up — on a
+physical padlock the direction change *is* the commit, and everything about how
+the object feels comes from that one fact. The third number has no reversal
+after it, so PULL is what commits it, which is also what a hand does. The same
+rule serves the keyboard for free: → and ← turn the dial, pressing the opposite
+arrow **is** the reversal, and Enter pulls. A minimum travel threshold stops the
+jitter at the start of a drag reading as a reversal and committing whatever
+number you were parked on before you had moved.
+
+**The combination is the passphrase.** The crypto below is untouched — the
+dialled numbers are formatted into one string and handed to the same
+decryption. What changes is the keyspace, and `src/gate/combination.ts` states
+the cost rather than glossing it: three numbers on forty positions is
+40³ = 64,000, grindable offline against a committed `verify.enc` in hours
+rather than centuries. That is roughly the security a physical combination
+padlock has ever offered, which is the point of the object. It does *not*
+weaken online guessing — a wrong combination still costs the 30-second lockout,
+so grinding 64,000 of them through the actual door is about 22 days of doing
+nothing else. If that trade is unwanted, `POSITIONS = 60` and `NUMBERS = 4` in
+that file is 12.9 million and needs no other change anywhere: the dial and the
+verifier both read those two constants.
+
+The format contract is the one genuinely breakable thing here — this file and
+`scripts/make-verify.mjs` must agree on one string exactly or the door never
+opens for anybody including its owner. So the rule is short, total, and stated
+in both places: **each number zero-padded to two digits, joined by hyphens**
+(`[12, 34, 5]` → `"12-34-05"`). The script normalises `HOME_COMBINATION` itself,
+so a stray space or a missing zero cannot brick a deployment.
 
 The lock is PBKDF2-SHA256 over the passphrase (250,000 iterations) and
 AES-256-GCM, and it checks an entry by *decrypting* a small blob: a wrong
@@ -125,6 +161,16 @@ too. It flashes at about 1.5 Hz, half the 3 Hz general-flash threshold in
 WCAG 2.3.1, and under `prefers-reduced-motion` it stops strobing but still
 takes the page for the whole 30 seconds.
 
+There are three ways to work the lock and they all hand one string to one
+decryption: **KEYPAD** (the default — type the three numbers, paste any format,
+Enter to pull), **DIAL** (the object: right, left, right, and a number commits
+when you reverse), and **PHRASE** (free text, above). Nothing downstream knows
+which one you used, so none of them can drift into skipping the lockout.
+
+`GATE_ENABLED` in `src/gate/config.ts` turns the whole door off in one word. It
+is read in a wrapper rather than inside the state machine, so `false` means the
+gate never mounts at all.
+
 One unlock covers the tab. Append `#lock` to any URL to throw the bolt again —
 it drops the stored passphrase, strips itself out of the URL and re-serves the
 door, so the owner can see their own front step without opening a new tab.
@@ -136,8 +182,27 @@ nothing else in the codebase reads those strings.
 ### Building the verifier
 
 ```bash
-HOME_PASSPHRASE='…' npm run gate:verify   # writes public/gate/verify.enc
+HOME_COMBINATION='NN-NN-NN' npm run gate:verify   # writes public/gate/verify.enc
+HOME_PASSPHRASE='…'         npm run gate:verify   # still works, passed through
 ```
+
+`HOME_COMBINATION` takes whatever is natural to type — `12-34-5`, `12 34 05`,
+`12,34,5` all normalise to the same string the dial produces. It rejects
+anything that is not three numbers in 0–39, because a combination that cannot
+be dialled is a door that cannot be opened.
+
+**Switching to the padlock means rebuilding the verifier.** The blob is keyed to
+whatever phrase built it, so a `verify.enc` made from the old typed passphrase
+will refuse every combination — indistinguishably from a wrong one, because
+that is what a wrong key looks like to GCM. Run the command above with the
+chosen combination before deploying the dial.
+
+Until that happens the door is not bricked: **PHRASE** mode passes free text
+straight to the same decryption, so a blob keyed to a sentence still opens for
+that sentence. That is the escape hatch for exactly this situation, and it is
+why the padlock is not a one-way door. It costs nothing in security — same
+blob, same 250k iterations — and once the verifier is rekeyed the numbers start
+working and the phrase stops.
 
 The blob is a ciphertext, so committing it leaks nothing but the cost of
 guessing. The passphrase itself is never written anywhere and cannot be
@@ -337,10 +402,7 @@ devices, which are the same device from four angles:
 
 It is applied to the classes the site already had rather than by rewriting
 components, and it runs in **every** palette: punk is not a colour scheme, it
-is what happens to the surface. The default room moved from the copy shop to
-the street and this layer did not change when it did — a flyer is a flyer under
-a streetlight too, and these four devices are what keeps the neon reading as DIY
-instead of as a corporate lobby.
+is what happens to the surface.
 
 The one new component is **`<Ransom>`** (`src/components/Ransom.tsx`) — cut-up
 headline type, six scraps from six sources. It is *seeded*, so a headline gets
@@ -351,23 +413,22 @@ whole string is on the wrapper as an `aria-label` and every scrap is
 
 ## Palettes
 
-Five, swapped by `data-vibe` on `<html>`. **`void` is the default and the house
-style**: ENTER THE VOID — Tokyo from directly above at the hour the trains have
-stopped, magenta and cyan and an acid green that reads as a chemical rather than
-a colour, over a black that is not quite black. The other four (`riot` · `den` ·
-`untitled` · `slime`) are the rooms off it, and you have to ask for them.
+Five, swapped by `data-vibe` on `<html>`. **`void` is the default and the
+house style**: acid green and electric violet on a black with a cast to it,
+with whatever primary the next sign happens to be. The other four are
+`dmt` (everything at once), `hotel` (sodium through a window that does not
+open), `griptape` (the deck face down — black, bone, one acid stripe) and
+`riot`, the photocopier, which used to be the house style and is now one room
+off the street.
 
-`riot` — the photocopier, toner on newsprint, one spot red and no third ink —
-used to be the default. It is still the whole DIY layer with the lights off, and
-every device in `punk.css` was cut there first; it is just no longer the room you
-arrive in. `kaiju` is retired: an oni gate and gumball planets is a costume, and
-the building wanted a street.
+In `void` the acid is `--n3` on purpose. `--n3` is what links, kana, focus
+rings and the default `.neon` all read from, so the green is the thing your eye
+follows through the building rather than a colour that merely appears in it.
 
 Defined as custom properties in `src/styles/tokens.css`; every component reads
 `--n1`…`--n5`, the `--void` and `--text` ramps, so nothing needs to know which
 palette is live. `void` also seeds bare `:root`, so the first paint — before the
-provider has written `[data-vibe]` onto `<html>` — is already the house style,
-and `index.html` ships `data-vibe="void"` on the element for the same reason.
+provider has written `[data-vibe]` onto `<html>` — is already the house style.
 
 `riot` puts an accent where the others put a light source, which breaks one
 assumption the rest of the site made everywhere: that text sitting **on** an
@@ -378,10 +439,203 @@ Anything whose background is `--glow` reads its text colour from it.
 
 A palette that is retired simply leaves `VIBES`: a stored `vibe` that no longer
 passes `isVibeId` falls back to the default on read, so nobody is stranded in a
-room that is not there any more and the storage key does not need a bump. That
-is what happened to `kaiju`. The key **was** bumped (`v2` → `v3`) for the
-redesign itself, on the separate grounds that a returning visitor holding a
-stored `riot` would never have seen it.
+room that is not there any more. The storage key was bumped to `v3` anyway, and
+for the opposite reason: `riot` *survived* the redesign as a room, so every
+returning visitor would have been handed back the palette the redesign
+replaced and would never have seen it.
+
+### The street layer
+
+`punk.css` was written when `riot` was the house style and it is unconditional
+— it repaints the logo in paper and spot red, flattens the wordmark to three
+inks and turns the heading bloom into a slab of red, with `!important`, in
+every palette. Correct when every room was a photocopy of one flyer; wrong once
+the default is a lit room.
+
+`src/styles/street.css` runs after it, scoped to `:not([data-vibe='riot'])`,
+and hands those four devices back their colour. Construction survives from
+punk everywhere — the scissors, the tape, the hazard bars, the hard offsets,
+the refusal to round a corner — because those are construction and not colour,
+and they are as much a skate deck as a 1977 flyer. `riot` keeps the
+photocopier exactly as it was.
+
+## The front door
+
+`/` shows the splash once a session, in front of the home page and behind the
+gate. It used to be a picture postcard — a crescent moon, a twinkling
+starfield, a pagoda, three paper lanterns and a row of crows on a tiled roof.
+Drawn well, and completely toothless: a tourist's idea of Tokyo in front of a
+building whose banner says EAT THE RICH.
+
+What replaced it is the other Tokyo — shot from a helicopter at 4am with the
+colour pushed until it hurts. Four layers, and between them they animate
+exactly two properties:
+
+| | layer | what moves |
+|---|---|---|
+| 1 | **the floor** | one element in perspective, translated a tile on Y forever |
+| 2 | **the bloom** | two conic gradients counter-rotating behind the mark |
+| 3 | **the signage** | six vertical kanji columns drifting on Y at four speeds |
+| 4 | **the barrage** | the title card, fourteen words on a `steps(1)` strobe |
+
+No blurs, no backdrop filters, no per-frame JavaScript. The old door ran a
+46-element starfield with a `drop-shadow` on every one of them — 46 blur passes
+a frame before the type had loaded. The Japanese stayed and got harder; the
+crown stayed and got promoted from a heading ornament to the thing directly
+over the door.
+
+## The brain console
+
+The front page is a deployment portal for a wiki of some 490 pages and it used to open
+with three paragraphs on the meaning of the word *dialectic*, with the wiki as
+slot one of an eight-card grid. You could not search it from the front page.
+You could not resume it. The only answer to "where do I start" was `/brain`,
+which opens on a force-directed map of several hundred unlabelled dots — an answer to a
+question you can only have once you have already read enough to ask it.
+
+`src/wiki/Console.tsx` goes above everything else on `/` and does four things:
+
+- **SEARCH** — scored, instant, keyboard-driven, `/` to focus from anywhere.
+  Title hits outrank slug hits outrank blurb hits; weight is a tiebreak, not a
+  ranking. Scored under `useDeferredValue`, so the field never waits on the
+  full-corpus pass.
+- **RESUME** — `src/wiki/trail.ts` records every page this browser opens.
+  One button, back where you were, and read pages are ticked everywhere they
+  appear.
+- **ROUTES** — four ordered ways in, in `src/wiki/entry.ts`, each one derived
+  from the index rather than hand-curated so none of them goes stale on the
+  next sync. They do not overlap: each claims its stops and the next picks from
+  what is left, so four routes cover twenty-four distinct pages instead of the
+  same three, three times. Reading times are computed, never asserted.
+- **THE BURIED** — see below.
+
+A slimmer version of the same thing (`src/wiki/StartRail.tsx`) sits across the
+top of `/brain`, above the map.
+
+## The buried
+
+"Hidden" is four different things in this corpus and the index rendered all
+four as the same card with a word count on it:
+
+| badge | what it means |
+|---|---|
+| **SEALED** 封 | encrypted in the snapshot; the row is the whole entry until somebody types the phrase |
+| **ORPHAN** 孤 | finished, wired in, and linked from nowhere — you can only arrive on purpose |
+| **STUB** 断 | started and not finished |
+| **CLOSED** 終 | over, and kept anyway |
+| **UNLIT** 暗 | long, finished, well-linked, and never on the obvious path |
+
+Orphans are the interesting case and they need the edge list to find: `links`
+on an index entry is the *outbound* count, and it is *inbound* that makes a
+page findable. `inboundCounts` in `src/wiki/entry.ts` counts them off
+`index.edges`.
+
+The badges appear on the list cards, and `BURIED` is a fifth view on `/brain`
+alongside MAP · LIST · BRIEFS · GAPS — the same act as the other four: MAP is
+what connects, LIST is what exists, BRIEFS is what it says, GAPS is what it
+admits it does not know, BURIED is what nothing points at.
+
+## The relics
+
+Ten Easter eggs — four on the front door, six on the main floor — each one a
+real thing out of `wiki/people/ally-lubin` and the arcade's cartridge data: a
+line she actually sent, a date the wiki derives rather than is told, a payment
+that is in a ledger with a timestamp. They are in `src/content/relics.ts` and
+the arcade's house rule applies to that file too: **the joke is never on her.**
+
+Each is a visible sticker with a hover state, not a pixel-hunt. Clicking one
+opens the line, the date, what it means, and a door into the room where the
+long version lives. Found state is in `localStorage` via
+`src/state/relics.ts`, published to React through `useSyncExternalStore` and
+deliberately *not* in `PortalProvider` — most of the site consumes
+`usePortal`, and it should not all re-render because somebody clicked a
+sticker. A counter in the bottom-left corner follows you off both pages,
+because "there are ten of these" is what turns a decoration into a hunt.
+
+**Photographs.** Every relic takes one the moment one exists: drop a file into
+`public/ally/` named for the relic's id (`top8.jpg`, `necklace.png`,
+`cats.webp`) and the panel picks it up on its next open, with no code change
+and no manifest to edit. `.jpg`, `.png` and `.webp` are probed in that order,
+lazily, only for a relic somebody has actually opened. Until then the drawn
+art in `src/components/RelicArt.tsx` stands in, and it is built to stand in
+permanently — nothing looks unfinished with the folder empty.
+`public/ally/README.md` carries the table and the one thing worth saying out
+loud about putting photographs of a real person on a public page.
+
+## What loads when
+
+Everything used to be one 729 kB bundle, of which the door and the home page
+use about a third; the rest is four arcade cabinets with their own game loops,
+thirty leviathan instruments, a 134,348-row transcript reader, a gallery
+lightbox and a markdown editor — all downloaded and parsed before the door
+would open.
+
+The eager set is now the critical path and nothing else: the door, the home
+page, the wiki index and a wiki page (a deployment portal that code-splits its
+own payload stutters on the one navigation everybody makes), plus the terms,
+which render in front of the gate. Everything else is `React.lazy`, fetched on
+arrival. Initial JS **729 kB → 451 kB**, initial CSS **231 kB → 132 kB**.
+
+Three other things were costing more than they were worth and are gone:
+
+- `backdrop-filter: blur()` on the sticky nav and the sticky transcript bar —
+  a re-blur of everything behind them on every frame of every scroll, for a
+  translucency that was invisible at 94% opacity over a black page.
+- `filter: blur(40px)` on the full-viewport `.fx-bleed` haze, which was also
+  being scaled — so it re-rasterised every frame. It was blurring three radial
+  gradients, which have no hard edges to blur; the stops are wider now and the
+  drift is translate-only.
+- The cursor trail, entirely — see below.
+
+## The reticle
+
+`src/components/Cursor.tsx`. What was there before was a comet: up to 48 soft
+circles, radius up to 21px, drawn additively and fading at 0.045 of their life
+per frame. It *felt* slow without being slow — a 20px blob has no edge, so
+there is nothing for the eye to lock onto and check against the actual pointer,
+and softness reads as lag even at 60fps. It was also enormous, and it lied:
+one sample per frame joined by big round dots means a fast flick drew a dotted
+chord rather than the path your hand took.
+
+Hard edges, one-pixel lines, and the true path:
+
+- **The bracket** — four corner ticks of a small square, locked to the exact
+  last reported position with no smoothing whatsoever, rotated to the direction
+  of travel and splaying open with speed. Nothing interpolates, on purpose: a
+  hard corner sitting precisely on the hotspot is checkable, so a frame of lag
+  would be visible, so there is none. It stays parked when you stop — it is a
+  reticle, and marking where the pointer is sitting is the job.
+- **The blade** — a 1px tapering polyline through the recent 14 samples, drawn
+  only above a walking pace and retracting into the bracket when the hand
+  stops. Acid green at rest, magenta at speed.
+
+Three things make it cheaper as well as sharper. `getCoalescedEvents()` draws
+the real path from samples the browser had already captured, so a flick is a
+curve rather than a chord. `pointerrawupdate` where it exists fires ahead of
+the coalescing `pointermove` waits on. And it clears a **dirty rect** — the
+union of what it drew last frame and this one, a few thousand pixels around the
+pointer — instead of a full 1440×900 viewport every frame, and still sleeps
+completely when the blade has drained and the hand has stopped.
+
+Two bugs worth recording, because both are the same mistake. Speed was
+initially measured between the last two points in the trail, which is wrong in
+both directions: when the hand stops those two points stop changing, so the
+reading holds at whatever the final flick was — speed never decays, the blade
+never drains, and a parked pointer keeps a streak hanging off it. And when the
+hand is fast, a coalesced batch delivers a dozen samples in one frame and the
+gap between the last two is a twelfth of the real distance, so the reticle
+reads a sprint as a stroll. The sum of distance actually covered over the frame
+is simply the truth. The envelope on it is fast-attack/slow-release for the
+same reason the bracket does not interpolate: a symmetric filter opens the
+reticle several frames after you started moving, which is precisely the lag the
+comet was replaced for.
+
+Motion tokens live in `tokens.css`: `--spring`, `--spring-hard`, `--glide` and
+the `--snap` / `--pop` / `--settle` durations. They are only ever spent on
+`transform` and `opacity`, which is the whole strategy — the compositor can
+animate those two without asking the main thread for a layout or a repaint, so
+the site is busier than it was on a frame budget it was previously blowing on
+blur.
 
 ## THE CRAWLS
 
@@ -560,6 +814,50 @@ force layout run once in node — and shipped in `index.json` with the edge list
 The browser gets a finished map: nothing simulates on load, and the wiki is in
 the same shape every time you walk into it. The canvas only repaints when
 something actually moves.
+
+## Constellations
+
+The map let you inspect one page at a time — click a star, read its probe,
+click one of its links, repeat. That is a walk, and a walk has no memory: the
+moment you click the second star the first is gone, so nothing on screen ever
+accumulated into an argument.
+
+**Shift-click** (or ⌘/Ctrl-click, or `P` on the focused star, or PIN in the
+probe) pins instead. Pinned stars stay lit and numbered, and the real edges
+between them light up as **strands**. A strand exists only where the wiki
+genuinely links those two pages, so what you are drawing is not decoration —
+it is a claim about the corpus that the corpus agreed to.
+
+### The end state
+
+A constellation **closes** when it has at least three stars and every star can
+be reached from every other *without leaving the figure*. That is a real graph
+property rather than a score, it is checkable at a glance once drawn, and it is
+what makes the thing you assembled mean something: a connected pinned subgraph
+is a set of pages that hang together, as opposed to a set of pages you happened
+to like.
+
+When it closes the map reforms — it dims the other 480 pages hard, flies to
+frame what you built, and **ignites the strands in sequence along the reading
+order** rather than snapping them all on at once, so closing a figure is an
+event you watch happen. The panel names the figure after what it is made of
+(one domain is a FIGURE, several is a CROSSING) and offers READ THE TRACK,
+which walks the pages in the order the figure runs.
+
+### The gap, named
+
+Until it closes the gap is shown rather than hidden. Every disconnected piece
+gets a **ghost route** to the main body along the shortest real path through
+the corpus, drawn as a crawling cadmium dash, and the unpinned pages on that
+route are named and clickable: *"Menore reaches the rest through Cocaine."*
+That is the answer to "what would join these two", which is the most useful
+question this map can be asked and previously could not be.
+
+Logic is in `src/wiki/constellation.ts` and is pure — components by BFS
+restricted to the pinned set, bridges by multi-source BFS over the whole graph,
+reading order by DFS from the most-connected member (depth-first because it
+runs *along* the figure like a path, where breadth-first hops back to the hub
+between every branch).
 
 ## Briefs
 
@@ -1120,96 +1418,22 @@ instead of a hard-coded number.
 
 1. **CHAOS DIAL** — draggable/arrow-keyed knob, 0 to 11, drives `--chaos`
 2. **VIBE SWITCH** — the five palettes
-3. **SHELL** — 55 verbs, 8 of them listed in `help`; reads the corpus (`grep`,
+3. **SHELL** — 34 verbs, 8 of them listed in `help`; reads the corpus (`grep`,
    `whois`, `cite`, `hegel`), drives the site (`chaos`, `vibe`, `goto`,
    `overdose`, `narcan`), and takes the screen apart (`invert`, `flip`,
    `scanlines`, `nap`, `strobe`). `man <verb>` documents any of them and Tab
-   completes over all of them. Ten of the unlisted ones are in **THE ALU SET**
-   below.
-
-There used to be a fourth — a slab of draggable stickers with momentum, which
-read as a fridge magnet set and undercut every other thing in the room. It is
-gone, and so is the pointer trail that used to follow the cursor around: a
-comet made of coloured circles is a screensaver, not a building.
+   completes over all of them.
+4. **STICKER SLAB** — drag, fling, bounce, with momentum
 
 The chaos dial and the palette switch also ride in the header on every page —
 the console keeps the big versions, both surfaces drive the same state.
-
-## The kiss
-
-`src/components/Kiss.tsx` — two figures in profile, kissing, cut out of the
-dark. It is the front door's lower-left corner and it is the whole of the VOID
-band on the home page, and it is the one thing on this site that is a picture
-rather than a list.
-
-Two profiles facing each other cannot both keep their noses: a nose sticks out
-further than a mouth does, so the moment the lips touch in a flat side view the
-noses are in the same square inch of canvas and the drawing collapses into one
-blob with two ears. Tilting the heads only moves the collision. So it is not
-solved, it is staged — one figure is **in front of** the other, and the one in
-front carries a thick stroke in the background colour, a *cut*, that separates
-her from everything behind her. Where the silhouettes overlap you get a hairline
-of void instead of a merge, which is what makes two people read as two people.
-The figure behind sits seven units to the left, so after the cut takes its four
-there are three units of night between one mouth and the other. That gap is the
-whole drawing; any wider and they are talking.
-
-Nothing in it is filled with a colour. The fills are void, the cut is void
-again — which is the only reason the cut survives a palette switch — and the
-only colour is a rim on each face, magenta behind and cyan in front, standing in
-for a light source between them and the viewer. On `riot` there is no light
-source, so there is no rim: the fills go to ink, the cut goes to paper, and the
-two faces are told apart by the gap alone.
-
-## THE ALU SET
-
-Eighteen references to Ally Lubin, none of them signposted, all of them sourced
-from `wiki/people/ally-lubin` by way of `src/arcade/content.ts`. They obey the
-arcade's house rule — **the joke is never on her**, Dan is the recurring
-obstacle, and everything the page files under crisis stays in the wiki where it
-belongs.
-
-Ten are unlisted shell verbs:
-
-| verb | what it is |
-| --- | --- |
-| `alu` | the ALU '08 card — TOP 8, ap.net, BUZZNET, side bangs, a burned CD |
-| `aluuuu` | the handle, and the transcripts-and-a-rejection-letter line |
-| `top8` | the old ranking, one slot filled, seven vacancies |
-| `edgar` | all black, broad, unhurried; did not consent to being caught |
-| `sylvia` | tuxedo, white bib, four white socks; named like a poet |
-| `cancer` | 蟹 · June 26 · cardinal water, ruled by the moon |
-| `praesepe` / `m44` | the Beehive, wired to nothing, being a thousand things at once |
-| `catbird` | "Get me this for being brave." October 30 2023. Outstanding. |
-| `dunkies` | 7:24 AM, and the question is still open |
-
-The other eight are not verbs:
-
-- **The sky behind the kiss** is Cancer, drawn from the same `CANCER` and
-  `CANCER_EDGES` the WATER SIGNS cabinet uses — imported rather than copied, so
-  the sky over the drawing cannot drift out of agreement with the sky in the
-  arcade. It is at a fifth brightness, which is roughly what Cancer looks like
-  anyway.
-- **The figure behind wears a catbird necklace**, one unit of line at a third
-  opacity, on a throat that is already dark.
-- **A fifth neon sign** — 蟹 — lights on the splash on June 26 and no other day
-  of the year.
-- **`chaos 6.26`** at the shell adds a row to the HUD. The dial rounds to a
-  tenth, so that value is not reachable by dragging it: the only way in is to
-  already know what the number is.
-- **`/alu`, `/aluuuu` and `/top8`** resolve to the arcade instead of 404ing,
-  because the room is named after the person who used those handles.
-- **The VOID band's third chip** on the home page reads `4:11 AM`, not `4AM`.
-  4:11:43 is a timestamp in a payments ledger.
-- **The devtools banner**, for the person who opens the console.
-- **An HTML comment in `index.html`**, for the person who reads the markup.
 
 ## Layout
 
 ```
 src/
-  components/        chrome (nav, marquee, crawl, HUD, FX, Ransom, the kiss)
-    rigs/            the three interactive elements
+  components/        chrome (nav, marquee, crawl, HUD, cursor trail, FX, Ransom)
+    rigs/            the six interactive elements
   content/           section definitions, banner slogans, the crawls
   routes/            Splash, Home, Stub, blog index + post, wiki index + page
   state/             palette + chaos context, persisted

@@ -325,3 +325,336 @@
   line-height: 1;
   color: var(--n2);
 }
+
+/* ==========================================================================
+   THE PADLOCK
+   ========================================================================== */
+
+.lock {
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+}
+
+.lock__body {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  margin-top: 0.4rem;
+  color: var(--n3);
+}
+
+/* The shackle sits behind the case and springs up and over on success. */
+.lock__shackle {
+  width: clamp(7rem, 30vw, 9.5rem);
+  height: auto;
+  margin-bottom: -14%;
+  color: color-mix(in srgb, var(--n3) 70%, transparent);
+  transition: transform 420ms cubic-bezier(0.34, 1.56, 0.64, 1), color 200ms linear;
+}
+
+.lock__body--open .lock__shackle {
+  transform: translateY(-22%) rotate(9deg);
+  color: var(--n3);
+}
+
+.lock__case {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: clamp(11rem, 46vw, 15rem);
+  aspect-ratio: 1;
+  border-radius: 14%;
+  background: linear-gradient(155deg, var(--void-3), var(--void));
+  border: var(--rule) solid var(--n3);
+  box-shadow:
+    6px 6px 0 var(--edge),
+    inset 0 0 40px color-mix(in srgb, var(--n3) 12%, transparent);
+}
+
+.lock__body--open .lock__case {
+  border-color: var(--n5);
+  box-shadow:
+    6px 6px 0 var(--edge),
+    inset 0 0 40px color-mix(in srgb, var(--n5) 22%, transparent),
+    0 0 var(--glow-r) color-mix(in srgb, var(--n5) 45%, transparent);
+}
+
+/* The index mark. The dial turns under this; this never moves — which is the
+   whole reason a combination lock reads as one number at a time. */
+.lock__index {
+  position: absolute;
+  top: 2%;
+  left: 50%;
+  translate: -50% 0;
+  width: 0;
+  height: 0;
+  border-inline: 7px solid transparent;
+  border-top: 11px solid var(--n2);
+  filter: drop-shadow(0 0 5px var(--n2));
+  z-index: 3;
+}
+
+.lock__dial {
+  width: 88%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 28%, var(--void-2), var(--edge) 72%);
+  border: 2px solid color-mix(in srgb, var(--n3) 45%, transparent);
+  cursor: grab;
+  touch-action: none;
+  /* The face turns; nothing else does. Transform only, so a fast spin is
+     composited rather than re-laid-out forty ticks at a time. */
+  rotate: var(--turn, 0deg);
+  will-change: rotate;
+}
+
+.lock__dial:active {
+  cursor: grabbing;
+}
+
+.lock__dial:focus-visible {
+  outline: 3px solid var(--n3);
+  outline-offset: 3px;
+}
+
+.lock__tick {
+  stroke: color-mix(in srgb, var(--text) 45%, transparent);
+  stroke-width: 2;
+}
+
+.lock__tick--major {
+  stroke: var(--n3);
+  stroke-width: 3;
+}
+
+.lock__num {
+  fill: var(--text);
+  font-family: var(--f-mono);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+/* The reading, held upright in the middle while the face spins under it. */
+.lock__read {
+  position: absolute;
+  font-family: var(--f-mono);
+  font-size: clamp(1.8rem, 8vw, 2.8rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--n3);
+  text-shadow: 0 0 calc(var(--glow-r) * 0.5) var(--n3);
+  pointer-events: none;
+}
+
+.lock__body--open .lock__read {
+  color: var(--n5);
+  text-shadow: 0 0 calc(var(--glow-r) * 0.6) var(--n5);
+}
+
+/* ---- the three slots ---------------------------------------------------- */
+.lock__steps {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.7rem;
+}
+
+.lock__step {
+  display: grid;
+  justify-items: center;
+  gap: 0.1rem;
+  min-width: 4rem;
+  padding: 0.3rem 0.5rem;
+  font-family: var(--f-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.16em;
+  color: var(--text-dim);
+  border: 2px solid color-mix(in srgb, var(--text-dim) 40%, transparent);
+}
+
+.lock__step b {
+  font-size: 1.15rem;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+
+.lock__step--set {
+  color: var(--n3);
+  border-color: var(--n3);
+}
+
+.lock__step--set b {
+  color: var(--n3);
+}
+
+/* Which one it is waiting for. */
+.lock__step--now {
+  color: var(--n2);
+  border-color: var(--n2);
+  box-shadow: 0 0 calc(var(--glow-r) * 0.4) color-mix(in srgb, var(--n2) 45%, transparent);
+}
+
+.lock__step--now b {
+  color: var(--n2);
+}
+
+.lock__hint {
+  margin-top: 0.5rem;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.2em;
+  color: var(--n2);
+}
+
+.lock__acts {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+
+.lock__clear {
+  padding: 0.3rem 0.7rem;
+  font-family: var(--f-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.16em;
+  color: var(--text-dim);
+  border: 2px solid var(--text-dim);
+  transition: color 140ms linear, border-color 140ms linear;
+}
+
+.lock__clear:hover:not(:disabled) {
+  color: var(--n2);
+  border-color: var(--n2);
+}
+
+.lock__clear:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ---- the keypad --------------------------------------------------------
+   Three boxes, one number each. Sized off the widest legal number rather than
+   a guess, and never below 44px in either direction — a lock somebody has to
+   open on a phone is the last place to be clever about touch targets.
+   ------------------------------------------------------------------------ */
+
+.lock__numeric {
+  display: grid;
+  justify-items: center;
+  gap: 0.9rem;
+  width: 100%;
+}
+
+.lock__inputs {
+  display: flex;
+  gap: 0.55rem;
+  justify-content: center;
+  align-items: center;
+}
+
+/* The hyphens the format is written with, so the boxes read as one number. */
+.lock__inputs > .lock__input + .lock__input::before {
+  content: '';
+}
+
+.lock__input {
+  width: clamp(3.2rem, 18vw, 4.4rem);
+  min-height: 44px;
+  padding: 0.7rem 0.3rem;
+  font-family: var(--f-mono);
+  font-size: clamp(1.3rem, 6vw, 1.7rem);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  letter-spacing: 0.06em;
+  color: var(--n3);
+  caret-color: var(--n3);
+  background: color-mix(in srgb, var(--void) 70%, transparent);
+  border: 2px solid color-mix(in srgb, var(--n3) 40%, transparent);
+  border-radius: 4px;
+  outline: none;
+  transition:
+    border-color var(--snap, 140ms) linear,
+    box-shadow var(--snap, 140ms) linear,
+    transform var(--pop, 320ms) var(--spring, ease);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.lock__input::placeholder {
+  color: color-mix(in srgb, var(--text-dim) 70%, transparent);
+  opacity: 1;
+}
+
+.lock__input:focus {
+  border-color: var(--n3);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--n3) 22%, transparent);
+  transform: translateY(-2px);
+}
+
+.lock__input:disabled {
+  opacity: 0.5;
+}
+
+/* ---- how you want to open it ------------------------------------------- */
+
+.lock__modes {
+  display: flex;
+  gap: 0.3rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.lock__mode {
+  min-height: 34px;
+  padding: 0.45rem 0.7rem;
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  color: var(--text-dim);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--text-dim) 40%, transparent);
+  border-radius: 3px;
+  cursor: pointer;
+  transition:
+    color var(--snap, 140ms) linear,
+    border-color var(--snap, 140ms) linear;
+}
+
+.lock__mode:hover:not(:disabled),
+.lock__mode:focus-visible {
+  color: var(--n2);
+  border-color: var(--n2);
+}
+
+.lock__mode--on {
+  color: var(--void);
+  background: var(--n3);
+  border-color: var(--n3);
+}
+
+.lock__mode--on:hover:not(:disabled) {
+  color: var(--void);
+  background: var(--n2);
+  border-color: var(--n2);
+}
+
+.lock__mode:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lock__input {
+    transition: border-color 140ms linear, box-shadow 140ms linear;
+  }
+
+  .lock__input:focus {
+    transform: none;
+  }
+}
+
+:root[data-still='1'] .lock__shackle {
+  transition: none;
+}

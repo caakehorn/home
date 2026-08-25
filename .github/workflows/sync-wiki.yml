@@ -50,6 +50,46 @@ jobs:
       - run: node scripts/sync-wiki.mjs .wiki-brain
         env:
           WIKI_LOCK_PASSPHRASE: ${{ secrets.WIKI_LOCK_PASSPHRASE }}
+
+      # sync-wiki embeds the current wall-clock time in three JSON datasets.
+      # Those files are one-line JSON, so a normal diff sees the whole file as
+      # changed every hour even when the source wiki did not move. Detect that
+      # exact timestamp-only case before staging; real content changes still
+      # proceed normally and get the new generatedAt value.
+      - name: Ignore timestamp-only wiki churn
+        run: |
+          node <<'NODE'
+          import { execFileSync } from 'node:child_process'
+          import { readFileSync } from 'node:fs'
+
+          const generated = new Set([
+            'public/wiki/index.json',
+            'public/wiki/gaps.json',
+            'public/wiki/sage.json',
+          ])
+          const changed = execFileSync('git', ['diff', '--name-only', '--', 'public/wiki'], { encoding: 'utf8' })
+            .trim()
+            .split('\n')
+            .filter(Boolean)
+
+          if (!changed.length || !changed.every((path) => generated.has(path))) process.exit(0)
+
+          const normalize = (text) => text.replace(/"generatedAt":"[^"]*"/g, '"generatedAt":"<normalized>"')
+          for (const path of changed) {
+            const current = normalize(readFileSync(path, 'utf8'))
+            let previous
+            try {
+              previous = normalize(execFileSync('git', ['show', `HEAD:${path}`], { encoding: 'utf8' }))
+            } catch {
+              process.exit(0)
+            }
+            if (current !== previous) process.exit(0)
+          }
+
+          console.log('Only generatedAt changed; restoring the existing snapshot.')
+          execFileSync('git', ['restore', '--source=HEAD', '--', 'public/wiki'], { stdio: 'inherit' })
+          NODE
+
       - run: npm run leviathan
 
       - id: commit

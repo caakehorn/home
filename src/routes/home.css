@@ -264,3 +264,96 @@
 :root[data-still='1'] .mast__eyebrow {
   animation: none;
 }
+
+/* ==========================================================================
+   THE VOID BAND
+
+   The one place on the home page that is a picture rather than a list. It sits
+   between the rooms and the console because the page needed somewhere to stop
+   talking, and because a building this loud has to prove once that it can hold
+   still for a second without the whole thing falling over.
+   ========================================================================== */
+.void-band {
+  position: relative;
+  overflow: hidden;
+  padding-block: clamp(2rem, 7vh, 4.5rem);
+  border-block: var(--rule) solid var(--edge);
+  background: linear-gradient(180deg, var(--void), var(--void-2) 60%, var(--void));
+}
+
+/* the streetlight, forty feet off and out of focus */
+.void-band__wash {
+  position: absolute;
+  inset: -30% -10%;
+  background:
+    radial-gradient(38% 60% at 26% 50%, color-mix(in srgb, var(--n1) 38%, transparent), transparent 70%),
+    radial-gradient(34% 54% at 62% 42%, color-mix(in srgb, var(--n3) 26%, transparent), transparent 72%);
+  filter: blur(46px);
+  opacity: calc(0.3 + 0.5 * var(--chaos));
+  pointer-events: none;
+}
+
+.void-band__inner {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  align-items: center;
+  gap: clamp(1.4rem, 4vw, 3.4rem);
+}
+
+.void-band__art {
+  width: 100%;
+  max-width: 560px;
+}
+
+.void-band__say {
+  display: grid;
+  justify-items: start;
+  gap: 0.7rem;
+}
+
+.void-band__kana {
+  font-size: clamp(1.4rem, 3.4vw, 2.4rem);
+  letter-spacing: 0.34em;
+  color: var(--n2);
+  text-shadow: 0 0 calc(var(--glow-r) * 0.7) var(--n2);
+}
+
+.void-band__title {
+  font-size: clamp(1.5rem, 5vw, 3.4rem);
+  line-height: 0.95;
+}
+
+.void-band__note {
+  max-width: 46ch;
+  font-size: var(--step-0);
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+.void-band__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+
+.void-band__meta span {
+  padding: 0.15rem 0.55rem;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  color: var(--n3);
+  border: 2px solid var(--n3);
+}
+
+@media (max-width: 860px) {
+  .void-band__inner {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .void-band__art {
+    max-width: 420px;
+    margin-inline: auto;
+  }
+}

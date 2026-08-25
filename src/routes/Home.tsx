@@ -1,4 +1,5 @@
 import { Crown } from '../components/Crown'
+import { Kiss } from '../components/Kiss'
 import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
 import { PortalCard } from '../components/PortalCard'
@@ -7,7 +8,6 @@ import { Rig } from '../components/Rig'
 import { Logo } from '../components/Logo'
 import { SubHead } from '../components/Wordmark'
 import { ChaosDial } from '../components/rigs/ChaosDial'
-import { StickerSlab } from '../components/rigs/StickerSlab'
 import { Terminal } from '../components/rigs/Terminal'
 import { VibeSwitch } from '../components/rigs/VibeSwitch'
 import { relicsOn } from '../content/relics'
@@ -128,6 +128,34 @@ export function Home() {
         lean={-0.6}
       />
 
+      {/* ---- the two of them ------------------------------------------ */}
+      <section className="void-band" aria-labelledby="void-title">
+        <div className="void-band__wash" aria-hidden="true" />
+        <div className="wrap void-band__inner">
+          <Kiss className="void-band__art" label="Two people in profile, kissing, lit from behind" />
+
+          <div className="void-band__say">
+            <span className="void-band__kana jp" aria-hidden="true">
+              虚空
+            </span>
+            <h2 id="void-title" className="void-band__title">
+              <SubHead venn={false}>ENTER THE VOID</SubHead>
+            </h2>
+            <p className="void-band__note">
+              Every other room here is one man arguing with a record at an hour the record should
+              not be trusted at. This is the other thing. Two people under a light on a street that
+              does not care, at the end of a night that went on too long — nobody in particular, on
+              purpose, because the whole point of a silhouette is that it is anybody.
+            </p>
+            <p className="void-band__meta">
+              <span>NO PERMISSION ASKED</span>
+              <span>NO APOLOGY OFFERED</span>
+              <span>4:11 AM</span>
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* ---- the console --------------------------------------------- */}
       <section className="wrap section" aria-labelledby="console-title">
         <div className="section__head">
@@ -138,7 +166,7 @@ export function Home() {
             操作卓
           </span>
           <p className="section__note">
-            Four things you can actually grab. They are wired to each other and to the rest of the
+            Three things you can actually grab. They are wired to each other and to the rest of the
             building — the dial and the palette drive every page you visit after this one, and the
             shell knows more verbs than it admits to.
           </p>
@@ -164,9 +192,6 @@ export function Home() {
             <Terminal />
           </Rig>
 
-          <Rig index={4} title="STICKER SLAB" kana="貼札" hint="drag · fling · they bounce" accent={5}>
-            <StickerSlab />
-          </Rig>
         </div>
       </section>
 

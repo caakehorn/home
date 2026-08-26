@@ -11,15 +11,11 @@ import {
 /** `motion: null` means nobody has chosen — follow the OS, and keep following it. */
 type Prefs = { vibe: VibeId; chaos: number; motion: boolean | null }
 
-// AFTERGLOW is the house palette: hot pink through black with one cold tube
-// for the things you follow. VOID and RIOT are both still in the rack — they
-// are rooms off the street now rather than the street.
-//
-// Chaos opens at 0.78. Every effect on the site scales off it — the strobe's
-// reach, how far the plates misregister, the glow radius, the grain, how fast
-// everything runs — and the brief for this pass was eleven. 0.68 was the site
-// holding something back and there is no longer any reason to.
-const DEFAULTS: Prefs = { vibe: 'afterglow', chaos: 0.78, motion: null }
+// VOID is the house palette: acid green and electric violet on black. RIOT is
+// still in the rack — it is a room off the street now rather than the street.
+// Chaos opens higher than it used to, because the building is louder than it
+// used to be and 0.55 now reads as the site holding something back.
+const DEFAULTS: Prefs = { vibe: 'void', chaos: 0.68, motion: null }
 
 const REDUCE = '(prefers-reduced-motion: reduce)'
 

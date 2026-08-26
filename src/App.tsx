@@ -6,7 +6,6 @@ import { Cursor } from './components/Cursor'
 import { JET_FUEL, RATIO } from './content/crawls'
 import { Fx } from './components/Fx'
 import { Hud } from './components/Hud'
-import { RelicCase } from './components/RelicCase'
 import { Gate } from './gate/Gate'
 import { Home } from './routes/Home'
 import { Splash } from './routes/Splash'
@@ -130,11 +129,6 @@ function Site() {
       <Crawl nodes={RATIO} label="The ratio" edge="top" travel="left" />
       <Crawl nodes={JET_FUEL} label="Jet fuel" edge="bottom" travel="right" />
       <Hud />
-      {/* The relics are only on the splash and the home page; the counter is
-          everywhere, because "there are ten of these" is the thing that turns
-          a decoration into a hunt and you cannot learn it from the two pages
-          you have already left. */}
-      <RelicCase />
     </>
   )
 }

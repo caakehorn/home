@@ -133,14 +133,29 @@
   transition: opacity 200ms ease, max-height 240ms ease, visibility 0s;
 }
 
+/* THE FACE.
+ *
+ * These were Space Mono, which is the site's METADATA voice — the HUD, the
+ * stamps, the eyebrows, the little uppercase run-ins that report a state. A
+ * nav link is not a readout, it is a sign over a door, and setting the eight
+ * doors of the building in the same face as the telemetry made the bar read as
+ * a status line that happened to be clickable.
+ *
+ * Bungee is the signage face and it is already in the rack (`--f-poster`,
+ * loaded for the arcade marquee). It is a display face cut for exactly this:
+ * short, upright, all-caps words on a sign. It is also much wider than mono at
+ * the same size, so the step down to 0.72rem and the tighter tracking are not
+ * decoration — eight of these have to fit on one line above 1100px, and at
+ * `--step--1` with 0.1em they wrapped to two rows. */
 .nav__link {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.22rem 0.6rem;
-  font-family: var(--f-mono);
-  font-size: var(--step--1);
-  letter-spacing: 0.1em;
+  padding: 0.3rem 0.62rem 0.22rem;
+  font-family: var(--f-poster);
+  font-size: clamp(0.6rem, 0.9vw, 0.72rem);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   text-decoration: none;
   color: var(--text);
   border: 2px solid color-mix(in srgb, var(--glow) 60%, transparent);

@@ -1,70 +1,59 @@
-# public/art — the plates
+# public/art — the frames
 
-Ten files, nine of them pictures.
+Six frames of animation, cut from screenshots. They hang on the front door, in
+the masthead and on the void band; `SCENES` in `src/content/art.ts` is the
+manifest and `<Plate>` draws them.
 
 | file                | what it is | where it hangs |
 | ------------------- | ---------- | -------------- |
-| `kiss-neon.webp`    | pink and blonde, sparkles, a pink field behind them | the front door, right side |
-| `kiss-close.webp`   | the same two, much closer | not hung yet |
-| `kiss-window.webp`  | dark blue and pink, in a window, morning | the front door, left side |
+| `kiss-window.webp`  | dark-haired and pink, in a window, morning | the front door, left |
+| `kiss-neon.webp`    | pink and blonde, sparkles | the front door, right |
 | `kiss-water.webp`   | blonde and black, green suits, on the water | the void band, the big one |
-| `kiss-dark.webp`    | dark-haired and blonde, both with their eyes shut | not hung yet |
-| `kiss-uniform.webp` | two in uniform, knocked out of white | the masthead and the footer — the only one with a real alpha channel |
-| `blob-figure.webp`  | the one that is not a kiss: a figure in a field of shapes | the void band, the counterweight |
-| `blob-lips.webp`    | one mouth, lifted out of that field | a sticker, wherever a sticker is wanted |
-| `blob-field.webp`   | the same field, blurred past reading | a surface, behind the void band |
-| `poster-mort.webp`  | a gig poster: MORT ROSE with VANILLE, February 7 2019 | not hung yet |
-
-Three are in the manifest and cut to size but are not placed on any page. That
-is deliberate rather than half-finished — where they go is an open question at
-the time of writing, and a plate sitting in `PLATES` costs nothing until a
-component asks for it.
+| `kiss-close.webp`   | the same two as `kiss-neon`, much nearer | the void band |
+| `kiss-dark.webp`    | dark-haired and blonde, both with their eyes shut | the void band |
+| `kiss-uniform.webp` | two in uniform, knocked out of white | the masthead — the only one with a real alpha channel |
 
 ## Where they came from
 
-Eight originals, supplied for this. The last three arrived as phone
-screenshots, so their crops are letterbox boxes found by scanning for the
-longest run of rows that are not black rather than by reading coordinates off a
-ruler. `poster-mort` stops short of the bottom of its frame because the phone
-had drawn its live-text button into that corner, over line art with hard edges
-that no patch could honestly cover. `scripts/build-art.mjs` is the whole
+Eight originals were supplied; six survive. `scripts/build-art.mjs` is the whole
 transformation and it is committed alongside them, so the crops are a decision
-in the repo rather than a memory of an afternoon. It is not wired into
-`npm run build` — the plates are committed and the script only runs again if a
-source changes:
+in the repo rather than a memory of an afternoon. It is **not** wired into
+`npm run build` — these are committed and it only runs again if a source
+changes:
 
 ```
 npm install --no-save sharp
 node scripts/build-art.mjs ./originals
 ```
 
-Four of the eight arrived with a hotlink watermark on them. Those are **cropped
-out**, not blurred out; a blurred watermark is still a watermark and it is still
-in the composition. What each crop takes and why is written next to it in the
-script.
+Three jobs, and nothing else:
 
-## Why only one of them has an alpha channel
+- **Watermarks come off**, cropped rather than blurred. A blurred watermark is
+  still a watermark and it is still in the composition.
+- **Nothing ships at source size.** One original was 2099×2952 — 6.2 megapixels
+  of decode for something 380 px wide on screen. Everything is cut to roughly
+  twice its largest on-page box and encoded as WebP. The folder is ~300 kB.
+- **One real knockout.** `kiss-uniform` was drawn on flat white, so a flood fill
+  inward from the border gives it a true alpha channel and it floats over the
+  page instead of sitting in a box. A *threshold* would have taken the cream
+  uniforms out along with the backdrop; a fill that can only reach what is
+  connected to the edge cannot get inside a shirt.
 
-`kiss-uniform` was drawn on flat white, so it is the only one that can be
-separated from its background honestly — a flood fill inward from the border
-gives it a true cut-out and it floats over the page instead of sitting in a box.
+Three of the eight arrived as phone screenshots. Their crops are letterbox boxes
+found by scanning for the longest run of rows that are not black, rather than by
+reading coordinates off a ruler.
 
-The other four are cut in CSS, by `clip-path`, with a deliberately ragged edge
-(see `src/components/cutout.css`). That is the right cut anyway: this building
-has been a photocopier and a pair of scissors since the punk pass, and a torn
-edge belongs to it in a way that a clean outline never did.
+## What is not baked in
 
-## What is *not* baked in
+No colour grading. The halftone screen and the palette wash are both CSS
+(`src/components/plate.css`), so a frame follows `[data-vibe]` — neon in VOID,
+sodium in LOVE HOTEL, a second-generation photocopy in RIOT — off one file.
+Baking any of it in would freeze every frame to whichever room it was baked for.
 
-No colour grading. The duotone, the halftone screen, the registration ghosts and
-the bleed are all CSS, so they follow `[data-vibe]` — a plate looks like neon in
-VOID, like sodium in LOVE HOTEL and like a second-generation photocopy in RIOT,
-off one file. Baking any of that in would freeze every plate to whichever room
-it happened to be baked for.
+## Paths
 
-## Sizes
-
-Every plate is cut to roughly twice its largest on-page box and encoded as WebP.
-The whole folder is ~420 kB, and the two that are only ever small — the lips and
-the field — are 5 kB and 12 kB. One of the originals was 2099×2952, which is
-6.2 megapixels of decode for something that is 380 px wide on screen.
+Never write a leading slash. The site is served from `/home/`, and an absolute
+path in TypeScript is not rewritten by Vite the way one in CSS is — that
+mistake shipped once and broke every image on the deployed site while looking
+fine in every local check. `src/content/art.ts` builds each path through
+`import.meta.env.BASE_URL`; see the note at the top of that file.

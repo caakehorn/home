@@ -1,52 +1,41 @@
-# public/ally — the relic photographs
+# public/ally — the photographs
 
-Ten Easter eggs are scattered across the front door and the main floor, each
-one a real thing out of the record. Every one of them will show a photograph
-the moment there is a photograph to show, and until then it shows a drawing.
+Five photographs of Ally Lubin, in a section of their own on the main floor
+with the date, the line and a door into the wiki under each one.
+`ALLY` in `src/content/art.ts` is the manifest; `<Plate>` draws them like
+everything else on the walls.
 
-## Dropping a photograph in
+| file           | what it is | the line |
+| -------------- | ---------- | -------- |
+| `top8.jpg`     | the 2008 scene internet, the Top 8 | “I peaked in 2008.” |
+| `personal.jpg` | the deadpan | “Well I do. It’s personal lol.” |
+| `dunkies.jpg`  | the morning of August 19 2026 | “Good morning my queen. What do you want from dunkies?” |
+| `cats.jpg`     | the two cats, and the shelf | Sylvia, named like a poet, behaving like a cat. |
+| `deal.jpg`     | the night the offer was accepted | “Okay deal. Sounds good 1-2-3 break.” |
 
-Name the file for the relic's id and put it in this folder. That is the whole
-procedure — no manifest to edit, no import to add, no code change. The panel
-picks it up the next time that relic is opened.
+## These used to be hidden
 
-| file                | relic                | where it hides | what it is | state |
-| ------------------- | -------------------- | -------------- | ---------- | ----- |
-| `top8.jpg`          | THE HANDLE           | front door     | `aluuuu`, the 2008 scene internet, the Top 8 | **photo** |
-| `personal.jpg`      | IT’S PERSONAL LOL    | front door     | October 30 2023, the sharpest sentence in the file | **photo** |
-| `dunkies.jpg`       | THE FIRST MORNING    | main floor     | “Good morning my queen. What do you want from dunkies?” | **photo** |
-| `cats.jpg`          | EDGAR & SYLVIA       | main floor     | the two cats, and the shelf | **photo** |
-| `deal.jpg`          | THE OFFER, ACCEPTED  | main floor     | “Okay deal. Sounds good 1-2-3 break.” | **photo** |
-| `petey.jpg`         | THE FIRST REPLY      | front door     | “Ok PeteyxWentz” — August 18 2026, 1:46 PM | drawn |
-| `cancer.jpg`        | A CANCER SUN         | front door     | June 26 1990 — cardinal water, ruled by the moon | drawn |
-| `necklace.jpg`      | THE CATBIRD NECKLACE | main floor     | “Get me this for being brave.” | drawn |
-| `ledger.jpg`        | THE FINDER’S FEE     | main floor     | $25.00, December 12 2018, 4:11:43 AM | drawn |
-| `enfp.jpg`          | ENFP                 | main floor     | the argument that is still open | drawn |
+They were the payload of the relics: ten stickers scattered across the front
+door and the main floor, each opening a panel. Five of the ten had a photograph
+behind them; the other five had a drawing.
 
-Five are photographs and five are drawings, and that split is not a
-half-finished job. The five drawn ones are the object relics — a message
-bubble, a constellation, a necklace, a receipt, four boxes with a letter in
-each — and a portrait would say less about any of them than the drawing does.
-The five photographed ones are the ones that are about *her being in the room*:
-the cat ears, the deadpan, the morning, the glam, and the one that is visibly
-from the older internet.
+The hunt is gone and so are the drawings. The photographs and the writing that
+went with them are a section now, at a size you can actually see. A hidden thing
+that nobody finds is not a thing on the site.
 
-`.jpg`, `.png` and `.webp` all work; they are tried in that order and the
-drawing is what happens when none of them is there. Anything that is not one
-of those ten names is ignored.
+## Adding or replacing one
 
-## What to give it
+Unlike the old system there is no filename magic: the manifest is explicit.
+Drop the file in, add an entry to `ALLY` in `src/content/art.ts` with its
+intrinsic size, and it hangs. Removing one is deleting the file and its entry.
 
-- **Square.** The plate is `aspect-ratio: 1` and crops with `object-fit: cover`,
-  so anything landscape loses its sides and anything portrait loses its top.
-  Crop to square first and you decide what survives instead of the CSS deciding.
-- **Around 800×800.** The plate is at most ~8rem wide on screen. A 4000px phone
-  photo is roughly twenty times more image than the largest display will use,
-  and it is fetched over the wire on the click.
+- **Square.** The plate crops with `object-fit: cover`, so anything landscape
+  loses its sides. Crop to square first and you decide what survives.
+- **Around 800×800.** The picture column is at most 300 px wide on screen.
 - **Loud is fine.** These sit on a black page under acid green and violet, and
-  the plate already puts a notch of contrast and a wash of the relic's own tube
-  over whatever it is given. A flash photo taken at 2 AM is the correct register
-  for this building; a nicely lit portrait is not.
+  the plate already puts a halftone and a wash of the room's own tube over
+  whatever it is given. A flash photo taken at 2 AM is the correct register for
+  this building; a nicely lit portrait is not.
 
 ## One thing worth saying out loud
 

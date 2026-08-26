@@ -486,10 +486,13 @@
    frames on it now, so it comes off the wall and goes under the copy as a
    signature. In the corner of the stack it was a small dark shape against
    three bright ones and read as a smudge rather than as a drawing. */
+/* Bigger than it was. When this was a flat silhouette it was a small dark
+   shape and shrinking it was the right call; it has two faces in it now and
+   there is something to look at. */
 .void-band__mark {
-  width: clamp(120px, 15vw, 190px);
-  margin-top: 0.4rem;
-  opacity: 0.85;
+  width: clamp(180px, 23vw, 320px);
+  margin-top: 0.6rem;
+  opacity: 1;
 }
 
 .void-band__say {

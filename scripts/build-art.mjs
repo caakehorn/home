@@ -93,6 +93,40 @@ const PLATES = [
     crop: { left: 0, top: 663, width: 828, height: 466 },
     width: 800,
   },
+  /* ---- the two faces that go inside THE KISS ------------------------------
+     `src/components/Kiss.tsx` draws two profiles as flat silhouettes. These
+     fill them: the drawing becomes a window onto the picture rather than a
+     shape cut out of the dark.
+
+     Both come out of src-01, which is the one frame where the two of them are
+     already arranged the way the drawing is — one on the left facing right,
+     one on the right facing left. Nothing had to be posed to fit.
+
+     `face-front` is FLOPPED at build time, and that is not a stylistic
+     choice. The front figure in the SVG lives inside a
+     `translate(420 0) scale(-1 1)` group, so everything drawn in it is
+     mirrored on the way to the screen. An image of somebody facing left,
+     placed in there, comes out facing right — pointing out of the back of a
+     head that is pointing the other way. Flipping the file cancels the
+     group's mirror exactly once. */
+  {
+    id: 'face-back',
+    from: 'src-01.jpg',
+    // Tight on her face, not on her head. The first cut of this took the
+    // whole 840px of her — and she is drawn from behind, so her face is the
+    // rightmost sixth of that and the silhouette filled with the back of her
+    // hair. The head shape wants a face in it, so the crop starts where the
+    // face does.
+    crop: { left: 480, top: 180, width: 420, height: 580 },
+    width: 420,
+  },
+  {
+    id: 'face-front',
+    from: 'src-01.jpg',
+    crop: { left: 930, top: 40, width: 790, height: 970 },
+    width: 400,
+    flop: true,
+  },
   {
     id: 'kiss-uniform',
     from: 'src-05.jpg',
@@ -207,6 +241,10 @@ async function main() {
   for (const plate of PLATES) {
     const from = path.join(SRC, plate.from)
     let pipe = sharp(from).extract(plate.crop)
+
+    // See the note on face-front: this cancels the mirror the SVG group
+    // applies, so the face points the same way the head does.
+    if (plate.flop) pipe = pipe.flop()
 
 
     pipe = pipe.resize({ width: plate.width, withoutEnlargement: true })

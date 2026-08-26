@@ -28,6 +28,25 @@
   paint-order: stroke fill;
 }
 
+/* ==========================================================================
+   THE FACES
+
+   The two frames filling the silhouettes. They sit over the void fills and
+   under the rims, so the lit edge still reads as a light source standing
+   between the two of them and the viewer rather than as an outline drawn on a
+   photograph.
+
+   Held slightly back from full strength, and pushed. These are pale pink cels
+   dropped into the darkest composition on the site: at 1.0 they blow the
+   silhouette open and the drawing stops reading as two people in the dark. The
+   contrast and the saturation are what keep them looking lit from behind
+   rather than pasted on.
+   ========================================================================== */
+.kiss__face {
+  opacity: calc(0.72 + 0.2 * var(--chaos));
+  filter: contrast(1.15) saturate(1.2) brightness(0.94);
+}
+
 .kiss__bloom {
   fill: var(--n1);
   opacity: calc(0.16 + 0.3 * var(--chaos));
@@ -83,6 +102,12 @@
    -------------------------------------------------------------------------- */
 :root[data-vibe='riot'] .kiss__ink {
   fill: var(--edge);
+}
+
+/* Through the machine, like every other picture in the paper room. */
+:root[data-vibe='riot'] .kiss__face {
+  opacity: 1;
+  filter: grayscale(1) contrast(1.7) brightness(1.02);
 }
 
 :root[data-vibe='riot'] .kiss__cut {

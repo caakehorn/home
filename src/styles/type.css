@@ -137,6 +137,23 @@
   z-index: 1;
 }
 
+/* The real string, for anything that reads rather than looks.
+ *
+ * SubHead renders the heading twice: this copy, which never changes and carries
+ * the accessible name, and an `aria-hidden` copy that arrives as noise and
+ * resolves. Taken out of flow so it contributes nothing to the line box — the
+ * animated copy is the one that occupies the heading. */
+.subhead__read {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /* the additive R/G/B lobes that bloom behind it */
 .subhead-set {
   position: relative;

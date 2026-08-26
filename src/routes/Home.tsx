@@ -1,4 +1,5 @@
 import { Crown } from '../components/Crown'
+import { Cutout } from '../components/Cutout'
 import { Kiss } from '../components/Kiss'
 import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
@@ -31,6 +32,18 @@ import './home.css'
    in the first screen is a way in, not an argument.
 
    Six of the ten relics are on this page, in the gaps between those blocks.
+
+   ---- and now there are pictures ----------------------------------------
+
+   Five of the seven plates hang on this page. One is knocked out of its own
+   background and stands in the masthead with the heading wrapped around her;
+   four are torn and stacked in the band between the rooms and the rigs, which
+   used to be one line drawing on an empty stage and is now a wall.
+
+   The band is deliberately the only place on the page where the pictures are
+   the content rather than the furniture. Everything else here is a way into
+   the corpus, and a photograph is not a way into anything — it is the one
+   thing in this building that is not an argument about the record.
    ========================================================================== */
 
 const MISSION = banner('mast')
@@ -71,6 +84,18 @@ export function Home() {
             lattice, the instruments, the arcade, the noise — is a different instrument pointed at
             the same corpus. <b>The brain is the point. Start there.</b>
           </p>
+
+          {/* The knocked-out one. She stands in the masthead at full height and
+              the bottom of her runs off the edge of it, cut by the same rule
+              that closes the block — which is what happens to anything you cut
+              out and stick down slightly too low. */}
+          <Cutout
+            plate="kiss-uniform"
+            cut="none"
+            className="mast__plate"
+            drift={0.7}
+            eager
+          />
 
           <div className="mast__meta">
             <span className="mast__chip">{SECTIONS.length} ROOMS</span>
@@ -128,24 +153,65 @@ export function Home() {
         lean={-0.6}
       />
 
-      {/* ---- the two of them ------------------------------------------ */}
+      {/* ---- the wall ------------------------------------------------- */}
       <section className="void-band" aria-labelledby="void-title">
         <div className="void-band__wash" aria-hidden="true" />
+
         <div className="wrap void-band__inner">
-          <Kiss className="void-band__art" label="Two people in profile, kissing, lit from behind" />
+          {/* Three plates, overlapping, on three angles. Stacked rather than
+              gridded on purpose: a grid of photographs is a contact sheet and
+              a contact sheet is a filing system. This is a wall. */}
+          <div className="void-band__stack">
+            <Cutout
+              plate="kiss-water"
+              cut="torn"
+              className="void-band__plate void-band__plate--1"
+              drift={1.1}
+              captioned
+            />
+            <Cutout
+              plate="kiss-neon"
+              cut="shard"
+              className="void-band__plate void-band__plate--2"
+              drift={1.6}
+            />
+            <Cutout
+              plate="kiss-window"
+              cut="rip"
+              className="void-band__plate void-band__plate--3"
+              drift={2}
+            />
+            {/* The only one of the four who is looking back at you, which is
+                why she is at the front of the stack and on the way out of the
+                band rather than buried in the middle of it. */}
+            <Cutout
+              plate="blob-figure"
+              cut="slab"
+              className="void-band__plate void-band__plate--4"
+              drift={2.4}
+            />
+          </div>
 
           <div className="void-band__say">
             <span className="void-band__kana jp" aria-hidden="true">
-              虚空
+              余韻
             </span>
             <h2 id="void-title" className="void-band__title">
               <SubHead venn={false}>ENTER THE VOID</SubHead>
             </h2>
+
+            {/* The drawing survives the redesign, at a fifteenth of the size it
+                was. It was the mark for this band before there were
+                photographs to hang here and it is still the only version of
+                this picture the house drew itself. */}
+            <Kiss className="void-band__mark" label="Two people in profile, kissing, lit from behind" />
+
             <p className="void-band__note">
               Every other room here is one man arguing with a record at an hour the record should
-              not be trusted at. This is the other thing. Two people under a light on a street that
-              does not care, at the end of a night that went on too long — nobody in particular, on
-              purpose, because the whole point of a silhouette is that it is anybody.
+              not be trusted at. This is the other thing. Four plates and nobody's name on any of
+              them — a window at nine in the morning, somebody's room at four, the middle of a
+              lake in front of everybody, and a girl standing in a field of shapes looking back
+              at you. None of it is evidence. None of it is being cited.
             </p>
             <p className="void-band__meta">
               <span>NO PERMISSION ASKED</span>
@@ -154,6 +220,7 @@ export function Home() {
             </p>
           </div>
         </div>
+
       </section>
 
       {/* ---- the console --------------------------------------------- */}
@@ -211,6 +278,8 @@ export function Home() {
             <span>NO ADS</span>
             <span>NO TAPER</span>
           </p>
+          <Cutout plate="blob-lips" cut="rip" className="foot__lips" drift={2.4} />
+
           <div className="foot__relics">
             {relics.slice(4).map((relic, i) => (
               <Relic

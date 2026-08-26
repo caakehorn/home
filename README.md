@@ -413,22 +413,27 @@ whole string is on the wrapper as an `aria-label` and every scrap is
 
 ## Palettes
 
-Five, swapped by `data-vibe` on `<html>`. **`void` is the default and the
-house style**: acid green and electric violet on a black with a cast to it,
-with whatever primary the next sign happens to be. The other four are
-`dmt` (everything at once), `hotel` (sodium through a window that does not
-open), `griptape` (the deck face down — black, bone, one acid stripe) and
-`riot`, the photocopier, which used to be the house style and is now one room
-off the street.
+Six, swapped by `data-vibe` on `<html>`. **`afterglow` is the default and the
+house style**: hot pink burning through a black with a wound in it, candy over
+the top of it, and one cold tube. The other five are `void` (acid green and
+electric violet — the previous house style, kept as a room), `dmt` (everything
+at once), `hotel` (sodium through a window that does not open), `griptape` (the
+deck face down — black, bone, one acid stripe) and `riot`, the photocopier,
+which used to be the house style two redesigns ago.
 
-In `void` the acid is `--n3` on purpose. `--n3` is what links, kana, focus
-rings and the default `.neon` all read from, so the green is the thing your eye
-follows through the building rather than a colour that merely appears in it.
+In `afterglow` the cold tube is `--n3`, and that is the load-bearing decision
+in the block. `--n3` is what links, kana, focus rings and the default `.neon`
+all read from, so it is the colour your eye is trained on across the whole
+building — and it cannot be a fourth shade of pink, or it disappears into the
+art now hanging on the walls. Cold against warm is the only reason a link stays
+findable on a page with a two-metre photograph on it. It is cyan because that
+is the colour of every highlight in every eye in all seven plates.
 
 Defined as custom properties in `src/styles/tokens.css`; every component reads
 `--n1`…`--n5`, the `--void` and `--text` ramps, so nothing needs to know which
-palette is live. `void` also seeds bare `:root`, so the first paint — before the
-provider has written `[data-vibe]` onto `<html>` — is already the house style.
+palette is live. `afterglow` also seeds bare `:root`, so the first paint —
+before the provider has written `[data-vibe]` onto `<html>` — is already the
+house style.
 
 `riot` puts an accent where the others put a light source, which breaks one
 assumption the rest of the site made everywhere: that text sitting **on** an
@@ -439,10 +444,12 @@ Anything whose background is `--glow` reads its text colour from it.
 
 A palette that is retired simply leaves `VIBES`: a stored `vibe` that no longer
 passes `isVibeId` falls back to the default on read, so nobody is stranded in a
-room that is not there any more. The storage key was bumped to `v3` anyway, and
-for the opposite reason: `riot` *survived* the redesign as a room, so every
-returning visitor would have been handed back the palette the redesign
-replaced and would never have seen it.
+room that is not there any more. The storage key is at `v4`, bumped for the
+opposite reason both times: the palette being replaced *survived* as a room, so
+`isVibeId` still passed for it and every returning visitor would have been
+handed back the thing the redesign moved off and would never have seen the new
+one. One-time amnesia on purpose — everybody arrives in `afterglow` once, and
+either of the two previous house styles is two clicks away.
 
 ### The street layer
 
@@ -468,7 +475,7 @@ Drawn well, and completely toothless: a tourist's idea of Tokyo in front of a
 building whose banner says EAT THE RICH.
 
 What replaced it is the other Tokyo — shot from a helicopter at 4am with the
-colour pushed until it hurts. Four layers, and between them they animate
+colour pushed until it hurts. Five layers, and between them they animate
 exactly two properties:
 
 | | layer | what moves |
@@ -477,12 +484,172 @@ exactly two properties:
 | 2 | **the bloom** | two conic gradients counter-rotating behind the mark |
 | 3 | **the signage** | six vertical kanji columns drifting on Y at four speeds |
 | 4 | **the barrage** | the title card, fourteen words on a `steps(1)` strobe |
+| 5 | **the plates** | two of them, torn, flanking the mark, drifting on the pointer |
 
 No blurs, no backdrop filters, no per-frame JavaScript. The old door ran a
 46-element starfield with a `drop-shadow` on every one of them — 46 blur passes
 a frame before the type had loaded. The Japanese stayed and got harder; the
 crown stayed and got promoted from a heading ornament to the thing directly
 over the door.
+
+The plates are 91 kB of WebP between them and one of the two is fetched at high
+priority, because it is above the fold on every viewport and a front door whose
+subject arrives after its furniture is a front door that assembles itself in
+front of you. The other is lazy. See **The plates**, below.
+
+## The plates
+
+Seven pictures live in `public/art/`, and the art direction is built around
+them rather than having them dropped on top of it. Five hang on the front door
+and the main floor; what each one is and where it came from is in
+`public/art/README.md`, and `scripts/build-art.mjs` is the entire
+transformation from the five originals — committed alongside the output so the
+crops are a decision in the repo rather than a memory of an afternoon.
+
+Three things happen in that script and nothing else does:
+
+- **Watermarks come off**, cropped rather than blurred. A blurred watermark is
+  still a watermark and it is still in the composition.
+- **Nothing ships at source size.** One original is 2099×2952, which is 6.2
+  megapixels of decode for something 380 px wide on screen. Everything is cut
+  to roughly twice its largest on-page box and encoded as WebP. The folder is
+  ~310 kB.
+- **One real knockout.** `kiss-uniform` was drawn on flat white, so a flood
+  fill inward from the border gives it a true alpha channel and it floats over
+  the page instead of sitting in a box. A *threshold* would have taken the
+  cream uniforms out with the backdrop; a fill that can only reach what is
+  connected to the edge cannot get inside a shirt.
+
+No colour grading is baked in. `<Cutout>` (`src/components/Cutout.tsx`) does
+the rest in CSS, so a plate follows `[data-vibe]` — neon in `afterglow`, sodium
+in `hotel`, a second-generation photocopy in `riot` — off one file:
+
+- **The cut.** Every plate but the knocked-out one is clipped to a torn polygon
+  (`torn`, `shard`, `rip`, `slab`). `clip-path` is a paint-time operation on a
+  static element: it costs nothing per frame and gives an edge that looks
+  handled rather than an outline that looks masked. It is also the right cut —
+  this building has been a photocopier and a pair of scissors since the punk
+  pass.
+- **The misregistration.** Two ghosts of the same file sit under the plate, one
+  pushed left and tinted magenta, one pushed right and tinted cyan. The split
+  is not constant: it reads `--sva` off TELEMETRY, so the channels come apart
+  when the page moves and settle when it stops. Same URL as the plate, so the
+  file is decoded once and composited three times — the tint is
+  `sepia → saturate → hue-rotate`, three colour-matrix ops in one shader pass.
+- **The screen and the wash.** A halftone and the room's own colour, held well
+  down. The first cut of this ran the dot screen near half opacity, at which
+  point it stops being a texture over a photograph and becomes a mesh you are
+  looking through.
+- **The pointer.** A cutout lifts, leans towards your hand and comes further
+  apart while you hold it, off `--mx`/`--my` — written by TELEMETRY's delegated
+  magnet, so there is no listener per plate.
+
+## The shutter
+
+The strobe and the misregistration that fire on the way through the front door
+were the best two seconds on the site and they happened exactly once a session.
+`src/fx/` is that grammar generalised: **every press on this site takes a
+photograph of the page, badly.**
+
+Nothing opts in. One `pointerdown` listener in the capture phase on the
+document decides whether what you just pressed was a control, and fires. There
+are north of two hundred interactive elements across thirty routes here, and
+the version of this that threads an `onClick` through all of them is a version
+that is 90% wired a month from now. A button added tomorrow by somebody who has
+never read the file gets the strobe, because the strobe is a property of the
+site rather than of the button. `pointerdown` and not `click`, so the flash
+lands on the press rather than the release — on the release it reads as lag.
+
+Four sizes, from `data-bang` on the element or from the listener's own guess (a
+link that goes somewhere is a `door`, anything else is a `tap`). The colour
+rotates through the five tubes on every fire, so two presses in a row are never
+the same colour; the six palette swatches pin their own, because there the
+colour is information.
+
+Seven layers, mounted only while a bang is on screen and keyed to it, so a
+re-fire is a remount and there is not one `animation: none` reset in the file:
+the veil (a `difference` strobe), the bloom and two rings out of the exact
+point you struck, two fringe veils sliding apart, three tear bands, and — on a
+door — a hard iris out of the same point. `src/fx/Arrival.tsx` opens that iris
+again out of the same coordinates when the new route turns up.
+
+Two things in it are worth calling out as decisions rather than details:
+
+**The page-wide half is on `:root` and nowhere else.** The root element is the
+one place a `filter` does not create a containing block for fixed descendants —
+the Filter Effects spec exempts it explicitly. On any other element it would
+re-parent the two crawls, the HUD and the five screen-furniture layers for the
+duration of every flash and they would all jump.
+
+**Nothing shakes the page.** `transform` on the root *does* re-parent fixed
+descendants, and every alternative ancestor takes the same fixed furniture with
+it. So the shake is faked and the fake is better: three horizontal bands jump
+sideways against each other instead of the whole picture jumping. That is what
+a mistracking tape does, and it costs three composited layers instead of a
+full-page re-raster.
+
+### Not flashing into somebody's face
+
+This is a full-screen luminance flash on a handler attached to every control on
+the site, which is exactly the shape of thing that can be made to flash faster
+than is safe. The guidance worth building against is the WCAG general flash
+threshold: more than three flashes in any one-second window, where a flash is a
+pair of opposing luminance changes over about a tenth of the screen's relative
+luminance across more than a quarter of it.
+
+Four guards, and the first three are structural — none of them depends on
+nobody clicking very fast:
+
+1. **`BANG_FLOOR`** is 340 ms between bangs. A hard ceiling of 2.9 per second.
+2. **One beat each.** Every bang contains exactly one full-amplitude flash. The
+   second and third beats of the strobe are held at roughly a third of it,
+   under the luminance-change bar that makes a change count as a flash at all —
+   you see a stutter, the threshold does not see three flashes.
+3. **The repeating layers are partial.** Everything that beats more than once —
+   the tear bands, the fringe veils, the rings — is clipped to well under a
+   quarter of the viewport, which is the other half of the same bar.
+4. **STILL.** Motion off forces every bang to `calm`: one soft tint, no invert,
+   no `steps()`, no strobe anywhere. `prefers-reduced-motion` seeds it and the
+   header's MOTION switch owns it.
+
+The page-wide beat is also clamped. `invert()` on a page this dark produces a
+page this *bright* — that is arithmetic, not a bug — and at full punch with a
+saturate on top the whole viewport went to a flat field of colour. A
+`brightness()` term pulls the peak back down while the hue swing keeps the
+punch, and the beat is 40 ms rather than the 150 the first cut ran for.
+
+## Telemetry, and the jolt layer
+
+`src/fx/Telemetry.tsx` publishes six numbers on `<html>` and draws nothing:
+
+| | |
+|---|---|
+| `--px` `--py` | pointer, 0 → 1 across the viewport |
+| `--pdx` `--pdy` | the same, signed from the centre |
+| `--pvel` | pointer speed, saturating around a hard flick |
+| `--sv` `--sva` | scroll velocity, signed and unsigned |
+| `--sp` | scroll progress through the document |
+
+`src/styles/jolt.css` is the reader — hover misregistration on everything
+clickable, the magnetic lean on cards and relics and plates, marquees that
+skew into the direction of travel, headings that shear a degree while the page
+is moving, scanlines that tighten under a fast scroll, and a two-pixel rail
+under the top crawl scaled on X by `--sp`. There is no JavaScript in that file's
+blast radius at all: the site reacts to the pointer in thirty places for the
+cost of one listener.
+
+Two things keep the writer cheap. **Nothing is written unless it changed** by
+more than a thousandth — setting a custom property on the root invalidates
+style for every rule that reads it. And **the loop sleeps**: there is no
+`requestAnimationFrame` running while the pointer is parked and the page is
+still, and both velocities decay to zero on their own so a hand that stops and a
+page that stops both settle without needing an event to say so.
+
+STILL zeroes `--pvel`, `--sv` and `--sva` at the writer, so every
+velocity-driven rule flattens to its resting value without a single override.
+What stays is the three driven by *position* rather than speed — the magnet,
+the haze offset and the rail — because tracking where something is is a
+response, not an animation.
 
 ## The brain console
 
@@ -575,6 +742,17 @@ page, the wiki index and a wiki page (a deployment portal that code-splits its
 own payload stutters on the one navigation everybody makes), plus the terms,
 which render in front of the gate. Everything else is `React.lazy`, fetched on
 arrival. Initial JS **729 kB → 451 kB**, initial CSS **231 kB → 132 kB**.
+
+The shutter, telemetry, the scramble and the cutouts cost **+11 kB of JS and
++16 kB of CSS** on that eager set (484 → 495 kB and 142 → 158 kB raw; +3.9 and
++3.7 kB gzipped). `public/art/` is a further ~310 kB of WebP, of which exactly
+one plate is fetched eagerly and the rest are lazy.
+
+That is the whole runtime bill, and it is small because almost none of it is
+JavaScript: one document listener, one sleeping rAF loop, and about eight
+hundred lines of CSS that read six numbers. See **The shutter** and
+**Telemetry** above for what that buys and what it deliberately refuses to
+spend.
 
 Three other things were costing more than they were worth and are gone:
 
@@ -707,8 +885,12 @@ visual tracks are `aria-hidden`.
 ## Chaos
 
 `--chaos` (0→1) is a single number on `<html>` that grain, glow radius, tilt,
-animation tempo, particle count and blur all derive from. The dial writes it,
-the shell can set it, and it persists to `localStorage` along with the palette.
+animation tempo, particle count, how far the plates misregister and the reach
+of the shutter all derive from. The dial writes it, the shell can set it, and it
+persists to `localStorage` along with the palette.
+
+It opens at **0.78** — 8.6 of 11 on the dial. The site was sitting at 0.68 and
+that now reads as holding something back.
 
 ## The agent surface
 
@@ -1040,7 +1222,7 @@ sum and two remainders put every message back, and the instrument does exactly
 that on load.
 
 Two channels — sent and received — and direction is the only thing colour
-encodes, so the pair has to separate in all five palettes. In RIOT it does not:
+encodes, so the pair has to separate in all six palettes. In RIOT it does not:
 that room has two inks and `--n1` and `--n3` are the same red twice through the
 machine. Where the ramp collapses the second channel falls back to bare paper,
 and the legend reads the resolved pair back off the canvas so a key can never
@@ -1417,7 +1599,7 @@ Each announces itself on mount via `useRig`, so the HUD counts live elements
 instead of a hard-coded number.
 
 1. **CHAOS DIAL** — draggable/arrow-keyed knob, 0 to 11, drives `--chaos`
-2. **VIBE SWITCH** — the five palettes
+2. **VIBE SWITCH** — the six palettes
 3. **SHELL** — 34 verbs, 8 of them listed in `help`; reads the corpus (`grep`,
    `whois`, `cite`, `hegel`), drives the site (`chaos`, `vibe`, `goto`,
    `overdose`, `narcan`), and takes the screen apart (`invert`, `flip`,

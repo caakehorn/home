@@ -6,6 +6,10 @@
 /* The street pass runs after it and hands the lit rooms their colour back.
    RIOT is excluded from every rule in it, so the photocopier is untouched. */
 @import './street.css';
+/* The jolt pass runs last: what every surface DOES when somebody is in the
+   room. It reads the six numbers TELEMETRY publishes on <html> and contains no
+   JavaScript of its own. */
+@import './jolt.css';
 
 /* ==========================================================================
    RESET-ISH

@@ -237,6 +237,93 @@
 }
 
 /* ==========================================================================
+   5 · THE PLATES
+
+   The two of them, hung on the door. Everything else on this screen — the
+   grid, the towers, the signage, the bloom — is now the room these are hung
+   in, and the composition is built around leaving them a wall each.
+
+   z-index 3 puts them over the signage and under the core. The mark has to
+   win: a title card competing with two photographs at the same depth is a
+   title card nobody reads, and the one job of a front door is the way in.
+   ========================================================================== */
+.splash__plates {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.splash__plates .cut {
+  position: absolute;
+  pointer-events: auto;
+  /* They arrive after the door does, staggered, on the same spring the relics
+     land on. A plate that is simply present on the first frame reads as a
+     background; a plate that is thrown at the wall reads as a decision. */
+  animation: plate-land 700ms var(--spring) both;
+}
+
+@keyframes plate-land {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 26px, 0) rotate(-6deg) scale(0.86);
+  }
+}
+
+.splash__plate--l {
+  top: 8%;
+  left: clamp(0.4rem, 3vw, 4.5rem);
+  width: clamp(190px, 27vw, 430px);
+  rotate: -3.2deg;
+  animation-delay: 200ms;
+}
+
+.splash__plate--r {
+  right: clamp(0.4rem, 3vw, 4.5rem);
+  bottom: clamp(4.5rem, 14vh, 9rem);
+  width: clamp(200px, 29vw, 470px);
+  rotate: 2.6deg;
+  animation-delay: 340ms;
+}
+
+/* The sticker. Small, loud, stuck at an angle nobody would choose, over the
+   corner of everything else — which is what a sticker is. */
+.splash__plate--lips {
+  top: 4%;
+  right: clamp(1rem, 9vw, 9rem);
+  width: clamp(88px, 11vw, 168px);
+  rotate: 11deg;
+  animation-delay: 480ms;
+  filter: drop-shadow(4px 5px 0 var(--edge));
+}
+
+/* Under 860px the signage is already occupying both walls and the core needs
+   the middle, so the pair comes down to one plate behind the mark and the
+   sticker stays. Hiding both would take the redesign off the one screen
+   everybody sees. */
+@media (max-width: 860px) {
+  .splash__plate--l {
+    top: 3%;
+    left: 50%;
+    translate: -50% 0;
+    width: min(74vw, 340px);
+    opacity: 0.5;
+    rotate: -1.5deg;
+  }
+
+  .splash__plate--r {
+    display: none;
+  }
+
+  .splash__plate--lips {
+    top: auto;
+    bottom: calc(var(--crawl-h) + 0.6rem);
+    right: 0.6rem;
+    width: 84px;
+  }
+}
+
+/* ==========================================================================
    4 · THE CORE — barrage, crown, mark, door
    ========================================================================== */
 .splash__core {
@@ -469,7 +556,8 @@
 :root[data-still='1'] .splash__block,
 :root[data-still='1'] .splash__crown-mount,
 :root[data-still='1'] .splash__venue,
-:root[data-still='1'] .splash__relics .relic {
+:root[data-still='1'] .splash__relics .relic,
+:root[data-still='1'] .splash__plates .cut {
   animation: none !important;
   opacity: 1;
   will-change: auto;

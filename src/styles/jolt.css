@@ -1,0 +1,201 @@
+/* ==========================================================================
+   THE JOLT LAYER
+   EVERYTHING THE POINTER TOUCHES, AND EVERYTHING THE PAGE DOES WHILE IT MOVES
+
+   The punk pass is what the surface looks like. The street pass is what colour
+   it is. This is what it DOES when somebody is in the room, and like both of
+   those it is applied to the classes and elements the site already has rather
+   than by rewriting every component.
+
+   Two inputs, and neither of them costs anything here:
+
+     --pdx --pdy --pvel   where the pointer is and how fast, off TELEMETRY
+     --sv  --sva  --sp    where the page is and how fast, off the same
+
+   TELEMETRY writes six numbers on <html> once a frame and goes back to sleep
+   when nothing is moving. Every rule below is a reader. There is no JavaScript
+   in this file's blast radius at all, which is the point: the site can react to
+   the pointer in thirty places for the cost of one listener.
+
+   ---- the rule this file obeys --------------------------------------------
+
+   Nothing in here animates anything but `transform`, `opacity`, `filter` (only
+   ever as a colour matrix or a drop-shadow) and `background-position`. No
+   `blur`, no `backdrop-filter`, no width, no top/left. The site is carrying
+   seven photographs, five fixed screen-furniture layers and a canvas reticle
+   now, and it holds its frame budget by never asking for a layout.
+   ========================================================================== */
+
+/* ==========================================================================
+   1 · THE SPLIT — hover misregistration on everything you can click
+
+   The same two channels the shutter splits on a click, at a fraction of the
+   distance, on hover. It is the quietest possible version of the loudest thing
+   on the site, and having the two be visibly the same effect is what makes a
+   click feel like the consequence of a hover rather than a separate event.
+   ========================================================================== */
+@media (hover: hover) and (pointer: fine) {
+  :where(a, button, summary, [role='button'], .relic, .portal, .hctl__vibe, .vibe) {
+    transition: filter var(--snap) linear;
+  }
+
+  :where(a, button, summary, [role='button']):hover {
+    filter:
+      drop-shadow(-1.5px 0 0 color-mix(in srgb, var(--n2) 70%, transparent))
+      drop-shadow(1.5px 0 0 color-mix(in srgb, var(--n4) 70%, transparent));
+  }
+
+  /* Turned up on the things that are the whole point of the page. */
+  .nav__link:hover,
+  .portal:hover .portal__title,
+  .section__title:hover {
+    filter:
+      drop-shadow(calc(-2px - 2px * var(--chaos)) 0 0 var(--n2))
+      drop-shadow(calc(2px + 2px * var(--chaos)) 0 0 var(--n4));
+  }
+}
+
+/* ==========================================================================
+   2 · THE MAGNET — cards lean towards your hand
+
+   `--mx`/`--my` are the pointer's position inside the element's own box,
+   signed from its centre, written by TELEMETRY's delegated magnet on any
+   element carrying `data-magnet`. One `closest()` on a pointermove that is
+   already being handled — not a listener per card.
+
+   The default of 0 in every `var()` below matters: an element that has never
+   been hovered has no --mx at all, and without the fallback the whole
+   `transform` is invalid and the card does not render its lift.
+   ========================================================================== */
+@media (hover: hover) and (pointer: fine) {
+  [data-magnet] {
+    transition: transform var(--pop) var(--spring);
+  }
+
+  .portal[data-magnet]:hover {
+    transform:
+      translate3d(calc(var(--mx, 0) * 14px), calc(-6px + var(--my, 0) * 10px), 0)
+      rotate3d(1, 0, 0, calc(var(--my, 0) * -7deg))
+      rotate3d(0, 1, 0, calc(var(--mx, 0) * 9deg))
+      scale(1.03);
+  }
+
+  .relic[data-magnet]:hover {
+    transform:
+      translate3d(calc(var(--mx, 0) * 8px), calc(var(--my, 0) * 6px), 0)
+      rotate(calc(var(--rot, -2deg) + var(--mx, 0) * 6deg))
+      scale(1.08);
+  }
+}
+
+/* The cards need somewhere to rotate INTO or the two rotate3d terms above are
+   a flat shear. On the grid rather than the card: perspective on the child
+   gives every card its own vanishing point, which is eight vanishing points in
+   one grid and reads as eight unrelated objects. */
+.portals {
+  perspective: 1400px;
+}
+
+/* ==========================================================================
+   3 · SCROLL — what the page does while it is moving
+
+   `--sv` is signed and `--sva` is not. Anything that should lean one way going
+   down and the other going up reads the signed one; anything that only cares
+   that the page is moving reads the other.
+   ========================================================================== */
+
+/* The crawls and the marquees lean into the direction of travel. They are
+   already running on their own clock; this is the page dragging on them. */
+.marquee {
+  transform: rotate(calc(var(--lean, 0) * 1deg)) skewX(calc(var(--sv, 0) * -3deg));
+  transition: transform 200ms var(--glide);
+}
+
+/* Section headings shear a degree while the page is in motion and snap back
+   when it stops. A degree is nothing; a degree that arrives and leaves with
+   the scroll is the difference between a page and a surface. */
+.section__title,
+.void-band__title,
+.mast__head {
+  transform: skewY(calc(var(--sv, 0) * -0.7deg));
+  transition: transform 240ms var(--glide);
+}
+
+/* The haze follows the pointer instead of only drifting on its own clock. It
+   is a translate on a layer that is already composited — the drift keyframe in
+   global.css and this are the same matrix, so there is no extra raster. */
+.fx-bleed {
+  translate: calc(var(--pdx, 0) * -3%) calc(var(--pdy, 0) * -2.4%);
+}
+
+/* The scanlines tighten under a fast scroll, which is exactly what a CRT being
+   dragged does. `background-position` on a repeating gradient is a paint, not
+   a layout. */
+.fx-scanlines {
+  opacity: calc(var(--scan) + var(--sva, 0) * 0.25);
+  background-position: 0 calc(var(--sp, 0) * -40px);
+}
+
+/* ==========================================================================
+   4 · THE RAIL — how far down you are
+
+   One line across the top of the viewport, scaled on X by `--sp`. It sits
+   under the top crawl and over everything else, it is two pixels tall, and it
+   is the only piece of chrome on this site that tells you something a scrollbar
+   would have told you — which is why it is a hairline of neon and not a
+   scrollbar.
+   ========================================================================== */
+.rail {
+  position: fixed;
+  top: var(--crawl-h);
+  left: 0;
+  right: 0;
+  z-index: 9200;
+  height: 2px;
+  pointer-events: none;
+  background: linear-gradient(90deg, var(--n1), var(--n2) 40%, var(--n3));
+  transform: scaleX(var(--sp, 0));
+  transform-origin: 0 50%;
+  box-shadow: 0 0 calc(var(--glow-r) * 0.5) var(--n2);
+  contain: strict;
+}
+
+/* ==========================================================================
+   5 · FOCUS — the keyboard gets the same treatment as the pointer
+
+   A dashed outline is what the platform gives you and it is the one piece of
+   this site that looked like a browser default. It is now the same
+   misregistration everything else gets, plus a ring in the room's own tube.
+   ========================================================================== */
+:focus-visible {
+  animation: focus-lock 420ms var(--spring) 1;
+}
+
+@keyframes focus-lock {
+  0% {
+    outline-offset: 10px;
+    filter: drop-shadow(-4px 0 0 var(--n2)) drop-shadow(4px 0 0 var(--n4));
+  }
+  100% {
+    outline-offset: 2px;
+    filter: none;
+  }
+}
+
+/* ==========================================================================
+   STILL
+
+   TELEMETRY already zeroes --pvel, --sv and --sva when motion is off, so every
+   velocity-driven rule above flattens to its resting value without a single
+   override. What is left is the three things that are driven by POSITION
+   rather than by speed — the magnet, the haze offset and the rail — and those
+   stay, because tracking where something is is a response and not an
+   animation. Only the keyframed ones go.
+   ========================================================================== */
+:root[data-still='1'] :focus-visible {
+  animation: none;
+}
+
+:root[data-still='1'] :where(a, button, summary, [role='button']):hover {
+  filter: none;
+}

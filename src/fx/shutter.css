@@ -1,0 +1,391 @@
+/* ==========================================================================
+   THE SHUTTER
+
+   Every rule in here is on `opacity`, `transform`, `clip-path` or a colour
+   matrix filter, and every one of them runs for under half a second on an
+   element that is unmounted immediately afterwards. There is no `blur` in this
+   file and there is nothing with `will-change` left on it between bangs,
+   because the whole point of a flash is that it is not there most of the time.
+   ========================================================================== */
+
+.shutter {
+  position: fixed;
+  inset: 0;
+  z-index: 9900;
+  pointer-events: none;
+  contain: strict;
+  /* Duration and amplitude come off :root, written by the provider, so the
+     four sizes are one animation at four volumes. */
+  --dur: var(--bang-dur, 240ms);
+}
+
+.shutter > span {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+/* ==========================================================================
+   1 · THE VEIL — the invert
+
+   `difference` against the page rather than an opaque white flash. A white
+   flash on a black site is a lamp in the face; a difference against the bang's
+   own tube inverts the page THROUGH that colour, which is the same move the
+   front door has always made on the way out and is legible rather than
+   blinding.
+
+   steps(1) so it cuts. A fade here would be a transition; this is a frame.
+   ========================================================================== */
+.shutter__veil {
+  background: var(--glow);
+  mix-blend-mode: difference;
+  opacity: 0;
+  animation: veil-strobe var(--dur) steps(1) 1;
+}
+
+/* ONE beat at full amplitude, then two echoes at roughly a third of it.
+   That split is the whole photosensitivity design and it is worth being
+   explicit about: a strobe you can see is not the same thing as three flashes.
+   The eye reads 0.85 → 0 → 0.3 → 0 → 0.22 as a stutter; the flash threshold
+   reads one luminance change big enough to count, because the echoes are well
+   under the tenth-of-relative-luminance bar that makes a change a flash.
+   See BANG_FLOOR in shutter-context.ts for the other two guards. */
+@keyframes veil-strobe {
+  0%, 13% { opacity: 0.85; }
+  14%, 27% { opacity: 0; }
+  28%, 36% { opacity: 0.3; }
+  37%, 52% { opacity: 0; }
+  53%, 59% { opacity: 0.22; }
+  60%, 100% { opacity: 0; }
+}
+
+/* On the way out of a room it is longer and it gets a fourth beat — still one
+   full-amplitude flash, still three echoes under the bar. */
+.shutter[data-kind='door'] .shutter__veil {
+  animation-name: veil-strobe-door;
+}
+
+@keyframes veil-strobe-door {
+  0%, 8% { opacity: 0.9; }
+  9%, 17% { opacity: 0; }
+  18%, 24% { opacity: 0.32; }
+  25%, 35% { opacity: 0; }
+  36%, 41% { opacity: 0.26; }
+  42%, 55% { opacity: 0; }
+  56%, 60% { opacity: 0.18; }
+  61%, 100% { opacity: 0; }
+}
+
+/* STILL: one soft tint, no strobe, no invert, no steps. The site still answers
+   the click — it just does not flash to do it. */
+.shutter[data-kind='calm'] .shutter__veil {
+  mix-blend-mode: screen;
+  animation: veil-calm 260ms ease-out 1;
+}
+
+@keyframes veil-calm {
+  0% { opacity: 0.16; }
+  100% { opacity: 0; }
+}
+
+/* ==========================================================================
+   2 · THE BLOOM — out of the point you struck
+
+   The strike point is the whole reason this reads as a response rather than as
+   a screensaver: the light comes out of your finger, not out of the middle of
+   the screen. `--bx`/`--by` are viewport percentages written by the renderer,
+   and a keyboard activation gets the centre of the focused element rather than
+   the centre of the viewport for exactly the same reason.
+   ========================================================================== */
+.shutter__bloom {
+  background: radial-gradient(
+    circle at var(--bx) var(--by),
+    color-mix(in srgb, var(--glow) 80%, transparent),
+    transparent 34%
+  );
+  mix-blend-mode: screen;
+  opacity: 0;
+  animation: bloom-out var(--dur) var(--glide) 1;
+}
+
+@keyframes bloom-out {
+  0% { opacity: 0.9; transform: scale(0.35); }
+  100% { opacity: 0; transform: scale(1.5); }
+}
+
+.shutter[data-kind='calm'] .shutter__bloom {
+  animation-duration: 340ms;
+  opacity: 0;
+}
+
+/* ==========================================================================
+   3 · THE RINGS — the shockwave
+   ========================================================================== */
+.shutter__ring {
+  border: 2px solid var(--glow);
+  border-radius: 50%;
+  /* Sized off the viewport diagonal-ish so it always clears the screen. */
+  inset: auto;
+  top: var(--by);
+  left: var(--bx);
+  width: 180vmax;
+  height: 180vmax;
+  translate: -50% -50%;
+  opacity: 0;
+  mix-blend-mode: screen;
+  animation: ring-out calc(var(--dur) * 2.4) var(--glide) 1;
+}
+
+.shutter__ring--2 {
+  border-width: 6px;
+  border-color: color-mix(in srgb, var(--glow) 55%, #fff);
+  animation-duration: calc(var(--dur) * 1.5);
+  animation-delay: 40ms;
+}
+
+@keyframes ring-out {
+  0% { opacity: 0.85; transform: scale(0); }
+  70% { opacity: 0.3; }
+  100% { opacity: 0; transform: scale(1); }
+}
+
+/* ==========================================================================
+   4 · THE FRINGE — misregistration
+
+   Two channel veils sliding apart. The page-wide `hue-rotate` on :root does
+   the colour half of a chromatic aberration; this does the geometry half, and
+   between them a click looks like a badly registered print rather than like a
+   filter was applied to a screenshot.
+   ========================================================================== */
+.shutter__fringe {
+  mix-blend-mode: screen;
+  opacity: 0;
+  animation: fringe-split var(--dur) var(--spring-hard) 1;
+  will-change: transform;
+}
+
+.shutter__fringe--m {
+  background: linear-gradient(
+    90deg,
+    #ff0090 0,
+    color-mix(in srgb, #ff0090 40%, transparent) 9%,
+    transparent 22%,
+    transparent 78%,
+    color-mix(in srgb, #ff0090 30%, transparent) 93%,
+    #ff0090 100%
+  );
+  --shove: -1;
+}
+
+.shutter__fringe--c {
+  background: linear-gradient(
+    90deg,
+    #00e5ff 0,
+    color-mix(in srgb, #00e5ff 30%, transparent) 7%,
+    transparent 20%,
+    transparent 80%,
+    color-mix(in srgb, #00e5ff 40%, transparent) 91%,
+    #00e5ff 100%
+  );
+  --shove: 1;
+}
+
+@keyframes fringe-split {
+  0% { opacity: 0; transform: translate3d(0, 0, 0); }
+  16% { opacity: 0.85; transform: translate3d(calc(var(--shove) * 3vw), 0, 0); }
+  55% { opacity: 0.4; transform: translate3d(calc(var(--shove) * 1.2vw), 0, 0); }
+  100% { opacity: 0; transform: translate3d(0, 0, 0); }
+}
+
+/* ==========================================================================
+   5 · THE TEAR — the shake that does not move anything
+
+   Three horizontal bands, clipped out of a full-screen field of the tube, each
+   jumping sideways on its own steps() cycle. The page underneath never moves;
+   three strips of light move against each other across it, and the eye reads
+   the whole frame as unstable.
+   ========================================================================== */
+.shutter__tear {
+  background: var(--glow);
+  mix-blend-mode: difference;
+  opacity: 0;
+  animation: tear-jump var(--dur) steps(1) 1;
+  will-change: transform;
+}
+
+.shutter__tear--1 {
+  clip-path: inset(14% 0 79% 0);
+  --shove: 1;
+}
+.shutter__tear--2 {
+  clip-path: inset(46% 0 47% 0);
+  --shove: -1.6;
+  animation-delay: 26ms;
+}
+.shutter__tear--3 {
+  clip-path: inset(72% 0 21% 0);
+  --shove: 0.7;
+  animation-delay: 52ms;
+}
+
+@keyframes tear-jump {
+  0%, 14% { opacity: 0.6; transform: translate3d(calc(var(--shove) * 4vw), 0, 0); }
+  15%, 29% { opacity: 0; transform: translate3d(0, 0, 0); }
+  30%, 40% { opacity: 0.4; transform: translate3d(calc(var(--shove) * -2vw), 0, 0); }
+  41%, 100% { opacity: 0; transform: translate3d(0, 0, 0); }
+}
+
+/* ==========================================================================
+   6 · THE IRIS — doors only
+
+   The front door has closed like this since the redesign. Every internal link
+   on the site now closes like it too, out of the point you clicked rather than
+   out of the centre, which is the difference between a page transition and a
+   page transition that is about you.
+   ========================================================================== */
+.shutter__iris {
+  background: var(--edge);
+  opacity: 0;
+  animation: iris-shut var(--dur) cubic-bezier(0.7, 0, 0.25, 1) 1;
+}
+
+@keyframes iris-shut {
+  0% { opacity: 0.9; clip-path: circle(0% at var(--bx) var(--by)); }
+  55% { opacity: 0.72; clip-path: circle(62% at var(--bx) var(--by)); }
+  100% { opacity: 0; clip-path: circle(150% at var(--bx) var(--by)); }
+}
+
+/* One frame of registration wireframe, over the top of it. */
+.shutter__plate {
+  background-image:
+    linear-gradient(90deg, color-mix(in srgb, var(--glow) 70%, transparent) 0 1px, transparent 1px),
+    linear-gradient(180deg, color-mix(in srgb, var(--glow) 50%, transparent) 0 1px, transparent 1px);
+  background-size: 46px 46px;
+  mix-blend-mode: screen;
+  opacity: 0;
+  animation: plate-blink var(--dur) steps(1) 1;
+}
+
+@keyframes plate-blink {
+  0%, 9% { opacity: 0.5; }
+  10%, 100% { opacity: 0; }
+}
+
+/* ==========================================================================
+   THE PAGE-WIDE HALF
+
+   On :root, and only on :root. `filter` on the document root is the one place
+   the spec does NOT create a containing block for fixed descendants, which is
+   what makes this safe on a site with five fixed screen-furniture layers, two
+   fixed crawls and a fixed HUD.
+
+   Nothing in here is a blur. `invert`, `hue-rotate`, `saturate` and
+   `brightness` are all colour-matrix operations — one shader pass over a
+   texture the compositor already has. That is the difference between this and
+   the 40px full-viewport Gaussian the haze layer used to run, which is
+   documented in global.css as the thing that was eating most of a frame.
+   ========================================================================== */
+:root[data-bang] {
+  /* A FIXED 190ms, not `--bang-dur`. The overlay's four sizes are four
+     durations; the page-wide flash is one length at four amplitudes, because
+     the beat has to be long enough to survive a frame boundary at every size.
+     Scaled with the rest, a `tap` would have inverted the page for 10ms — less
+     than one frame at 60Hz — and would simply not have been painted on half
+     the machines that ran it. */
+  animation: var(--bang-anim, bang-root-a) 190ms steps(1) 1;
+}
+
+/* Two identical keyframe sets, alternated by the provider on every fire.
+   An attribute-triggered animation does not restart when the attribute is set
+   to the value it already holds, so without the alternation two clicks 340ms
+   apart would flash once.
+
+   ONE beat, and it is clamped. `invert()` on a page this dark produces a page
+   this BRIGHT — that is arithmetic, not a bug — and at punch 1 with a saturate
+   on top of it the whole viewport went to a flat field of colour. The
+   `brightness()` term pulls the peak back down while the hue swing keeps the
+   punch, and the beat is 40ms rather than the 150 the first cut of this ran
+   for. See BANG_FLOOR in shutter-context.ts for why there is only one. */
+@keyframes bang-root-a {
+  0%, 21% {
+    filter:
+      invert(calc(var(--bang-punch, 0) * 100%))
+      hue-rotate(calc(var(--bang-punch, 0) * 140deg))
+      saturate(calc(1 + var(--bang-punch, 0) * 1.6))
+      brightness(calc(1 - var(--bang-punch, 0) * 0.34));
+  }
+  22%, 100% { filter: none; }
+}
+
+@keyframes bang-root-b {
+  0%, 21% {
+    filter:
+      invert(calc(var(--bang-punch, 0) * 100%))
+      hue-rotate(calc(var(--bang-punch, 0) * -140deg))
+      saturate(calc(1 + var(--bang-punch, 0) * 1.6))
+      brightness(calc(1 - var(--bang-punch, 0) * 0.34));
+  }
+  22%, 100% { filter: none; }
+}
+
+/* ==========================================================================
+   THE LOCAL HALF — the thing you actually pressed
+
+   `data-struck` is stamped on the element under the pointer for 320ms. The
+   page-wide flash says something happened; this says it was THIS, which is the
+   part that makes the site feel wired rather than decorated.
+   ========================================================================== */
+[data-struck] {
+  animation: struck 320ms var(--spring-hard) 1;
+}
+
+@keyframes struck {
+  0% {
+    transform: translate3d(0, 0, 0) scale(0.94);
+    filter: drop-shadow(-4px 0 0 #ff0090) drop-shadow(4px 0 0 #00e5ff) brightness(1.6);
+  }
+  40% {
+    transform: translate3d(0, 0, 0) scale(1.03);
+    filter: drop-shadow(-2px 0 0 #ff0090) drop-shadow(2px 0 0 #00e5ff) brightness(1.2);
+  }
+  100% {
+    transform: none;
+    filter: none;
+  }
+}
+
+/* A link is inline and a scale on it re-flows the line it is in. Split the
+   channels, do not resize it. */
+:where(a, .nav__link, .hctl__vibe)[data-struck] {
+  animation-name: struck-flat;
+}
+
+@keyframes struck-flat {
+  0% { filter: drop-shadow(-5px 0 0 #ff0090) drop-shadow(5px 0 0 #00e5ff) brightness(1.7); }
+  45% { filter: drop-shadow(-2px 0 0 #ff0090) drop-shadow(2px 0 0 #00e5ff) brightness(1.25); }
+  100% { filter: none; }
+}
+
+/* ==========================================================================
+   STILL
+
+   The global brake stretches every animation on the site to one 3-second pass,
+   which on a strobe would be catastrophic — the invert frame would sit on
+   screen for a third of a second at a time. So STILL does not slow the shutter
+   down, it takes it away: the provider forces every bang to 'calm', which has
+   no invert and no steps in it, and these two rules make sure the page-wide
+   half and the local half do not run at all.
+   ========================================================================== */
+:root[data-still='1'][data-bang] {
+  animation: none !important;
+  filter: none !important;
+}
+
+:root[data-still='1'] [data-struck] {
+  animation: none !important;
+}
+
+:root[data-still='1'] .shutter__veil,
+:root[data-still='1'] .shutter__bloom {
+  animation-duration: 300ms !important;
+}

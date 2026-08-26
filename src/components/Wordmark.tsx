@@ -1,5 +1,7 @@
 import type { CSSProperties } from 'react'
 import { Crown } from './Crown'
+import { useScramble } from '../fx/useScramble'
+import { usePortal } from '../state/usePortal'
 
 const SPARKS = [
   { top: '-14%', left: '-5%', s: '26px', color: '#ffd400', delay: '0s' },
@@ -80,6 +82,19 @@ type SubHeadProps = {
   id?: string
 }
 
+/**
+ * Every heading on the site tunes in rather than appearing: it arrives as kana
+ * noise and resolves left to right the first time it scrolls into view, and
+ * again whenever a pointer crosses it. The behaviour lives here rather than in
+ * each page because SubHead is what a heading IS in this building — thirty
+ * routes use it and none of them should have to opt in.
+ *
+ * The real string is rendered in a visually-hidden sibling and the animated
+ * copy is `aria-hidden`, so the accessible name of the heading is the word from
+ * the first frame to the last. A screen reader is never handed ▓▒░ｱｲｳ, and
+ * `aria-labelledby` on the sections that point at `id` still resolves to the
+ * heading it always did.
+ */
 export function SubHead({
   children,
   venn = true,
@@ -88,6 +103,9 @@ export function SubHead({
   className = '',
   id,
 }: SubHeadProps) {
+  const { motion } = usePortal()
+  const { shown, host } = useScramble(children, motion)
+
   return (
     <span
       className={`subhead-set${crown ? ' crowned' : ''} ${className}`}
@@ -100,8 +118,9 @@ export function SubHead({
           <span className="subhead-set__lobe" />
         </span>
       )}
-      <span className="subhead" id={id}>
-        {children}
+      <span className="subhead" id={id} ref={host as React.RefObject<HTMLSpanElement>}>
+        <span className="subhead__read">{children}</span>
+        <span aria-hidden="true">{shown}</span>
       </span>
       {crown && <Crown />}
     </span>

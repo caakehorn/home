@@ -106,7 +106,58 @@
   text-shadow: 0 0 calc(var(--glow-r) * 0.4) var(--n3);
 }
 
+/* ==========================================================================
+   THE ONE IN THE MASTHEAD
+
+   Absolute, so she does not take a row in the grid and the four lines of type
+   stay four lines of type. She is anchored to the BOTTOM of the block with a
+   negative offset, which means the masthead's closing rule cuts her off at the
+   shins — the mast has `overflow: hidden` and that is being used rather than
+   worked around. A figure that fits neatly inside the box she is in reads as
+   an illustration; one that is slightly too big for it reads as something
+   somebody stuck there.
+   ========================================================================== */
+.mast__plate {
+  position: absolute;
+  right: 0;
+  bottom: -14%;
+  z-index: 1;
+  width: clamp(150px, 21vw, 330px);
+  pointer-events: auto;
+}
+
+/* The block gives up its right-hand quarter so nothing runs under her feet.
+   It is a padding on the CONTAINER rather than on each line, and that is not a
+   stylistic preference — `.mast__inner` is a grid with `justify-items: start`,
+   so its children shrink-to-fit, and `max-width` is a border-box measurement.
+   Padding each line instead subtracts 360px from a 62ch cap and leaves the
+   body copy in a 140px column: sixty-two characters of measure, four of them
+   per line. Padding the container narrows the track and every child follows.
+
+   Absolutely positioned children are laid out against the padding box, so the
+   plate itself is not moved by this and still hangs off the right edge. */
+@media (min-width: 861px) {
+  .mast__inner {
+    padding-right: clamp(0px, 23vw, 340px);
+  }
+}
+
+/* On a phone she goes behind the type at a quarter strength instead of beside
+   it. There is no column to put her in and dropping her entirely would take
+   the redesign off the small screen. */
+@media (max-width: 860px) {
+  .mast__plate {
+    right: -8%;
+    bottom: -6%;
+    width: 62vw;
+    opacity: 0.32;
+    z-index: 0;
+  }
+}
+
 .mast__meta {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -266,47 +317,128 @@
 }
 
 /* ==========================================================================
-   THE VOID BAND
+   THE WALL
 
-   The one place on the home page that is a picture rather than a list. It sits
-   between the rooms and the console because the page needed somewhere to stop
-   talking, and because a building this loud has to prove once that it can hold
-   still for a second without the whole thing falling over.
+   The one place on the home page that is a picture rather than a list. It used
+   to be a single line drawing on an empty stage with a paragraph beside it —
+   the page needed somewhere to stop talking, and a building this loud has to
+   prove once that it can hold still for a second without falling over.
+
+   It still does that. There is just something on the wall now: three plates,
+   overlapping, on three angles, with a fourth bleeding off the right edge of
+   the section. Stacked rather than gridded, because a grid of photographs is a
+   contact sheet and a contact sheet is a filing system.
    ========================================================================== */
 .void-band {
   position: relative;
   overflow: hidden;
-  padding-block: clamp(2rem, 7vh, 4.5rem);
+  padding-block: clamp(2.6rem, 9vh, 6rem);
   border-block: var(--rule) solid var(--edge);
   background: linear-gradient(180deg, var(--void), var(--void-2) 60%, var(--void));
 }
 
-/* the streetlight, forty feet off and out of focus */
+/* The wash is now the blurred field plate rather than two blurred gradients.
+   Same job, one fewer 46px Gaussian: the blur is baked into the 12 kB file at
+   build time instead of being asked for on every frame the section is on
+   screen. See build-art.mjs on why that plate is blurred past legibility. */
 .void-band__wash {
   position: absolute;
-  inset: -30% -10%;
-  background:
-    radial-gradient(38% 60% at 26% 50%, color-mix(in srgb, var(--n1) 38%, transparent), transparent 70%),
-    radial-gradient(34% 54% at 62% 42%, color-mix(in srgb, var(--n3) 26%, transparent), transparent 72%);
-  filter: blur(46px);
-  opacity: calc(0.3 + 0.5 * var(--chaos));
+  inset: -12%;
+  background-image: url('/art/blob-field.webp');
+  background-size: cover;
+  background-position: center;
+  mix-blend-mode: screen;
+  /* Held well down. `screen` over a near-black section lifts every pixel it
+     touches, and at the opacity this started on it turned the band olive and
+     took the copy's contrast with it. It is a suggestion of colour behind the
+     wall, not a backdrop. */
+  opacity: calc(0.06 + 0.12 * var(--chaos));
   pointer-events: none;
+  /* Drifts on translate only, like the haze in global.css and for the same
+     reason: a `scale` here re-rasterises a full-width image every frame. */
+  animation: bleed-drift calc(34s * var(--tempo)) ease-in-out infinite alternate;
+  will-change: transform;
 }
 
 .void-band__inner {
   position: relative;
+  z-index: 2;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
   align-items: center;
   gap: clamp(1.4rem, 4vw, 3.4rem);
 }
 
-.void-band__art {
-  width: 100%;
-  max-width: 560px;
+/* ---- the stack ------------------------------------------------------
+
+   Four plates, absolutely placed inside a box with a fixed aspect ratio.
+
+   The first version stacked them in one grid cell and pushed them out of it
+   with `translate`, which is a nice trick and the wrong one here: a percentage
+   translate is a percentage of THE ELEMENT'S OWN SIZE, so a 240px plate told
+   to move 116% down moves 140px and all four pile into the same corner rather
+   than spreading across the wall. Absolute percentages are percentages of the
+   CONTAINER, which is what "put that one bottom right" actually means.
+
+   The container is sized by `aspect-ratio` rather than by a height, so the
+   whole arrangement scales with the column instead of needing a breakpoint
+   every time the wall gets narrower.
+   -------------------------------------------------------------------------- */
+.void-band__stack {
+  position: relative;
+  aspect-ratio: 1 / 0.9;
+  min-height: 260px;
+}
+
+.void-band__plate {
+  position: absolute;
+}
+
+/* The biggest, at the back, on the left. */
+.void-band__plate--1 {
+  left: 0;
+  top: 8%;
+  width: 55%;
+  rotate: -3deg;
+  z-index: 1;
+}
+
+.void-band__plate--2 {
+  right: 0;
+  top: 3%;
+  width: 47%;
+  rotate: 5.5deg;
+  z-index: 2;
+}
+
+.void-band__plate--3 {
+  left: 23%;
+  bottom: 1%;
+  width: 49%;
+  rotate: -7deg;
+  z-index: 3;
+}
+
+/* The one looking back, at the front, on the way out of the band. */
+.void-band__plate--4 {
+  right: 2%;
+  bottom: 0;
+  width: 25%;
+  rotate: 4deg;
+  z-index: 4;
+}
+
+/* Whichever one you are holding comes to the front. Without this the plate
+   under the pointer can lift, scale and misregister underneath the one on top
+   of it, which looks like a rendering bug rather than like a hand. */
+.void-band__plate:hover,
+.void-band__plate:focus-within {
+  z-index: 9;
 }
 
 .void-band__say {
+  position: relative;
+  z-index: 3;
   display: grid;
   justify-items: start;
   gap: 0.7rem;
@@ -322,6 +454,14 @@
 .void-band__title {
   font-size: clamp(1.5rem, 5vw, 3.4rem);
   line-height: 0.95;
+}
+
+/* The house's own drawing of this picture, kept, at a fifteenth of the size it
+   held before there were photographs to hang here. It is a signature on the
+   wall rather than the thing on it. */
+.void-band__mark {
+  width: clamp(90px, 12vw, 150px);
+  opacity: 0.8;
 }
 
 .void-band__note {
@@ -347,13 +487,45 @@
   border: 2px solid var(--n3);
 }
 
+/* One column: the four keep their relative positions and the wall takes a
+   portrait crop instead of a landscape one. The angles stay — they are the
+   whole reason it reads as a wall and not as a slideshow. */
 @media (max-width: 860px) {
   .void-band__inner {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .void-band__art {
-    max-width: 420px;
-    margin-inline: auto;
+  .void-band__stack {
+    justify-self: center;
+    width: min(100%, 440px);
+    aspect-ratio: 1 / 1.02;
   }
+
+  /* The caption hangs off the bottom of the biggest plate and, in one column,
+     lands squarely on top of the next one. On a wall this size the plate is the
+     caption. */
+  .void-band__plate .cut__note {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   THE SIGN OFF THE FOOTER
+
+   One sticker, stuck over the corner of the last block on the page. It is the
+   only plate on the site that is not in a composition — it is just on the
+   wall, slightly crooked, the way the last thing anybody sticks up is.
+   ========================================================================== */
+.foot__lips {
+  width: clamp(96px, 13vw, 190px);
+  rotate: -9deg;
+  margin-top: 0.4rem;
+  filter: drop-shadow(5px 6px 0 var(--edge));
+}
+
+/* ==========================================================================
+   STILL
+   ========================================================================== */
+:root[data-still='1'] .void-band__wash {
+  animation: none;
 }

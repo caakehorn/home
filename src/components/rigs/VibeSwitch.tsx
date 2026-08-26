@@ -18,6 +18,10 @@ export function VibeSwitch() {
               role="radio"
               aria-checked={active}
               className={`vibe${active ? ' vibe--on' : ''}`}
+              /* Pinned rather than rotated: see the note on colour in
+                 ShutterProvider. Each palette always answers in its own tube,
+                 so the rack is learnable. */
+              data-tone={(i % 5) + 1}
               style={{ ['--rot' as string]: `${(i % 2 ? 1 : -1) * 1.6}deg` }}
               onClick={() => {
                 setVibe(option.id)
@@ -42,8 +46,8 @@ export function VibeSwitch() {
         })}
       </div>
       <p className="vibes__note">
-        Five palettes: one photocopier, four rooms with the lights on. The whole site
-        repaints — every panel, every glow, the cursor.
+        Six palettes: one photocopier, five rooms with the lights on. The whole site
+        repaints — every panel, every glow, the cursor, and every plate on the wall.
       </p>
     </div>
   )

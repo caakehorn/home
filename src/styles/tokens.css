@@ -1,13 +1,16 @@
 /* ==========================================================================
    DAN'S DIALECTICAL DATABASE AND DRUG DEN — DESIGN TOKENS
 
-   The house style is a Tokyo backstreet at 4am shot from above: black that
-   is never neutral, acid green and electric violet burning through it, and
-   whatever primary the next sign happens to be. Xerox is still in the rack —
-   it is one palette now, not the house.
+   The house style is a Tokyo backstreet at 4am with somebody's arms around
+   somebody: black that is never neutral, hot pink burning through it, candy
+   over the top and one cold tube for the things you are meant to follow. Acid
+   green and xerox are both still in the rack — they are palettes now, not the
+   house.
 
-   Five palettes. Swap with [data-vibe] on <html>; VOID is the default and the
-   house style, and every other room is a different tube in the same street.
+   Six palettes. Swap with [data-vibe] on <html>; AFTERGLOW is the default and
+   the house style, and every other room is a different tube in the same
+   street.
+
    The neon ramp (--n1..--n5) is the SIGNAGE layer; the paint ramp (--p-*) is
    the CANVAS layer underneath it, and they are deliberately different jobs —
    neon glows, paint does not, and toner does neither.
@@ -85,7 +88,7 @@
      palette where the accents are neon on black and catastrophic in RIOT,
      where an accent IS the ink — black on black, and the label vanishes.
 
-     --void is the correct answer in all five: it is near-black in the dark
+     --void is the correct answer in all six: it is near-black in the dark
      rooms (indistinguishable from --edge, so nothing there changes) and it is
      paper on newsprint, which is what you want on top of ink. */
   --on-glow: var(--void);
@@ -121,7 +124,51 @@
 }
 
 /* -------------------------------------------------------------------------
-   VIBE 01 — VOID — the house style, and the default.
+   VIBE 01 — AFTERGLOW — the house style, and the default.
+
+   The building has pictures in it now, and they are pink. Seven plates of two
+   people at four in the morning, at noon, in a window, in the water — and the
+   palette they were dropped into was acid green on black, which is a palette
+   for a server rack. Every one of them fought it.
+
+   So the house moved. Black with a wound in it, hot pink for structure, candy
+   for signage, and one cold tube for the things you are supposed to follow.
+
+   --n3 is CYAN and that is the load-bearing decision in this block. --n3 is
+   what links, kana, focus rings and the default .neon all read from, so it is
+   the colour your eye is trained on across the whole site — and it cannot be a
+   fourth shade of pink or it disappears into the art. Cold against warm is the
+   only reason a link is findable on a page with a two-metre photograph on it.
+   It is also the colour of every highlight in every eye in all seven plates,
+   which is not a coincidence, it is where it was taken from.
+
+   As the default it seeds bare :root, so the first paint — before the provider
+   has written [data-vibe] onto <html> — is already the house style.
+   ---------------------------------------------------------------------- */
+:root,
+:root[data-vibe='afterglow'] {
+  --void: #14030e;
+  --void-2: #240718;
+  --void-3: #3a0c27;
+  --edge: #08000a;
+
+  --n1: #ff1f6f; /* hot pink  — structure, frames, the underlit edge */
+  --n2: #ff8ad4; /* candy     — signage */
+  --n3: #3dfaff; /* cyan      — links, kana, focus. the thing you follow */
+  --n4: #ffc247; /* blonde    — the sporadic primary */
+  --n5: #c77dff; /* violet    — the other one */
+
+  --text: #ffe9f3;
+  --text-dim: #bb8ba4;
+  --vibe-name: 'AFTERGLOW';
+}
+
+/* -------------------------------------------------------------------------
+   VIBE 02 — VOID — the old house style, kept as a room.
+
+   Acid green and electric violet on black with a cast to it. It was the house
+   for exactly one redesign and it is still the best room in the building to
+   read the wiki in, which is why it is second in the rack rather than gone.
 
    Black with a violet cast, acid green burning through it, electric violet
    behind that, and a primary showing up wherever a sign happens to be. The
@@ -132,7 +179,6 @@
    As the default it also seeds bare :root, so the first paint — before the
    provider has written [data-vibe] onto <html> — is already the house style.
    ---------------------------------------------------------------------- */
-:root,
 :root[data-vibe='void'] {
   --void: #030308;
   --void-2: #0a0616;
@@ -151,7 +197,7 @@
 }
 
 /* -------------------------------------------------------------------------
-   VIBE 02 — DMT — the ceiling, seen from the floor.
+   VIBE 03 — DMT — the ceiling, seen from the floor.
    Everything at once, nothing where you left it.
    ---------------------------------------------------------------------- */
 :root[data-vibe='dmt'] {
@@ -172,7 +218,7 @@
 }
 
 /* -------------------------------------------------------------------------
-   VIBE 03 — LOVE HOTEL — sodium through a window that does not open.
+   VIBE 04 — LOVE HOTEL — sodium through a window that does not open.
    ---------------------------------------------------------------------- */
 :root[data-vibe='hotel'] {
   --void: #10020c;
@@ -192,7 +238,7 @@
 }
 
 /* -------------------------------------------------------------------------
-   VIBE 04 — GRIPTAPE — the deck, face down.
+   VIBE 05 — GRIPTAPE — the deck, face down.
    Black, bone, and one acid stripe. The one palette here that is quiet, and
    it is quiet the way grip tape is: because it is for standing on.
    ---------------------------------------------------------------------- */
@@ -214,7 +260,7 @@
 }
 
 /* -------------------------------------------------------------------------
-   VIBE 05 — RIOT — the photocopier.
+   VIBE 06 — RIOT — the photocopier.
 
    Two inks and a sheet of paper, which is the entire budget a flyer has ever
    had. Everything here is toner on newsprint with one spot red, and the
@@ -222,10 +268,11 @@
    same red at two weights on purpose, because a copy shop does not stock
    cadmium and the constraint is the aesthetic.
 
-   It used to seed bare :root as the house style. VOID does that now; this is
-   one room off the street rather than the street, and the ~80 rules elsewhere
-   that key off [data-vibe='riot'] to turn the light sources off are exactly
-   what makes it survive as a room.
+   It used to seed bare :root as the house style; then VOID did. AFTERGLOW
+   does now. This is one room off the street rather than the street, and the
+   ~80 rules elsewhere that key off [data-vibe='riot'] to turn the light
+   sources off — plus the ones in cutout.css that put the plates through the
+   machine — are exactly what makes it survive as a room.
    ---------------------------------------------------------------------- */
 :root[data-vibe='riot'] {
   --void: #e8e2d4;

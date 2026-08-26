@@ -54,13 +54,17 @@ export function HeaderControls() {
         </button>
 
         <div className="hctl__vibes" role="radiogroup" aria-label="Palette">
-          {VIBES.map((v) => (
+          {VIBES.map((v, i) => (
             <button
               key={v.id}
               type="button"
               role="radio"
               aria-checked={v.id === vibe}
               className={`hctl__vibe${v.id === vibe ? ' hctl__vibe--on' : ''}`}
+              /* Same fixed tube as the big rack on the console: this is the
+                 same control in a smaller box and it should not answer in a
+                 different colour than the one downstairs. */
+              data-tone={(i % 5) + 1}
               title={`${v.name} — ${v.blurb}`}
               onClick={() => setVibe(v.id)}
             >

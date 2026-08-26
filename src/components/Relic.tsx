@@ -56,6 +56,11 @@ export function Relic({ relic, style, className = '' }: Props) {
       <button
         type="button"
         className={`relic${found ? ' relic--found' : ''} ${className}`}
+        data-magnet=""
+        /* It is a sticker the size of a postage stamp and it opens a panel over
+           the whole page. The listener would have called that a tap. */
+        data-bang="hit"
+        data-tone={relic.tone}
         style={{ ['--glow' as string]: `var(--n${relic.tone})`, ...style }}
         onClick={show}
         aria-expanded={open}

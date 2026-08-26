@@ -8,6 +8,10 @@ export function PortalCard({ section, index }: { section: Section; index: number
     <Link
       to={`/${section.slug}`}
       className="portal"
+      /* Leans towards the pointer. The numbers come from TELEMETRY's delegated
+         magnet, which writes --mx/--my into any element carrying this; the
+         lean itself is three lines in jolt.css. Nothing is wired here. */
+      data-magnet=""
       style={{
         ['--glow' as string]: `var(--n${section.accent})`,
         ['--lean' as string]: index % 2 ? 0.8 : -0.8,

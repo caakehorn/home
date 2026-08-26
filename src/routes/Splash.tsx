@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Crown } from '../components/Crown'
+import { Cutout } from '../components/Cutout'
 import { Logo } from '../components/Logo'
 import { Marquee } from '../components/Marquee'
 import { Relic } from '../components/Relic'
@@ -26,19 +27,29 @@ import './splash.css'
 
    ---- what it is made of ------------------------------------------------
 
-   Four layers, and between them they animate exactly two properties:
+   Five layers, and between them they animate exactly two properties:
 
      1. THE GRID     one element, rotated into perspective, translated on Y
                      forever. The city, from above.
      2. THE BLOOM    two conic gradients counter-rotating behind the mark.
      3. THE SIGNAGE  vertical kanji columns, drifting on Y at four speeds.
      4. THE BARRAGE  the title card, on a steps() opacity strobe.
+     5. THE PLATES   two of them, torn, flanking the mark, drifting against
+                     the pointer. They are the thing this door is now about;
+                     everything above is the room they are hung in.
 
    No blurs, no backdrop filters, no per-frame JavaScript. The old door ran a
    46-element twinkling starfield with a `filter: drop-shadow` on every one of
    them, which is 46 separate blur passes a frame before anything else on the
    page has painted; this runs on the compositor and leaves the main thread
    free for the thing the door is actually in front of.
+
+   The plates cost 91 kB of WebP between them and one of the two is fetched at
+   high priority, because it is above the fold on every viewport and a front
+   door whose subject arrives after its furniture is a front door that assembles
+   itself in front of you. The other is lazy. Neither is decoded more than once
+   even though each is composited three times — see cutout.css on why the
+   misregistration ghosts reuse the same URL.
    ========================================================================== */
 
 /** Vertical signage. Real words, and none of them are welcoming. */
@@ -154,6 +165,33 @@ export function Splash() {
         </span>
       ))}
 
+      {/* ---- 5 · the plates ------------------------------------------
+          Two, flanking the mark, torn on different angles so the pair does
+          not read as a symmetrical frame. They sit UNDER the core in the
+          stack and over everything else: the mark has to win, and a title
+          card competing with two photographs for the same z-index loses. */}
+      <div className="splash__plates">
+        <Cutout
+          plate="kiss-window"
+          cut="shard"
+          className="splash__plate splash__plate--l"
+          drift={1.5}
+          eager
+        />
+        <Cutout
+          plate="kiss-neon"
+          cut="torn"
+          className="splash__plate splash__plate--r"
+          drift={1.2}
+        />
+        <Cutout
+          plate="blob-lips"
+          cut="rip"
+          className="splash__plate splash__plate--lips"
+          drift={2.6}
+        />
+      </div>
+
       {/* ---- 4 · the mark -------------------------------------------- */}
       <div className="splash__core">
         <div className="splash__barrage" aria-hidden="true">
@@ -190,7 +228,9 @@ export function Splash() {
           </span>
         </p>
 
-        <button type="button" className="splash__enter" onClick={go}>
+        {/* A button, but what it does is leave — so it gets the door's bang
+            rather than a control's. */}
+        <button type="button" className="splash__enter" data-bang="door" onClick={go}>
           <span className="splash__enter-label">ENTER THE VOID</span>
           <span className="splash__enter-kana jp" aria-hidden="true">
             入

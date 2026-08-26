@@ -13,12 +13,14 @@
  *     npm install --no-save sharp
  *     node scripts/build-art.mjs ./originals
  *
- * `originals/` holds src-01.jpg … src-05.jpg. What each one is, and what is
- * done to it, is in PLATES below.
+ * `originals/` holds src-01 … src-08. What each one is, and what is done to
+ * it, is in PLATES below. The last three arrived as phone screenshots, so their
+ * crops are letterbox boxes measured by scanning for the longest run of rows
+ * that are not black — not by somebody reading coordinates off a ruler.
  *
  * ---- three jobs ---------------------------------------------------------
  *
- * 1. WATERMARKS COME OFF. Three of the five arrived with somebody's
+ * 1. WATERMARKS COME OFF. Four of the eight arrived with somebody's
  *    hotlink stamp on them. They are cropped out, not blurred out — a blurred
  *    watermark is still a watermark and it is still in the composition.
  *
@@ -99,6 +101,41 @@ const PLATES = [
     // two of them from the ring up, which loses the tag and the empty water.
     crop: { left: 250, top: 210, width: 1620, height: 1500 },
     width: 1120,
+  },
+  {
+    id: 'poster-mort',
+    from: 'src-06.png',
+    // A phone screenshot of a gig poster. The status bar, the date header, the
+    // thumbnail rail and the toolbar all go. The content box was found by
+    // scanning for the longest run of rows that are not letterbox black rather
+    // than by eyeballing pixels, which is also how 07 and 08 were measured —
+    // it puts the artwork at 482..1310.
+    //
+    // It stops at 1185 instead. The phone had drawn its live-text button into
+    // the bottom-right corner of the frame, over a yellow hand and two pink
+    // shapes, and there is no honest way to paint that out: everything under it
+    // is line art with hard edges and a patch would read as a smear. The bottom
+    // eighth of the poster is her shorts and one more row of doodles, so the
+    // crop loses the least of anything available and the whole title, the
+    // support act and the date all survive.
+    crop: { left: 0, top: 482, width: 828, height: 703 },
+    width: 760,
+  },
+  {
+    id: 'kiss-close',
+    from: 'src-07.png',
+    // Letterboxed at 663..1128. The same two as `kiss-neon` from much closer,
+    // and the same hotlink stamp sat in the top-left corner of the frame — the
+    // extra 46 rows off the top are what takes it out.
+    crop: { left: 0, top: 709, width: 828, height: 420 },
+    width: 800,
+  },
+  {
+    id: 'kiss-dark',
+    from: 'src-08.png',
+    // Letterboxed at 663..1128, nothing stamped on it.
+    crop: { left: 0, top: 663, width: 828, height: 466 },
+    width: 800,
   },
   {
     id: 'kiss-uniform',

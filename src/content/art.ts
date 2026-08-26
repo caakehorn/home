@@ -216,3 +216,21 @@ export const ALLY: Photo[] = [
     hrefLabel: 'THE INFOBOX',
   },
 ]
+
+/* ==========================================================================
+   THE TWO FACES INSIDE THE DRAWING
+
+   Not plates — nothing hangs these on a wall. `src/components/Kiss.tsx` draws
+   two profiles as flat silhouettes and these fill them, so the drawing is a
+   window onto the picture rather than a shape cut out of the dark.
+
+   They go through `asset()` like everything else: an SVG `<image href>` is a
+   URL in a TypeScript string, which is exactly the kind Vite does not rewrite.
+   ========================================================================== */
+
+export const KISS_FACES = {
+  /** The one behind, facing right. */
+  back: asset('art/face-back.webp'),
+  /** The one in front. Flopped at build time — see build-art.mjs for why. */
+  front: asset('art/face-front.webp'),
+}

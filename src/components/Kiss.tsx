@@ -1,4 +1,6 @@
+import { useId } from 'react'
 import { CANCER, CANCER_EDGES } from '../arcade/content'
+import { KISS_FACES } from '../content/art'
 import './kiss.css'
 
 /* ==========================================================================
@@ -30,6 +32,24 @@ import './kiss.css'
    front — which is a light source standing between them and the viewer, and is
    also the reason a silhouette this dark is legible on a screen this dark at
    all.
+
+   ---- and then there are faces in it ------------------------------------
+
+   Two frames of animation fill the silhouettes, clipped to the exact same
+   paths that draw them. The drawing is a WINDOW onto the picture now rather
+   than a shape cut out of the dark, and the void fills underneath are still
+   there — they are what shows through wherever a plate has not loaded yet, so
+   the composition never has a hole in it.
+
+   The clip paths carry no transform of their own. A `clipPath` is resolved in
+   the user space of whatever references it, so the untransformed head sits
+   inside the rotated group and rotates with it for free; giving the clip its
+   own copy of the rotation would apply it twice.
+
+   Everything the rim and the cut were doing survives, in the same order. The
+   images go UNDER the rim and OVER the ink, and the front figure's cut is a
+   stroke with `paint-order: stroke fill`, so it grows outward from the
+   silhouette and is not covered by the image sitting inside it.
    ========================================================================== */
 
 /** Facing right, closed, with the lip contact at (210,131). */
@@ -119,6 +139,11 @@ type KissProps = {
 }
 
 export function Kiss({ className = '', label }: KissProps) {
+  // Four clip paths, and an SVG id is document-global. Two of these on one
+  // page with hard-coded ids and the second drawing silently clips itself to
+  // the first one's shapes.
+  const uid = useId().replace(/:/g, '')
+
   return (
     <svg
       className={`kiss ${className}`}
@@ -128,6 +153,28 @@ export function Kiss({ className = '', label }: KissProps) {
       aria-hidden={label ? undefined : true}
       focusable="false"
     >
+      <defs>
+        {/* No transforms in here on purpose: a clipPath resolves in the user
+            space of the element that references it, so each of these inherits
+            the rotation and the mirror of the group it is used inside. */}
+        <clipPath id={`${uid}-back-head`}>
+          <path d={HEAD} />
+          <path d={HAIR_BACK} />
+          <path d={KNOT_BACK} />
+        </clipPath>
+        <clipPath id={`${uid}-back-torso`}>
+          <path d={TORSO} />
+        </clipPath>
+        <clipPath id={`${uid}-front-head`}>
+          <path d={HEAD} />
+          <path d={HAIR_FRONT} />
+          <path d={TAIL_FRONT} />
+        </clipPath>
+        <clipPath id={`${uid}-front-torso`}>
+          <path d={TORSO} />
+        </clipPath>
+      </defs>
+
       <ellipse className="kiss__bloom" cx="210" cy="120" rx="140" ry="112" />
 
       <g className="kiss__sky" aria-hidden="true">
@@ -159,10 +206,37 @@ export function Kiss({ className = '', label }: KissProps) {
         <path className="kiss__chain" d="M 150 196 C 162 208 182 208 194 197" />
         <path className="kiss__chain kiss__chain--bird" d="M 168 208 l 5 -4 l 6 4 l -4 3 l 1 5 l -5 -4 l -5 2 Z" />
 
+        <g clipPath={`url(#${uid}-back-torso)`}>
+          <image
+            className="kiss__face"
+            href={KISS_FACES.back}
+            x="44"
+            y="146"
+            width="180"
+            height="126"
+            preserveAspectRatio="xMidYMin slice"
+          />
+        </g>
+
         <g transform="rotate(-10 210 131)">
           <path className="kiss__ink" d={HEAD} />
           <path className="kiss__ink" d={HAIR_BACK} />
           <path className="kiss__ink" d={KNOT_BACK} />
+          <g clipPath={`url(#${uid}-back-head)`}>
+            <image
+              className="kiss__face"
+              href={KISS_FACES.back}
+              x="84"
+              y="8"
+              width="142"
+              height="172"
+              /* Anchored to the RIGHT edge, which is where her profile is and
+                 also where the silhouette's profile runs. Centred, `slice`
+                 trims both sides evenly and takes the front of her face off
+                 with it. */
+              preserveAspectRatio="xMaxYMid slice"
+            />
+          </g>
           <path className="kiss__rim kiss__rim--back" d={RIM} />
         </g>
       </g>
@@ -170,10 +244,33 @@ export function Kiss({ className = '', label }: KissProps) {
       {/* ---- the one in front, and the cut that says so ---------------- */}
       <g transform="translate(420 0) scale(-1 1)">
         <path className="kiss__ink kiss__cut" d={TORSO} />
+        <g clipPath={`url(#${uid}-front-torso)`}>
+          <image
+            className="kiss__face"
+            href={KISS_FACES.front}
+            x="44"
+            y="146"
+            width="180"
+            height="126"
+            preserveAspectRatio="xMidYMin slice"
+          />
+        </g>
+
         <g transform="rotate(5 210 131)">
           <path className="kiss__ink kiss__cut" d={TAIL_FRONT} />
           <path className="kiss__ink kiss__cut" d={HEAD} />
           <path className="kiss__ink kiss__cut" d={HAIR_FRONT} />
+          <g clipPath={`url(#${uid}-front-head)`}>
+            <image
+              className="kiss__face"
+              href={KISS_FACES.front}
+              x="84"
+              y="8"
+              width="142"
+              height="172"
+              preserveAspectRatio="xMidYMid slice"
+            />
+          </g>
           <path className="kiss__rim kiss__rim--front" d={RIM} />
         </g>
       </g>

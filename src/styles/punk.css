@@ -461,25 +461,6 @@
   background-image: repeating-linear-gradient(-45deg, var(--edge) 0 8px, var(--paper) 8px 16px);
 }
 
-/* Relics are stickers in every room; on paper they are stickers printed in the
-   one ink anybody could afford. */
-:root[data-vibe='riot'] .relic {
-  color: var(--paper);
-  background: var(--toner);
-  border-color: var(--toner);
-}
-
-:root[data-vibe='riot'] .relic--found {
-  color: var(--toner);
-  background: var(--paper);
-  border-color: var(--toner);
-  box-shadow: 3px 3px 0 var(--toner);
-}
-
-:root[data-vibe='riot'] .relic--found::after {
-  background: var(--spot);
-}
-
 /* ==========================================================================
    RIOT — TONER ON PAPER
 

@@ -237,93 +237,6 @@
 }
 
 /* ==========================================================================
-   5 · THE PLATES
-
-   The two of them, hung on the door. Everything else on this screen — the
-   grid, the towers, the signage, the bloom — is now the room these are hung
-   in, and the composition is built around leaving them a wall each.
-
-   z-index 3 puts them over the signage and under the core. The mark has to
-   win: a title card competing with two photographs at the same depth is a
-   title card nobody reads, and the one job of a front door is the way in.
-   ========================================================================== */
-.splash__plates {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  pointer-events: none;
-}
-
-.splash__plates .cut {
-  position: absolute;
-  pointer-events: auto;
-  /* They arrive after the door does, staggered, on the same spring the relics
-     land on. A plate that is simply present on the first frame reads as a
-     background; a plate that is thrown at the wall reads as a decision. */
-  animation: plate-land 700ms var(--spring) both;
-}
-
-@keyframes plate-land {
-  from {
-    opacity: 0;
-    transform: translate3d(0, 26px, 0) rotate(-6deg) scale(0.86);
-  }
-}
-
-.splash__plate--l {
-  top: 8%;
-  left: clamp(0.4rem, 3vw, 4.5rem);
-  width: clamp(190px, 27vw, 430px);
-  rotate: -3.2deg;
-  animation-delay: 200ms;
-}
-
-.splash__plate--r {
-  right: clamp(0.4rem, 3vw, 4.5rem);
-  bottom: clamp(4.5rem, 14vh, 9rem);
-  width: clamp(200px, 29vw, 470px);
-  rotate: 2.6deg;
-  animation-delay: 340ms;
-}
-
-/* The sticker. Small, loud, stuck at an angle nobody would choose, over the
-   corner of everything else — which is what a sticker is. */
-.splash__plate--lips {
-  top: 4%;
-  right: clamp(1rem, 9vw, 9rem);
-  width: clamp(88px, 11vw, 168px);
-  rotate: 11deg;
-  animation-delay: 480ms;
-  filter: drop-shadow(4px 5px 0 var(--edge));
-}
-
-/* Under 860px the signage is already occupying both walls and the core needs
-   the middle, so the pair comes down to one plate behind the mark and the
-   sticker stays. Hiding both would take the redesign off the one screen
-   everybody sees. */
-@media (max-width: 860px) {
-  .splash__plate--l {
-    top: 3%;
-    left: 50%;
-    translate: -50% 0;
-    width: min(74vw, 340px);
-    opacity: 0.5;
-    rotate: -1.5deg;
-  }
-
-  .splash__plate--r {
-    display: none;
-  }
-
-  .splash__plate--lips {
-    top: auto;
-    bottom: calc(var(--crawl-h) + 0.6rem);
-    right: 0.6rem;
-    width: 84px;
-  }
-}
-
-/* ==========================================================================
    4 · THE CORE — barrage, crown, mark, door
    ========================================================================== */
 .splash__core {
@@ -471,64 +384,70 @@
 }
 
 /* ==========================================================================
-   THE RELICS — four, in the corners the composition leaves empty
+   5 · THE PLATES
+
+   Two frames of animation, on the walls the composition leaves empty. They
+   stand where four hidden relic stickers used to, which is a straight trade:
+   a picture you can see for a sticker you had to find.
+
+   z-index 3 puts them over the signage and under the core. The mark has to
+   win — a title card competing with two pictures at the same depth is a title
+   card nobody reads, and the one job of a front door is the way in.
    ========================================================================== */
-.splash__relics {
+.splash__plates {
   position: absolute;
   inset: 0;
-  z-index: 30;
+  z-index: 3;
   pointer-events: none;
 }
 
-.splash__relics .relic {
+.splash__plates .plate {
   position: absolute;
   pointer-events: auto;
-  animation: relic-land 620ms var(--spring) both;
+  /* Thrown at the wall after the door has arrived, on the house spring. A
+     picture simply present on the first frame reads as a background; one that
+     lands reads as a decision. */
+  animation: plate-land 700ms var(--spring) both;
 }
 
-@keyframes relic-land {
-  from { opacity: 0; transform: translate3d(0, -14px, 0) rotate(-14deg) scale(0.7); }
+@keyframes plate-land {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 26px, 0) rotate(-6deg) scale(0.86);
+  }
 }
 
-.splash__relic--1 {
-  top: 13%;
-  left: clamp(3.5rem, 12vw, 12rem);
-  animation-delay: 300ms;
-}
-.splash__relic--2 {
-  top: 25%;
-  right: clamp(3.5rem, 11vw, 11rem);
-  animation-delay: 420ms;
-}
-.splash__relic--3 {
-  bottom: 22%;
-  left: clamp(3.5rem, 14vw, 14rem);
-  animation-delay: 540ms;
-}
-.splash__relic--4 {
-  bottom: 30%;
-  right: clamp(3.5rem, 13vw, 13rem);
-  animation-delay: 660ms;
+.splash__plate--l {
+  top: 8%;
+  left: clamp(0.4rem, 3vw, 4.5rem);
+  width: clamp(190px, 27vw, 430px);
+  rotate: -3.2deg;
+  animation-delay: 220ms;
 }
 
-/* On a phone the corners are where the signage already is, so the relics come
-   off the walls and sit in a row under the door instead. */
-@media (max-width: 720px) {
-  .splash__relics {
-    inset: auto 0 calc(var(--crawl-h) + 2.6rem) 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    justify-content: center;
-    padding-inline: 0.8rem;
+.splash__plate--r {
+  right: clamp(0.4rem, 3vw, 4.5rem);
+  bottom: clamp(4.5rem, 14vh, 9rem);
+  width: clamp(200px, 29vw, 470px);
+  rotate: 2.6deg;
+  animation-delay: 360ms;
+}
+
+/* Under 860px the signage already holds both walls and the core needs the
+   middle, so the pair becomes one plate behind the mark. Dropping both would
+   take the pictures off the one screen everybody sees. */
+@media (max-width: 860px) {
+  .splash__plate--l {
+    top: 3%;
+    left: 50%;
+    translate: -50% 0;
+    width: min(74vw, 340px);
+    opacity: 0.5;
+    rotate: -1.5deg;
   }
 
-  .splash__relics .relic {
-    position: static;
-    /* 9rem clipped "it's personal lol" to "it's personal —", which turns a
-       quotation into a typo. The row wraps to two lines instead. */
-    max-width: min(11rem, 46vw);
-    font-size: 0.58rem;
+  .splash__plate--r {
+    display: none;
   }
 }
 
@@ -556,8 +475,7 @@
 :root[data-still='1'] .splash__block,
 :root[data-still='1'] .splash__crown-mount,
 :root[data-still='1'] .splash__venue,
-:root[data-still='1'] .splash__relics .relic,
-:root[data-still='1'] .splash__plates .cut {
+:root[data-still='1'] .splash__plates .plate {
   animation: none !important;
   opacity: 1;
   will-change: auto;

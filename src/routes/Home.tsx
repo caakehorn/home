@@ -1,17 +1,17 @@
+import { Link } from 'react-router-dom'
 import { Crown } from '../components/Crown'
-import { Cutout } from '../components/Cutout'
 import { Kiss } from '../components/Kiss'
 import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
 import { PortalCard } from '../components/PortalCard'
-import { Relic } from '../components/Relic'
+import { Plate } from '../components/Plate'
 import { Rig } from '../components/Rig'
 import { Logo } from '../components/Logo'
 import { SubHead } from '../components/Wordmark'
 import { ChaosDial } from '../components/rigs/ChaosDial'
 import { Terminal } from '../components/rigs/Terminal'
 import { VibeSwitch } from '../components/rigs/VibeSwitch'
-import { relicsOn } from '../content/relics'
+import { ALLY, sceneById } from '../content/art'
 import { SECTIONS } from '../content/sections'
 import { banner } from '../content/slogans'
 import { VIBES } from '../state/portal-context'
@@ -31,26 +31,24 @@ import './home.css'
    lines and a crown instead of a lecture, because the thing a portal owes you
    in the first screen is a way in, not an argument.
 
-   Six of the ten relics are on this page, in the gaps between those blocks.
+   ---- the pictures --------------------------------------------------
 
-   ---- and now there are pictures ----------------------------------------
+   Six frames of animation hang around the building and five photographs of
+   one person hang in a section of their own near the bottom of this page.
 
-   Five of the seven plates hang on this page. One is knocked out of its own
-   background and stands in the masthead with the heading wrapped around her;
-   four are torn and stacked in the band between the rooms and the rigs, which
-   used to be one line drawing on an empty stage and is now a wall.
-
-   The band is deliberately the only place on the page where the pictures are
-   the content rather than the furniture. Everything else here is a way into
-   the corpus, and a photograph is not a way into anything — it is the one
-   thing in this building that is not an argument about the record.
+   Those five used to be the payload of the relics — ten stickers hidden
+   across the front door and this page, each opening a panel with a line, a
+   date and a door into the wiki. The hunt is gone. What it was hiding is not:
+   it is a section now, at a size you can actually see, with the same writing
+   under it. A hidden thing nobody finds is not a thing on the site, and five
+   photographs of the only person who has read the whole wiki were the wrong
+   thing to have made into a pixel hunt.
    ========================================================================== */
 
 const MISSION = banner('mast')
 
 export function Home() {
   const { rigs } = usePortal()
-  const relics = relicsOn('home')
 
   return (
     <div className="home">
@@ -67,9 +65,6 @@ export function Home() {
           <div className="mast__mark-row">
             <Logo size="clamp(1.6rem, 5.6vw, 4.2rem)" className="mast__mark" />
             <Crown className="mast__crown" />
-            {relics[0] && (
-              <Relic relic={relics[0]} className="mast__relic" style={{ ['--rot' as string]: '-6deg' }} />
-            )}
           </div>
 
           <h1 className="mast__head">
@@ -85,15 +80,15 @@ export function Home() {
             the same corpus. <b>The brain is the point. Start there.</b>
           </p>
 
-          {/* The knocked-out one. She stands in the masthead at full height and
-              the bottom of her runs off the edge of it, cut by the same rule
-              that closes the block — which is what happens to anything you cut
-              out and stick down slightly too low. */}
-          <Cutout
-            plate="kiss-uniform"
+          {/* The knocked-out one, standing in the masthead with the heading
+              wrapped around her. Her feet run off the bottom of the block and
+              are cut by the rule that closes it — the mast already clips, and
+              a figure that fits neatly inside her box reads as an
+              illustration rather than as something stuck there. */}
+          <Plate
+            plate={sceneById('kiss-uniform')}
             cut="none"
             className="mast__plate"
-            drift={0.7}
             eager
           />
 
@@ -102,9 +97,6 @@ export function Home() {
             <span className="mast__chip">{rigs.length} LIVE RIGS</span>
             <span className="mast__chip">{VIBES.length} PALETTES</span>
             <span className="mast__chip mast__chip--hot">CHAOS ENABLED</span>
-            {relics[1] && (
-              <Relic relic={relics[1]} style={{ ['--rot' as string]: '3deg' }} />
-            )}
           </div>
         </div>
       </header>
@@ -128,13 +120,6 @@ export function Home() {
             lattice puts it on a time axis; the transcript is the raw material every other room
             argues about; the arcade is one room with one person's name on it, and she earned it.
           </p>
-          {relics[2] && (
-            <Relic
-              relic={relics[2]}
-              className="section__relic"
-              style={{ ['--rot' as string]: '4deg' }}
-            />
-          )}
         </div>
 
         <div className="portals">
@@ -153,66 +138,47 @@ export function Home() {
         lean={-0.6}
       />
 
-      {/* ---- the wall ------------------------------------------------- */}
+      {/* ---- the two of them ------------------------------------------ */}
       <section className="void-band" aria-labelledby="void-title">
         <div className="void-band__wash" aria-hidden="true" />
-
         <div className="wrap void-band__inner">
-          {/* Three plates, overlapping, on three angles. Stacked rather than
-              gridded on purpose: a grid of photographs is a contact sheet and
-              a contact sheet is a filing system. This is a wall. */}
           <div className="void-band__stack">
-            <Cutout
-              plate="kiss-water"
+            <Plate
+              plate={sceneById('kiss-water')}
               cut="torn"
               className="void-band__plate void-band__plate--1"
-              drift={1.1}
-              captioned
             />
-            <Cutout
-              plate="kiss-neon"
+            <Plate
+              plate={sceneById('kiss-close')}
               cut="shard"
               className="void-band__plate void-band__plate--2"
-              drift={1.6}
             />
-            <Cutout
-              plate="kiss-window"
+            <Plate
+              plate={sceneById('kiss-dark')}
               cut="rip"
               className="void-band__plate void-band__plate--3"
-              drift={2}
-            />
-            {/* The only one of the four who is looking back at you, which is
-                why she is at the front of the stack and on the way out of the
-                band rather than buried in the middle of it. */}
-            <Cutout
-              plate="blob-figure"
-              cut="slab"
-              className="void-band__plate void-band__plate--4"
-              drift={2.4}
             />
           </div>
 
           <div className="void-band__say">
             <span className="void-band__kana jp" aria-hidden="true">
-              余韻
+              虚空
             </span>
             <h2 id="void-title" className="void-band__title">
               <SubHead venn={false}>ENTER THE VOID</SubHead>
             </h2>
-
-            {/* The drawing survives the redesign, at a fifteenth of the size it
-                was. It was the mark for this band before there were
-                photographs to hang here and it is still the only version of
-                this picture the house drew itself. */}
-            <Kiss className="void-band__mark" label="Two people in profile, kissing, lit from behind" />
-
             <p className="void-band__note">
               Every other room here is one man arguing with a record at an hour the record should
-              not be trusted at. This is the other thing. Four plates and nobody's name on any of
-              them — a window at nine in the morning, somebody's room at four, the middle of a
-              lake in front of everybody, and a girl standing in a field of shapes looking back
-              at you. None of it is evidence. None of it is being cited.
+              not be trusted at. This is the other thing. Three frames and nobody's name on any of
+              them — a window at nine in the morning, the middle of a lake in front of everybody,
+              and one where both of them have their eyes shut. Nobody in particular, on purpose,
+              because the whole point of a drawing is that it is anybody. None of it is evidence
+              and none of it is being cited.
             </p>
+            {/* The house's own drawing of this picture, kept. It used to be the
+                only thing on this wall; it signs the copy now instead. */}
+            <Kiss className="void-band__mark" label="Two people in profile, kissing, lit from behind" />
+
             <p className="void-band__meta">
               <span>NO PERMISSION ASKED</span>
               <span>NO APOLOGY OFFERED</span>
@@ -220,7 +186,6 @@ export function Home() {
             </p>
           </div>
         </div>
-
       </section>
 
       {/* ---- the console --------------------------------------------- */}
@@ -237,13 +202,6 @@ export function Home() {
             building — the dial and the palette drive every page you visit after this one, and the
             shell knows more verbs than it admits to.
           </p>
-          {relics[3] && (
-            <Relic
-              relic={relics[3]}
-              className="section__relic"
-              style={{ ['--rot' as string]: '-5deg' }}
-            />
-          )}
         </div>
 
         <div className="console">
@@ -259,6 +217,48 @@ export function Home() {
             <Terminal />
           </Rig>
 
+        </div>
+      </section>
+
+      {/* ---- the photographs ------------------------------------------ */}
+      <section className="wrap section ally" aria-labelledby="ally-title">
+        <div className="section__head">
+          <h2 id="ally-title" className="section__title">
+            <SubHead venn={false}>ALLY LUBIN</SubHead>
+          </h2>
+          <span className="section__kana jp" aria-hidden="true">
+            記録
+          </span>
+          <p className="section__note">
+            Five photographs and five things that were actually said, on dates that are actually in
+            the record. She is the only person who has read the whole wiki — four thousand words
+            about herself, at 2 AM — and came back the next morning with notes and a question
+            nobody else thought to ask: <b>“did it align with like your concept of who I am?”</b>
+          </p>
+        </div>
+
+        <div className="ally__grid">
+          {ALLY.map((photo, i) => (
+            <article
+              key={photo.id}
+              className="ally__card"
+              style={{
+                ['--glow' as string]: `var(--n${photo.tone})`,
+                ['--rot' as string]: `${i % 2 ? 1.4 : -1.6}deg`,
+              }}
+            >
+              <Plate plate={photo} cut={i % 2 ? 'rip' : 'torn'} className="ally__plate" />
+              <div className="ally__say">
+                <span className="ally__stamp">{photo.stamp}</span>
+                <h3 className="ally__title">{photo.title}</h3>
+                <blockquote className="ally__quote">{photo.quote}</blockquote>
+                <p className="ally__note">{photo.note}</p>
+                <Link to={photo.href} className="ally__go">
+                  {photo.hrefLabel} →
+                </Link>
+              </div>
+            </article>
+          ))}
         </div>
       </section>
 
@@ -278,17 +278,6 @@ export function Home() {
             <span>NO ADS</span>
             <span>NO TAPER</span>
           </p>
-          <Cutout plate="blob-lips" cut="rip" className="foot__lips" drift={2.4} />
-
-          <div className="foot__relics">
-            {relics.slice(4).map((relic, i) => (
-              <Relic
-                key={relic.id}
-                relic={relic}
-                style={{ ['--rot' as string]: `${i % 2 ? 5 : -4}deg` }}
-              />
-            ))}
-          </div>
         </div>
       </footer>
     </div>

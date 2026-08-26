@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Crown } from '../components/Crown'
-import { Cutout } from '../components/Cutout'
 import { Logo } from '../components/Logo'
 import { Marquee } from '../components/Marquee'
-import { Relic } from '../components/Relic'
-import { relicsOn } from '../content/relics'
+import { Plate } from '../components/Plate'
+import { sceneById } from '../content/art'
 import { banner } from '../content/slogans'
 import { usePortal, useRig } from '../state/usePortal'
 import { useWikiIndex } from '../wiki/data'
@@ -34,22 +33,16 @@ import './splash.css'
      2. THE BLOOM    two conic gradients counter-rotating behind the mark.
      3. THE SIGNAGE  vertical kanji columns, drifting on Y at four speeds.
      4. THE BARRAGE  the title card, on a steps() opacity strobe.
-     5. THE PLATES   two of them, torn, flanking the mark, drifting against
-                     the pointer. They are the thing this door is now about;
-                     everything above is the room they are hung in.
+     5. THE PLATES   two frames of animation, torn, on the walls the
+                     composition leaves empty. They stand where four hidden
+                     relic stickers used to, which is a straight trade: a
+                     picture you can see for a sticker you had to find.
 
    No blurs, no backdrop filters, no per-frame JavaScript. The old door ran a
    46-element twinkling starfield with a `filter: drop-shadow` on every one of
    them, which is 46 separate blur passes a frame before anything else on the
    page has painted; this runs on the compositor and leaves the main thread
    free for the thing the door is actually in front of.
-
-   The plates cost 91 kB of WebP between them and one of the two is fetched at
-   high priority, because it is above the fold on every viewport and a front
-   door whose subject arrives after its furniture is a front door that assembles
-   itself in front of you. The other is lazy. Neither is decoded more than once
-   even though each is composited three times — see cutout.css on why the
-   misregistration ghosts reuse the same URL.
    ========================================================================== */
 
 /** Vertical signage. Real words, and none of them are welcoming. */
@@ -81,7 +74,6 @@ export function Splash() {
   const { enter } = usePortal()
   const poke = useRig('THE GATE')
   const [leaving, setLeaving] = useState(false)
-  const relics = relicsOn('splash')
 
   // The door is the one moment on the site where nothing is being read yet, so
   // it is the right place to pay for the index: the brain console on the other
@@ -166,29 +158,20 @@ export function Splash() {
       ))}
 
       {/* ---- 5 · the plates ------------------------------------------
-          Two, flanking the mark, torn on different angles so the pair does
-          not read as a symmetrical frame. They sit UNDER the core in the
-          stack and over everything else: the mark has to win, and a title
-          card competing with two photographs for the same z-index loses. */}
+          Torn on different angles so the pair does not read as a symmetrical
+          frame, and UNDER the core in the stack: the mark has to win, and a
+          title card competing with two pictures at the same depth loses. */}
       <div className="splash__plates">
-        <Cutout
-          plate="kiss-window"
+        <Plate
+          plate={sceneById('kiss-window')}
           cut="shard"
           className="splash__plate splash__plate--l"
-          drift={1.5}
           eager
         />
-        <Cutout
-          plate="kiss-neon"
+        <Plate
+          plate={sceneById('kiss-neon')}
           cut="torn"
           className="splash__plate splash__plate--r"
-          drift={1.2}
-        />
-        <Cutout
-          plate="blob-lips"
-          cut="rip"
-          className="splash__plate splash__plate--lips"
-          drift={2.6}
         />
       </div>
 
@@ -228,9 +211,7 @@ export function Splash() {
           </span>
         </p>
 
-        {/* A button, but what it does is leave — so it gets the door's bang
-            rather than a control's. */}
-        <button type="button" className="splash__enter" data-bang="door" onClick={go}>
+        <button type="button" className="splash__enter" onClick={go}>
           <span className="splash__enter-label">ENTER THE VOID</span>
           <span className="splash__enter-kana jp" aria-hidden="true">
             入
@@ -238,22 +219,8 @@ export function Splash() {
         </button>
 
         <span className="splash__hint">
-          click, or hit ENTER / SPACE · <b>4 of the 10 relics are on this screen</b>
+          click, or hit ENTER / SPACE
         </span>
-      </div>
-
-      {/* ---- the relics ----------------------------------------------
-          Four, in the corners the composition leaves empty, at sizes that
-          read as signage until you put a pointer on one. */}
-      <div className="splash__relics">
-        {relics.map((relic, i) => (
-          <Relic
-            key={relic.id}
-            relic={relic}
-            className={`splash__relic splash__relic--${i + 1}`}
-            style={{ ['--rot' as string]: `${i % 2 ? 4 : -5}deg` }}
-          />
-        ))}
       </div>
 
       <div className="splash__ticker">

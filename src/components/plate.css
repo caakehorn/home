@@ -1,0 +1,230 @@
+/* ==========================================================================
+   THE PLATES
+
+   Two `filter`s in this file and both are colour matrices — grayscale,
+   contrast, brightness — which is one shader pass. No blur, no
+   backdrop-filter, and nothing here animates on anything but `transform`.
+   These are the largest painted objects on the page and they are the last
+   place that can afford either.
+   ========================================================================== */
+
+.plate {
+  position: relative;
+  margin: 0;
+  display: block;
+}
+
+/* The frame is what gets torn. It carries the clip and the aspect ratio; the
+   image inside is free to be slightly bigger than its box so a hover scale
+   never drags an edge into view. */
+.plate__frame {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  aspect-ratio: var(--ratio, 3 / 2);
+  background: var(--void-2);
+  isolation: isolate;
+  contain: paint;
+}
+
+/* ---- the cuts --------------------------------------------------------
+   Irregular by hand. A repeating notch reads as a border treatment; an
+   uneven one reads as paper somebody tore, which is the difference the punk
+   layer has been making since it was written. */
+.plate--torn .plate__frame {
+  clip-path: polygon(
+    2% 3%, 19% 0, 38% 4%, 57% 1%, 74% 5%, 91% 1%, 100% 6%,
+    98% 24%, 100% 43%, 97% 61%, 100% 79%, 96% 96%,
+    79% 100%, 61% 96%, 43% 100%, 24% 97%, 6% 100%, 0 92%,
+    3% 74%, 0 56%, 4% 37%, 0 19%
+  );
+}
+
+.plate--shard .plate__frame {
+  clip-path: polygon(6% 0, 100% 4%, 94% 100%, 0 91%);
+}
+
+.plate--rip .plate__frame {
+  clip-path: polygon(
+    0 0, 100% 0, 100% 88%, 92% 100%, 83% 90%, 74% 99%, 65% 89%,
+    55% 100%, 46% 91%, 36% 99%, 27% 90%, 17% 100%, 8% 91%, 0 99%
+  );
+}
+
+.plate--slab .plate__frame {
+  clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 22px 100%, 0 calc(100% - 22px));
+}
+
+.plate__img {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.03);
+  transition: transform var(--settle) var(--glide);
+}
+
+/* ==========================================================================
+   THE SCREEN AND THE WASH
+
+   The halftone, and the room's own colour laid over the top. Between them they
+   are why one file reads as neon in VOID, as sodium in LOVE HOTEL and as a
+   second-generation photocopy in RIOT.
+
+   Both are held well down. A halftone is a texture over a picture; at half
+   opacity it stops being a texture and becomes a mesh you are looking THROUGH,
+   and every plate goes muddy.
+   ========================================================================== */
+.plate__screen {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background-image: radial-gradient(
+    circle at 50% 50%,
+    color-mix(in srgb, var(--edge) 62%, transparent) 0 32%,
+    transparent 34%
+  );
+  background-size: 4px 4px;
+  mix-blend-mode: multiply;
+  opacity: calc(0.08 + 0.16 * var(--chaos));
+  pointer-events: none;
+}
+
+.plate__wash {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  background: linear-gradient(
+    148deg,
+    color-mix(in srgb, var(--glow) 60%, transparent),
+    transparent 44%,
+    color-mix(in srgb, var(--n1) 44%, transparent)
+  );
+  mix-blend-mode: overlay;
+  opacity: calc(0.12 + 0.22 * var(--chaos));
+  pointer-events: none;
+}
+
+/* One kana burned into the corner, like a shop sign reflected in the glass.
+   Small, lit, and the only type allowed inside the cut. */
+.plate__kana {
+  position: absolute;
+  z-index: 5;
+  right: 0.5rem;
+  bottom: 0.35rem;
+  font-size: clamp(0.9rem, 2vw, 1.5rem);
+  line-height: 1;
+  color: var(--glow);
+  text-shadow: 0 0 4px var(--edge), 0 0 calc(var(--glow-r) * 0.6) var(--glow);
+  opacity: 0.85;
+  pointer-events: none;
+  animation: flicker calc(7s * var(--tempo)) steps(1) infinite;
+}
+
+/* ==========================================================================
+   THE POINTER
+   A plate is a sticker on a board: it lifts, and what is under the tear comes
+   a little closer. Both on `transform`, on the house spring.
+   ========================================================================== */
+@media (hover: hover) and (pointer: fine) {
+  .plate {
+    transition: transform var(--pop) var(--spring);
+    will-change: transform;
+  }
+
+  .plate:hover {
+    transform: translate3d(0, -4px, 0) scale(1.02);
+  }
+
+  .plate:hover .plate__img {
+    transform: scale(1.09);
+    transition-duration: var(--pop);
+  }
+}
+
+/* ==========================================================================
+   THE KNOCKED-OUT ONE
+
+   `kiss-uniform` was drawn on flat white and is cut out for real, with an
+   alpha channel. It must not be given a box, a background or a tear — all
+   three put back the rectangle the knockout exists to remove.
+   ========================================================================== */
+.plate--none .plate__frame {
+  clip-path: none;
+  background: none;
+  overflow: visible;
+  contain: none;
+}
+
+.plate--none .plate__img {
+  object-fit: contain;
+  transform: none;
+  /* A knocked-out figure on a black page has no edge of its own. This is the
+     light standing behind her, and it is the only reason she reads. */
+  filter:
+    drop-shadow(0 0 calc(4px + var(--glow-r) * 0.5) color-mix(in srgb, var(--glow) 80%, transparent))
+    drop-shadow(0.06em 0.06em 0 var(--edge));
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .plate--none:hover .plate__img {
+    transform: none;
+  }
+}
+
+/* The screen and the wash are square; over a knocked-out figure they would be
+   a visible rectangle of dots hanging in the air. */
+.plate--none .plate__screen,
+.plate--none .plate__wash,
+.plate--none .plate__kana {
+  display: none;
+}
+
+/* ==========================================================================
+   ON PAPER
+
+   RIOT is two inks and a sheet of newsprint, and a full-colour picture in the
+   middle of it would be the one object in the room that had not been through
+   the machine. So it goes through the machine.
+
+   contrast 2.4 is what `.xerox` uses in punk.css and it is right for what that
+   class was written for — a dark plate that needs opening up. Several of these
+   are already bright, and at those numbers they went to a blank sheet with an
+   eyebrow on it. Held back to where a blown highlight is still a highlight.
+   ========================================================================== */
+:root[data-vibe='riot'] .plate__img {
+  filter: grayscale(1) contrast(1.65) brightness(0.9);
+}
+
+:root[data-vibe='riot'] .plate--none .plate__img {
+  filter: grayscale(1) contrast(1.65) brightness(0.9) drop-shadow(0.05em 0.05em 0 var(--edge));
+}
+
+:root[data-vibe='riot'] .plate__screen {
+  background-size: 3px 3px;
+  opacity: calc(0.4 + 0.3 * var(--chaos));
+}
+
+:root[data-vibe='riot'] .plate__wash {
+  background: linear-gradient(148deg, color-mix(in srgb, var(--spot) 42%, transparent), transparent 60%);
+  mix-blend-mode: multiply;
+}
+
+:root[data-vibe='riot'] .plate__kana {
+  color: var(--edge);
+  text-shadow: none;
+}
+
+/* ==========================================================================
+   STILL
+   ========================================================================== */
+:root[data-still='1'] .plate__kana {
+  animation: none;
+  opacity: 0.85;
+}
+
+:root[data-still='1'] .plate,
+:root[data-still='1'] .plate__img {
+  transition-duration: 120ms;
+}

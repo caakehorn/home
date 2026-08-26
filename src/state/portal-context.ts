@@ -2,17 +2,10 @@ import { createContext } from 'react'
 
 export const VIBES = [
   {
-    id: 'afterglow',
-    name: 'AFTERGLOW',
-    kana: '余韻',
-    blurb: 'hot pink through black, candy over it, one cold tube',
-    swatch: ['#ff1f6f', '#ff8ad4', '#3dfaff'],
-  },
-  {
     id: 'void',
     name: 'VOID',
     kana: '虚空',
-    blurb: 'acid green, electric violet, the old house style',
+    blurb: 'acid green, electric violet, black with a cast to it',
     swatch: ['#9dff00', '#b026ff', '#030308'],
   },
   {
@@ -89,12 +82,11 @@ export const PortalContext = createContext<PortalState | null>(null)
 // back to the default, so retiring a palette does not need a key bump: nobody
 // gets stranded on a room that is not there any more.
 //
-// v4 is a bump anyway, and for the opposite reason — the same one v3 was. VOID
-// survived this redesign as a room, so `isVibeId('void')` is still true, which
-// means every returning visitor would have been handed back the palette the
-// redesign moved off and would never have seen the one the pictures were hung
-// for. The bump is one-time amnesia on purpose: everybody arrives in AFTERGLOW
-// once, and anybody who wants the acid or the photocopier back is two clicks
-// from either.
-export const STORAGE_KEY = 'danfrank:prefs:v4'
+// v3 is a bump anyway, and for the opposite reason. RIOT survived the redesign
+// as a room, so `isVibeId('riot')` is still true — which means every returning
+// visitor would have been handed back the palette the redesign was meant to
+// replace and would never have seen it. The bump is one-time amnesia on
+// purpose: everybody arrives in VOID once, and anybody who wants the
+// photocopier back is two clicks from it.
+export const STORAGE_KEY = 'danfrank:prefs:v3'
 export const SESSION_KEY = 'danfrank:entered:v1'

@@ -13,14 +13,15 @@
  *     npm install --no-save sharp
  *     node scripts/build-art.mjs ./originals
  *
- * `originals/` holds src-01 … src-08. What each one is, and what is done to
- * it, is in PLATES below. The last three arrived as phone screenshots, so their
- * crops are letterbox boxes measured by scanning for the longest run of rows
- * that are not black — not by somebody reading coordinates off a ruler.
+ * `originals/` holds src-01 … src-08; six of the eight are still shipped. What
+ * each one is, and what is done to it, is in PLATES below. Three arrived as
+ * phone screenshots, so their crops are letterbox boxes measured by scanning
+ * for the longest run of rows that are not black — not by somebody reading
+ * coordinates off a ruler.
  *
  * ---- three jobs ---------------------------------------------------------
  *
- * 1. WATERMARKS COME OFF. Four of the eight arrived with somebody's
+ * 1. WATERMARKS COME OFF. Four of the originals arrived with somebody's
  *    hotlink stamp on them. They are cropped out, not blurred out — a blurred
  *    watermark is still a watermark and it is still in the composition.
  *
@@ -69,57 +70,12 @@ const PLATES = [
     width: 1280,
   },
   {
-    id: 'blob-figure',
-    from: 'src-03.jpg',
-    // The one that is not a kiss: a figure standing in a field of flowing
-    // shapes. Cropped to the figure and the shapes immediately around her.
-    crop: { left: 545, top: 24, width: 420, height: 744 },
-    width: 620,
-  },
-  {
-    id: 'blob-field',
-    from: 'src-03.jpg',
-    // The same picture used as a surface rather than as a subject: the whole
-    // frame, blurred past legibility and pushed, so it tiles behind things as
-    // colour and movement instead of as a drawing anybody reads.
-    crop: { left: 0, top: 0, width: 1408, height: 768 },
-    width: 900,
-    wash: true,
-  },
-  {
-    id: 'blob-lips',
-    from: 'src-03.jpg',
-    // One graphic lifted out of that field. It is the single best object in
-    // the five and it wants to be a sticker.
-    crop: { left: 880, top: 275, width: 300, height: 186 },
-    width: 420,
-  },
-  {
     id: 'kiss-water',
     from: 'src-04.jpg',
     // 2099×2952 with a caption tag in the bottom-left corner. Cropped to the
     // two of them from the ring up, which loses the tag and the empty water.
     crop: { left: 250, top: 210, width: 1620, height: 1500 },
     width: 1120,
-  },
-  {
-    id: 'poster-mort',
-    from: 'src-06.png',
-    // A phone screenshot of a gig poster. The status bar, the date header, the
-    // thumbnail rail and the toolbar all go. The content box was found by
-    // scanning for the longest run of rows that are not letterbox black rather
-    // than by eyeballing pixels, which is also how 07 and 08 were measured —
-    // it puts the artwork at 482..1310.
-    //
-    // It stops at 1185 instead. The phone had drawn its live-text button into
-    // the bottom-right corner of the frame, over a yellow hand and two pink
-    // shapes, and there is no honest way to paint that out: everything under it
-    // is line art with hard edges and a patch would read as a smear. The bottom
-    // eighth of the poster is her shorts and one more row of doodles, so the
-    // crop loses the least of anything available and the whole title, the
-    // support act and the date all survive.
-    crop: { left: 0, top: 482, width: 828, height: 703 },
-    width: 760,
   },
   {
     id: 'kiss-close',
@@ -252,12 +208,6 @@ async function main() {
     const from = path.join(SRC, plate.from)
     let pipe = sharp(from).extract(plate.crop)
 
-    if (plate.wash) {
-      // Past legibility on purpose: this one is a surface, and a surface that
-      // resolves into a drawing when you look at it is a distraction sitting
-      // behind the thing somebody is reading.
-      pipe = pipe.blur(18).modulate({ saturation: 1.5, brightness: 1.04 })
-    }
 
     pipe = pipe.resize({ width: plate.width, withoutEnlargement: true })
 

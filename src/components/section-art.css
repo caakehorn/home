@@ -1,44 +1,51 @@
-/* ==========================================================================
-   THE BANNER
-
-   One plate, large, anchored to one side of the wrap, right under the nav and
-   before the room says anything else. It stays in normal flow rather than
-   overlapping whatever comes next: some rooms put a Marquee strip straight
-   after `<Nav />`, some go straight to a masthead, and a negative margin sized
-   for one of those shapes would misjudge the other.
-   ========================================================================== */
-
 .sec-art {
   position: relative;
-  z-index: 3;
-  width: min(46vw, 30rem);
-  margin-block: clamp(1rem, 3vh, 2rem);
+  z-index: 0;
+  width: min(72vw, 760px);
+  margin: clamp(1.25rem, 3vw, 2.75rem) 0 clamp(1.5rem, 4vw, 3.5rem);
   pointer-events: none;
 }
 
-.sec-art__plate {
-  pointer-events: auto;
-}
-
 .sec-art--left {
-  margin-left: var(--gutter);
+  margin-left: clamp(0rem, 4vw, 4rem);
   margin-right: auto;
-  rotate: -2.4deg;
 }
 
 .sec-art--right {
   margin-left: auto;
-  margin-right: var(--gutter);
-  rotate: 2.6deg;
+  margin-right: clamp(0rem, 4vw, 4rem);
 }
 
-/* Under 860px the banner is nearly the width of the phone either way, so the
-   left/right split stops mattering and both sides centre instead — a plate
-   pinned to one edge on a 380px screen runs off it. */
-@media (max-width: 860px) {
+.sec-art__plate {
+  width: 100%;
+}
+
+.sec-art__plate .plate__frame {
+  min-height: clamp(180px, 30vw, 430px);
+}
+
+@media (max-width: 700px) {
   .sec-art {
-    width: min(78vw, 24rem);
-    margin-inline: auto;
-    rotate: -1.4deg;
+    width: calc(100% - 1rem);
+    margin: 1rem 0 1.5rem;
+  }
+
+  .sec-art--left,
+  .sec-art--right {
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+  }
+
+  .sec-art__plate .plate__frame {
+    min-height: 150px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sec-art .plate,
+  .sec-art .plate__img,
+  .sec-art .plate__kana {
+    transition: none;
+    animation: none;
   }
 }

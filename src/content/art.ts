@@ -1,8 +1,8 @@
 /* ==========================================================================
    THE PLATES
 
-   Eleven pictures hung around the building: six frames of animation, and five
-   photographs of one person.
+   Thirteen pictures hung around the building: eight frames of animation, and
+   five photographs of one person.
 
    ---- the path, and why it is built rather than written -------------------
 
@@ -126,12 +126,14 @@ export const SCENES: Plate[] = [
 export const sceneById = (id: string) => SCENES.find((s) => s.id === id) as Plate
 
 /**
- * `SCENES` in a fixed order, for anything that wants to cycle through all
- * eight deterministically — `SectionArt` picks one of these by hashing a
- * section's slug rather than importing `SCENES` directly, so a ninth plate
- * added above extends every room's rotation without another file to touch.
+ * The scenes in hanging order, as ids.
+ *
+ * Derived rather than written down so a plate added to `SCENES` is hung
+ * automatically and the two lists cannot drift apart. `SectionArt` indexes into
+ * this modulo its length, which is why it wants ids in a stable order rather
+ * than the objects.
  */
-export const SCENE_ORDER = SCENES.map((s) => s.id)
+export const SCENE_ORDER: string[] = SCENES.map((s) => s.id)
 
 /* ==========================================================================
    THE PHOTOGRAPHS

@@ -1,1 +1,1 @@
-{"v":"1","kdf":"PBKDF2-SHA256","iter":"250000","salt":"xIF/2dyeIWSyQIo5+0YCTw==","iv":"1bm4EtsfDQtyv/YM","ct":"2PIwWD2JSFKJAxUnc/jAg+MRMnXOgbHraAfjvyK8LXBRNrGcMmfko1HNEA=="}
+{"v":"2","blobs":[{"v":"1","kdf":"PBKDF2-SHA256","iter":"250000","salt":"FkpP3oJSqOam7j+cPwgzhw==","iv":"uXEXE/Z2IICTLhiQ","ct":"sM265uf0LYtZmbVSWTFgloeeJU6QnWz4F/NRHEpKXzbja9owlzw8vP/ZVg=="},{"v":"1","kdf":"PBKDF2-SHA256","iter":"250000","salt":"AhsMfck5XncluXMPeaDJFw==","iv":"ObaHj7peQYXfKIQB","ct":"7NPaYj7oFk6nuC3C9BYgI6e/kEVieKwmV8Pf3xpJNtwiCJ4/3R9MNbmC+A=="}]}

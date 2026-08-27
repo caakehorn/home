@@ -18,7 +18,60 @@ import './wiki.css'
 const DOMAIN_KANA: Record<string, string> = {
   people: '人', interests: '趣味', mind: '心', timeline: '年表',
   self: '自己', work: '仕事', places: '場所', health: '健康', legal: '法',
+  meta: '書',
 }
+
+/* ==========================================================================
+   TWO AXES, NOT ONE
+
+   DOMAIN says what a page is *about* — people, mind, timeline. It was the only
+   facet this page had, and it is the less useful of the two for the question
+   people actually arrive with, which is not "show me everything about people"
+   (174 pages) but "show me the conclusions" or "show me what happened."
+
+   TYPE says what a page *is*, and the wiki has always carried it in
+   frontmatter: a synthesis is a conclusion reasoned from other pages, an event
+   is something that happened on a date, an entity is a person or a place, a
+   concept is an idea the corpus keeps returning to. Filtering on it turns 516
+   undifferentiated cards into "the 58 things this wiki concluded," which is a
+   browse somebody would actually make.
+
+   The two compose. TIMELINE × EVENT is the chronology; MIND × SYNTHESIS is the
+   argument; PEOPLE × ENTITY is the cast.
+   ========================================================================== */
+const TYPE_KANA: Record<string, string> = {
+  entity: '実体', synthesis: '統合', concept: '概念', event: '事件',
+  summary: '概要', report: '報告', profile: '人物', index: '索引',
+  period: '時代', chat: '対話', note: '記録', journey: '道',
+  dataset: '数表', update: '更新',
+}
+
+/** What the type is, in one line, for the chip's tooltip. */
+const TYPE_NOTE: Record<string, string> = {
+  entity: 'A person, a place, a thing — the cast and the props.',
+  synthesis: 'A conclusion reasoned from other pages. The wiki thinking, not reporting.',
+  concept: 'An idea the corpus keeps returning to.',
+  event: 'Something that happened, on a date.',
+  summary: 'A domain overview — the way in, not the depth.',
+  report: 'A worked analysis of one source or question.',
+  profile: 'A measured read of one mind.',
+  index: 'Navigation. A list of what is under it.',
+  period: 'A stretch of years treated as one thing.',
+  chat: 'A conversation, kept as a conversation.',
+  note: 'A dated observation, too small to be an event.',
+  journey: 'A curated path through pages that were written apart.',
+  dataset: 'Structured numbers, drawn as a chart.',
+  update: 'A dated addendum to a page that already exists.',
+}
+
+/* The three generated ledgers, mirrored into `wiki/meta/` upstream precisely so
+   the portal can serve them — the sync only reads `wiki/**`, so a root-level
+   DIGEST.md is invisible here. They were reachable only by knowing the slug. */
+const LEDGERS = [
+  { slug: 'meta/digest', label: 'DIGEST', kana: '要', note: 'The state of the thing — size, shape, what it holds.' },
+  { slug: 'meta/recent-activity', label: 'RECENT', kana: '新', note: 'What moved lately, newest first.' },
+  { slug: 'meta/open-questions', label: 'OPEN', kana: '問', note: "Every gap the wiki admits it hasn't closed." },
+] as const
 
 const VIEWS = [
   { id: 'map', label: 'MAP', kana: '地図' },
@@ -61,6 +114,7 @@ export function WikiIndexRoute() {
   const [params, setParams] = useSearchParams()
   const [query, setQuery] = useState('')
   const domain = params.get('domain')
+  const type = params.get('type')
   const drafts = useMemo(() => Object.keys(allDrafts()), [])
 
   const requested = (params.get('view') ?? 'map') as View
@@ -86,6 +140,7 @@ export function WikiIndexRoute() {
     return data.pages
       .filter((p) => (view === 'briefs' ? p.brief : true))
       .filter((p) => (domain ? p.domain === domain : true))
+      .filter((p) => (type ? p.type === type : true))
       .filter((p) =>
         !q
           ? true
@@ -94,7 +149,22 @@ export function WikiIndexRoute() {
             (p.knownFor ?? '').toLowerCase().includes(q),
       )
       .sort((a, b) => b.words - a.words)
-  }, [data, view, domain, query])
+  }, [data, view, domain, type, query])
+
+  /* Type counts respect the domain filter but not their own, so the row reads
+     as "what else is in here" rather than collapsing to the one chip you just
+     pressed. Same convention the domain row would want if it had counts that
+     moved. */
+  const types = useMemo(() => {
+    if (!data) return []
+    const counts = new Map<string, number>()
+    for (const p of data.pages) {
+      if (domain && p.domain !== domain) continue
+      if (!p.type) continue
+      counts.set(p.type, (counts.get(p.type) ?? 0) + 1)
+    }
+    return [...counts].sort((a, b) => b[1] - a[1])
+  }, [data, domain])
 
   // The map dims rather than removes, so it wants the set, not the list.
   const visible = useMemo(() => new Set(results.map((p) => p.slug)), [results])
@@ -104,6 +174,14 @@ export function WikiIndexRoute() {
     if (domain && data && !data.domains.some((d) => d.id === domain)) setParam('domain', null)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, domain])
+
+  // A type that survives a domain change into a domain that has none of it
+  // leaves the page reading "0 pages" with no visible cause, because the chip
+  // that caused it is no longer in the row.
+  useEffect(() => {
+    if (type && types.length && !types.some(([id]) => id === type)) setParam('type', null)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [types, type])
 
   return (
     <div className="wiki">
@@ -133,6 +211,22 @@ export function WikiIndexRoute() {
           </p>
         )}
       </header>
+
+      {/* The three generated ledgers, one click from the front of the wiki.
+          They were always here — `wiki/meta/` is synced like any other page —
+          but the only way to reach one was to already know its slug, which
+          means they were written for a reader who could not find them. */}
+      <div className="wrap wiki__ledgers" role="group" aria-label="The wiki about itself">
+        {LEDGERS.map((l) => (
+          <Link key={l.slug} to={`/brain/${l.slug}`} className="wiki__ledger" title={l.note}>
+            <span className="jp" aria-hidden="true">
+              {l.kana}
+            </span>
+            <b>{l.label}</b>
+            <i>{l.note}</i>
+          </Link>
+        ))}
+      </div>
 
       {/* Above the deck bar, because the first question on this page is "where
           do I start" and the map is an answer to a later one. */}
@@ -198,6 +292,57 @@ export function WikiIndexRoute() {
           </button>
         ))}
       </div>
+
+      {/* The second axis. DOMAIN is what a page is about; this is what it is. */}
+      {types.length > 1 && (
+        <div className="wrap wiki__types" role="group" aria-label="Filter by kind of entry">
+          <span className="wiki__types-label">KIND</span>
+          <button
+            type="button"
+            className={`wiki__type${!type ? ' wiki__type--on' : ''}`}
+            onClick={() => setParam('type', null)}
+          >
+            ANY
+          </button>
+          {types.map(([id, count]) => (
+            <button
+              key={id}
+              type="button"
+              className={`wiki__type${type === id ? ' wiki__type--on' : ''}`}
+              title={TYPE_NOTE[id]}
+              onClick={() => setParam('type', type === id ? null : id)}
+            >
+              <span className="jp" aria-hidden="true">
+                {TYPE_KANA[id] ?? '書'}
+              </span>
+              {id.toUpperCase()} ({count})
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* A filter that finds nothing has to say so. The map dims rather than
+          removes, so it is the only view that does not need this. */}
+      {data && results.length === 0 && view !== 'map' && view !== 'gaps' && (
+        <p className="wrap wiki__state">
+          Nothing matches{type ? ` kind ${type.toUpperCase()}` : ''}
+          {domain ? ` in ${domain.toUpperCase()}` : ''}
+          {query.trim() ? ` for “${query.trim()}”` : ''}.{' '}
+          <button
+            type="button"
+            className="wiki__reset"
+            onClick={() => {
+              setQuery('')
+              const next = new URLSearchParams(params)
+              next.delete('domain')
+              next.delete('type')
+              setParams(next)
+            }}
+          >
+            clear the filters
+          </button>
+        </p>
+      )}
 
       {loading && <p className="wrap wiki__state">waking the brain…</p>}
       {error && (

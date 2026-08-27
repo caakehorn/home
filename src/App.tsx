@@ -2,7 +2,6 @@ import { Suspense, lazy } from 'react'
 import { Route, Routes, useLocation } from 'react-router-dom'
 import { Crawl } from './components/Crawl'
 import { CrownDefs } from './components/Crown'
-import { Cursor } from './components/Cursor'
 import { JET_FUEL, RATIO } from './content/crawls'
 import { Fx } from './components/Fx'
 import { Hud } from './components/Hud'
@@ -56,6 +55,7 @@ const LineageRoute = lazy(() =>
   import('./routes/Lineage').then((m) => ({ default: m.LineageRoute })),
 )
 const SageRoute = lazy(() => import('./routes/Sage').then((m) => ({ default: m.SageRoute })))
+const WordsRoute = lazy(() => import('./routes/Words').then((m) => ({ default: m.WordsRoute })))
 const TranscriptRoute = lazy(() =>
   import('./routes/Transcript').then((m) => ({ default: m.TranscriptRoute })),
 )
@@ -99,7 +99,6 @@ function Site() {
     <>
       <CrownDefs />
       <Fx />
-      <Cursor />
 
       <Suspense fallback={<Arriving />}>
         <Routes>
@@ -118,6 +117,7 @@ function Site() {
           <Route path="/leviathan" element={<LeviathanRoute />} />
           <Route path="/leviathan/:id" element={<LeviathanRoute />} />
           <Route path="/sage" element={<SageRoute />} />
+          <Route path="/words" element={<WordsRoute />} />
           <Route path="/transcript" element={<TranscriptRoute />} />
           <Route path="/:slug" element={<Stub />} />
         </Routes>

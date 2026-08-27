@@ -23,12 +23,12 @@
  * scoped so that a bad day means edits to two repositories rather than
  * anything worse.
  */
-import { decrypt, type Blob } from '../gate/protocol'
+import { decryptVault, type Vault } from '../gate/protocol'
 import { KEYS } from '../gate/config'
 
 const url = () => `${import.meta.env.BASE_URL}gate/keyring.enc`.replace(/\/{2,}/g, '/')
 
-let blob: Promise<Blob | null> | null = null
+let blob: Promise<Vault | null> | null = null
 let token: string | null = null
 
 /**
@@ -44,9 +44,9 @@ let token: string | null = null
  * `no-store` for the same reason: `force-cache` let the browser keep serving a
  * 404 from before the file existed.
  */
-function load(): Promise<Blob | null> {
+function load(): Promise<Vault | null> {
   blob ??= fetch(url(), { cache: 'no-store' })
-    .then((r) => (r.ok ? (r.json() as Promise<Blob>) : Promise.reject(new Error('absent'))))
+    .then((r) => (r.ok ? (r.json() as Promise<Vault>) : Promise.reject(new Error('absent'))))
     .catch(() => {
       blob = null
       return null
@@ -71,15 +71,25 @@ export async function configured(): Promise<boolean> {
 /**
  * Open the keyring with an explicit passphrase.
  *
- * Returns false on a wrong one — GCM authentication fails and `decrypt` throws,
- * which is the same check the gate makes, so there is no separate notion here
- * of a right passphrase.
+ * Returns false on a wrong one — GCM authentication fails and `decryptVault`
+ * throws, which is the same check the gate makes, so there is no separate
+ * notion here of a right passphrase.
+ *
+ * **The keyring must be built under every phrase the door accepts.** The gate
+ * stores whichever phrase opened it and this reaches for that one, so a keyring
+ * sealed under a phrase the door no longer takes fails here and nowhere else —
+ * the door opens, the site works, and SAVE silently stops publishing. That is
+ * not hypothetical: it was the state of this deployment on 2026-08-27, when
+ * `verify.enc` had been rebuilt for the combination dial and `keyring.enc` was
+ * still sealed under the typed passphrase it replaced. Both files carry a
+ * `Vault` for exactly this reason, and `scripts/make-keyring.mjs` takes the
+ * same phrase inputs as `scripts/make-verify.mjs` so the two cannot drift.
  */
 export async function unlock(phrase: string): Promise<boolean> {
   const b = await load()
   if (!b) return false
   try {
-    token = (await decrypt(b, phrase)).trim()
+    token = (await decryptVault(b, phrase)).trim()
     return true
   } catch {
     return false

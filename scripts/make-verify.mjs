@@ -1,126 +1,92 @@
 /**
- * Writes the blob the gate checks a passphrase against.
+ * Writes the vault the gate checks an entry against.
  *
- *   HOME_COMBINATION='NN-NN-NN' node scripts/make-verify.mjs
- *   HOME_PASSPHRASE='…'         node scripts/make-verify.mjs
+ *   HOME_COMBINATION='6-9-6'                       node scripts/make-verify.mjs
+ *   HOME_PASSPHRASE='…'                            node scripts/make-verify.mjs
+ *   HOME_COMBINATION='6-9-6' HOME_PASSPHRASE='…'   node scripts/make-verify.mjs
  *   npm run gate:verify
  *
- * The blob is a tiny AES-256-GCM ciphertext under a PBKDF2-SHA256 key
- * (250,000 iterations) derived from the passphrase. The gate checks an entry
- * by *decrypting* it: a wrong passphrase fails GCM authentication and throws.
+ * Each accepted phrase gets a tiny AES-256-GCM ciphertext under a PBKDF2-SHA256
+ * key (250,000 iterations). The gate checks an entry by *decrypting*: a wrong
+ * phrase fails GCM authentication and throws. Set both inputs and the door takes
+ * either — one blob each, in a `{ v: '2', blobs: [...] }` vault.
  *
  * There is no stored hash, so committing this file leaks nothing but the cost
- * of guessing — 250k iterations per attempt, offline or not. The passphrase
- * itself is never written anywhere and cannot be recovered from this
- * repository, which is the point of the design.
+ * of guessing. No phrase is ever written anywhere and none can be recovered
+ * from this repository, which is the point of the design.
  *
- * In CI, put the passphrase in a repository secret and export it as
- * HOME_PASSPHRASE for this one step. Do not echo it, and do not pass it as an
- * argument — argv is visible to every process on the box.
+ * **Run `npm run keyring` with the same inputs whenever you run this.** The gate
+ * stores whichever phrase opened it and the keyring is opened with that phrase,
+ * so rebuilding one without the other leaves a door that opens onto a
+ * credential nobody can decrypt — see `scripts/phrases.mjs` for the day that
+ * actually happened here.
+ *
+ * Which phrases the door takes, how a combination is normalised, and what
+ * accepting more than one costs: `scripts/phrases.mjs`. In CI, put each phrase
+ * in a repository secret and export it for this one step. Do not echo them, and
+ * do not pass them as arguments — argv is visible to every process on the box.
  */
 import { webcrypto as crypto } from 'node:crypto'
 import { mkdirSync, writeFileSync } from 'node:fs'
+import { phrases, vault } from './phrases.mjs'
 
 const ITERATIONS = 250_000
 const OUT = 'public/gate/verify.enc'
 
-/*
- * THE COMBINATION FORMAT
- *
- * The door is a combination padlock now, and the dialled numbers ARE the
- * passphrase. That means this script and `src/gate/combination.ts` have to
- * agree on one string exactly, or the door never opens for anybody including
- * its owner — so the normalisation lives here rather than in the operator's
- * fingers. HOME_COMBINATION takes whatever is natural to type:
- *
- *     HOME_COMBINATION='12-34-5'    npm run gate:verify
- *     HOME_COMBINATION='12 34 05'   npm run gate:verify
- *     HOME_COMBINATION='12,34,5'    npm run gate:verify
- *
- * All three become "12-34-05", which is what the dial produces: each number
- * zero-padded to two digits, joined by single hyphens.
- *
- * HOME_PASSPHRASE still works and is still passed through untouched, for a
- * deployment that has not switched the door over.
- */
-const POSITIONS = 40
-const NUMBERS = 3
-
-function fromCombination(raw) {
-  const parts = raw.trim().split(/[^0-9]+/).filter(Boolean)
-  if (parts.length !== NUMBERS) {
-    console.error(`A combination is ${NUMBERS} numbers. Got ${parts.length}: "${raw}"`)
-    process.exit(1)
-  }
-  const numbers = parts.map(Number)
-  for (const n of numbers) {
-    if (!Number.isInteger(n) || n < 0 || n >= POSITIONS) {
-      console.error(`Every number must be 0–${POSITIONS - 1}. Got ${n}.`)
-      process.exit(1)
-    }
-  }
-  return numbers.map((n) => String(n).padStart(2, '0')).join('-')
-}
-
-const combo = process.env.HOME_COMBINATION
-const phrase = combo ? fromCombination(combo) : process.env.HOME_PASSPHRASE
-
-if (!phrase) {
-  console.error(
-    'Set HOME_COMBINATION (e.g. "12-34-05") or HOME_PASSPHRASE in the environment.\n' +
-      'Neither is ever read from argv or a file.',
-  )
-  process.exit(1)
-}
-
-// The length floor is about a typed passphrase being worth the iterations. A
-// combination is a fixed 8 characters by construction and its cost is the
-// 64,000-guess keyspace, not its length — so the floor would only ever reject
-// a correctly-formatted combination. `src/gate/combination.ts` documents that
-// trade honestly rather than pretending the floor covers it.
-if (!combo && phrase.length < 8) {
-  console.error('That passphrase is too short to be worth the 250,000 iterations.')
-  process.exit(1)
-}
-
-if (combo) console.log(`combination normalised to ${NUMBERS} numbers on a ${POSITIONS}-position dial`)
+// The plaintext is deliberately boring: a blob exists to authenticate, not to
+// carry anything. What it says is never shown.
+const PLAINTEXT = '薬窟 — the door is open'
 
 const b64 = (bytes) => Buffer.from(bytes).toString('base64')
 
-const salt = crypto.getRandomValues(new Uint8Array(16))
-const iv = crypto.getRandomValues(new Uint8Array(12))
-
-const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(phrase), 'PBKDF2', false, [
-  'deriveKey',
-])
-const key = await crypto.subtle.deriveKey(
-  { name: 'PBKDF2', salt, iterations: ITERATIONS, hash: 'SHA-256' },
-  base,
-  { name: 'AES-GCM', length: 256 },
-  false,
-  ['encrypt'],
-)
-
-// The plaintext is deliberately boring: the blob exists to authenticate, not
-// to carry anything. What it says is never shown.
-const ct = await crypto.subtle.encrypt(
-  { name: 'AES-GCM', iv },
-  key,
-  new TextEncoder().encode('薬窟 — the door is open'),
-)
-
-mkdirSync('public/gate', { recursive: true })
-writeFileSync(
-  OUT,
-  JSON.stringify({
+async function seal(phrase, plaintext) {
+  const salt = crypto.getRandomValues(new Uint8Array(16))
+  const iv = crypto.getRandomValues(new Uint8Array(12))
+  const base = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(phrase),
+    'PBKDF2',
+    false,
+    ['deriveKey'],
+  )
+  const key = await crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt, iterations: ITERATIONS, hash: 'SHA-256' },
+    base,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt'],
+  )
+  const ct = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv },
+    key,
+    new TextEncoder().encode(plaintext),
+  )
+  return {
     v: '1',
     kdf: 'PBKDF2-SHA256',
     iter: String(ITERATIONS),
     salt: b64(salt),
     iv: b64(iv),
     ct: b64(new Uint8Array(ct)),
-  }),
-)
+  }
+}
 
-console.log(`gate: verifier written -> ${OUT} (${ITERATIONS.toLocaleString()} iterations)`)
-console.log('Commit it. The passphrase stays out of the repository.')
+const ways = phrases()
+const blobs = []
+for (const { phrase, label } of ways) {
+  blobs.push(await seal(phrase, PLAINTEXT))
+  console.log(`gate: sealed a blob for the ${label}`)
+}
+
+mkdirSync('public/gate', { recursive: true })
+writeFileSync(OUT, JSON.stringify(vault(blobs)))
+
+console.log(
+  `gate: verifier written -> ${OUT} (${blobs.length} way${blobs.length === 1 ? '' : 's'} in, ` +
+    `${ITERATIONS.toLocaleString()} iterations each)`,
+)
+if (blobs.length > 1) {
+  console.log('gate: the door is only as strong as the weakest of those — see scripts/phrases.mjs.')
+}
+console.log('Now run `npm run keyring` with the SAME inputs, or SAVE will stop publishing.')
+console.log('Commit the result. No phrase enters the repository.')

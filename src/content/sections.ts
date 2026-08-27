@@ -35,6 +35,17 @@ export const SECTIONS: Section[] = [
     chant: banner('sage'),
   },
   {
+    slug: 'words',
+    title: 'THE NET',
+    short: 'WORDS',
+    kana: '網',
+    blurb:
+      'A box for words. Type in a piece of slang or a phrase and it is filed to the wiki, where a pass counts it against 106,629 sent messages before deciding what it is. The vocabulary page is full of words picked as pleasing; this is where the measured ones come from.',
+    status: 'LIVE',
+    accent: 2,
+    chant: banner('brain'),
+  },
+  {
     slug: 'lineage',
     title: 'THE LATTICE',
     kana: '血統',

@@ -1,7 +1,17 @@
 /**
  * Writes the keyring: the GitHub token, encrypted under the site passphrase.
  *
- *   HOME_PASSPHRASE='…' GITHUB_TOKEN='github_pat_…' npm run keyring
+ *   HOME_COMBINATION='6-9-6' GITHUB_TOKEN='github_pat_…' npm run keyring
+ *   HOME_PASSPHRASE='…'      GITHUB_TOKEN='github_pat_…' npm run keyring
+ *   both set                                             npm run keyring
+ *
+ * **Run this with exactly the inputs you gave `make-verify.mjs`.** The gate
+ * stores whichever phrase opened the door and this credential is opened with
+ * that phrase, so a keyring sealed under a phrase the door no longer accepts
+ * fails here and nowhere else: the door opens, the site renders, and every
+ * SAVE and every question typed into the sage box silently stops committing.
+ * That was this deployment's actual state on 2026-08-27. `scripts/phrases.mjs`
+ * resolves the inputs for both scripts so they cannot drift again.
  *
  * ---- what this is for --------------------------------------------------
  *
@@ -41,21 +51,17 @@
  */
 import { webcrypto as crypto } from 'node:crypto'
 import { mkdirSync, writeFileSync } from 'node:fs'
+import { phrases, vault } from './phrases.mjs'
 
 const ITERATIONS = 250_000
 const OUT = 'public/gate/keyring.enc'
 
-const phrase = process.env.HOME_PASSPHRASE
 const token = process.env.GITHUB_TOKEN
 
-if (!phrase || !token) {
-  console.error('Set both HOME_PASSPHRASE and GITHUB_TOKEN in the environment.')
-  console.error("  HOME_PASSPHRASE='…' GITHUB_TOKEN='github_pat_…' npm run keyring")
+if (!token) {
+  console.error('Set GITHUB_TOKEN in the environment, with a phrase to seal it under.')
+  console.error("  HOME_COMBINATION='6-9-6' GITHUB_TOKEN='github_pat_…' npm run keyring")
   console.error('Neither is read from argv or from a file.')
-  process.exit(1)
-}
-if (phrase.length < 8) {
-  console.error('That passphrase is too short to be worth the 250,000 iterations.')
   process.exit(1)
 }
 if (token.startsWith('ghp_')) {
@@ -67,31 +73,53 @@ if (token.startsWith('ghp_')) {
 
 const b64 = (bytes) => Buffer.from(bytes).toString('base64')
 
-const salt = crypto.getRandomValues(new Uint8Array(16))
-const iv = crypto.getRandomValues(new Uint8Array(12))
+async function seal(phrase, plaintext) {
+  const salt = crypto.getRandomValues(new Uint8Array(16))
+  const iv = crypto.getRandomValues(new Uint8Array(12))
+  const base = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(phrase),
+    'PBKDF2',
+    false,
+    ['deriveKey'],
+  )
+  const key = await crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt, iterations: ITERATIONS, hash: 'SHA-256' },
+    base,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt'],
+  )
+  const ct = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv },
+    key,
+    new TextEncoder().encode(plaintext),
+  )
+  return {
+    v: '1',
+    kdf: `PBKDF2-SHA256/${ITERATIONS}`,
+    iter: String(ITERATIONS),
+    salt: b64(salt),
+    iv: b64(iv),
+    ct: b64(new Uint8Array(ct)),
+  }
+}
 
-const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(phrase), 'PBKDF2', false, [
-  'deriveKey',
-])
-const key = await crypto.subtle.deriveKey(
-  { name: 'PBKDF2', salt, iterations: ITERATIONS, hash: 'SHA-256' },
-  base,
-  { name: 'AES-GCM', length: 256 },
-  false,
-  ['encrypt'],
-)
-
-const ct = await crypto.subtle.encrypt(
-  { name: 'AES-GCM', iv },
-  key,
-  new TextEncoder().encode(token),
-)
+// One blob per way through the door, so the token opens for whichever phrase
+// the visitor actually used. Every blob carries the same token — this is not a
+// per-phrase credential, it is one credential reachable by each accepted key.
+const ways = phrases()
+const blobs = []
+for (const { phrase, label } of ways) {
+  blobs.push(await seal(phrase, token))
+  console.log(`keyring: sealed the token for the ${label}`)
+}
 
 mkdirSync('public/gate', { recursive: true })
-writeFileSync(
-  OUT,
-  JSON.stringify({ v: '1', kdf: `PBKDF2-SHA256/${ITERATIONS}`, iter: String(ITERATIONS), salt: b64(salt), iv: b64(iv), ct: b64(ct) }),
-)
+writeFileSync(OUT, JSON.stringify(vault(blobs)))
 
-console.log(`keyring: wrote ${OUT} (${token.slice(0, 7)}…, ${ITERATIONS.toLocaleString()} iterations)`)
-console.log('Commit it. The passphrase is not in it and cannot be recovered from it.')
+console.log(
+  `keyring: wrote ${OUT} (${token.slice(0, 7)}…, ${blobs.length} way${blobs.length === 1 ? '' : 's'} in, ` +
+    `${ITERATIONS.toLocaleString()} iterations each)`,
+)
+console.log('Commit it. No phrase is in it and none can be recovered from it.')

@@ -496,6 +496,74 @@ function sageEntries() {
 
 const sage = sageEntries()
 
+// ---------------------------------------------------------------------------
+// lexicon.json — words put to the wiki from outside it
+//
+// `lexicon/words/*.md` in wiki-brain, one file per word. Same mechanism as the
+// sage log above and the same promise: nothing analyses a word automatically,
+// it is parked until a session counts it against the message record and folds
+// the finding into `wiki/interests/language/vocabulary-lexicon.md`.
+//
+// The one state worth being careful about is `rejected` — a word checked and
+// found to be nothing. It is kept rather than deleted, because a word nobody
+// has looked at and a word looked at and dismissed must not be indistinguishable
+// from outside, so the derivation carries it like any other.
+
+function lexiconEntries() {
+  const dir = join(SOURCE, 'lexicon', 'words')
+  if (!existsSync(dir)) return []
+  const section = (body, name) => {
+    const at = body.search(new RegExp(`^##\\s+${name}\\s*$`, 'im'))
+    if (at === -1) return ''
+    const rest = body.slice(at).replace(/^##.*\n/, '')
+    const next = rest.search(/^##\s/m)
+    return (next === -1 ? rest : rest.slice(0, next)).trim()
+  }
+  // Placeholders exist so an empty section still reads as a file upstream; they
+  // are not content and must not reach the UI as if they were.
+  const real = (s) => (/^_.*_$/.test(s.trim()) ? '' : s)
+  return readdirSync(dir)
+    .filter((f) => f.endsWith('.md'))
+    .map((f) => {
+      const { meta, lists, body } = parseFrontmatter(readFileSync(join(dir, f), 'utf8'))
+      return {
+        id: meta.id ?? f.replace(/\.md$/, ''),
+        added: meta.added ?? null,
+        // Quoted upstream so a word may contain a colon or a quote; strip the
+        // wrapping quotes and unescape, or every word renders with them.
+        word: String(meta.word ?? '')
+          .replace(/^"(.*)"$/s, '$1')
+          .replace(/\\"/g, '"')
+          .replace(/\\\\/g, '\\'),
+        kind: meta.kind || 'word',
+        status: meta.status ?? 'pending',
+        analyzed: meta.analyzed || null,
+        targets: lists?.targets ?? [],
+        note: real(section(body, 'Note')),
+        reading: real(section(body, 'Reading')),
+      }
+    })
+    // Newest first: the list is read from the top and the thing just caught is
+    // the thing somebody wants to see land.
+    .sort((a, b) => String(b.added ?? b.id).localeCompare(String(a.added ?? a.id)))
+}
+
+const words = lexiconEntries()
+
+writeFileSync(
+  join(OUT, 'lexicon.json'),
+  JSON.stringify({
+    generatedAt: new Date().toISOString(),
+    counts: {
+      caught: words.length,
+      pending: words.filter((e) => e.status === 'pending').length,
+      analyzed: words.filter((e) => e.status === 'analyzed').length,
+      rejected: words.filter((e) => e.status === 'rejected').length,
+    },
+    entries: words,
+  }),
+)
+
 // A sealed page ships as ciphertext precisely so the site cannot read it out.
 // An answer that quotes one would publish through the back door exactly what the
 // seal exists to keep shut. Warned rather than failed: the answer is already

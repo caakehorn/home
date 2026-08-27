@@ -1,5 +1,6 @@
 import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
+import { SectionArt } from '../components/SectionArt'
 import { SubHead } from '../components/Wordmark'
 import { sectionBySlug } from '../content/sections'
 import { Record } from '../transcript/Record'
@@ -21,6 +22,7 @@ export function TranscriptRoute() {
   return (
     <div className="tsw" style={{ ['--glow' as string]: `var(--n${section.accent})` }}>
       <Nav />
+      <SectionArt slug="transcript" />
       <Marquee
         text={section.chant}
         duration={20}

@@ -1,8 +1,8 @@
 /* ==========================================================================
    THE PLATES
 
-   Eleven pictures hung around the building: six frames of animation, and five
-   photographs of one person.
+   Thirteen pictures hung around the building: eight frames of animation, and
+   five photographs of one person.
 
    ---- the path, and why it is built rather than written -------------------
 
@@ -39,7 +39,7 @@ export type Plate = {
 }
 
 /* ==========================================================================
-   THE SCENES — six frames, nobody in particular
+   THE SCENES — eight frames, nobody in particular
 
    Cels rather than photographs, and that distinction is the whole reason they
    can hang in a building that is otherwise a wiki about one real person: a
@@ -93,6 +93,24 @@ export const SCENES: Plate[] = [
     alt: 'Two women kissing with their eyes shut, one dark-haired, one blonde',
     kana: '密',
     tone: 5,
+  },
+  {
+    id: 'kiss-butterfly',
+    src: asset('art/kiss-butterfly.webp'),
+    w: 1026,
+    h: 1410,
+    alt: 'Two women in headphones with butterfly wings on the ear cups, teal-haired and pink-haired, foreheads together',
+    kana: '蝶',
+    tone: 4,
+  },
+  {
+    id: 'kiss-mirror',
+    src: asset('art/kiss-mirror.webp'),
+    w: 1200,
+    h: 849,
+    alt: 'Two women close together, one holding a mirror, the other holding a makeup brush to her face',
+    kana: '化粧',
+    tone: 2,
   },
   {
     id: 'kiss-uniform',

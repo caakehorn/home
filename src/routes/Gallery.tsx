@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
+import { SectionArt } from '../components/SectionArt'
 import { SubHead } from '../components/Wordmark'
 import { sectionBySlug } from '../content/sections'
 import { Lightbox } from '../gallery/Lightbox'
@@ -50,6 +51,7 @@ export function GalleryRoute() {
   return (
     <div className="gal" style={{ ['--glow' as string]: `var(--n${section.accent})` }}>
       <Nav />
+      <SectionArt slug="gallery" />
       <Marquee
         text={section.chant}
         duration={22}

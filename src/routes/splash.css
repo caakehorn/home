@@ -418,17 +418,17 @@
 }
 
 .splash__plate--l {
-  top: 8%;
-  left: clamp(0.4rem, 3vw, 4.5rem);
-  width: clamp(190px, 27vw, 430px);
+  top: 6%;
+  left: clamp(0.2rem, 2vw, 3rem);
+  width: clamp(230px, 34vw, 540px);
   rotate: -3.2deg;
   animation-delay: 220ms;
 }
 
 .splash__plate--r {
-  right: clamp(0.4rem, 3vw, 4.5rem);
-  bottom: clamp(4.5rem, 14vh, 9rem);
-  width: clamp(200px, 29vw, 470px);
+  right: clamp(0.2rem, 2vw, 3rem);
+  bottom: clamp(4rem, 13vh, 8.5rem);
+  width: clamp(240px, 36vw, 580px);
   rotate: 2.6deg;
   animation-delay: 360ms;
 }

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
+import { SectionArt } from '../components/SectionArt'
 import { SubHead } from '../components/Wordmark'
 import { banner } from '../content/slogans'
 import { BriefDeck } from '../wiki/BriefDeck'
@@ -185,6 +186,7 @@ export function WikiIndexRoute() {
   return (
     <div className="wiki">
       <Nav />
+      <SectionArt slug="brain" />
       <Marquee
         text={banner('wiki')}
         duration={20}

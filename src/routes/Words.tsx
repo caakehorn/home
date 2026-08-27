@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
+import { SectionArt } from '../components/SectionArt'
 import { SubHead } from '../components/Wordmark'
 import { banner } from '../content/slogans'
 import { Catch } from '../lexicon/Catch'
@@ -63,6 +64,7 @@ export function WordsRoute() {
   return (
     <div className="lex">
       <Nav />
+      <SectionArt slug="words" />
       <Marquee
         text={banner('brain')}
         duration={20}

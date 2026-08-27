@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
 import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
+import { SectionArt } from '../components/SectionArt'
 import { SubHead } from '../components/Wordmark'
 import { sectionBySlug } from '../content/sections'
 import { INSTRUMENTS, WINGS, countBy, instrumentById, instrumentsIn } from '../leviathan/core'
@@ -261,6 +262,7 @@ function Wing({ children }: { children: React.ReactNode }) {
   return (
     <div className="lev" style={{ ['--glow' as string]: `var(--n${section.accent})` }}>
       <Nav />
+      <SectionArt slug="leviathan" />
       <Marquee text={section.chant} duration={20} tone={section.accent} size="clamp(0.75rem, 1.6vw, 1.05rem)" />
       {children}
     </div>

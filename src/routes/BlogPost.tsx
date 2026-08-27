@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Nav } from '../components/Nav'
+import { SectionArt } from '../components/SectionArt'
 import { Ransom } from '../components/Ransom'
 import { Markdown, outline } from '../wiki/Markdown'
 import { neighbours, postBySlug, stamp } from '../blog/posts'
@@ -43,6 +44,7 @@ export function BlogPostRoute() {
   return (
     <div className="blog blog--post" style={{ ['--glow' as string]: `var(--n${post.tone})` }}>
       <Nav />
+      <SectionArt slug={`blog/${slug}`} />
 
       <article className="wrap post">
         <header className="post__head">

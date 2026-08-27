@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
+import { SectionArt } from '../components/SectionArt'
 import { Ransom } from '../components/Ransom'
 import { POSTS, TAGS, stamp, type Post } from '../blog/posts'
 import { banner } from '../content/slogans'
@@ -42,6 +43,7 @@ export function BlogRoute() {
   return (
     <div className="blog">
       <Nav />
+      <SectionArt slug="blog" />
       <Marquee text={banner('blog')} duration={19} tone={5} size="clamp(0.75rem, 1.6vw, 1.1rem)" />
 
       <header className="wrap blog__mast">

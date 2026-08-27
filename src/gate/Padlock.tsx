@@ -33,21 +33,33 @@ import { GREETING } from './config'
 
    ---- why PHRASE exists --------------------------------------------------
 
-   `verify.enc` is built once, against one secret, by `scripts/make-verify.mjs`.
-   Turning the door into a padlock did not rebuild it. So a deployment whose
-   blob predates the dial is keyed to a *sentence*, and there is no combination
-   on earth that opens it — every one of the 64,000 comes back from GCM as an
-   authentication failure, which is the same answer a wrong combination gives.
-   Unopenable and wrong-key are cryptographically indistinguishable from in
-   here, so the door cannot detect the situation and apologise for it.
+   It began as an escape hatch. `verify.enc` used to hold exactly one blob
+   against one secret, so a deployment whose blob predated the dial was keyed to
+   a *sentence* and no combination on earth opened it — every one of the 64,000
+   comes back from GCM as an authentication failure, which is the same answer a
+   wrong combination gives. Unopenable and wrong-key are cryptographically
+   indistinguishable from in here, so the door could not detect the situation
+   and apologise for it. PHRASE passed whatever you typed straight to
+   `tryPassphrase`, so the old key still turned.
 
-   The fix is not cleverness, it is leaving the old key in the lock: PHRASE
-   passes whatever you type straight to `tryPassphrase`, so a blob keyed to a
-   sentence still opens for that sentence. Rekey with `npm run gate:verify` and
-   the numbers start working; until then the phrase is the way in and the door
-   is not bricked. This costs nothing in security — it is the same decryption
-   against the same blob, and the keyspace of a passphrase was never the weak
-   half of this design.
+   **Since 2026-08-27 it is a way in rather than a fallback.** `verify.enc` is
+   now a `Vault` (`./protocol`) that can hold one blob per accepted phrase, and
+   `scripts/make-verify.mjs` builds one for a combination and one for a typed
+   passphrase when given both. So PHRASE opens for a genuinely different string
+   than the numbers do, rather than only for whichever single secret the file
+   happened to be built against.
+
+   That is a real trade and it is stated where it is decided
+   (`scripts/phrases.mjs`): a door that accepts two phrases is only as strong as
+   the *weaker* of them, which with a 3-number dial in the set is the 64,000
+   keyspace above, however long the sentence is. The mitigation is that a wrong
+   entry in any mode costs the same 30-second lockout, so this is an alternative
+   to the dial rather than a rate-limit bypass around it.
+
+   `keyring.enc` is the same shape for the same reason, and it must be rebuilt
+   with the same inputs — the gate stores whichever phrase opened it and the
+   credential is opened with that phrase. When the two drifted apart, the door
+   opened and every SAVE silently stopped committing.
 
    ---- the dial's one real idea ------------------------------------------
 

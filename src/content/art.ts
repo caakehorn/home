@@ -107,6 +107,16 @@ export const SCENES: Plate[] = [
 
 export const sceneById = (id: string) => SCENES.find((s) => s.id === id) as Plate
 
+/**
+ * The scenes in hanging order, as ids.
+ *
+ * Derived rather than written down so a plate added to `SCENES` is hung
+ * automatically and the two lists cannot drift apart. `SectionArt` indexes into
+ * this modulo its length, which is why it wants ids in a stable order rather
+ * than the objects.
+ */
+export const SCENE_ORDER: string[] = SCENES.map((s) => s.id)
+
 /* ==========================================================================
    THE PHOTOGRAPHS
 

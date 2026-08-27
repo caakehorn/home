@@ -1,7 +1,7 @@
 /* ==========================================================================
    THE PLATES
 
-   Thirteen pictures hung around the building: eight frames of animation, and
+   Fourteen pictures hung around the building: nine frames of animation, and
    five photographs of one person.
 
    ---- the path, and why it is built rather than written -------------------
@@ -111,6 +111,15 @@ export const SCENES: Plate[] = [
     alt: 'Two women close together, one holding a mirror, the other holding a makeup brush to her face',
     kana: '化粧',
     tone: 2,
+  },
+  {
+    id: 'kiss-blush',
+    src: asset('art/kiss-blush.webp'),
+    w: 348,
+    h: 345,
+    alt: 'Two women in school uniforms, hands clasped together, both blushing, close',
+    kana: '照',
+    tone: 1,
   },
   {
     id: 'kiss-uniform',

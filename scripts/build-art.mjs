@@ -146,6 +146,15 @@ const PLATES = [
     width: 1200,
   },
   {
+    id: 'kiss-blush',
+    from: 'src-11.jpg',
+    // 348x345, arrived small and clean — no watermark, no letterbox, the
+    // full frame kept. The smallest source in the set by a wide margin, so
+    // it ships at native size rather than being upscaled into softness.
+    crop: { left: 0, top: 0, width: 348, height: 345 },
+    width: 348,
+  },
+  {
     id: 'kiss-uniform',
     from: 'src-05.jpg',
     // Shot on flat white — the only one that gets a real alpha channel.

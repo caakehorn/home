@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Nav } from '../components/Nav'
+import { SectionArt } from '../components/SectionArt'
 import { Editor } from '../wiki/Editor'
 import { Infobox } from '../wiki/Infobox'
 import { Markdown, outline } from '../wiki/Markdown'
@@ -119,6 +120,7 @@ export function WikiPageRoute() {
   return (
     <div className="wiki">
       <Nav />
+      <SectionArt slug={`brain/${slug}`} />
 
       {loading && <p className="wiki__state">reading the brain…</p>}
 

@@ -119,18 +119,19 @@
   right: 0;
   bottom: -14%;
   z-index: 1;
-  width: clamp(150px, 21vw, 330px);
+  width: clamp(210px, 28vw, 460px);
 }
 
-/* The block gives up its right-hand quarter so nothing runs under her feet.
-   It is a padding on the CONTAINER, not on each line: `.mast__inner` is a grid
-   with `justify-items: start`, so its children shrink-to-fit and `max-width`
-   is a border-box measurement — padding each line instead subtracts 340px from
-   a 62ch cap and leaves the body copy four characters wide. Absolutely
-   positioned children lay out against the padding box, so she is not moved. */
+/* The block gives up more of its right-hand side so nothing runs under her
+   feet, sized to match. It is a padding on the CONTAINER, not on each line:
+   `.mast__inner` is a grid with `justify-items: start`, so its children
+   shrink-to-fit and `max-width` is a border-box measurement — padding each
+   line instead subtracts the gutter from a 62ch cap and leaves the body copy
+   a handful of characters wide. Absolutely positioned children lay out
+   against the padding box, so she is not moved. */
 @media (min-width: 861px) {
   .mast__inner {
-    padding-right: clamp(0px, 23vw, 340px);
+    padding-right: clamp(0px, 30vw, 460px);
   }
 }
 
@@ -424,7 +425,9 @@
 .void-band__inner {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  /* The wall used to be the smaller of the two columns. It is the reason this
+     band exists now, and the split says so. */
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
   align-items: center;
   gap: clamp(1.4rem, 4vw, 3.4rem);
 }
@@ -440,8 +443,8 @@
 .void-band__stack {
   position: relative;
   width: 100%;
-  aspect-ratio: 1 / 0.78;
-  min-height: 240px;
+  aspect-ratio: 1 / 0.92;
+  min-height: 320px;
 }
 
 .void-band__plate {
@@ -452,24 +455,24 @@
    other two hides them, which is the difference between a stack and a pile. */
 .void-band__plate--1 {
   left: 0;
-  top: 6%;
-  width: 58%;
+  top: 4%;
+  width: 64%;
   rotate: -3deg;
   z-index: 1;
 }
 
 .void-band__plate--2 {
   right: 0;
-  top: 2%;
-  width: 46%;
+  top: 0;
+  width: 52%;
   rotate: 5.5deg;
   z-index: 2;
 }
 
 .void-band__plate--3 {
-  left: 20%;
-  bottom: 2%;
-  width: 50%;
+  left: 16%;
+  bottom: 0;
+  width: 56%;
   rotate: -7deg;
   z-index: 3;
 }

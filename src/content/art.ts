@@ -39,7 +39,7 @@ export type Plate = {
 }
 
 /* ==========================================================================
-   THE SCENES — six frames, nobody in particular
+   THE SCENES — eight frames, nobody in particular
 
    Cels rather than photographs, and that distinction is the whole reason they
    can hang in a building that is otherwise a wiki about one real person: a
@@ -95,6 +95,24 @@ export const SCENES: Plate[] = [
     tone: 5,
   },
   {
+    id: 'kiss-butterfly',
+    src: asset('art/kiss-butterfly.webp'),
+    w: 1026,
+    h: 1410,
+    alt: 'Two women in headphones with butterfly wings on the ear cups, teal-haired and pink-haired, foreheads together',
+    kana: '蝶',
+    tone: 4,
+  },
+  {
+    id: 'kiss-mirror',
+    src: asset('art/kiss-mirror.webp'),
+    w: 1200,
+    h: 849,
+    alt: 'Two women close together, one holding a mirror, the other holding a makeup brush to her face',
+    kana: '化粧',
+    tone: 2,
+  },
+  {
     id: 'kiss-uniform',
     src: asset('art/kiss-uniform.webp'),
     w: 620,
@@ -106,6 +124,14 @@ export const SCENES: Plate[] = [
 ]
 
 export const sceneById = (id: string) => SCENES.find((s) => s.id === id) as Plate
+
+/**
+ * `SCENES` in a fixed order, for anything that wants to cycle through all
+ * eight deterministically — `SectionArt` picks one of these by hashing a
+ * section's slug rather than importing `SCENES` directly, so a ninth plate
+ * added above extends every room's rotation without another file to touch.
+ */
+export const SCENE_ORDER = SCENES.map((s) => s.id)
 
 /* ==========================================================================
    THE PHOTOGRAPHS

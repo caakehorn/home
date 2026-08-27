@@ -13,11 +13,12 @@
  *     npm install --no-save sharp
  *     node scripts/build-art.mjs ./originals
  *
- * `originals/` holds src-01 … src-08; six of the eight are still shipped. What
- * each one is, and what is done to it, is in PLATES below. Three arrived as
- * phone screenshots, so their crops are letterbox boxes measured by scanning
- * for the longest run of rows that are not black — not by somebody reading
- * coordinates off a ruler.
+ * `originals/` holds src-01 … src-10; eight of the ten are shipped. What each
+ * one is, and what is done to it, is in PLATES below. Three arrived as phone
+ * screenshots, so their crops are letterbox boxes measured by scanning for
+ * the longest run of rows that are not black — not by somebody reading
+ * coordinates off a ruler. Two more (09, 10) are full illustrations rather
+ * than screenshots and needed no letterboxing, only a watermark check.
  *
  * ---- three jobs ---------------------------------------------------------
  *
@@ -126,6 +127,23 @@ const PLATES = [
     crop: { left: 930, top: 40, width: 790, height: 970 },
     width: 400,
     flop: true,
+  },
+  {
+    id: 'kiss-butterfly',
+    from: 'src-09.jpg',
+    // 1026x1500, cel-shaded rather than a screenshot, arrived clean. The
+    // bottom 90px carried an artist signature in looping script — cropped
+    // out rather than covered, same rule as every watermark in this file.
+    crop: { left: 0, top: 0, width: 1026, height: 1410 },
+    width: 1100,
+  },
+  {
+    id: 'kiss-mirror',
+    from: 'src-10.jpg',
+    // 1500x1061, full frame, nothing to crop out. The tightest of all nine —
+    // two faces and four hands in one frame with almost no background.
+    crop: { left: 0, top: 0, width: 1500, height: 1061 },
+    width: 1200,
   },
   {
     id: 'kiss-uniform',

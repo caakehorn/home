@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
+import { SectionArt } from '../components/SectionArt'
 import { SubHead } from '../components/Wordmark'
 import { banner } from '../content/slogans'
 import { Ask } from '../sage/Ask'
@@ -38,6 +39,7 @@ export function SageRoute() {
   return (
     <div className="sage">
       <Nav />
+      <SectionArt slug="sage" />
       <Marquee
         text={banner('sage')}
         duration={20}

@@ -537,16 +537,25 @@ admits it does not know, BURIED is what nothing points at.
 
 ## The pictures
 
-Eleven of them, and they are in two groups that are hung the same way and mean
-different things.
+Thirteen of them, and they are in two groups that are hung the same way and
+mean different things.
 
-**Six frames of animation** (`public/art/`, `SCENES` in `src/content/art.ts`).
+**Eight frames of animation** (`public/art/`, `SCENES` in `src/content/art.ts`).
 Two on the front door, three on the void band, one knocked out of its own
-background and standing in the masthead. Cels rather than photographs, and that
+background and standing in the masthead — and, via `<SectionArt>`, one large
+plate under the nav on every one of the eight section routes, the wiki index,
+every wiki page and every blog post. Cels rather than photographs, and that
 distinction is what lets them hang in a building that is otherwise a wiki about
 one real person: a drawing of two people at four in the morning is about the
 hour, not about anybody. They are the only thing here that is not an argument
 about the record.
+
+`SectionArt` (`src/components/SectionArt.tsx`) assigns each of the eight named
+rooms one scene by fixed position — there are exactly eight of each, so no two
+rooms on the nav bar ever open on the same picture — and falls back to hashing
+the path for anything else, which is how 486 wiki pages and an open-ended
+number of blog posts each get a stable plate out of the same eight without a
+lookup table to keep in sync.
 
 **Five photographs of Ally Lubin** (`public/ally/`, `ALLY` in the same file),
 in a section of their own on the main floor with the date, the line and a door

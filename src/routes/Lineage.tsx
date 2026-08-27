@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
+import { SectionArt } from '../components/SectionArt'
 import { banner } from '../content/slogans'
 import { SubHead } from '../components/Wordmark'
 import { Dossier } from '../lineage/Dossier'
@@ -38,6 +39,7 @@ export function LineageRoute() {
   return (
     <div className="lin">
       <Nav />
+      <SectionArt slug="lineage" />
       <Marquee
         text={banner('lattice')}
         duration={24}

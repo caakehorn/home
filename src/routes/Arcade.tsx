@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
 import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
+import { SectionArt } from '../components/SectionArt'
 import { CABS, PLAQUE, PRIZES, cabById } from '../arcade/content'
 import { Alu08 } from '../arcade/cabs/Alu08'
 import { Courtship } from '../arcade/cabs/Courtship'
@@ -290,6 +291,7 @@ function Floor({ children }: { children: React.ReactNode }) {
   return (
     <div className="arc" style={{ ['--glow' as string]: `var(--n${section.accent})` }}>
       <Nav />
+      <SectionArt slug="arcade" />
       {children}
     </div>
   )

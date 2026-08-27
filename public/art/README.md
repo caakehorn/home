@@ -1,6 +1,6 @@
 # public/art — the frames
 
-Eight frames of animation, cut from screenshots and illustrations. They hang
+Nine frames of animation, cut from screenshots and illustrations. They hang
 on the front door, in the masthead, on the void band, and — via
 `<SectionArt>` — under the nav on every section route, the wiki index, every
 wiki page and every blog post. `SCENES` in `src/content/art.ts` is the
@@ -12,17 +12,23 @@ manifest and `<Plate>` draws them.
 | `kiss-neon.webp`      | pink and blonde, sparkles | the front door, right |
 | `kiss-water.webp`     | blonde and black, green suits, on the water | the void band, the big one |
 | `kiss-close.webp`     | the same two as `kiss-neon`, much nearer | the void band |
-| `kiss-butterfly.webp` | teal and pink, butterfly-wing headphones | one of the eight section rooms |
-| `kiss-mirror.webp`    | one holding a mirror, the other a makeup brush | one of the eight section rooms |
+| `kiss-butterfly.webp` | teal and pink, butterfly-wing headphones | one of the nine section rooms |
+| `kiss-mirror.webp`    | one holding a mirror, the other a makeup brush | one of the nine section rooms |
+| `kiss-blush.webp`     | two in uniform, hands clasped, both blushing | one of the nine section rooms |
 | `kiss-dark.webp`      | dark-haired and blonde, both with their eyes shut | the void band |
 | `kiss-uniform.webp`   | two in uniform, knocked out of white | the masthead — the only one with a real alpha channel |
 | `face-back.webp`      | the pink one's face, from `src-01` | inside THE KISS, filling the figure behind |
 | `face-front.webp`     | the blonde's face, from `src-01`, flopped | inside THE KISS, filling the figure in front |
 
-`SectionArt` assigns each of the eight named rooms (`SECTIONS` in
+`kiss-blush` shipped at its native 348×345 rather than being cut down from
+something bigger — it arrived that small and clean, with nothing to crop out,
+and upscaling it would only have softened it.
+
+`SectionArt` assigns each of the nine named rooms (`SECTIONS` in
 `src/content/sections.ts`) one scene by fixed position, so no two rooms on the
-nav bar ever open on the same picture. A wiki page or a blog post — anything
-outside those eight slugs — falls back to a hash of its own path instead,
+nav bar ever open on the same picture — nine rooms, nine scenes, no wrap. A
+wiki page or a blog post — anything outside those nine slugs — falls back to
+a hash of its own path instead,
 which is why the assignment there does not need a matching row here: there
 are 486 wiki pages and eight pictures, and nothing stops two pages sharing a
 plate the way two *rooms* never do. See `src/components/SectionArt.tsx`.

@@ -56,6 +56,7 @@ const LineageRoute = lazy(() =>
   import('./routes/Lineage').then((m) => ({ default: m.LineageRoute })),
 )
 const SageRoute = lazy(() => import('./routes/Sage').then((m) => ({ default: m.SageRoute })))
+const WordsRoute = lazy(() => import('./routes/Words').then((m) => ({ default: m.WordsRoute })))
 const TranscriptRoute = lazy(() =>
   import('./routes/Transcript').then((m) => ({ default: m.TranscriptRoute })),
 )
@@ -118,6 +119,7 @@ function Site() {
           <Route path="/leviathan" element={<LeviathanRoute />} />
           <Route path="/leviathan/:id" element={<LeviathanRoute />} />
           <Route path="/sage" element={<SageRoute />} />
+          <Route path="/words" element={<WordsRoute />} />
           <Route path="/transcript" element={<TranscriptRoute />} />
           <Route path="/:slug" element={<Stub />} />
         </Routes>

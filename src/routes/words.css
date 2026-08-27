@@ -1,0 +1,310 @@
+/* ==========================================================================
+   THE LEXICON
+
+   Two columns on a desktop: the box, and the paragraph explaining why the box
+   asks for a word rather than an opinion. The explanation is not decoration —
+   the whole value of the queue is the counting step, and a capture box that
+   does not say so reads as a suggestion form.
+   ========================================================================== */
+
+.lex {
+  min-height: 100vh;
+  padding-bottom: 4rem;
+}
+
+.lex__masthead {
+  position: relative;
+  padding-top: 1.6rem;
+}
+
+.lex__mast-title {
+  margin: 0;
+}
+
+.lex__mast-kana {
+  position: absolute;
+  top: 1.2rem;
+  right: 0;
+  font-size: clamp(2rem, 6vw, 3.4rem);
+  color: color-mix(in srgb, var(--n2) 60%, transparent);
+  pointer-events: none;
+}
+
+.lex__mast-note {
+  max-width: 62ch;
+  margin: 0.7rem 0 0;
+  font-size: var(--step--1);
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+.lex__mast-note a {
+  color: var(--n2);
+}
+
+/* ---- the box and its argument ------------------------------------------- */
+
+.lex__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1.2rem;
+  align-items: start;
+  padding-top: 1.4rem;
+}
+
+@media (max-width: 52rem) {
+  .lex__body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.lex__catch,
+.lex__why {
+  padding: 1rem 1.1rem;
+  background: var(--void-2);
+  border: var(--rule) solid color-mix(in srgb, var(--n2) 50%, transparent);
+  box-shadow: 5px 5px 0 var(--edge);
+}
+
+.lex__label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-family: var(--f-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.lex__label + .lex__field {
+  margin-bottom: 0.9rem;
+}
+
+.lex__field {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.6rem 0.7rem;
+  background: color-mix(in srgb, var(--void) 70%, transparent);
+  border: 1px solid color-mix(in srgb, var(--n2) 45%, transparent);
+  color: var(--text);
+  font-family: var(--f-mono);
+  font-size: var(--step-0);
+  outline: none;
+}
+
+.lex__field--note {
+  font-size: var(--step--1);
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.lex__field:focus {
+  border-color: var(--n2);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--n2) 40%, transparent);
+}
+
+.lex__field::placeholder {
+  color: color-mix(in srgb, var(--text-dim) 80%, transparent);
+}
+
+.lex__kinds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-bottom: 1rem;
+}
+
+.lex__kind {
+  padding: 0.2rem 0.55rem;
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  border: 1px solid color-mix(in srgb, var(--n2) 35%, transparent);
+  transition: color 140ms ease, background-color 140ms ease, border-color 140ms ease;
+}
+
+.lex__kind:hover:not(:disabled) {
+  color: var(--text);
+  border-color: var(--n2);
+}
+
+.lex__kind--on {
+  background: var(--n2);
+  border-color: var(--n2);
+  color: var(--edge);
+}
+
+.lex__meter {
+  min-height: 1rem;
+  margin: 0 0 0.5rem;
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  color: var(--n2);
+}
+
+.lex__go,
+.lex__again,
+.lex__toggle {
+  padding: 0.5rem 0.9rem;
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  color: var(--edge);
+  background: var(--n2);
+  border: 0;
+  box-shadow: 3px 3px 0 var(--edge);
+  transition: filter 140ms ease;
+}
+
+.lex__go:disabled {
+  filter: grayscale(1) brightness(0.6);
+}
+
+.lex__go:hover:not(:disabled),
+.lex__again:hover,
+.lex__toggle:hover {
+  filter: brightness(1.15);
+}
+
+.lex__catch--done p,
+.lex__why p {
+  margin: 0 0 0.7rem;
+  font-size: var(--step--1);
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+.lex__done-head {
+  font-family: var(--f-mono);
+  font-size: 0.8rem !important;
+  letter-spacing: 0.12em;
+  color: var(--n2) !important;
+}
+
+.lex__why-head {
+  margin: 0 0 0.6rem;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.lex__why-kicker {
+  color: var(--text) !important;
+  border-left: 2px solid var(--n2);
+  padding-left: 0.6rem;
+}
+
+/* ---- the list ------------------------------------------------------------ */
+
+.lex__state {
+  padding-top: 1.4rem;
+  font-size: var(--step--1);
+  color: var(--text-dim);
+}
+
+.lex__list {
+  list-style: none;
+  margin: 1.6rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.lex__word {
+  padding: 0.8rem 1rem;
+  background: var(--void-2);
+  border-left: 3px solid var(--n2);
+}
+
+.lex__word--pending {
+  border-left-color: color-mix(in srgb, var(--n3) 70%, transparent);
+}
+
+.lex__word--rejected {
+  border-left-color: color-mix(in srgb, var(--text-dim) 60%, transparent);
+}
+
+.lex__word-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.lex__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: var(--f-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  color: var(--n2);
+}
+
+.lex__word--pending .lex__badge {
+  color: var(--n3);
+}
+
+.lex__word--rejected .lex__badge {
+  color: var(--text-dim);
+}
+
+.lex__word-title {
+  margin: 0;
+  font-size: var(--step-1);
+  color: var(--text);
+}
+
+.lex__word-meta {
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+
+.lex__word-note,
+.lex__word-waiting {
+  margin: 0.5rem 0 0;
+  font-size: var(--step--1);
+  line-height: 1.55;
+  color: var(--text-dim);
+}
+
+.lex__word-waiting {
+  font-style: italic;
+}
+
+.lex__toggle {
+  margin-top: 0.7rem;
+  font-size: 0.62rem;
+}
+
+.lex__reading {
+  margin-top: 0.8rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid color-mix(in srgb, var(--n2) 30%, transparent);
+}
+
+/* A reading carries tables of counts, which are the point of it — they scroll
+   inside their own box rather than widening the page. */
+.lex__reading table {
+  display: block;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.lex__targets {
+  margin: 0.7rem 0 0;
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+
+.lex__targets a {
+  color: var(--n2);
+}

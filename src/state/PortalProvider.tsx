@@ -3,19 +3,24 @@ import {
   PortalContext,
   SESSION_KEY,
   STORAGE_KEY,
+  isReadMode,
   isVibeId,
   type PortalState,
+  type ReadMode,
   type VibeId,
 } from './portal-context'
 
 /** `motion: null` means nobody has chosen — follow the OS, and keep following it. */
-type Prefs = { vibe: VibeId; chaos: number; motion: boolean | null }
+type Prefs = { vibe: VibeId; chaos: number; motion: boolean | null; readMode: ReadMode }
 
 // VOID is the house palette: acid green and electric violet on black. RIOT is
 // still in the rack — it is a room off the street now rather than the street.
 // Chaos opens higher than it used to, because the building is louder than it
 // used to be and 0.55 now reads as the site holding something back.
-const DEFAULTS: Prefs = { vibe: 'void', chaos: 0.68, motion: null }
+// `readMode: 'full'` is the default because the wiki as written is the artifact
+// — the digest is a way in, not a replacement for it. Someone who wants the
+// plain edition asks for it once and it sticks.
+const DEFAULTS: Prefs = { vibe: 'void', chaos: 0.68, motion: null, readMode: 'full' }
 
 const REDUCE = '(prefers-reduced-motion: reduce)'
 
@@ -32,6 +37,10 @@ function readPrefs(): Prefs {
           ? Math.min(1, Math.max(0, parsed.chaos))
           : DEFAULTS.chaos,
       motion: typeof parsed.motion === 'boolean' ? parsed.motion : DEFAULTS.motion,
+      readMode:
+        typeof parsed.readMode === 'string' && isReadMode(parsed.readMode)
+          ? parsed.readMode
+          : DEFAULTS.readMode,
     }
   } catch {
     return DEFAULTS
@@ -56,6 +65,7 @@ export function PortalProvider({ children }: { children: ReactNode }) {
   )
   const [motionPref, setMotionPref] = useState<boolean | null>(initial.current.motion)
   const [headerCollapsed, setHeaderCollapsed] = useState(false)
+  const [readMode, setReadMode] = useState<ReadMode>(initial.current.readMode)
 
   useEffect(() => {
     const mq = window.matchMedia(REDUCE)
@@ -86,11 +96,21 @@ export function PortalProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ vibe, chaos, motion: motionPref }))
+      window.localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ vibe, chaos, motion: motionPref, readMode }),
+      )
     } catch {
       /* private mode; preferences just will not survive the tab */
     }
-  }, [vibe, chaos, motionPref])
+  }, [vibe, chaos, motionPref, readMode])
+
+  // Published for plain CSS, the same way the palette and the motion answer
+  // are: the digest edition wants a wider measure and a calmer type scale, and
+  // that is a stylesheet's job rather than a prop threaded through every page.
+  useEffect(() => {
+    document.documentElement.dataset.read = readMode
+  }, [readMode])
 
   const enter = useCallback(() => {
     setEntered(true)
@@ -123,10 +143,12 @@ export function PortalProvider({ children }: { children: ReactNode }) {
       lastPoked,
       motion,
       setMotion: setMotionPref,
+      readMode,
+      setReadMode,
       headerCollapsed,
       toggleHeaderCollapsed,
     }),
-    [vibe, chaos, entered, enter, registerRig, rigs, pokeRig, lastPoked, motion, headerCollapsed, toggleHeaderCollapsed],
+    [vibe, chaos, entered, enter, registerRig, rigs, pokeRig, lastPoked, motion, readMode, headerCollapsed, toggleHeaderCollapsed],
   )
 
   return <PortalContext.Provider value={value}>{children}</PortalContext.Provider>

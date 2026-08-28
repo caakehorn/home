@@ -207,6 +207,7 @@ export function WikiIndexRoute() {
             {data.counts.edges ? ` · ${data.counts.edges.toLocaleString()} links` : ''} ·{' '}
             {data.counts.chartables} tables drawn as charts
             {data.counts.briefs ? ` · ${data.counts.briefs} briefs unpacked` : ''}
+            {data.counts.plain ? ` · ${data.counts.plain} in plain english` : ''}
             {data.counts.sealed ? ` · ${data.counts.sealed} sealed` : ''}.
           </p>
         )}
@@ -481,6 +482,7 @@ function PageCard({
           )}
           {page.charts > 0 && <span className="wiki__card-charts">{page.charts} charts</span>}
           {page.brief && <span className="wiki__card-brief">brief</span>}
+          {page.plain && <span className="wiki__card-plain">plain english</span>}
           {page.links > 0 && <span>{page.links} links</span>}
           {draft && <span className="wiki__card-draft">edited</span>}
           {read && <span className="wiki__card-read">read</span>}

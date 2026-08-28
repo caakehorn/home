@@ -254,3 +254,61 @@
 .hctl__motion--on .jp {
   color: var(--on-glow);
 }
+
+/* ---- the edition switch --------------------------------------------------- */
+/* FULL vs READER'S DIGEST. Styled closer to the motion switch than to the vibe
+   swatches, because like MOTION it carries its own words: somebody hunting for
+   the plain-English version is reading the bar, not scanning for affordances.
+   Two radios rather than one toggle — both editions are real, and a toggle
+   leaves the unselected state unnamed. */
+.hctl__editions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.hctl__edition {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.18rem 0.5rem;
+  font-family: var(--f-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.14em;
+  white-space: nowrap;
+  color: var(--text-dim);
+  background: none;
+  border: 2px solid color-mix(in srgb, var(--n2) 45%, transparent);
+  cursor: pointer;
+  transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+
+.hctl__edition .jp {
+  color: var(--n2);
+}
+
+.hctl__edition:hover {
+  color: var(--text);
+  border-color: var(--n2);
+}
+
+.hctl__edition--on {
+  color: var(--on-glow);
+  background: var(--n2);
+  border-color: var(--n2);
+}
+
+.hctl__edition--on .jp {
+  color: var(--on-glow);
+}
+
+/* On a phone the full label does not fit next to the palette. The kana carries
+   the distinction on its own — 全 whole, 要 gist — and both keep their
+   accessible names from the radiogroup. */
+@media (max-width: 640px) {
+  .hctl__edition {
+    font-size: 0.58rem;
+    padding: 0.18rem 0.4rem;
+  }
+}

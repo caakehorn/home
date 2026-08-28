@@ -216,6 +216,13 @@ export async function sealSnapshot(dir, { locked, phrase }) {
         brief: false,
         gaps: [],
         staged: null,
+        // `split()` is denylist-by-default, so the twin is already inside the
+        // blob — a sealed page's plain-English version is exactly as sealed as
+        // its prose, which is the whole point: an easier-to-read edition of a
+        // page that ships as ciphertext would publish through the back door
+        // what the seal exists to keep shut. Blanked here too so a husk has one
+        // shape, per the note above.
+        plain: null,
         lock: await encrypt(JSON.stringify(secret), phrase),
       }),
     )
@@ -269,6 +276,8 @@ function redactIndex(file, sealed) {
       charts: 0,
       links: 0,
       brief: false,
+      // A sealed page must not advertise that an easier edition of it exists.
+      plain: false,
       locked: true,
     }
   })
@@ -282,6 +291,7 @@ function redactIndex(file, sealed) {
     words: index.pages.reduce((n, p) => n + p.words, 0),
     chartables: index.pages.reduce((n, p) => n + p.charts, 0),
     briefs: index.pages.filter((p) => p.brief).length,
+    plain: index.pages.filter((p) => p.plain).length,
     ...(index.edges ? { edges: index.edges.length } : {}),
     sealed: locked.size,
   }

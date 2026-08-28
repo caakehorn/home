@@ -15,6 +15,8 @@ export type IndexEntry = {
   links: number
   /** The page carries a compressed block the brief visualiser can open. */
   brief?: boolean
+  /** A Reader's Digest twin exists for this page. */
+  plain?: boolean
   /** Map coordinates, baked at sync time. Roughly [-1, 1]. */
   x?: number
   y?: number
@@ -29,6 +31,8 @@ export type WikiIndex = {
     words: number
     chartables: number
     briefs?: number
+    /** How many of `pages` have a Reader's Digest twin. */
+    plain?: number
     edges?: number
     /** How many of `pages` ship sealed. */
     sealed?: number
@@ -37,6 +41,30 @@ export type WikiIndex = {
   pages: IndexEntry[]
   /** Undirected links as index pairs into `pages`. */
   edges?: [number, number][]
+}
+
+/**
+ * The READER'S DIGEST twin of a page — the same finding in plain language.
+ *
+ * `plain/<slug>.md` in wiki-brain, folded into the page's own JSON at sync
+ * time. Null when nobody has written one yet, which is the ordinary case: the
+ * mode falls back to the technical page and says so rather than inventing a
+ * simplification in the browser.
+ */
+export type PlainTwin = {
+  /** The twin's own H1, stripped from `body` at sync time. */
+  title: string | null
+  body: string
+  words: number
+  readingLevel: string
+  /** The `date_modified` of the page this twin was written against. */
+  against: string | null
+  /**
+   * The page has moved past `against`. Gated in the source repo by
+   * `bin/wiki-plain check` and recomputed at sync anyway, so the reader is told
+   * rather than quietly served a version that no longer matches the page.
+   */
+  stale: boolean
 }
 
 export type WikiPage = {
@@ -55,6 +83,8 @@ export type WikiPage = {
   fmRaw?: string
   /** The leading `# Heading` line, stripped from `body` at sync time. */
   h1?: string | null
+  /** The plain-language twin, or null if none has been written. */
+  plain?: PlainTwin | null
   /**
    * Sealed by `scripts/wiki-locks.mjs`. Everything but the slug, the domain and
    * the title is inside `lock`, and the fields above are empty until `open()`

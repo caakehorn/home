@@ -8,6 +8,7 @@ import { INSTRUMENTS, WINGS, countBy, instrumentById, instrumentsIn } from '../l
 import type { Instrument, InstrumentStatus } from '../leviathan/core'
 import { Accretion } from '../leviathan/instruments/Accretion'
 import { Ask } from '../leviathan/instruments/Ask'
+import { Atlas } from '../leviathan/instruments/Atlas'
 import { Chronology } from '../leviathan/instruments/Chronology'
 import { Attention } from '../leviathan/instruments/Attention'
 import { Census } from '../leviathan/instruments/Census'
@@ -38,6 +39,7 @@ const BUILT: Record<string, typeof Mass> = {
   pen: Pen,
   recorder: Recorder,
   ask: Ask,
+  atlas: Atlas,
   clock: Clock,
   pulse: Pulse,
   silence: Silence,

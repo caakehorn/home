@@ -43,6 +43,24 @@ export type VibeId = (typeof VIBES)[number]['id']
 export const isVibeId = (value: string): value is VibeId =>
   VIBES.some((vibe) => vibe.id === value)
 
+/**
+ * How the wiki reads.
+ *
+ * `full` is the wiki as written — every number, every typed edge, every
+ * falsifier and provenance note, aimed at somebody who already knows the
+ * corpus. `digest` is the READER'S DIGEST edition: the same finding at the same
+ * altitude, told to somebody who walked in off the street.
+ *
+ * Site-wide and sticky rather than per-page, because a reader who wants plain
+ * English wants it on the next page too — having to re-ask on every entry is
+ * the same as not having the switch. A page with no twin written yet serves the
+ * technical version and says so; it does not silently pretend the mode is off.
+ */
+export type ReadMode = 'full' | 'digest'
+
+export const isReadMode = (value: string): value is ReadMode =>
+  value === 'full' || value === 'digest'
+
 export type PortalState = {
   vibe: VibeId
   setVibe: (vibe: VibeId) => void
@@ -71,6 +89,9 @@ export type PortalState = {
    */
   motion: boolean
   setMotion: (motion: boolean) => void
+  /** Which edition of the wiki to render. See `ReadMode`. */
+  readMode: ReadMode
+  setReadMode: (mode: ReadMode) => void
   /** Whether the header bar is collapsed (slid up out of view) */
   headerCollapsed: boolean
   toggleHeaderCollapsed: () => void

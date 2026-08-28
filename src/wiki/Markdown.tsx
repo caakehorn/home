@@ -7,7 +7,20 @@ import { headingId, segmentBriefs } from './brief'
 import { marked, type Token, type Tokens } from 'marked'
 import './markdown.css'
 
-function Block({ token }: { token: Token }): ReactNode {
+/**
+ * Whether a numeric-looking table may become a chart.
+ *
+ * `'chart'` is the wiki's normal behaviour. `'table'` is the Reader's Digest
+ * edition, and it is not merely a different default view on the same widget:
+ * `Chart`'s own TABLE face renders only the columns the spec selected, so a
+ * six-column table with one numeric column comes back as two columns. The
+ * generation table on `fayette-return` lost Who, Left for, Ended up and Buried
+ * exactly that way, and drew birth years as bar lengths besides. So the plain
+ * edition does not route tables through the chart at all.
+ */
+export type TableView = 'chart' | 'table'
+
+function Block({ token, tables }: { token: Token; tables: TableView }): ReactNode {
   switch (token.type) {
     case 'heading': {
       const h = token as Tokens.Heading
@@ -42,7 +55,7 @@ function Block({ token }: { token: Token }): ReactNode {
       return (
         <blockquote className="md__quote">
           {(token as Tokens.Blockquote).tokens.map((t, i) => (
-            <Block key={i} token={t} />
+            <Block key={i} token={t} tables={tables} />
           ))}
         </blockquote>
       )
@@ -60,7 +73,7 @@ function Block({ token }: { token: Token }): ReactNode {
         headers: t.header.map((c) => c.text),
         rows: t.rows.map((row) => row.map((c) => c.text)),
       }
-      const spec = analyzeTable(data)
+      const spec = tables === 'chart' ? analyzeTable(data) : null
       // Numbers become a chart; the table itself stays reachable in its toggle.
       if (spec) return <Chart spec={spec} table={data} />
       return (
@@ -97,17 +110,17 @@ function Block({ token }: { token: Token }): ReactNode {
   }
 }
 
-function Blocks({ source }: { source: string }) {
+function Blocks({ source, tables }: { source: string; tables: TableView }) {
   return (
     <>
       {marked.lexer(preprocess(source)).map((token, i) => (
-        <Block key={i} token={token} />
+        <Block key={i} token={token} tables={tables} />
       ))}
     </>
   )
 }
 
-export function Markdown({ source }: { source: string }) {
+export function Markdown({ source, tables = 'chart' }: { source: string; tables?: TableView }) {
   // Compressed blocks are pulled out ahead of lexing: the visualiser reads the
   // prose whole, not a stream of tokens, and the rest of the page is unaffected.
   const segments = useMemo(() => segmentBriefs(source), [source])
@@ -117,7 +130,7 @@ export function Markdown({ source }: { source: string }) {
         segment.kind === 'brief' ? (
           <Brief key={i} brief={segment.brief} />
         ) : (
-          <Blocks key={i} source={segment.text} />
+          <Blocks key={i} source={segment.text} tables={tables} />
         ),
       )}
     </div>

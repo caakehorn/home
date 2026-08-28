@@ -17,6 +17,46 @@ import { MANIFEST, readManifest, requirePassphrase, sealSnapshot, staleDerived, 
 const SOURCE = resolve(process.argv[2] ?? process.env.WIKI_BRAIN ?? '../wiki-brain')
 const OUT = resolve('public/wiki')
 
+/**
+ * READER'S DIGEST — the plain-language twin of a page, if it has one.
+ *
+ * `plain/<slug>.md` in wiki-brain mirrors `wiki/<slug>.md`: same finding, same
+ * altitude, told to somebody who has never read anything else here. The portal
+ * serves the pair as two modes behind one switch, so this rides along inside
+ * the page's own JSON rather than in a second dataset — the reader flips the
+ * switch on a page they are already looking at, and a second fetch to render
+ * something they already asked for is a spinner for no reason.
+ *
+ * `stale` is computed rather than trusted. `source_modified:` records the
+ * version of the page a twin was written against; when the page moves past it
+ * the twin is a confident, readable, WRONG account of what the wiki now says,
+ * aimed at exactly the reader least equipped to catch it. `bin/wiki-plain
+ * check` gates that in the source repo and this recomputes it anyway — a
+ * derivation that trusts its input to have been gated is a derivation that
+ * publishes whatever got past the gate.
+ */
+function plainTwin(slug, sourceModified) {
+  const file = join(SOURCE, 'plain', `${slug}.md`)
+  if (!existsSync(file)) return null
+  const { meta, body } = parseFrontmatter(readFileSync(file, 'utf8'))
+
+  // Same H1 handling as the page above: the heading duplicates the title.
+  let content = body.replace(/^\s*\n/, '')
+  const h1 = content.match(/^#\s+(.+)\n?/)
+  const title = h1 ? h1[1].trim() : null
+  if (h1) content = content.slice(h1[0].length)
+
+  const against = meta.source_modified ?? null
+  return {
+    title,
+    body: content.trimEnd(),
+    words: content.split(/\s+/).filter(Boolean).length,
+    readingLevel: meta.reading_level ?? 'general',
+    against,
+    stale: Boolean(sourceModified && against !== sourceModified),
+  }
+}
+
 /** Frontmatter is hand-written YAML; this handles the shapes the wiki uses. */
 function parseFrontmatter(text) {
   if (!text.startsWith('---')) return { meta: {}, infobox: null, body: text }
@@ -338,6 +378,8 @@ const pages = files.map((file) => {
     gaps: extractGaps(content),
     /** Set by bin/wiki-gaps: this page is holding an answer nothing has acted on. */
     staged: meta.pending_ingest ?? null,
+    /** The Reader's Digest twin, or null. See `plainTwin`. */
+    plain: plainTwin(slug, meta.date_modified),
   }
 })
 
@@ -383,6 +425,8 @@ for (const page of pages) {
     charts: page.charts,
     links: page.links.length,
     brief: page.brief,
+    /** A Reader's Digest twin exists. The browse view marks these. */
+    plain: Boolean(page.plain),
   })
 }
 
@@ -418,6 +462,7 @@ writeFileSync(
       words: index.reduce((n, p) => n + p.words, 0),
       chartables: index.reduce((n, p) => n + p.charts, 0),
       briefs: index.filter((p) => p.brief).length,
+      plain: index.filter((p) => p.plain).length,
       edges: edges.length,
     },
     domains,

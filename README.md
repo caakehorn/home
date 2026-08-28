@@ -241,7 +241,8 @@ repository hands them the blob to grind offline at their leisure.
 the URL, gate or no gate:
 
 - `public/wiki/**` — the whole vendored wiki snapshot
-- `public/leviathan/**` — the instrument datasets
+- `public/leviathan/**` — the instrument datasets (including `atlas.json`,
+  built by `npm run atlas`)
 - `public/transcript/**` — the whole message record, 134,348 messages
 - `public/gallery/**` — every plate on the gallery wall
 - every asset in the build
@@ -1022,6 +1023,7 @@ SEALED wants a corpus this site does not carry, BARRED is not coming.
   `public/transcript/`.
 - **◈ CORPUS · I · THE PULSE** — see below.
 - **◈ CORPUS · II · THE CLOCK** — see below.
+- **◈ CORPUS · IV · THE ATLAS** — see below.
 - **◈ CORPUS · XIV · THE SILENCE** — see below.
 
 The dates come from the same matchers the brief visualiser uses
@@ -1230,6 +1232,99 @@ from, which is a hand-audited reading of the record rather than the record, and
 is not vendored here — and it is barred as well as sealed, since a
 classification of one person's requests is a judgement whatever the ledger says.
 `◈ CORPUS · II · THE CLOCK` needed nothing from outside and is now built.
+
+### THE ATLAS, and the difference between a count and a day
+
+```
+npm run atlas                          # from the vendored wiki snapshot
+npm run atlas -- ../location-export    # from a real Google Takeout timeline
+```
+
+A decade of movement over the corridor between Fayette County and the Upper
+East Side, replayed a day at a time, in two modes that answer different
+questions.
+
+**CHASE** locks the camera on the subject at street scale and follows it turn
+by turn: which door, at what hour, by which road, how long they stood there.
+The whole day's route is drawn before it is walked — dotted ahead, solid
+behind — so a three-stop day and a twenty-stop day are told apart at a glance.
+
+**BLOOM** never moves the camera and never clears the frame. Every road driven
+gains exposure, every door gains a glow, every town lights when something in
+it is visited, and none of it fades. Run the reel out and the corridor
+develops like a plate: Uniontown and 307 East 76th Street burn to white, the
+turnpike between them is a lit wire, and everywhere in two states that was
+never once driven through stays black.
+
+The rate is a control, not a decision. Twenty seconds a day is slow enough to
+watch somebody drive to the CVS and back; an eighth of a second a day puts all
+1,992 days with movement on the plate in about four minutes. Every speed chip
+prints what it costs in real time before you press it, and `LOOP THIS DAY`
+holds whatever day you are on at twelve seconds without re-timing the rest —
+so you can read one Tuesday in full and then watch the decade go past.
+
+#### Where the numbers come from, and where they stop
+
+The card said SEALED for a year under one line: *the location history is not
+vendored here and is not something this site is going to publish.* That is
+still true and this instrument does not change it. 6,227 raw fixes are a map
+of where somebody slept.
+
+What **is** already published, at [`/brain/self/location-history`](/brain) and
+[`/brain/self/context-core`](/brain), is the arithmetic over those fixes —
+visits per year for eleven years, visits per named address for twenty-one
+addresses, and the canonical residence timeline. Those tables are the corpus
+`scripts/build-atlas.mjs` reads, and the build **checks them against the wiki
+page and refuses to write if the page has stopped saying them.**
+
+Two published margins over the same 6,227 visits do not determine the days
+between them, but they do determine a matrix. Iterative proportional fitting
+finds the visit matrix whose row sums are the per-address totals and whose
+column sums are the per-year totals, both exactly, against a weight field that
+is only ever *era mask × published total* — no address is nudged toward a year
+because it would look better there. Where the two margins are structurally
+stuck against each other — Walgreens on East 86th owes a visit and 2016 owes a
+visit, and he did not live in New York in 2016 — the repair routes around the
+zero in two moves rather than fudging either margin. The residual, the 1,891
+visits no published address claims, is drawn as unnamed pins rather than given
+invented names, because that is what the export says they are.
+
+So: **every aggregate the instrument replays is a published count, and the
+build will not write a dataset where one of them is off by one.** Which day
+inside a year a given visit fell on is *not* in the record, is not derivable
+from it, and is drawn from a fixed seed — the same Tuesday out of every build.
+The instrument prints RECONSTRUCTED on every frame it draws for that reason,
+and the ledger beside the plate prints the published number next to the
+replayed one on every address so the claim can be checked while it runs.
+
+Hand a real Takeout export to the build (`npm run atlas -- <dir>`) and it reads
+the semantic-location JSONs instead, snaps each visit to the nearest known pin,
+marks the dataset `source: "export"` and stops printing RECONSTRUCTED. The
+reconstruction is the fallback, not the point.
+
+#### The map is drawn by hand
+
+`scripts/atlas-geography.mjs`. No road on it was surveyed and no tile is
+fetched: the interstates, the rivers, the Fayette County state routes and the
+Uniontown streets are polylines somebody typed, good to a block in town and a
+mile out on the turnpike. Roads meet where the same coordinate is typed into
+both, which is how a list of polylines becomes a routable graph — 550 nodes
+and 840 segments, with a leg between two doors solved by Dijkstra on travel
+time so a run to Manhattan takes the turnpike instead of walking the National
+Pike the whole way.
+
+The Upper East Side is the one exception, and it is generated rather than
+typed: the Commissioners' Plan of 1811 laid the grid out as a rotated lattice
+and it still is one, so `ues()` builds it from the corner of Fifth and 57th,
+the 29° rotation, the 80.47 m street spacing and the measured avenue offsets.
+That lands within about 25 m of the real intersections, which is better than
+hand-typing forty streets would have managed and means an address on East 76th
+Street sits *on* East 76th Street.
+
+The one date the reconstruction assumes rather than reads is the move from 337
+Saratoga Drive to 155 Virginia Avenue inside the documented 2013–2019
+Uniontown stretch: the wiki gives the stretch and the order, not the day.
+2016-07-01 is the build's assumption, and it is flagged as one in the dataset.
 
 ### THE SILENCE, and the difference between a gap and a hole
 

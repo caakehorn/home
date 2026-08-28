@@ -219,13 +219,13 @@ export const INSTRUMENTS: Instrument[] = [
     title: 'THE ATLAS',
     kana: '地図',
     wing: 'CORPUS',
-    corpus: '6,185 location fixes',
+    corpus: '6,227 place visits · 11 years · 21 named addresses · 2014-04 \u2192 2024-12',
     blurb:
-      'A decade of movement replayed over the north-east corridor, rivers and interstates drawn in by hand. Play it at ×1, ×4 or ×12 and watch a life move between two states.',
-    method: 'Each fix placed at its own coordinates on its own date. No path is interpolated between two of them.',
-    status: 'SEALED',
-    origin: 'void.html · MODULE 04 · draw_atlas',
-    needs: 'the location history, which is not vendored here and is not something this site is going to publish',
+      'A decade of movement replayed day by day over the corridor between Fayette County and the Upper East Side \u2014 roads, towns and doors drawn in by hand. Follow the subject street by street, or let it paint light behind itself until the places it kept going back to burn white.',
+    method:
+      'The raw fixes are not published and are not going to be. What is published, on wiki/self/location-history, is the arithmetic over them \u2014 visits per year, visits per named address \u2014 and the canonical residence timeline on wiki/self/context-core. Those tables are the corpus. Iterative proportional fitting finds the one visit matrix whose year totals and address totals are both exactly the published ones; the matrix is then scattered across days from a fixed seed. Every aggregate the instrument replays is a published count. Which day inside a year a given visit fell on is not in the record and is drawn, from that seed, which is why the frame says RECONSTRUCTED on it. Hand a real Takeout export to the build and it reads that instead and stops saying so.',
+    status: 'LIVE',
+    origin: 'void.html \u00b7 MODULE 04 \u00b7 draw_atlas',
   },
   {
     id: 'lexicon',
@@ -850,6 +850,55 @@ export function useSet<T>(file: string): Async<T> {
 
 // ---------------------------------------------------------------------------
 // dataset shapes
+
+/**
+ * \u25c8 CORPUS IV \u00b7 THE ATLAS.
+ *
+ * A base map and a decade of days over it.
+ *
+ * `nodes` are road vertices, `edges` are `[a, b, roadIdx, metres]` between
+ * two of them, and a `route` is the list of node indices a leg walks. A day
+ * is `s`, flattened threes of `[place, arriveMinute, departMinute]`, whose
+ * first and last entries are the bed the day started and ended in rather
+ * than visits \u2014 which is why the day totals and the published visit totals
+ * differ by two per day, and why the instrument counts from index 1.
+ */
+export type AtlasSet = {
+  generatedAt: string
+  /** `reconstruction` off the published tables, or `export` off a real one. */
+  source: 'reconstruction' | 'export'
+  /** Whether the published tables were still on the wiki page at build time. */
+  checked: boolean
+  seed: number
+  span: { from: string; to: string; days: number; from0: number }
+  totals: { visits: number; named: number; unnamed: number; replayed: number; activeDays: number }
+  years: { year: number; visits: number }[]
+  /** The per-address table, as published, to print against what was replayed. */
+  published: { id: string; visits: number }[]
+  eras: { from: string; to: string; label: string; place: string | null }[]
+  bases: { since: string; place: string; region: string; assumed: boolean }[]
+  regions: { id: string; name: string; bounds: [number, number, number, number] }[]
+  cities: { id: string; name: string; lon: number; lat: number; rank: number }[]
+  waters: { id: string; name: string; pts: [number, number][] }[]
+  roads: { id: string; name: string; kind: string }[]
+  nodes: [number, number][]
+  edges: [number, number, number, number][]
+  places: {
+    id: string
+    name: string
+    kind: string
+    region: string
+    page: string | null
+    note: string | null
+    lon: number
+    lat: number
+    node: number
+    named: boolean
+    visits: number
+  }[]
+  routes: Record<string, number[]>
+  days: { d: number; s: number[]; move?: 1; trip?: 1 }[]
+}
 
 export type MassDomain = {
   id: string

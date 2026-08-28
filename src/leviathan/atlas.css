@@ -1,0 +1,221 @@
+/* ==========================================================================
+   ◈ CORPUS IV · THE ATLAS
+
+   A plate and a ledger. The plate is a canvas that is either following one
+   person around a street grid or accumulating eleven years of light on a
+   fixed frame; the ledger beside it is the same decade as numbers, and the
+   two have to agree — the bars in it fill as the plate exposes, and at the
+   end of the reel every one of them is at 100%.
+
+   The controls sit under the plate rather than in the frame's header because
+   there are nine of them and they are the instrument: a replay whose rate you
+   cannot change is a video.
+   ========================================================================== */
+
+.atlas {
+  display: grid;
+  grid-template-columns: minmax(320px, 1.5fr) minmax(280px, 25rem);
+  gap: clamp(1rem, 3vw, 2.2rem);
+  align-items: start;
+}
+
+@media (max-width: 1000px) {
+  .atlas { grid-template-columns: 1fr; }
+}
+
+.atlas__stage {
+  display: grid;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+/* ---- the plate ----------------------------------------------------------
+   Dark in every palette, for the reason THE CLOCK's mount gives: this is an
+   additive exposure, and additive light judged against newsprint is not
+   light. RIOT's paper would eat the whole low end of it. */
+
+.atlas__canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  min-height: 320px;
+  background: #04040a;
+  border: var(--staple) solid var(--edge);
+}
+
+@media (max-width: 640px) {
+  .atlas__canvas { aspect-ratio: 4 / 3; }
+}
+
+/* ---- the rate ------------------------------------------------------------ */
+
+.atlas__rate,
+.atlas__years {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.atlas__rate-lead {
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  color: var(--n1);
+  margin-right: 0.15rem;
+}
+
+.atlas__rate-say {
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  margin-left: auto;
+}
+
+.pt-chip--year {
+  padding-inline: 0.42rem;
+}
+
+.atlas__lock {
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  padding: 0.3rem 0.4rem;
+  color: var(--text);
+  background: var(--void-2);
+  border: var(--staple) solid var(--edge);
+}
+
+/* ---- the scrub ----------------------------------------------------------- */
+
+.atlas__scrub {
+  display: grid;
+  gap: 0.25rem;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+}
+
+.atlas__scrub b {
+  color: var(--text);
+}
+
+.atlas__scrub input {
+  width: 100%;
+  accent-color: var(--n1);
+}
+
+/* ---- the day, stop by stop ----------------------------------------------
+   Three columns: when they arrived, where, and how long they stood there.
+   The two bookends are dimmed and say what they are, because the bed a day
+   starts in is not a visit and this instrument's whole argument is that it
+   knows the difference. */
+
+.atlas__stops {
+  list-style: none;
+  margin: 0 0 0.6rem;
+  padding: 0;
+  display: grid;
+  gap: 1px;
+  max-height: 20rem;
+  overflow-y: auto;
+}
+
+.atlas__stop {
+  display: grid;
+  grid-template-columns: 3.4rem 1fr auto;
+  gap: 0.5rem;
+  align-items: baseline;
+  padding: 0.22rem 0.35rem;
+  font-size: var(--step--1);
+  background: var(--void-2);
+}
+
+.atlas__stop--bed {
+  color: var(--text-dim);
+  background: transparent;
+}
+
+.atlas__stop--bed i {
+  font-style: normal;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  opacity: 0.75;
+}
+
+.atlas__stop--here {
+  background: var(--void-3);
+  outline: 1px solid var(--n1);
+}
+
+.atlas__stop-t,
+.atlas__stop-d {
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+
+.atlas__stop--here .atlas__stop-t,
+.atlas__stop--here .atlas__stop-n {
+  color: var(--text);
+}
+
+.atlas__stop-n {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* ---- the running counters ------------------------------------------------ */
+
+.atlas__counts {
+  margin: 0 0 0.7rem;
+  display: grid;
+  gap: 1px;
+}
+
+.atlas__counts > div {
+  display: grid;
+  grid-template-columns: 9.5rem 1fr;
+  gap: 0.5rem;
+  align-items: baseline;
+  padding: 0.24rem 0.35rem;
+  background: var(--void-2);
+}
+
+.atlas__counts dt {
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  color: var(--n1);
+}
+
+.atlas__counts dd {
+  margin: 0;
+  min-width: 0;
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.atlas__counts dd i {
+  font-style: normal;
+  color: var(--text-dim);
+}
+
+.atlas__counts-era {
+  font-size: 0.66rem;
+  letter-spacing: 0.04em;
+}
+
+/* ---- the ledger ---------------------------------------------------------
+   Two numbers per row and both of them matter, so neither gets clipped: the
+   name is what gives way on a narrow column, because the name is also on the
+   plate and the numbers are not. */
+
+.atlas__ledger .pt-value {
+  white-space: nowrap;
+}

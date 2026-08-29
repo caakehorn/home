@@ -346,9 +346,14 @@ export function CoreRoute() {
 
     let raf = 0
     let last = performance.now()
-    let told = 0
+    // Measured from here, not from zero. `told = 0` made the first window "since
+    // the page loaded", which reads as a couple of frames per second and
+    // degraded a fast machine before it had drawn anything at all.
+    const started = last
+    let told = last
     let frames = 0
     let eased = 0
+    let quick = 0
 
     const frame = (now: number) => {
       raf = requestAnimationFrame(frame)
@@ -426,9 +431,26 @@ export function CoreRoute() {
         // Rather than crawl, draw a smaller unbiased sample and say so. One
         // step at a time with a cooldown, so the picture settles instead of
         // thrashing while each step is still being measured.
-        if (rate < 24 && now - eased > 2600) {
-          eased = now
-          setFraction((f) => Math.max(0.0625, f / 2))
+        //
+        // It climbs back, and it ignores the first two seconds. Shader
+        // compilation and the force solve are not the steady-state frame rate,
+        // and a ladder that only went down meant one stall at load left a phone
+        // that can hold the whole record drawing a sixteenth of it for the rest
+        // of the session. Three good seconds to go up, one bad one to come down:
+        // slower to trust a machine than to doubt it.
+        if (now - started > 2000) {
+          if (rate < 24 && now - eased > 2600) {
+            eased = now
+            quick = 0
+            setFraction((f) => Math.max(0.0625, f / 2))
+          } else if (rate > 52 && live.fraction < 1) {
+            quick++
+            if (quick >= 3 && now - eased > 2600) {
+              eased = now
+              quick = 0
+              setFraction((f) => Math.min(1, f * 2))
+            }
+          } else if (rate <= 52) quick = 0
         }
         frames = 0
         told = now

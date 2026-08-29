@@ -112,7 +112,62 @@ page shot downscales the region you care about.
 
 ---
 
-## 5. The traps that fail the build
+## 5. Touch is not a smaller mouse
+
+**The rule.** A view that sets `touch-action: none` has taken the browser's own
+pan and pinch away from the reader. It now owes them a replacement. `onWheel` is
+not a replacement: a wheel event never fires on a touchscreen, so a canvas that
+zooms only on the wheel and suppresses the native gesture cannot be zoomed at all
+on a phone — the reader pinches and nothing happens, or worse, iOS zooms the whole
+document and the layout goes with it.
+
+Three specific things, all of which THE CORE got wrong and all of which are easy
+to get wrong again:
+
+- **Never select from a hover state.** A touchscreen fires no `pointermove`
+  before a tap, so `hover` is always `null` when the tap lands. Pick at the
+  release coordinates instead. This also fixes the mouse click that outruns a
+  hover throttle.
+- **A pick target is measured in fingers.** Reading one pixel of an ID buffer is
+  a ~3 CSS px target at dpr 3. Read a block and take the hit nearest the centre —
+  22 CSS px for a coarse pointer, 6 for a fine one. Do not fatten the geometry in
+  the pick shader instead: with no depth test, that makes overlaps resolve by
+  draw order, which is to say arbitrarily.
+- **Ship buttons as well as the gesture.** Pinch and two-finger drag are
+  discoverable only if you already expect them, and neither is reachable from a
+  keyboard. `src/routes/Core.tsx`'s `.core__pad` is the reference: four real
+  `<button>`s, hold-to-repeat on an interval, `e.detail === 0` to catch keyboard
+  activation.
+
+`src/routes/Core.tsx` and `src/core/scene.ts` carry the worked version of all
+three. Copy from there rather than re-deriving it.
+
+### What is still owed, in order
+
+Only two views on the site have the full bug — they claim the gesture and give
+nothing back. Both pan correctly on touch already; it is only zoom that is
+missing.
+
+1. **`src/wiki/Cortex.tsx` — the wiki map.** `cortex.css:22` sets
+   `touch-action: none`; `onWheel` at `Cortex.tsx:652` is the only path to
+   `camera.zoom`, and the chrome offers `RESET` but no zoom control. The most
+   used visualiser on the site and the one to fix first. Its wheel handler
+   already pins the point under the cursor while zooming — keep that, and pin the
+   pinch midpoint the same way.
+2. **`src/leviathan/instruments/Pulse.tsx` — PULSE.** `pulse.css:34` sets
+   `touch-action: none`; `onWheel` at `Pulse.tsx:394` is the only zoom, and the
+   key still reads *"drag to pan · scroll to zoom"*. Single-axis, so a pinch is
+   horizontal distance only.
+
+Everything else is fine and should be left alone. `Lattice`, `PenChart` and
+`Accretion` set `touch-action: pan-y` — they never claim the gesture, so the page
+scrolls as the reader expects and there is nothing to replace. THE ATLAS binds no
+pointer handlers at all: its camera is driven by its own modes, which is a design
+decision, not a gap.
+
+---
+
+## 6. The traps that fail the build
 
 - **Every asset URL goes through `import.meta.env.BASE_URL`.** The site deploys to
   the subpath `/home/`, and Vite does not rewrite string literals. There is a
@@ -139,7 +194,7 @@ page shot downscales the region you care about.
 
 ---
 
-## 6. Where the data is
+## 7. Where the data is
 
 `docs/CORPUS.md` is the data dictionary: every payload in the repo, its exact
 shape, its row counts, its enum distributions, its traps, and a ranked list of the
@@ -155,7 +210,7 @@ committing a derived payload; follow it rather than inventing a new one.
 
 ---
 
-## 7. House style
+## 8. House style
 
 No linter is configured, so the conventions are held by hand and by review:
 2-space indent, no semicolons, single quotes, trailing commas, ~100-column wrap.

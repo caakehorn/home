@@ -77,7 +77,9 @@
 @media (max-width: 700px) {
   .core__mount {
     aspect-ratio: 3 / 4;
-    min-height: 420px;
+    /* Tall enough that the structure is the page and the controls are the
+       margin, rather than the other way round. */
+    min-height: min(62svh, 520px);
   }
 }
 
@@ -106,6 +108,44 @@
   color: color-mix(in srgb, var(--paper) 62%, transparent);
 }
 
+/* The zoom and travel pad.
+   Pinch and two-finger drag both work, but a gesture nobody finds is not a
+   feature — and these are real buttons, so a keyboard reaches the camera too. */
+.core__pad {
+  position: absolute;
+  right: 0.55rem;
+  bottom: 0.55rem;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.core__pad-btn {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  font-family: var(--f-mono);
+  font-size: 0.9rem;
+  line-height: 1;
+  color: color-mix(in srgb, var(--paper) 80%, transparent);
+  background: color-mix(in srgb, #03030a 74%, transparent);
+  border: var(--staple) solid color-mix(in srgb, var(--paper) 24%, transparent);
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+}
+
+/* Zoom above, travel below, with a gap that says they are two pairs. */
+.core__pad-btn:nth-child(2) {
+  margin-bottom: 0.3rem;
+}
+
+.core__pad-btn:hover,
+.core__pad-btn:focus-visible {
+  color: var(--glow, var(--n4));
+  border-color: var(--glow, var(--n4));
+}
+
 .core__tip {
   position: absolute;
   left: 0.7rem;
@@ -113,7 +153,8 @@
   display: grid;
   gap: 0.1rem;
   padding: 0.35rem 0.55rem;
-  max-width: min(28rem, 70%);
+  /* Never under the pad. */
+  max-width: min(28rem, calc(100% - 4.6rem));
   background: color-mix(in srgb, #03030a 82%, transparent);
   border-left: 2px solid var(--glow, var(--n4));
   pointer-events: none;
@@ -539,4 +580,80 @@
   font-size: 0.68rem;
   line-height: 1.45;
   color: var(--text-dim);
+}
+
+/* ---- the search results --------------------------------------------------- */
+
+/* Searching lit the right pages in the structure and left you to find them,
+   which on a phone means hitting a four-pixel dot in a cloud of 519. Naming
+   them is the other half of selecting one. */
+.core__found {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.core__found-hit {
+  padding: 0.3rem 0.55rem;
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  color: var(--text);
+  background: var(--void-2);
+  border: var(--staple) solid color-mix(in srgb, var(--glow, var(--n4)) 55%, transparent);
+  cursor: pointer;
+  text-align: left;
+}
+
+.core__found-hit:hover,
+.core__found-hit:focus-visible {
+  color: var(--on-glow);
+  background: var(--glow, var(--n4));
+}
+
+.core__found-hit--on {
+  color: var(--on-glow);
+  background: var(--glow, var(--n4));
+}
+
+.core__found-none {
+  font-family: var(--f-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+}
+
+/* ---- the phone ------------------------------------------------------------ */
+
+@media (max-width: 700px) {
+  /* Every row wrapped except the tag rows, so three chips — WIKILINKS, AXIS and
+     CLEAR — sat off the right edge with no way to reach them. */
+  .core__row {
+    flex-wrap: wrap;
+  }
+
+  .core__search {
+    flex: 1 1 100%;
+  }
+
+  .core__chip,
+  .core__tag,
+  .core__found-hit {
+    min-height: 32px;
+    padding-block: 0.45rem;
+  }
+
+  /* Two counts side by side wrapped to three lines and collided with each
+     other. Stacked, they are two lines and stay two lines. */
+  .core__hud {
+    display: grid;
+    gap: 0.1rem;
+    justify-content: start;
+  }
+
+  .core__slider input {
+    width: 6rem;
+  }
 }

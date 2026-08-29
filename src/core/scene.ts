@@ -466,13 +466,21 @@ export class Scene {
   }
 
   /**
-   * What is under the cursor.
+   * What is under the pointer — or, with a radius, nearest to it.
    *
    * The nodes are drawn again into a small offscreen target with their index as
-   * their colour, and one pixel is read back. It costs a draw call and a stall,
-   * so the room only asks when the pointer has actually moved.
+   * their colour, and the pixels around the pointer are read back. It costs a
+   * draw call and a stall, so the room only asks when the pointer has actually
+   * moved, or when a tap has landed.
+   *
+   * `radius` is in device pixels and exists for fingers. The obvious fix — a
+   * bigger `gl_PointSize` in the pick shader — is the wrong one: this pass runs
+   * with no depth test, so fattening every point makes overlaps resolve by draw
+   * order, which is to say arbitrarily. Reading a block and taking the hit
+   * *nearest the centre* means a finger selects the node closest to it, every
+   * time, and a mouse still selects exactly what it is on top of.
    */
-  pick(camera: Camera, x: number, y: number, w: number, h: number): number {
+  pick(camera: Camera, x: number, y: number, w: number, h: number, radius = 0): number {
     const gl = this.gl
     this.pickT.resize(w, h)
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.pickT.fbo)
@@ -492,11 +500,38 @@ export class Scene {
     attrib(gl, this.bufs.node, p.a.a_size, 1, 6, 4)
     gl.drawArrays(gl.POINTS, 0, this.counts.node)
 
-    const px = new Uint8Array(4)
-    gl.readPixels(x, h - y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px)
+    // GL's origin is bottom-left; the pointer's is top-left.
+    const cx = x
+    const cy = h - y
+    const r = Math.max(0, Math.round(radius))
+    const x0 = Math.max(0, cx - r)
+    const y0 = Math.max(0, cy - r)
+    const x1 = Math.min(w - 1, cx + r)
+    const y1 = Math.min(h - 1, cy + r)
+    const bw = x1 - x0 + 1
+    const bh = y1 - y0 + 1
+    let best = -1
+    if (bw > 0 && bh > 0) {
+      const px = new Uint8Array(bw * bh * 4)
+      gl.readPixels(x0, y0, bw, bh, gl.RGBA, gl.UNSIGNED_BYTE, px)
+      let nearest = Infinity
+      for (let j = 0; j < bh; j++) {
+        const dy = y0 + j - cy
+        for (let i = 0; i < bw; i++) {
+          const o = (j * bw + i) * 4
+          const id = px[o] | (px[o + 1] << 8) | (px[o + 2] << 16)
+          if (!id) continue
+          const dx = x0 + i - cx
+          const d = dx * dx + dy * dy
+          if (d < nearest) {
+            nearest = d
+            best = id - 1
+          }
+        }
+      }
+    }
     gl.bindFramebuffer(gl.FRAMEBUFFER, null)
-    const id = px[0] | (px[1] << 8) | (px[2] << 16)
-    return id - 1
+    return best
   }
 
   draw(camera: Camera, w: number, h: number, palette: Palette, vis: Visible, dt: number) {

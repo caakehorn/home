@@ -1474,6 +1474,22 @@ sheath: 134,000 additively blended points is the thing 2D cannot do, and a sampl
 of them would be quietly showing a different corpus, so it names the missing
 layer instead.
 
+### How you drive it
+
+Drag to orbit, pinch to close in, two fingers to travel the years; with a mouse,
+the wheel closes in and shift-drag travels. There is a pad of four buttons on the
+picture doing the same two jobs, because a gesture nobody finds is not a feature
+and because it is the only path from a keyboard to the camera. Type a name and
+the matches print as a row you can take one from, which on a phone is the
+difference between selecting a page and hunting a four-pixel dot in a cloud of
+519.
+
+Picking reads a block of the offscreen ID target rather than a single pixel and
+takes the hit **nearest the centre** — 22 CSS pixels for a finger, 6 for a mouse.
+The obvious alternative, a fatter point in the pick shader, is worse: that pass
+runs with no depth test, so inflating every point makes overlapping pages resolve
+by draw order, which is to say arbitrarily.
+
 ### The pipeline
 
 `scripts/core-frontmatter.mjs` reads the `connections:` block **by line rather

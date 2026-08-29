@@ -11,10 +11,10 @@ the room where both of those happened.
 > THESIS · ANTITHESIS · ANOTHER BUMP · SYNTHESIS · CITE YOUR SOURCES ·
 > LOSE THE ARGUMENT · LOG IT ANYWAY
 
-Eight rooms off one hallway: the **wiki-brain** and its map, **THE SAGE**,
-**THE LATTICE**, the **LEVIATHAN** instruments, **THE GALLERY**, **THE
-TRANSCRIPT**, **TRANSMISSIONS**, and **ALLY LUBIN'S ADVENTURE ARCADE**. All
-eight are open.
+Nine rooms off one hallway: the **wiki-brain** and its map, **THE SAGE**,
+**THE LATTICE**, the **LEVIATHAN** instruments, **THE DOCKET**, **THE
+GALLERY**, **THE TRANSCRIPT**, **TRANSMISSIONS**, and **ALLY LUBIN'S ADVENTURE
+ARCADE**. All nine are open.
 
 ### The sage
 
@@ -43,6 +43,45 @@ ones carry the reason. A question nobody wanted to answer is visible as one.
 Format details are in `sage/README.md` upstream. Three programs parse that file
 and none imports the others, so `npm run sage:check` guards the contract and runs
 in CI.
+
+### The docket
+
+Every other room reads the second brain for what it asserts. This one reads it
+for what it has not settled — and the corpus's own standard for an answer,
+written into its `CLAUDE.md`, is that one *"states its own strongest
+counter-evidence and what would falsify it,"* because an answering system that
+routes around the parts that do not flatter its subject is one nobody should
+believe on anything. `/docket` is that standard given a floor.
+
+Four benches over 1,036 items, and every one of them a span of prose the wiki
+wrote about itself, lifted whole and attributed to the page that wrote it:
+
+| | | |
+|---|---|---|
+| **I · THE COLLISIONS** 衝突 | 41 | Two claims that cannot both be true, neither withdrawn. Drawn as a graph, because the convention is that *both* pages carry the block — so a collision is an edge, and the fifty-one pages carrying one are lit against the other four hundred and sixty-five. |
+| **II · THE FIELD** 空白 | 484 | Every gap a page writes down about itself, one tally stroke each, grouped by domain and page. Take one off the wall and read it. |
+| **III · THE BOARD** 賭 | 68 | The bets, on a departures board. Verdict, claim, falsifier, and who filed it. Nineteen state what would kill them; forty-nine print a dash, which is the finding. |
+| **IV · THE RULINGS** 裁定 | 443 | Where a doubt actually got closed — 199 re-checks, 105 corrections, 86 revisions, 34 gaps closed, two retractions — dated, and plotted per day. |
+
+The fourth bench is why the room exists rather than being a fourth tab on a page
+about gaps. A list of what a body of work does not know is a complaint; the same
+list beside a dated record of the doubts it has already closed is a machine with
+a work rate.
+
+**The room decides nothing.** It does not resolve a collision, rank a gap or
+score a prediction — those are commits in the other repository, made by somebody
+who has read the sources. Nothing here is summarised or ranked, and the one
+place a judgement could have crept in is which blocks count as settled, which is
+not this build's opinion: `CLOSED`, `RESOLVED` and `SETTLED` are the exact marks
+`bin/wiki-digest` filters `OPEN.md` on.
+
+Built by `npm run docket` from `public/wiki/` — the snapshot THE WIKI-BRAIN
+already ships — into `public/docket/docket.json`, and re-run by the sync
+workflow. Its `generatedAt` is the snapshot's rather than the wall clock's, so
+the committed file is byte-identical until the wiki actually moves. Sealed pages
+are not read, and neither are the three `wiki/meta/` mirrors of OPEN, DIGEST and
+RECENT — they list the same items the room is built from, and reading them would
+count every gap twice.
 
 ### The arcade
 

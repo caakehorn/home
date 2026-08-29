@@ -43,6 +43,7 @@ const BlogPostRoute = lazy(() =>
   import('./routes/BlogPost').then((m) => ({ default: m.BlogPostRoute })),
 )
 const DocketRoute = lazy(() => import('./routes/Docket').then((m) => ({ default: m.DocketRoute })))
+const CoreRoute = lazy(() => import('./routes/Core').then((m) => ({ default: m.CoreRoute })))
 const GalleryRoute = lazy(() =>
   import('./routes/Gallery').then((m) => ({ default: m.GalleryRoute })),
 )
@@ -114,6 +115,8 @@ function Site() {
           <Route path="/brain" element={<WikiIndexRoute />} />
           <Route path="/brain/*" element={<WikiPageRoute />} />
           <Route path="/docket" element={<DocketRoute />} />
+          <Route path="/core" element={<CoreRoute />} />
+          <Route path="/core/*" element={<CoreRoute />} />
           <Route path="/gallery" element={<GalleryRoute />} />
           <Route path="/gallery/:id" element={<GalleryRoute />} />
           <Route path="/leviathan" element={<LeviathanRoute />} />

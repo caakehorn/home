@@ -327,6 +327,11 @@ function extractGaps(body) {
         const label = flatten(text)
         // Settled already, by the two marks bin/wiki-digest filters OPEN.md on.
         if (!label || label.startsWith('~~')) continue
+        // A horizontal rule is punctuation between sections, not something the
+        // page does not know. `timeline/2015-annie-read-wiki-impact-analysis`
+        // ends its corrections queue with one, and it was being published as an
+        // open gap and offered to the operator as answerable.
+        if (/^(?:-{3,}|_{3,}|\*{3,})$/.test(label)) continue
         if (/\b(CLOSED|RESOLVED|SETTLED)\b/.test(label)) continue
         out.push({ text, label })
       }

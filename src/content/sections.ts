@@ -66,6 +66,16 @@ export const SECTIONS: Section[] = [
     chant: banner('leviathan'),
   },
   {
+    slug: 'docket',
+    title: 'THE DOCKET',
+    kana: '未決',
+    blurb:
+      'Everything the record has not settled, and everything it has. The collisions it is holding rather than resolving, the gaps the pages write down about themselves, the bets left standing with what would kill them, and 443 dated rulings where a doubt actually got closed. Every other room here tells you what it knows.',
+    status: 'LIVE',
+    accent: 4,
+    chant: banner('docket'),
+  },
+  {
     slug: 'gallery',
     title: 'THE GALLERY',
     kana: '画廊',

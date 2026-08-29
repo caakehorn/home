@@ -16,6 +16,7 @@
     "transcript": "node scripts/sync-transcript.mjs",
     "accretion": "node --experimental-strip-types scripts/build-accretion.mjs",
     "atlas": "node scripts/build-atlas.mjs",
+    "core": "node scripts/build-core.mjs",
     "clock": "node scripts/build-clock.mjs",
     "lexicon": "node scripts/build-lexicon.mjs",
     "recorder": "node scripts/build-recorder.mjs",

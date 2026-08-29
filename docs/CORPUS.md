@@ -139,8 +139,8 @@ arrays).
 
 518 of 519 parse as YAML. **One failure:**
 `mind/synthesis/august-grievance-verdict` — block-scalar syntax error at line 12.
-**Any parser must carry a regex fallback or it silently loses that page's 12
-typed edges.**
+**A YAML parser silently loses that page's 12 typed edges**; read the block by
+line instead (`scripts/core-frontmatter.mjs`) and there is nothing to lose.
 
 | key | pages | value type |
 |---|---|---|
@@ -203,35 +203,47 @@ taste 1 · vocabulary 1 · trust 1.
 
 ### 1.4 Typed edges — the rarest thing in the corpus
 
-**2,386 connections across 402 pages.** Every entry is `{ page, type, claim }`,
-all three keys present on all 2,386, zero exceptions. `claim` is prose asserting
-*why* the edge exists — length min/median/max **65 / 221 / 704** chars. A further
-~12 are recoverable by regex from the one unparseable page, so the true total is
-**~2,398**.
+**2,398 connections across 404 pages.** Every entry is `{ page, type, claim }`,
+all three keys present, zero exceptions. `claim` is prose asserting *why* the
+edge exists — length min/median/max **65 / 221 / 704** chars.
+
+> **Two totals, and which one is right.** A YAML parser reaches **2,386** across
+> 402 pages, because `mind/synthesis/august-grievance-verdict` throws on a
+> block-scalar error at line 12 and takes its 12 edges with it. A line reader
+> reaches all **2,398** across 404 pages, because the block shape is completely
+> uniform: every item is indented exactly two spaces and **no value wraps onto a
+> second line**, corpus-wide. `scripts/core-frontmatter.mjs` reads it that way
+> and needs no YAML dependency and no fallback. The per-type table below is the
+> line reader's — the parenthesised figure is what a YAML parse returns, and the
+> difference is always those 12 edges.
 
 **19 types, six inverse pairs, four symmetric, three unpaired:**
 
-| type | n | inverse |
-|---|---|---|
-| `co-occurs` | 330 | *(symmetric)* |
-| `evidences` | 319 | `evidenced-by` |
-| `evidenced-by` | 317 | `evidences` |
-| `contains` | 292 | `component-of` |
-| `component-of` | 291 | `contains` |
-| `parallels` | 157 | *(symmetric)* |
-| `instantiates` | 137 | `instance-of` |
-| `instance-of` | 135 | `instantiates` |
-| `caused-by` | 81 | `causes` |
-| `causes` | 79 | `caused-by` |
-| `contradicts` | 70 | *(symmetric)* |
-| `contextualizes` | 50 | — |
-| `mirrors` | 39 | *(symmetric)* |
-| `precedes` | 35 | `follows` |
-| `follows` | 32 | `precedes` |
-| `supplies` | 9 | `supplied-by` |
-| `supplied-by` | 5 | `supplies` |
-| `resolves` | 4 | — |
-| `escalates` | 4 | — |
+| type | n (YAML parse) | family | inverse |
+|---|---|---|---|
+| `co-occurs` | 330 | affinity | *(symmetric)* |
+| `evidences` | 322 (319) | evidential | `evidenced-by` |
+| `evidenced-by` | 317 | evidential | `evidences` |
+| `contains` | 292 | structural | `component-of` |
+| `component-of` | 292 (291) | structural | `contains` |
+| `parallels` | 158 (157) | affinity | *(symmetric)* |
+| `instantiates` | 138 (137) | structural | `instance-of` |
+| `instance-of` | 137 (135) | structural | `instantiates` |
+| `caused-by` | 82 (81) | causal | `causes` |
+| `causes` | 79 | causal | `caused-by` |
+| `contradicts` | 70 | tension | *(symmetric)* |
+| `contextualizes` | 52 (50) | evidential | — |
+| `mirrors` | 39 | affinity | *(symmetric)* |
+| `precedes` | 35 | causal | `follows` |
+| `follows` | 32 | causal | `precedes` |
+| `supplies` | 10 (9) | evidential | `supplied-by` |
+| `supplied-by` | 5 | evidential | `supplies` |
+| `escalates` | 4 | causal | — |
+| `resolves` | 4 | causal | — |
+
+`family` is a grouping of the names the corpus already uses, added by
+`scripts/build-core.mjs` to decide how an edge is drawn. It is not a judgement
+about which edges matter.
 
 The near-exact reciprocity of the paired counts (319/317, 292/291, 137/135,
 81/79, 35/32, 9/5) means this is a **deliberately maintained bidirectional typed

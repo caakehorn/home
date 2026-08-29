@@ -76,6 +76,16 @@ export const SECTIONS: Section[] = [
     chant: banner('docket'),
   },
   {
+    slug: 'core',
+    title: 'THE CORE',
+    kana: '核心',
+    blurb:
+      'The whole corpus as one body, with time running up the middle of it. 519 pages hung at the dates the record gives them, 2,398 argued edges between them — nineteen kinds of claim, each one carrying the sentence that says why it was made — and 134,348 messages wrapped around the axis as the mass it all rests on. Fly through it, pick anything, and read the argument in the wiki\u2019s own words.',
+    status: 'LIVE',
+    accent: 4,
+    chant: banner('core'),
+  },
+  {
     slug: 'gallery',
     title: 'THE GALLERY',
     kana: '画廊',

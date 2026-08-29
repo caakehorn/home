@@ -123,6 +123,24 @@ type Filters = {
 
 const EMPTY: Filters = { domains: new Set(), families: new Set(), types: new Set(), status: new Set() }
 
+/**
+ * A finger, not a mouse.
+ *
+ * This room was built and checked with a pointing device, and every one of its
+ * gestures assumed one: selection read a hover state that a touchscreen never
+ * sets, zoom was the wheel and nothing else, and travelling the years wanted a
+ * shift key. Read once at module scope — a device does not grow a mouse
+ * mid-session, and the two places that care (the pick radius and the sentence
+ * that tells you what the gestures are) do not need to react.
+ */
+const COARSE =
+  typeof window !== 'undefined' &&
+  typeof window.matchMedia === 'function' &&
+  window.matchMedia('(pointer: coarse)').matches
+
+/** How far from the pointer a node still counts as picked, in CSS pixels. */
+const PICK_R = COARSE ? 22 : 6
+
 export function CoreRoute() {
   // Slugs carry slashes (`people/annie-ulmer`), so the route is a splat and the
   // focused page is whatever follows `/core/`.
@@ -422,44 +440,88 @@ export function CoreRoute() {
 
   /* ---- pointer ----------------------------------------------------------- */
 
-  const drag = useRef<{ x: number; y: number; button: number } | null>(null)
+  /**
+   * Every pointer currently down, by id.
+   *
+   * One entry is a drag: orbit, or pan with shift or the right button. Two is a
+   * pinch: the distance between them is the dolly and the midpoint is the
+   * travel, which is the pair of gestures every map application has already
+   * taught everybody. A single ref holding one drag could not express the
+   * second case at all, which is why touch had no zoom.
+   */
+  const pointers = useRef(new Map<number, { x: number; y: number }>())
+  /** The live two-finger gesture: the span between the fingers and their middle. */
+  const gesture = useRef<{ dist: number; midY: number } | null>(null)
+  /** Where the first finger went down, so a tap can be told from a drag. */
+  const tap = useRef<{ x: number; y: number; multi: boolean } | null>(null)
   const lastPick = useRef(0)
+
+  /** What is under a point on the page, in node indices. −1 for nothing. */
+  const pickAt = useCallback((el: HTMLCanvasElement, clientX: number, clientY: number) => {
+    const scene = sceneRef.current
+    if (!scene) return -1
+    const rect = el.getBoundingClientRect()
+    const dpr = Math.min(2, window.devicePixelRatio || 1)
+    return scene.pick(
+      cameraRef.current,
+      Math.round((clientX - rect.left) * dpr),
+      Math.round((clientY - rect.top) * dpr),
+      el.width,
+      el.height,
+      PICK_R * dpr,
+    )
+  }, [])
 
   const onMove = useCallback(
     (e: React.PointerEvent<HTMLCanvasElement>) => {
       const camera = cameraRef.current
-      if (drag.current) {
-        const dx = e.clientX - drag.current.x
-        const dy = e.clientY - drag.current.y
-        drag.current.x = e.clientX
-        drag.current.y = e.clientY
-        if (drag.current.button === 2 || e.shiftKey) camera.pan(dy * 0.8)
-        else camera.orbit(dx * 0.006, -dy * 0.005)
+      const live = pointers.current.get(e.pointerId)
+
+      // Nothing is down: this is a mouse looking around. Throttled, because a
+      // pick costs a draw call and a readback.
+      if (!live) {
+        if (!sceneRef.current) return
+        const now = performance.now()
+        if (now - lastPick.current < 55) return
+        lastPick.current = now
+        const id = pickAt(e.currentTarget, e.clientX, e.clientY)
+        setHover(id >= 0 ? id : null)
         return
       }
-      const scene = sceneRef.current
-      if (!scene) return
-      const now = performance.now()
-      if (now - lastPick.current < 55) return
-      lastPick.current = now
-      const el = e.currentTarget
-      const rect = el.getBoundingClientRect()
-      const dpr = Math.min(2, window.devicePixelRatio || 1)
-      const id = scene.pick(
-        camera,
-        Math.round((e.clientX - rect.left) * dpr),
-        Math.round((e.clientY - rect.top) * dpr),
-        el.width,
-        el.height,
-      )
-      setHover(id >= 0 ? id : null)
+
+      const dx = e.clientX - live.x
+      const dy = e.clientY - live.y
+      live.x = e.clientX
+      live.y = e.clientY
+
+      if (pointers.current.size >= 2) {
+        const [a, b] = [...pointers.current.values()]
+        const dist = Math.max(1, Math.hypot(a.x - b.x, a.y - b.y))
+        const midY = (a.y + b.y) / 2
+        const was = gesture.current
+        if (was) {
+          camera.dolly(was.dist / dist)
+          camera.pan((midY - was.midY) * 0.8)
+        }
+        gesture.current = { dist, midY }
+        if (tap.current) tap.current.multi = true
+        return
+      }
+
+      // Dragging down travels up the years, which is the direction the sheath
+      // moves under your finger. Shift or the right button does it with a mouse.
+      if (e.shiftKey || (e.buttons & 2) === 2) camera.pan(dy * 0.8)
+      else camera.orbit(dx * 0.006, -dy * 0.005)
     },
-    [],
+    [pickAt],
   )
 
   const structure = data?.structure
   const node = selected !== null && structure ? structure.nodes[selected] : null
   const hovered = hover !== null && structure ? structure.nodes[hover] : null
+  // On a phone the panel that names what you picked is below the fold, so the
+  // tip falls back to the selection: a tap answers itself, on the canvas.
+  const tipped = hovered ?? node
 
   const pick = useCallback(
     (i: number | null) => {
@@ -472,6 +534,46 @@ export function CoreRoute() {
     },
     [data, navigate],
   )
+
+  /**
+   * A pointer came up.
+   *
+   * Selection used to read the `hover` state, which only `onMove` ever set —
+   * so on a touchscreen, where no move precedes a tap, every tap read `null`
+   * and *cleared* the selection. Picking at the release coordinates fixes touch
+   * and also fixes the mouse click that outruns the 55 ms hover throttle.
+   */
+  const endPointer = useCallback(
+    (e: React.PointerEvent<HTMLCanvasElement>, select: boolean) => {
+      const el = e.currentTarget
+      pointers.current.delete(e.pointerId)
+      if (el.hasPointerCapture(e.pointerId)) el.releasePointerCapture(e.pointerId)
+      if (pointers.current.size < 2) gesture.current = null
+      // Still fingers down — the gesture is not over, so nothing has been tapped.
+      if (pointers.current.size > 0) return
+      const t = tap.current
+      tap.current = null
+      if (!select || !t || t.multi) return
+      if (Math.hypot(e.clientX - t.x, e.clientY - t.y) > 6) return
+      const id = pickAt(el, e.clientX, e.clientY)
+      setHover(id >= 0 ? id : null)
+      pick(id >= 0 ? id : null)
+    },
+    [pick, pickAt],
+  )
+
+  /* ---- the zoom and travel pad ------------------------------------------- */
+
+  // A gesture nobody finds is not a feature. These are real buttons, so a
+  // keyboard reaches the camera for the first time as well.
+  const holding = useRef(0)
+  const hold = useCallback((fn: () => void) => {
+    fn()
+    window.clearInterval(holding.current)
+    holding.current = window.setInterval(fn, 70)
+  }, [])
+  const release = useCallback(() => window.clearInterval(holding.current), [])
+  useEffect(() => () => window.clearInterval(holding.current), [])
 
   /* ---- render ------------------------------------------------------------ */
 
@@ -541,20 +643,25 @@ export function CoreRoute() {
               className="core__canvas"
               onPointerDown={(e) => {
                 e.currentTarget.setPointerCapture(e.pointerId)
-                drag.current = { x: e.clientX, y: e.clientY, button: e.button }
+                pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+                if (pointers.current.size === 1) {
+                  tap.current = { x: e.clientX, y: e.clientY, multi: false }
+                  gesture.current = null
+                } else {
+                  // A second finger: this is a pinch, and whatever happens next
+                  // it is not a tap.
+                  if (tap.current) tap.current.multi = true
+                  const [a, b] = [...pointers.current.values()]
+                  gesture.current = {
+                    dist: Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)),
+                    midY: (a.y + b.y) / 2,
+                  }
+                }
               }}
-              onPointerUp={(e) => {
-                const was = drag.current
-                drag.current = null
-                e.currentTarget.releasePointerCapture(e.pointerId)
-                if (was && Math.hypot(e.clientX - was.x, e.clientY - was.y) < 4)
-                  pick(hover ?? null)
-              }}
+              onPointerUp={(e) => endPointer(e, true)}
+              onPointerCancel={(e) => endPointer(e, false)}
               onPointerMove={onMove}
-              onPointerLeave={() => {
-                drag.current = null
-                setHover(null)
-              }}
+              onPointerLeave={() => setHover(null)}
               onContextMenu={(e) => e.preventDefault()}
               onWheel={(e) => cameraRef.current.dolly(e.deltaY > 0 ? 1.09 : 0.92)}
             />
@@ -572,11 +679,44 @@ export function CoreRoute() {
                   : `134,348 MARKS · ${fps} FPS`}
             </span>
           </div>
-          {hovered && (
+          {!noGl && (
+            <div className="core__pad">
+              {(
+                [
+                  ['＋', 'Zoom in', () => cameraRef.current.dolly(0.92)],
+                  ['－', 'Zoom out', () => cameraRef.current.dolly(1.087)],
+                  ['↑', 'Travel up the years', () => cameraRef.current.pan(26)],
+                  ['↓', 'Travel down the years', () => cameraRef.current.pan(-26)],
+                ] as const
+              ).map(([glyph, label, step]) => (
+                <button
+                  key={label}
+                  type="button"
+                  className="core__pad-btn"
+                  aria-label={label}
+                  title={label}
+                  onPointerDown={() => hold(step)}
+                  onPointerUp={release}
+                  onPointerCancel={release}
+                  onPointerLeave={release}
+                  onBlur={release}
+                  // `detail === 0` is a keyboard activation, which fires no
+                  // pointerdown and so would otherwise do nothing at all.
+                  onClick={(e) => {
+                    if (e.detail === 0) step()
+                  }}
+                >
+                  {glyph}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {tipped && (
             <div className="core__tip">
-              <b>{hovered.n}</b>
+              <b>{tipped.n}</b>
               <span>
-                {hovered.d} · {hovered.t === null ? 'undated' : year(hovered.t)}
+                {tipped.d} · {tipped.t === null ? 'undated' : year(tipped.t)}
               </span>
             </div>
           )}

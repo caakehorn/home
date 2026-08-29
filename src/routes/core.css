@@ -106,6 +106,44 @@
   color: color-mix(in srgb, var(--paper) 62%, transparent);
 }
 
+/* The zoom and travel pad.
+   Pinch and two-finger drag both work, but a gesture nobody finds is not a
+   feature — and these are real buttons, so a keyboard reaches the camera too. */
+.core__pad {
+  position: absolute;
+  right: 0.55rem;
+  bottom: 0.55rem;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.core__pad-btn {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  font-family: var(--f-mono);
+  font-size: 0.9rem;
+  line-height: 1;
+  color: color-mix(in srgb, var(--paper) 80%, transparent);
+  background: color-mix(in srgb, #03030a 74%, transparent);
+  border: var(--staple) solid color-mix(in srgb, var(--paper) 24%, transparent);
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+}
+
+/* Zoom above, travel below, with a gap that says they are two pairs. */
+.core__pad-btn:nth-child(2) {
+  margin-bottom: 0.3rem;
+}
+
+.core__pad-btn:hover,
+.core__pad-btn:focus-visible {
+  color: var(--glow, var(--n4));
+  border-color: var(--glow, var(--n4));
+}
+
 .core__tip {
   position: absolute;
   left: 0.7rem;
@@ -113,7 +151,8 @@
   display: grid;
   gap: 0.1rem;
   padding: 0.35rem 0.55rem;
-  max-width: min(28rem, 70%);
+  /* Never under the pad. */
+  max-width: min(28rem, calc(100% - 4.6rem));
   background: color-mix(in srgb, #03030a 82%, transparent);
   border-left: 2px solid var(--glow, var(--n4));
   pointer-events: none;

@@ -235,6 +235,31 @@ export function CoreRoute() {
     return on
   }, [data, filters, query])
 
+  /**
+   * The matches, as a list you can touch.
+   *
+   * Searching lit the right pages in the structure and left you to find them —
+   * which on a phone means hitting a four-pixel dot in a cloud of 519. Naming
+   * them is the other half of selecting one. Titles that begin with what you
+   * typed come first; the rest are alphabetical, so the order is a rule and not
+   * a ranking.
+   */
+  const found = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q || !data || !matches) return []
+    const nodes = data.structure.nodes
+    const hits: number[] = []
+    for (let i = 0; i < matches.length; i++) if (matches[i]) hits.push(i)
+    hits.sort((a, b) => {
+      const na = nodes[a].n.toLowerCase()
+      const nb = nodes[b].n.toLowerCase()
+      const pa = na.startsWith(q) ? 0 : 1
+      const pb = nb.startsWith(q) ? 0 : 1
+      return pa !== pb ? pa - pb : na.localeCompare(nb)
+    })
+    return hits
+  }, [data, matches, query])
+
   const sceneRef = useRef<Scene | null>(null)
   const cameraRef = useRef(new Camera())
   const liveRef = useRef({ layers, bloom, win, motion, hover, selected, edge, fraction })
@@ -755,6 +780,34 @@ export function CoreRoute() {
             </label>
           </div>
 
+          {query.trim() && (
+            <div className="core__found">
+              {found.length === 0 ? (
+                <span className="core__found-none">
+                  no page is called anything like “{query.trim()}”
+                </span>
+              ) : (
+                <>
+                  {found.slice(0, 12).map((i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      className={`core__found-hit${selected === i ? ' core__found-hit--on' : ''}`}
+                      onClick={() => pick(i)}
+                    >
+                      {structure.nodes[i].n}
+                    </button>
+                  ))}
+                  {found.length > 12 && (
+                    <span className="core__found-none">
+                      and {found.length - 12} more, lit in the structure
+                    </span>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+
           <div className="core__row">
             <button
               type="button"
@@ -888,9 +941,12 @@ export function CoreRoute() {
           </h2>
           {!node && (
             <p className="core__say">
-              Click a page in the structure. Its argued edges light up and every claim it makes
-              becomes readable below. Drag to orbit, shift-drag to travel up the years, scroll to
-              close in.
+              {COARSE ? 'Tap' : 'Click'} a page in the structure — or type a name above and take it
+              from the list. Its argued edges light up and every claim it makes becomes readable
+              below.{' '}
+              {COARSE
+                ? 'Drag to orbit, pinch to close in, two fingers to travel the years. The pad on the picture does the same thing with buttons.'
+                : 'Drag to orbit, shift-drag to travel up the years, scroll to close in.'}
             </p>
           )}
           {node && (

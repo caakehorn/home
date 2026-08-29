@@ -75,8 +75,8 @@ export function Home() {
 
           <p className="mast__body">
             A wiki about one person, written by him, argued at by him, and left contradictory where
-            the contradictions are load-bearing. Everything else in this building — the map, the
-            lattice, the instruments, the arcade, the noise — is a different instrument pointed at
+            the contradictions are load-bearing. Everything else in this building — the core, the map,
+            the lattice, the instruments, the arcade, the noise — is a different instrument pointed at
             the same corpus. <b>The brain is the point. Start there.</b>
           </p>
 
@@ -116,9 +116,10 @@ export function Home() {
             館内
           </span>
           <p className="section__note">
-            {SECTIONS.length} instruments pointed at the same corpus. The brain holds it; the
-            lattice puts it on a time axis; the transcript is the raw material every other room
-            argues about; the arcade is one room with one person's name on it, and she earned it.
+            {SECTIONS.length} instruments pointed at the same corpus. The brain holds it; the core
+            hangs the whole of it in one place and lets you fly through the argument; the lattice
+            puts it on a time axis; the transcript is the raw material every other room argues
+            about; the arcade is one room with one person's name on it, and she earned it.
           </p>
         </div>
 

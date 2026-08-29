@@ -288,6 +288,8 @@ export type Visible = {
   axis: boolean
   bloom: number
   sheathAlpha: number
+  /** 0→1 of the message record to draw. Below 1 the room says so. */
+  sheathFraction: number
   window: [number, number] | null
 }
 
@@ -393,12 +395,34 @@ export class Scene {
       }
     }
 
+    /**
+     * The sheath goes into the buffer shuffled, and the shuffle is the whole
+     * reason a slow machine can still read this room honestly.
+     *
+     * 134,348 additively blended points is a lot to ask of software GL or an
+     * integrated part, so the renderer can draw only the first N of them. In
+     * message order that would show 2015 and stop — a different corpus, drawn
+     * without saying so. Shuffled deterministically first, the first N are an
+     * unbiased sample of the whole eleven years, every gap still falls where it
+     * falls, and the instrument can say "one in four" and mean it.
+     */
+    const order = new Uint32Array(sheath.count)
+    for (let i = 0; i < sheath.count; i++) order[i] = i
+    let seed = 0x9e3779b9
+    for (let i = sheath.count - 1; i > 0; i--) {
+      seed = (Math.imul(seed ^ (seed >>> 15), 0x85ebca6b) + 0x165667b1) >>> 0
+      const j = seed % (i + 1)
+      const t = order[i]
+      order[i] = order[j]
+      order[j] = t
+    }
     const sheathData = new Float32Array(sheath.count * 4)
-    for (let i = 0; i < sheath.count; i++) {
-      sheathData[i * 4] = sheath.pos[i * 3]
-      sheathData[i * 4 + 1] = sheath.pos[i * 3 + 1]
-      sheathData[i * 4 + 2] = sheath.pos[i * 3 + 2]
-      sheathData[i * 4 + 3] = sheath.dir[i]
+    for (let k = 0; k < sheath.count; k++) {
+      const i = order[k]
+      sheathData[k * 4] = sheath.pos[i * 3]
+      sheathData[k * 4 + 1] = sheath.pos[i * 3 + 1]
+      sheathData[k * 4 + 2] = sheath.pos[i * 3 + 2]
+      sheathData[k * 4 + 3] = sheath.dir[i]
     }
 
     this.bufs = {
@@ -533,7 +557,11 @@ export class Scene {
       gl.uniform1f(p.u.u_alpha, vis.sheathAlpha)
       attrib(gl, this.bufs.sheath, p.a.a_pos, 3, 4, 0)
       attrib(gl, this.bufs.sheath, p.a.a_dir, 1, 4, 3)
-      gl.drawArrays(gl.POINTS, 0, this.counts.sheath)
+      // Fewer points at a proportionally higher alpha, so a sampled sheath has
+      // roughly the brightness of a whole one rather than fading out.
+      const n = Math.max(1, Math.round(this.counts.sheath * vis.sheathFraction))
+      gl.uniform1f(p.u.u_alpha, vis.sheathAlpha / Math.max(0.25, vis.sheathFraction) ** 0.55)
+      gl.drawArrays(gl.POINTS, 0, n)
     }
 
     // ---- the typed graph

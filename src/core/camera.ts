@@ -117,7 +117,7 @@ export class Camera {
   }
 
   dolly(factor: number) {
-    this.goal.distance = clamp(this.goal.distance * factor, 12, 1600)
+    this.goal.distance = clamp(this.goal.distance * factor, 12, 3000)
   }
 
   pan(dy: number) {
@@ -127,7 +127,7 @@ export class Camera {
   /** Fly to a point: keep the current angle, centre the height, close in. */
   focus(height: number, distance = 90) {
     this.goal.height = height
-    this.goal.distance = clamp(distance, 12, 1600)
+    this.goal.distance = clamp(distance, 12, 3000)
   }
 
   /**
@@ -155,7 +155,7 @@ export class Camera {
   }
 
   frame(aspect: number) {
-    perspective(this.proj, 0.9, aspect, 0.5, 4000)
+    perspective(this.proj, 0.9, aspect, 0.5, 9000)
     multiply(this.viewProj, this.proj, this.view)
     return this.viewProj
   }

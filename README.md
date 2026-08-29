@@ -1400,6 +1400,111 @@ the wrong message.
 One number on the page is not from the record and says so: **SINCE THE LAST
 MESSAGE** is counted from the last message to the day the page loaded.
 
+## THE CORE
+
+```
+npm run core            # reads public/wiki + public/leviathan, writes public/core/
+```
+
+The whole corpus as one body, at `/core`, with time running up the middle of it.
+Hand-written WebGL2 — no three.js, no new dependency, `package.json` is still at
+four.
+
+### What is drawn
+
+**The skeleton is the wiki's typed graph, and it is the reason the room exists.**
+Not `index.json.edges` — those 3,851 undirected wikilinks are the flat graph, and
+they are in here only as the dim haze you can switch on behind everything else.
+The structure is the **2,398 `connections`**: nineteen relationship types, six of
+them in inverse pairs whose counts match almost exactly, and every single edge
+carrying a sentence of prose saying why it was made. Pick an edge and the claim
+prints whole.
+
+That graph lives only in each page's raw front-matter. `lists.connections` in the
+page JSON flattens every entry to `"page: …"` and drops both the type and the
+claim, which is why nothing on this site had ever drawn it.
+
+**The mass is the message record** — 134,348 marks, one per message, decoded on
+the client out of `clock.json`'s packed integers. Height is the day it was sent,
+bearing is the minute. The 38 months no export covers are drawn as rings the
+light does not fill, at their true height, and the sheath visibly breaks in half
+across the 28-month hole from 2020-08 to 2022-11.
+
+### The one rule the geometry obeys
+
+**Vertical is data and is never simulated. Horizontal is a drawing.**
+
+A page hangs at the date the record gives it and nothing moves it. Where it sits
+on its own ring of time was chosen by a force relaxation over the typed edges and
+means nothing at all. That split is the difference between a diagram and a mood,
+and the room prints it on its own masthead.
+
+Because the record does not date everything equally, the fallback is recorded
+rather than hidden. 160 pages are placed by a documented `date_range`; 8 by a
+range with one end; 256 by the earliest date their prose happens to name; 89 by
+nothing better than when the file was created; 6 by nothing at all. **Every page
+says which rule placed it** — a page floating at 1900 because it mentions a
+grandparent's birth is not making the same claim as one with a range on it.
+
+The axis is linear across 1892→2027 and mostly empty. A third of the corpus
+predates 2010 and the century under it is nearly bare. Compressing that would
+make a denser picture and a false one, so the emptiness is drawn at its true
+height and the message record occupies the eight per cent of the column it
+actually covers.
+
+### How it is rendered
+
+Eight programs against one canvas: the axis and untyped mesh, the sheath, the
+typed edges, the pages, then a bright pass, a separable blur and a composite. A
+ninth path draws the nodes again into an offscreen target with their index as
+their colour, so hovering asks the GPU what is under the cursor rather than
+searching on the CPU.
+
+**Nothing on screen is changed by rebuilding geometry.** Every edge and node
+carries its index as a vertex attribute and reads a one-byte lookup texture to
+find out whether it is hidden, dimmed, lit or selected. A filter is a
+two-kilobyte `texSubImage2D`; retessellating 67,000 vertices on every click would
+hitch. Those two LUTs are the entire interaction surface between React and the
+GPU.
+
+The GPU is here for the sheath and the compositing and not much else — 519 nodes
+and 2,398 edges would run fine on canvas 2D, and `src/core/Fallback2D.tsx` draws
+exactly those when WebGL2 is missing or a context is lost. It does not fake the
+sheath: 134,000 additively blended points is the thing 2D cannot do, and a sample
+of them would be quietly showing a different corpus, so it names the missing
+layer instead.
+
+### The pipeline
+
+`scripts/core-frontmatter.mjs` reads the `connections:` block **by line rather
+than with a YAML parser**. Two reasons: a parser is a dependency this repo has
+gone without, and `mind/synthesis/august-grievance-verdict` has a block-scalar
+error that makes a strict parse throw and take 12 real edges with it. A survey of
+all 519 pages says the line reader loses nothing — 404 pages carry the block,
+every item is indented exactly two spaces, and no value in the corpus wraps onto
+a second line. It counts any line it did not understand so the build can refuse
+to write when that stops being true.
+
+`scripts/build-core.mjs` asserts every count against `docs/CORPUS.md` and exits
+non-zero on drift — 519 nodes, 765,809 words, 3,851 untyped, 2,398 typed, 19
+types, 10 domains, 151 pages declaring 485 gaps — and fails if a relationship
+type appears with no drawing family, so a twentieth type cannot reach the map as
+an unstyled line. Deterministic: two builds differ only in `generatedAt`.
+
+`clock.json` is reused whole rather than rebuilt. `public/core/` carries only
+what does not already exist somewhere in this repo: `structure.json` (0.20 MB)
+and `claims.json`, which is half a megabyte of prose and is not fetched until
+somebody opens an edge.
+
+### Next to THE DOCKET
+
+They read the same corpus and do not collide. THE DOCKET mines page *bodies* and
+uses `contradicts` — 70 of the 2,398 — as text, lifting each item whole and
+refusing to count it. THE CORE reads front-matter and draws the other 2,328 as
+structure. Where they touch, at the 485 declared gaps, THE CORE carries the count
+as a number on the page's panel and links out to `/docket` for the words rather
+than re-listing them.
+
 ## THE GALLERY
 
 `/gallery` is the room the old repo is hung in, and it is the only room here

@@ -506,3 +506,37 @@
   line-height: 1.5;
   color: color-mix(in srgb, var(--text-dim) 75%, transparent);
 }
+
+/* ---- provenance ----------------------------------------------------------
+   The raw corpora a page cites. They are named and counted and they do not
+   ship — the citation is the record, the file is not. */
+
+.core__roots {
+  display: grid;
+  gap: 0.2rem;
+  margin: 0 0 0.7rem;
+  padding: 0.4rem 0.5rem;
+  background: var(--void-2);
+  border-left: 3px solid var(--n5);
+}
+
+.core__roots-head {
+  font-family: var(--f-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.16em;
+  color: var(--n5);
+}
+
+.core__roots-list {
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  line-height: 1.5;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.core__roots-say {
+  font-size: 0.68rem;
+  line-height: 1.45;
+  color: var(--text-dim);
+}

@@ -82,6 +82,22 @@ const mix = (
   a[2] + (b[2] - a[2]) * t,
 ]
 
+const WHITE: [number, number, number] = [1, 1, 1]
+
+/**
+ * Lift a colour until it can be seen on a black ground.
+ *
+ * RIOT is two inks — spot red and toner — so three of its five accents are
+ * near-black, and a near-black line drawn additively onto a near-black canvas
+ * is not a line. Every channel the scene uses goes through here first, which
+ * costs a little saturation in the dark palettes and is the difference between
+ * a legend that matches the picture and one that lies about it.
+ */
+const lift = (c: [number, number, number], floor: number): [number, number, number] => {
+  const peak = Math.max(c[0], c[1], c[2])
+  return peak >= floor ? c : mix(c, WHITE, (floor - peak) / (1 - peak + 1e-6))
+}
+
 const FAMILY_ORDER = ['causal', 'structural', 'evidential', 'affinity', 'tension', 'other']
 const FAMILY_SAYS: Record<string, string> = {
   causal: 'this made that happen, or came before it',
@@ -134,6 +150,8 @@ export function CoreRoute() {
   const [layers, setLayers] = useState({ sheath: true, typed: true, untyped: false, axis: true })
   const [bloom, setBloom] = useState(0.85)
   const [fps, setFps] = useState(0)
+  /** How much of the record is drawn. Dropped automatically on a slow device. */
+  const [fraction, setFraction] = useState(1)
   /** Bumped when the GL scene exists, so the first state push is not dropped. */
   const [ready, setReady] = useState(0)
 
@@ -173,6 +191,19 @@ export function CoreRoute() {
 
   /* ---- what is visible --------------------------------------------------- */
 
+  /** Which raw corpora each page cites, and how often. */
+  const rootsFor = useMemo(() => {
+    if (!data) return new Map<number, [string, number][]>()
+    const m = new Map<number, [string, number][]>()
+    for (const [node, root, n] of data.structure.nodeRoots) {
+      const list = m.get(node) ?? []
+      list.push([data.structure.roots[root].id, n])
+      m.set(node, list)
+    }
+    for (const list of m.values()) list.sort((a, b) => b[1] - a[1])
+    return m
+  }, [data])
+
   const matches = useMemo(() => {
     if (!data) return null
     const q = query.trim().toLowerCase()
@@ -188,8 +219,8 @@ export function CoreRoute() {
 
   const sceneRef = useRef<Scene | null>(null)
   const cameraRef = useRef(new Camera())
-  const liveRef = useRef({ layers, bloom, win, motion, hover, selected, edge })
-  liveRef.current = { layers, bloom, win, motion, hover, selected, edge }
+  const liveRef = useRef({ layers, bloom, win, motion, hover, selected, edge, fraction })
+  liveRef.current = { layers, bloom, win, motion, hover, selected, edge, fraction }
 
   /** Push node and edge states into the lookup textures. */
   useEffect(() => {
@@ -274,6 +305,7 @@ export function CoreRoute() {
     let last = performance.now()
     let told = 0
     let frames = 0
+    let eased = 0
 
     const frame = (now: number) => {
       raf = requestAnimationFrame(frame)
@@ -306,27 +338,30 @@ export function CoreRoute() {
         ink('--n5', [1, 0.9, 0]),
       ]
       const paper = ink('--paper', [0.91, 0.89, 0.83])
-      const white: [number, number, number] = [1, 1, 1]
       const palette: Palette = {
-        void: ink('--void', [0.01, 0.01, 0.03]).map((c) => c * 0.55) as [number, number, number],
-        // Ten domains out of five accents: the second five are the same hues
-        // lifted toward white, so they stay distinct in griptape and riot where
-        // two of the accents collapse onto each other.
+        // The mount is dark in every palette, for the reason THE CLOCK's is:
+        // this is an additive exposure, and RIOT's `--void` is paper. Adding
+        // scene light onto newsprint is not light. The room around the canvas
+        // still follows the palette; the canvas itself never does.
+        void: [0.012, 0.012, 0.028],
+        // Ten domains out of five accents, on a continuous lightness ramp
+        // rather than two tiers — GRIPTAPE collapses two accents onto each
+        // other and RIOT collapses four, so hue alone cannot separate ten.
         domains: Array.from({ length: 10 }, (_, i) =>
-          i < 5 ? accents[i] : mix(accents[i - 5], white, 0.5),
+          lift(mix(accents[i % 5], WHITE, (i / 9) * 0.7), 0.5),
         ),
         families: [
-          accents[1], // causal
-          accents[3], // structural
-          accents[2], // evidential
-          accents[0], // affinity
-          ink('--spot', [0.88, 0.11, 0.07]), // tension — the one constant across palettes
-          mix(paper, white, 0.2), // other
+          lift(accents[1], 0.62), // causal
+          lift(accents[3], 0.62), // structural
+          lift(accents[2], 0.62), // evidential
+          lift(accents[0], 0.62), // affinity
+          lift(ink('--spot', [0.88, 0.11, 0.07]), 0.7), // tension — the one constant colour
+          lift(mix(paper, WHITE, 0.2), 0.7), // other
         ],
-        sent: mix(accents[4], white, 0.25),
-        recv: accents[3],
-        axis: mix(paper, white, 0.1),
-        link: paper,
+        sent: lift(mix(accents[4], WHITE, 0.25), 0.7),
+        recv: lift(accents[3], 0.7),
+        axis: lift(mix(paper, WHITE, 0.1), 0.6),
+        link: lift(paper, 0.6),
       }
 
       const vis: Visible = {
@@ -336,12 +371,22 @@ export function CoreRoute() {
         axis: live.layers.axis,
         bloom: live.bloom,
         sheathAlpha: live.selected === null ? 0.5 : 0.24,
+        sheathFraction: live.fraction,
         window: live.win ? [yearToY(live.win[0]), yearToY(live.win[1])] : null,
       }
       scene.draw(camera, w, h, palette, vis, live.motion ? dt : 0)
 
       if (now - told > 900) {
-        setFps(Math.round((frames * 1000) / (now - told)))
+        const rate = Math.round((frames * 1000) / (now - told))
+        setFps(rate)
+        // Software GL and integrated parts cannot hold 134,000 additive points.
+        // Rather than crawl, draw a smaller unbiased sample and say so. One
+        // step at a time with a cooldown, so the picture settles instead of
+        // thrashing while each step is still being measured.
+        if (rate < 24 && now - eased > 2600) {
+          eased = now
+          setFraction((f) => Math.max(0.0625, f / 2))
+        }
         frames = 0
         told = now
       }
@@ -520,7 +565,11 @@ export function CoreRoute() {
               {c.nodes} PAGES · {c.typed.toLocaleString()} ARGUED EDGES · {c.types} TYPES
             </span>
             <span>
-              {noGl ? 'CANVAS 2D — NO SHEATH' : `134,348 MARKS · ${fps} FPS`}
+              {noGl
+                ? 'CANVAS 2D — NO SHEATH'
+                : fraction < 1
+                  ? `${Math.round(134348 * fraction).toLocaleString()} OF 134,348 MARKS — 1 IN ${Math.round(1 / fraction)} · ${fps} FPS`
+                  : `134,348 MARKS · ${fps} FPS`}
             </span>
           </div>
           {hovered && (
@@ -610,6 +659,30 @@ export function CoreRoute() {
                 </button>
               </>
             )}
+            <button
+              type="button"
+              className="core__chip"
+              onClick={() => {
+                const c = cameraRef.current
+                // 1,900 units of column at a 0.9 rad field needs about this much
+                // room, plus a margin so 1892 and 2027 are both inside the frame.
+                c.goal.height = 0
+                c.goal.distance = 2350
+              }}
+            >
+              ⤢ THE WHOLE COLUMN
+            </button>
+            <button
+              type="button"
+              className="core__chip"
+              onClick={() => {
+                const c = cameraRef.current
+                c.goal.height = yearToY(2016)
+                c.goal.distance = 560
+              }}
+            >
+              ⌖ THE RECORD
+            </button>
             <button type="button" className="core__chip" onClick={() => pick(null)}>
               ⟲ CLEAR
             </button>
@@ -626,6 +699,21 @@ export function CoreRoute() {
                 onClick={() => toggle('domains', d.id)}
               >
                 {d.id} <i>{d.count}</i>
+              </button>
+            ))}
+          </div>
+
+          <div className="core__row core__row--wrap">
+            {structure.facets.status.map((f) => (
+              <button
+                key={f.id}
+                type="button"
+                className={`core__tag${filters.status.has(f.id) ? ' core__tag--on' : ''}`}
+                aria-pressed={filters.status.has(f.id)}
+                style={{ ['--tag' as string]: 'var(--n5)' }}
+                onClick={() => toggle('status', f.id)}
+              >
+                {f.id} <i>{f.n}</i>
               </button>
             ))}
           </div>
@@ -692,6 +780,21 @@ export function CoreRoute() {
                   </dd>
                 </div>
               </dl>
+              {rootsFor.get(node.i)?.length ? (
+                <div className="core__roots">
+                  <span className="core__roots-head">RESTS ON</span>
+                  <span className="core__roots-list">
+                    {rootsFor
+                      .get(node.i)!
+                      .map(([id, n]) => `${id}${n > 1 ? ` ×${n}` : ''}`)
+                      .join(' · ')}
+                  </span>
+                  <span className="core__roots-say">
+                    raw corpora this page cites. None of them ship — the citation is the record,
+                    the file is not.
+                  </span>
+                </div>
+              ) : null}
               <p className="core__links">
                 <Link to={`/brain/${node.s}`}>READ THE PAGE →</Link>
                 {node.g > 0 && <Link to="/docket">ITS {node.g} GAPS, IN ITS OWN WORDS →</Link>}

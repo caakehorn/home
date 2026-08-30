@@ -6,6 +6,7 @@ import { Closing } from '../ledger/Closing'
 import { LogSheet } from '../ledger/LogSheet'
 import { Export, NewUnit, UnitCard, emptyMessage } from '../ledger/Capture'
 import { Report } from '../ledger/Report'
+import { SingleDoseSheet } from '../ledger/SingleDose'
 import { Trends } from '../ledger/Trends'
 import { Instant, pluralise, since } from '../ledger/bits'
 import { loadLedger, record, sync, type LedgerState } from '../ledger/sync'
@@ -45,6 +46,7 @@ export function LedgerRoute() {
   const [state, setState] = useState<LedgerState | null>(null)
   const [failed, setFailed] = useState<string | null>(null)
   const [sheet, setSheet] = useState<{ kind: 'log' | 'close'; unit: string } | null>(null)
+  const [dosing, setDosing] = useState(false)
   const [syncing, setSyncing] = useState(false)
   const [syncNote, setSyncNote] = useState<string | null>(null)
   const [syncedAt, setSyncedAt] = useState<string | null>(null)
@@ -241,6 +243,20 @@ export function LedgerRoute() {
         {!focused && pane === 'trends' && <Trends ledger={ledger} />}
 
         {!focused && pane === 'units' && (
+        <>
+        <div className="lg__quick">
+          {/* Beside NEW UNIT rather than buried in it: a dose with no unit
+              behind it is not a lesser case, and on most days it is the more
+              common one. */}
+          <button type="button" className="lg__single" onClick={() => setDosing(true)}>
+            + SINGLE DOSE
+          </button>
+          <span className="lg__quick-note">
+            one dose, nothing tracked behind it — counted in every dose figure, kept out of
+            every figure about units
+          </span>
+        </div>
+
         <section className="lg__units">
           {open.length === 0 && <p className="lg__empty">{emptyMessage(shut.length)}</p>}
           {open.map((unit) => (
@@ -255,6 +271,7 @@ export function LedgerRoute() {
           ))}
           <NewUnit onDone={(events) => void commit(events)} />
         </section>
+        </>
         )}
 
         {!focused && pane === 'units' && shut.length > 0 && (
@@ -264,7 +281,10 @@ export function LedgerRoute() {
               {shut.map((unit) => (
                 <li key={unit.id}>
                   <button type="button" className="lg__closed-row" onClick={() => navigate(`/ledger/u/${unit.id}`)}>
-                    <b>{unit.substance}</b>
+                    <b>
+                      {unit.substance}
+                      {unit.single && <span className="lg__single-tag"> DOSE</span>}
+                    </b>
                     <span>
                       {unit.quantity} {unit.uom}
                     </span>
@@ -287,6 +307,20 @@ export function LedgerRoute() {
               unit={sheetUnit}
               onDone={(events) => void commit(events)}
               onCancel={() => setSheet(null)}
+            />
+          </div>
+        </div>
+      )}
+
+      {dosing && (
+        <div className="lg__scrim" onClick={() => setDosing(false)}>
+          <div className="lg__sheet-wrap" onClick={(e) => e.stopPropagation()}>
+            <SingleDoseSheet
+              onDone={(events) => {
+                setDosing(false)
+                void commit(events)
+              }}
+              onCancel={() => setDosing(false)}
             />
           </div>
         </div>

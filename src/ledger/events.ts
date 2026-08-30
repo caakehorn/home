@@ -123,6 +123,22 @@ type Base = {
   source: { application: string; tool: string; interface: string }
 }
 
+/**
+ * Anything the four dedicated fields do not have a slot for.
+ *
+ * Substance, amount, unit of measure and time are the four a dose cannot be
+ * read without, and they are columns. Everything else about a dose is
+ * open-ended and nobody knows the list in advance — route, who was there, what
+ * it was cut with, how it landed — so it is a bag of strings rather than a
+ * schema somebody has to keep amending.
+ *
+ * It rides inside `data.extra` on the wire, which `bin/intake` reads past
+ * without complaint: that program validates the event `type` strictly and
+ * ignores keys in `data` it does not know. So this extends the record without
+ * forking the format, which a new event type would do immediately.
+ */
+export type Extra = Record<string, string>
+
 /** A finite object enters the record. */
 export type UnitOpened = Base & {
   type: 'unit_opened'
@@ -137,6 +153,17 @@ export type UnitOpened = Base & {
   /** Where it came from, in whatever words. Free text on purpose. */
   origin?: string
   note?: string
+  extra?: Extra
+  /**
+   * A unit of one: opened, consumed and closed in a single action.
+   *
+   * Set by `singleDose()`. It is a real unit and every dose statistic counts
+   * it, but it is excluded from statistics *about units* — a single dose has a
+   * lifetime of zero by construction, and a hundred of them would drag the
+   * median unit life to nothing while saying nothing true about how long a
+   * unit lasts.
+   */
+  single?: boolean
 }
 
 /** One consumption event against one unit. */
@@ -153,6 +180,7 @@ export type IntakeLogged = Base & {
   /** The words used when there was no number: "one line", "two hits". */
   descriptor?: string
   note?: string
+  extra?: Extra
 }
 
 /** What a correction may change. Anything absent is left as it was. */

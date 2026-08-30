@@ -33,6 +33,7 @@ import {
   type Disposition,
   type IntakePatch,
   type LedgerEvent,
+  type Extra,
   type Measurement,
   type Reconciliation,
   type AdjustmentKind,
@@ -72,6 +73,8 @@ const text = (value: string | undefined | null) => {
 
 export type NewUnit = {
   substance: string
+  /** Anything the four dedicated fields have no slot for. */
+  extra?: Extra
   /** The catalogue id from `intake/substances.json`, when the name matched one. */
   substanceId?: string
   category?: string
@@ -96,6 +99,7 @@ export function openUnit(draft: NewUnit): { event: LedgerEvent; unit: string } {
     receivedAt: draft.receivedAt ?? nowLocal(),
     origin: text(draft.origin),
     note: text(draft.note),
+    extra: draft.extra,
   })
   return { event, unit }
 }
@@ -112,6 +116,7 @@ export type NewIntake = {
   descriptor?: string
   occurredAt?: string
   note?: string
+  extra?: Extra
 }
 
 /**
@@ -134,6 +139,7 @@ export function intake(draft: NewIntake): LedgerEvent {
       measurement: 'unquantified' as const,
       descriptor: text(draft.descriptor),
       note: text(draft.note),
+      extra: draft.extra,
     })
   }
 
@@ -150,6 +156,7 @@ export function intake(draft: NewIntake): LedgerEvent {
     confidence: measurement === 'estimated' ? (draft.confidence ?? 'medium') : undefined,
     descriptor: text(draft.descriptor),
     note: text(draft.note),
+    extra: draft.extra,
   })
 }
 
@@ -261,6 +268,104 @@ export function closeUnit(draft: Closing): LedgerEvent[] {
   )
 
   return events
+}
+
+export type SingleDose = {
+  substance: string
+  substanceId?: string
+  category?: string
+  /** Null or undefined means the amount is not known, same as anywhere else. */
+  quantity?: number | null
+  uom?: string
+  measurement?: Measurement
+  confidence?: Confidence
+  descriptor?: string
+  occurredAt?: string
+  note?: string
+  extra?: Extra
+}
+
+/**
+ * One dose, with no unit behind it — logged and finished in a single action.
+ *
+ * Not every substance arrives as a tracked quantity. Somebody hands you
+ * something; you take one out of a bottle you are not counting. The unit-based
+ * model has no place to put that, and the honest options were to refuse the
+ * event or to make people open a fake 3.5 g unit to hold one 0.18 g dose — the
+ * second of which corrupts every unit statistic it touches.
+ *
+ * So a single dose is modelled as what it actually is: **a unit of one**,
+ * opened at the dose's own size, consumed entirely, and closed balanced, in
+ * three events written together.
+ *
+ * ---- why three events rather than one new type -----------------------------
+ *
+ * Because `bin/intake` in wiki-brain validates the event `type` against a fixed
+ * list and errors on anything else, and that check runs inside `bin/wiki-check`
+ * — a fourth event type would turn that gate red on every run. These three are
+ * types it already knows, so the ledger stays readable by the tool that owns
+ * the format while gaining a concept it did not have.
+ *
+ * ---- what the `single` flag is for -----------------------------------------
+ *
+ * It is a real unit and every *dose* statistic counts it: the amount, the
+ * hour, the interval, the distribution. It is kept out of every statistic
+ * *about units* — lifetime, how often a unit is gone inside a day — because a
+ * single dose has a lifetime of zero by construction, and a hundred of them
+ * would drag the median unit life to nothing while saying nothing true.
+ *
+ * An unquantified single dose is allowed and works: the unit is opened at a
+ * nominal one count, and the intake carries the words instead of a number.
+ */
+export function singleDose(draft: SingleDose): { events: LedgerEvent[]; unit: string } {
+  const quantified =
+    typeof draft.quantity === 'number' && Number.isFinite(draft.quantity) && draft.quantity > 0
+  const at = draft.occurredAt ?? nowLocal()
+  // With no figure there is nothing to size the unit by, so it is one of
+  // whatever this is. The intake against it stays unquantified, so no total
+  // ever counts that 1 as an amount.
+  const uom = quantified ? (draft.uom ?? 'g') : 'dose'
+  const quantity = quantified ? (draft.quantity as number) : 1
+
+  const unit = unitId()
+  const opened = seal({
+    type: 'unit_opened' as const,
+    unit,
+    substance: draft.substance.trim(),
+    substanceId: draft.substanceId,
+    category: draft.category,
+    quantity,
+    uom,
+    receivedAt: at,
+    note: text(draft.note),
+    extra: draft.extra,
+    single: true,
+  })
+
+  const taken = intake({
+    unit,
+    quantity: quantified ? quantity : null,
+    uom,
+    measurement: draft.measurement,
+    confidence: draft.confidence,
+    descriptor: draft.descriptor,
+    occurredAt: at,
+    note: draft.note,
+    extra: draft.extra,
+  })
+
+  // Closed balanced, and deliberately not through `closeUnit`: there is nothing
+  // to reconcile. A quantified single dose accounts for itself exactly, and an
+  // unquantified one is closed as `unknown` because the ledger genuinely does
+  // not know how much left the record.
+  const shut = seal({
+    type: 'unit_closed' as const,
+    unit,
+    closedAt: at,
+    disposition: quantified ? ('consumed' as const) : ('unknown' as const),
+  })
+
+  return { events: [opened, taken, shut], unit }
 }
 
 export const reopenUnit = (unit: string, reason: string) =>

@@ -35,6 +35,7 @@ import {
   instant,
   type Confidence,
   type Disposition,
+  type Extra,
   type LedgerEvent,
   type Measurement,
   type Reconciliation,
@@ -62,6 +63,7 @@ export type IntakeRecord = {
   confidence: Confidence | null
   descriptor: string | null
   note: string | null
+  extra: Extra | null
   corrections: Correction[]
   /** Set when the event was withdrawn. Kept in the record, out of every total. */
   voided: { at: string; reason: string } | null
@@ -124,6 +126,9 @@ export type UnitRecord = {
   openedAt: string
   origin: string | null
   note: string | null
+  extra: Extra | null
+  /** A unit of one — opened, consumed and closed in a single action. */
+  single: boolean
   status: 'active' | 'closed'
   closure: Closure | null
   amendments: Correction[]
@@ -148,15 +153,44 @@ const byOccurrence = (a: { occurredAt: string }, b: { occurredAt: string }) =>
 /**
  * Fold the log.
  *
- * Events are sorted by `loggedAt` before folding, not by `occurredAt`: a
- * correction has to land after the thing it corrects, and a dose backdated to
- * yesterday was still recorded today. Ordering by when the world was told is
- * the only ordering under which the fold is deterministic.
+ * Events are ordered by `loggedAt`, not `occurredAt`: a correction has to land
+ * after the thing it corrects, and a dose backdated to yesterday was still
+ * recorded today.
+ *
+ * ---- why the fold is staged rather than one pass ---------------------------
+ *
+ * `loggedAt` is only precise to the second, so a burst of events shares one
+ * timestamp and the sort falls through to comparing ids. That tiebreak is
+ * stable but arbitrary: a ULID's randomness decides it. In a single pass that
+ * meant a `unit_closed` could be folded before the `unit_opened` it belongs to
+ * and be recorded as an orphan — the unit would stay open, its doses would
+ * vanish, and every total would quietly be wrong.
+ *
+ * It is not hypothetical. Logging a single dose writes three events in the same
+ * millisecond by construction, and it lost roughly a third of them.
+ *
+ * So references are resolved by stage rather than by luck. Units exist before
+ * anything is attached to them; intakes exist before anything corrects them.
+ * Within a stage the sort still orders, which is what keeps two corrections of
+ * the same row applying in the order they were made. Nothing here depends on
+ * timestamp resolution any more, so an orphan now means the target is genuinely
+ * absent — which is the only thing it should ever have meant.
  */
 export function project(events: LedgerEvent[]): Ledger {
-  const ordered = [...events].sort(
-    (a, b) => instant(a.loggedAt) - instant(b.loggedAt) || a.id.localeCompare(b.id),
-  )
+  const byTime = (a: LedgerEvent, b: LedgerEvent) =>
+    instant(a.loggedAt) - instant(b.loggedAt) || a.id.localeCompare(b.id)
+
+  const sorted = [...events].sort(byTime)
+  const stage = (types: LedgerEvent['type'][]) => sorted.filter((e) => types.includes(e.type))
+
+  const ordered = [
+    // 1. every unit that was ever opened
+    ...stage(['unit_opened']),
+    // 2. everything that hangs off a unit
+    ...stage(['intake_logged', 'unit_adjusted', 'unit_amended']),
+    // 3. everything that refers to one of those, or ends a unit
+    ...stage(['intake_corrected', 'intake_voided', 'unit_closed', 'unit_reopened']),
+  ]
 
   const units = new Map<string, UnitRecord>()
   const intakeIndex = new Map<string, { unit: string; record: IntakeRecord }>()
@@ -175,6 +209,8 @@ export function project(events: LedgerEvent[]): Ledger {
           openedAt: event.loggedAt,
           origin: event.origin ?? null,
           note: event.note ?? null,
+          extra: event.extra ?? null,
+          single: event.single === true,
           status: 'active',
           closure: null,
           amendments: [],
@@ -202,6 +238,7 @@ export function project(events: LedgerEvent[]): Ledger {
           confidence: event.confidence ?? null,
           descriptor: event.descriptor ?? null,
           note: event.note ?? null,
+          extra: event.extra ?? null,
           corrections: [],
           voided: null,
         }
@@ -401,6 +438,16 @@ export function tally(unit: UnitRecord): Tally {
  */
 export const unaccounted = (unit: UnitRecord) =>
   unit.quantity - (unit.tally.quantifiedQuantity + unit.tally.adjustedOut - unit.tally.adjustedIn)
+
+/**
+ * Units that are units, as opposed to single doses wearing the shape of one.
+ *
+ * Every dose statistic counts a single dose. Every statistic *about units* —
+ * how long one lasts, how often one is gone inside a day — has to skip them, or
+ * a run of one-off doses drags the median lifetime to zero while saying nothing
+ * true about how long a unit lasts.
+ */
+export const tracked = (units: UnitRecord[]) => units.filter((u) => !u.single)
 
 export const active = (ledger: Ledger) => ledger.units.filter((u) => u.status === 'active')
 export const closed = (ledger: Ledger) => ledger.units.filter((u) => u.status === 'closed')

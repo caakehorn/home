@@ -35,7 +35,7 @@
  */
 
 import { instant, localDay, localHour } from './events.ts'
-import { live, type IntakeRecord, type Ledger, type UnitRecord } from './project.ts'
+import { live, tracked, type IntakeRecord, type Ledger, type UnitRecord } from './project.ts'
 import { convert } from './uom.ts'
 
 const MINUTE = 60_000
@@ -298,6 +298,8 @@ export type SubstanceStats = {
   medianUnitDuration: number | null
   /** Closed units whose whole life was under 24 hours. */
   withinADay: number
+  /** Units of one, counted separately and kept out of every unit statistic. */
+  singleDoses: number
   doses: number[]
   /** Mean quantified dose per closed unit, oldest first — the trend line. */
   trend: { unit: string; receivedAt: string; meanDose: number | null; duration: number }[]
@@ -330,6 +332,7 @@ export function bySubstance(ledger: Ledger, now = Date.now()): SubstanceStats[] 
     let quantified = 0
     let withinADay = 0
     let closedUnits = 0
+    let singleDoses = 0
 
     for (const unit of [...units].sort((a, b) => instant(a.receivedAt) - instant(b.receivedAt))) {
       const report = reportOn(unit, WINDOW_HOURS, now)
@@ -341,7 +344,12 @@ export function bySubstance(ledger: Ledger, now = Date.now()): SubstanceStats[] 
       doses.push(...unitDoses)
       if (unit.uom === uom) quantified += report.quantified
 
-      if (unit.status === 'closed') {
+      // A single dose contributes its dose to every dose figure above and
+      // nothing at all to the unit figures below: its lifetime is zero by
+      // construction, and averaging that in would be arithmetic over a shape.
+      if (unit.single) {
+        singleDoses++
+      } else if (unit.status === 'closed') {
         closedUnits++
         durations.push(report.duration)
         if (report.duration < 24 * HOUR) withinADay++
@@ -357,7 +365,7 @@ export function bySubstance(ledger: Ledger, now = Date.now()): SubstanceStats[] 
     out.push({
       substance: units[0].substance,
       uom,
-      units: units.length,
+      units: tracked(units).length,
       closedUnits,
       events,
       quantifiedEvents,
@@ -368,6 +376,7 @@ export function bySubstance(ledger: Ledger, now = Date.now()): SubstanceStats[] 
       meanUnitDuration: mean(durations),
       medianUnitDuration: median(durations),
       withinADay,
+      singleDoses,
       doses,
       trend,
     })

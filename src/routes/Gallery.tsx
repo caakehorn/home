@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
 import { SubHead } from '../components/Wordmark'
+import { SectionArt } from '../components/SectionArt'
 import { sectionBySlug } from '../content/sections'
 import { Lightbox } from '../gallery/Lightbox'
 import { Wall } from '../gallery/Wall'
@@ -81,6 +82,8 @@ export function GalleryRoute() {
           the rack.
         </p>
       </header>
+
+      <SectionArt slug="gallery" tone={5} />
 
       {loading && (
         <div className="wrap">

@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
 import { Ransom } from '../components/Ransom'
+import { SectionArt } from '../components/SectionArt'
 import { POSTS, TAGS, stamp, type Post } from '../blog/posts'
 import { banner } from '../content/slogans'
 import './blog.css'
@@ -57,6 +58,8 @@ export function BlogRoute() {
           there is no analytics on this page and I do not know you are here.
         </p>
       </header>
+
+      <SectionArt slug="blog" tone={5} />
 
       <div className="wrap blog__bar">
         <div className="blog__tags" role="group" aria-label="Filter by tag">

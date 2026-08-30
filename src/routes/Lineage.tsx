@@ -3,6 +3,7 @@ import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
 import { banner } from '../content/slogans'
 import { SubHead } from '../components/Wordmark'
+import { SectionArt } from '../components/SectionArt'
 import { Dossier } from '../lineage/Dossier'
 import { Lattice } from '../lineage/Lattice'
 import {
@@ -66,6 +67,8 @@ export function LineageRoute() {
           <li><b>{SCOPE.generations}</b> generations</li>
         </ul>
       </header>
+
+      <SectionArt slug="lineage" tone={4} />
 
       {/* ---- controls ---------------------------------------------------- */}
       <div className="wrap lin__controls">

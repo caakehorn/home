@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
 import { SubHead } from '../components/Wordmark'
+import { SectionArt } from '../components/SectionArt'
 import { banner } from '../content/slogans'
 import { Ask } from '../sage/Ask'
 import { Log } from '../sage/Log'
@@ -68,6 +69,8 @@ export function SageRoute() {
           )}
         </p>
       </header>
+
+      <SectionArt slug="sage" tone={4} />
 
       <div className="wrap sage__body">
         <Ask onAsked={refresh} />

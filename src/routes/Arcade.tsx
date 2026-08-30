@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
 import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
+import { SectionArt } from '../components/SectionArt'
 import { CABS, PLAQUE, PRIZES, cabById } from '../arcade/content'
 import { Alu08 } from '../arcade/cabs/Alu08'
 import { Courtship } from '../arcade/cabs/Courtship'
@@ -113,6 +114,8 @@ function Lobby() {
           </p>
         </div>
       </header>
+
+      <SectionArt slug="arcade" tone={1} />
 
       <Marquee
         text="ALU · aluuuu · ALEXANDRA · CANCER SUN · EDGAR + SYLVIA · CHARLOTTE NC · PEAKED IN 2008 · OBJECT OF FIXATION · "

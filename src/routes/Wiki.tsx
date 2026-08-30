@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
 import { SubHead } from '../components/Wordmark'
+import { SectionArt } from '../components/SectionArt'
 import { banner } from '../content/slogans'
 import { BriefDeck } from '../wiki/BriefDeck'
 import { Cortex } from '../wiki/Cortex'
@@ -209,6 +210,8 @@ export function WikiIndexRoute() {
           </p>
         )}
       </header>
+
+      <SectionArt slug="brain" tone={3} />
 
       {/* The three generated ledgers, one click from the front of the wiki.
           They were always here — `wiki/meta/` is synced like any other page —

@@ -2,6 +2,7 @@ import { Link, useParams } from 'react-router-dom'
 import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
 import { SubHead } from '../components/Wordmark'
+import { SectionArt } from '../components/SectionArt'
 import { sectionBySlug } from '../content/sections'
 import { INSTRUMENTS, WINGS, countBy, instrumentById, instrumentsIn } from '../leviathan/core'
 import type { Instrument, InstrumentStatus } from '../leviathan/core'
@@ -152,6 +153,8 @@ export function LeviathanRoute() {
           ))}
         </ul>
       </header>
+
+      <SectionArt slug="leviathan" tone={1} />
 
       {WINGS.map((wing) => (
         <section key={wing.id} className="wrap lev__wing">

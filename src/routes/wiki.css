@@ -421,6 +421,12 @@
 .wiki__views {
   display: flex;
   gap: 3px;
+  /* Five chips do not fit 390px, and without this they pushed the whole
+     document sideways rather than wrapping — the one thing a page must never
+     do. Wrap rather than the domain row's scroll rail: there are five of these
+     and they are the primary control, so a hidden second row is worse than a
+     taller first one. */
+  flex-wrap: wrap;
 }
 
 .wiki__view {

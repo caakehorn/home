@@ -1,6 +1,7 @@
 import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
 import { SubHead } from '../components/Wordmark'
+import { SectionArt } from '../components/SectionArt'
 import { sectionBySlug } from '../content/sections'
 import { Record } from '../transcript/Record'
 import './transcript.css'
@@ -45,6 +46,8 @@ export function TranscriptRoute() {
           <i>this</i> is the material.
         </p>
       </header>
+
+      <SectionArt slug="transcript" tone={2} />
 
       <main className="wrap">
         <Record />

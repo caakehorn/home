@@ -1,19 +1,48 @@
+/* ==========================================================================
+   SECTION ART — a plate in every room, and never the thing you came for
+
+   The brief for these was "a prevalent design element, not the primary focus,"
+   and those two pull in opposite directions: to be prevalent it has to appear
+   in every room, and to not be the focus it has to lose every fight with the
+   content next to it. The first draft failed the second half — at 72vw it sat
+   in its own full-width band between the masthead and the page, which is the
+   layout of a hero image, so it read as one.
+
+   So: it is small, it is pushed to one edge, and it is pulled UP into the
+   masthead's own vertical space with a negative margin rather than given a
+   band of its own. Nothing is displaced by it. On a wide screen the type sits
+   beside it; the plate is the thing in the corner of your eye while you read
+   the heading, which is what a recurring motif is.
+   ========================================================================== */
+
 .sec-art {
   position: relative;
   z-index: 0;
-  width: min(72vw, 760px);
-  margin: clamp(1.25rem, 3vw, 2.75rem) 0 clamp(1.5rem, 4vw, 3.5rem);
+  width: min(34vw, 360px);
+  /* Up into the masthead, not below it. This is the whole difference between
+     an accent and a hero — but only as far as the room's kana glyph, which
+     lives in the same top-right corner. Pulled the full height of the masthead
+     the plate covered it, which reads as a z-index bug rather than a choice. */
+  margin-top: clamp(-5rem, -6vw, -2rem);
+  margin-bottom: clamp(0.75rem, 2vw, 1.5rem);
   pointer-events: none;
+  /* Behind the heading where they overlap: the words win, always. */
+  opacity: 0.82;
 }
 
+/* The side margins are wider than they look like they need to be, and that is
+   deliberate: `Plate`'s cut is a rotation, so the PAINTED box is a couple of
+   dozen pixels wider than the LAYOUT box the margin is measured against. A
+   margin sized for the layout box let the plate hang off the right edge and
+   gave the document a horizontal scrollbar at 1400px. */
 .sec-art--left {
-  margin-left: clamp(0rem, 4vw, 4rem);
+  margin-left: clamp(1rem, 6vw, 6rem);
   margin-right: auto;
 }
 
 .sec-art--right {
   margin-left: auto;
-  margin-right: clamp(0rem, 4vw, 4rem);
+  margin-right: clamp(1rem, 6vw, 6rem);
 }
 
 .sec-art__plate {
@@ -21,13 +50,24 @@
 }
 
 .sec-art__plate .plate__frame {
-  min-height: clamp(180px, 30vw, 430px);
+  min-height: clamp(120px, 17vw, 220px);
+}
+
+/* Below the masthead's own width the negative pull would drag the plate over
+   the heading instead of beside it, so it stops being an overlap and becomes
+   an ordinary small block in the flow. */
+@media (max-width: 900px) {
+  .sec-art {
+    width: min(46vw, 300px);
+    margin-top: 0.5rem;
+  }
 }
 
 @media (max-width: 700px) {
   .sec-art {
     width: calc(100% - 1rem);
-    margin: 1rem 0 1.5rem;
+    margin: 0.75rem 0 1.25rem;
+    opacity: 0.7;
   }
 
   .sec-art--left,
@@ -37,7 +77,7 @@
   }
 
   .sec-art__plate .plate__frame {
-    min-height: 150px;
+    min-height: 130px;
   }
 }
 

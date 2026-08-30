@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
 import { SubHead } from '../components/Wordmark'
+import { SectionArt } from '../components/SectionArt'
 import { banner } from '../content/slogans'
 import { Catch } from '../lexicon/Catch'
 import { forget, loadWords, type WordEntry, type WordLog } from '../lexicon/log'
@@ -95,6 +96,8 @@ export function WordsRoute() {
           )}
         </p>
       </header>
+
+      <SectionArt slug="words" tone={2} />
 
       <div className="wrap lex__body">
         <Catch onCaught={refresh} />

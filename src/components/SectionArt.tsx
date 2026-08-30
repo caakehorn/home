@@ -23,10 +23,19 @@ export function SectionArt({ slug, tone }: SectionArtProps) {
   const i = named >= 0 ? named % SCENE_ORDER.length : hash(slug) % SCENE_ORDER.length
   const plate = sceneById(SCENE_ORDER[i])
   const cut = CUTS[i % CUTS.length]
-  const side = i % 2 ? 'right' : 'left'
+
+  /* Always right, never alternating.
+     The alternation this used to do was written for a layout where the plate
+     had a full-width band to itself, and there left/right made a rhythm down
+     the page. It does not survive the plate being pulled up INTO the masthead:
+     every masthead on this site is left-aligned, so a left-hand plate lands
+     directly on the title — on /brain it covered the words WIKI-BRAIN and the
+     page's own stat line. The empty half of a masthead is the right one, and
+     that is the only side an overlapping plate can take. Variety comes from
+     the cut and the plate instead, which cost nothing legible. */
 
   return (
-    <div className={`sec-art sec-art--${side}`} aria-hidden="true">
+    <div className="sec-art sec-art--right" aria-hidden="true">
       <Plate plate={plate} cut={cut} tone={tone} className="sec-art__plate" eager />
     </div>
   )

@@ -40,7 +40,7 @@ import { Amount, pluralise } from './bits.tsx'
 
 const ENDINGS: { value: Disposition; label: string; hint: string }[] = [
   { value: 'consumed', label: 'Fully consumed', hint: 'nothing left' },
-  { value: 'lost', label: 'Lost or discarded', hint: 'it went, but not into anybody' },
+  { value: 'discarded', label: 'Lost or discarded', hint: 'it went, but not into anybody' },
   { value: 'transferred', label: 'Given or traded away', hint: 'somebody else has it' },
   { value: 'unknown', label: 'Unknown', hint: 'it is gone and the reason is not recorded' },
   { value: 'other', label: 'Other', hint: 'say so in the note' },
@@ -67,19 +67,10 @@ export function Closing({
 
   const choices: { value: Reconciliation; label: string; hint: string }[] = [
     {
-      value: 'final-intake-estimated',
+      value: 'final_intake',
       label: `A last dose of about ${withUnit(Math.abs(gap), unit.uom)}, never logged`,
       hint: 'writes a real estimated dose, low confidence, into the dose statistics',
     },
-    ...(unit.tally.unquantified > 0
-      ? [
-          {
-            value: 'attributed-to-unquantified' as const,
-            label: `The ${pluralise(unit.tally.unquantified, 'event')} logged without a figure took it`,
-            hint: `derives a mean of ${withUnit(Math.abs(gap) / unit.tally.unquantified, unit.uom)} for those events, kept apart from the measured ones`,
-          },
-        ]
-      : []),
     {
       value: 'discrepancy',
       label: 'Nobody knows — the scale and the log disagree',
@@ -90,7 +81,17 @@ export function Closing({
     { value: 'other', label: 'Other — see the note', hint: '' },
   ]
 
+  // These five are `bin/intake`'s RESOLUTIONS, exactly. This screen used to
+  // offer a sixth — "the events logged without a figure took the remainder",
+  // which derived a mean for those alone — and it is gone rather than forked
+  // into the shared format for one interface's benefit. The unaccounted amount
+  // and the unquantified count are both still above, which is the honest half
+  // of what it did.
+
   const needsReconciliation = !settled && disposition === 'consumed'
+  // Upstream refuses `final_intake` when more is logged than the unit held —
+  // the fix there is to correct an event, not to add another one.
+  const offered = over ? choices.filter((c) => c.value !== 'final_intake') : choices
   const ready = !needsReconciliation || reconciliation !== null
 
   const save = () =>
@@ -197,7 +198,7 @@ export function Closing({
             There is no default here on purpose. The automatic answer is always “assume it was
             consumed”, and that is the invented number this ledger exists to not produce.
           </p>
-          {choices.map((choice) => (
+          {offered.map((choice) => (
             <label key={choice.value} className="lg__radio">
               <input
                 type="radio"

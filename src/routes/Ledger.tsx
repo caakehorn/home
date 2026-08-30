@@ -49,6 +49,7 @@ export function LedgerRoute() {
   const [syncNote, setSyncNote] = useState<string | null>(null)
   const [syncedAt, setSyncedAt] = useState<string | null>(null)
   const [pane, setPane] = useState<'units' | 'trends'>('units')
+  const [held, setHeld] = useState(false)
 
   /**
    * Push and pull, without ever letting the result reach an error boundary.
@@ -61,14 +62,19 @@ export function LedgerRoute() {
     setSyncing(true)
     try {
       const report = await sync()
-      const stuck = report.problems.length > 0
+      const stuck = report.problems.length > 0 || report.refused !== null
       setSyncNote(
-        stuck
-          ? report.problems[0]
-          : report.pushed || report.pulled
-            ? `${report.pushed} up · ${report.pulled} down`
-            : null,
+        // A refusal is not a failure and is not transient: the ledger is
+        // working exactly as designed and will keep working locally forever.
+        // It is first in line because it is the one the reader has to act on.
+        report.refused ??
+          (report.problems.length
+            ? report.problems[0]
+            : report.pushed || report.pulled
+              ? `${report.pushed} up · ${report.pulled} down`
+              : null),
       )
+      setHeld(report.refused !== null)
       // Only a clean pass sets the timestamp. A badge reading SYNCED above an
       // error is the worst of both — it is the reassurance without the fact,
       // and this is the one screen where "it is only on this phone" has to be
@@ -152,16 +158,18 @@ export function LedgerRoute() {
       <div className="wrap lg__bar">
         <span
           className={`lg__sync${syncing ? ' lg__sync--busy' : ''}${
-            !syncing && syncNote && !syncedAt ? ' lg__sync--stuck' : ''
+            !syncing && (held || (syncNote && !syncedAt)) ? ' lg__sync--stuck' : ''
           }`}
         >
           {syncing
             ? 'SYNCING…'
-            : state.waiting > 0
-              ? `${pluralise(state.waiting, 'event')} on this device only`
-              : syncedAt
-                ? `SYNCED ${since(syncedAt)}`
-                : 'THIS DEVICE ONLY'}
+            : held
+              ? 'HELD — REPO IS PUBLIC'
+              : state.waiting > 0
+                ? `${pluralise(state.waiting, 'event')} on this device only`
+                : syncedAt
+                  ? `SYNCED ${since(syncedAt)}`
+                  : 'THIS DEVICE ONLY'}
         </span>
         {syncNote && <span className="lg__sync-note">{syncNote}</span>}
         <span className="lg__bar-end">

@@ -243,12 +243,12 @@ export function reportOn(unit: UnitRecord, spanHours = WINDOW_HOURS, now = Date.
     quarters: burnQuarters(unit),
     unaccounted: unexplained,
     coverage: t.coverage,
-    impliedUnquantifiedDose:
-      unit.closure?.reconciliation === 'attributed-to-unquantified' &&
-      t.unquantified > 0 &&
-      unexplained > 0
-        ? unexplained / t.unquantified
-        : null,
+    // Upstream has five resolutions and "the unquantified events took the
+    // remainder" is not one of them, so this portal no longer offers it and
+    // never derives a figure from it. The unaccounted amount and the
+    // unquantified count are both still on the report, which is the honest
+    // half of what it did.
+    impliedUnquantifiedDose: null,
   }
 }
 

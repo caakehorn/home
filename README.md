@@ -149,16 +149,47 @@ the sign; the mean dose carries `÷ 10, not ÷ 11` under it; and closing a unit
 disables SAVE until somebody says what happened to the difference, because the
 automatic answer is always "assume it was consumed".
 
-Capture is local-first — IndexedDB, instant, offline, never waiting on a network
-— and `sync.ts` pushes to `data/intake/events-YYYY-MM.jsonl` in
-`caakehorn/wiki-brain` behind it, through the same keyring that publishes a page
-edit. Intake data never enters `public/` or the deployed bundle; the room reads
-its own shards live. `bin/wiki-intake` upstream is the analysis side and shares
-no code with this one on purpose — two independent folds of the same log
-agreeing is the only thing that actually tests the contract, so
-`npm run ledger:check` asserts 91 properties here and
-`tests/test_wiki_intake.py` asserts them there, over the same worked unit. Both
-run in CI. The data contract is `data/intake/README.md` upstream.
+**It writes `bin/intake`'s file, not its own.** Two people built this ledger at
+the same time: `caakehorn/wiki-brain` landed `bin/intake` and `intake/` while
+this room was being built against a shape of its own. Only one of them can be
+the format, and it is not this one — that repository owns the data and its tool
+is merged. So `src/ledger/wire.ts` translates at the serialisation boundary and
+the file this room reads and writes is `intake/events.jsonl` upstream,
+byte-compatible with what the CLI appends. Three interfaces, one log: the CLI,
+Special:Intake in the local app, and this. Verified by handing a
+portal-written log to the real `bin/intake`, which rebuilt it and printed a
+correct unit report — correction applied, coverage 5 of 6, disposition
+reconciled.
+
+One idea did not survive that and is worth naming rather than quietly dropping:
+this room had a sixth reconciliation — *the events logged without a figure took
+the remainder* — which derived a mean for those alone and kept it apart from the
+measured mean. `bin/intake` has five and that is not one of them. Adding it
+would fork a shared format for one interface's benefit, so it is gone. The
+unaccounted amount and the unquantified count are both still on every report,
+which is the honest half of what it did.
+
+**The interlock, which is the part to read twice.** That repository held its
+ledger data in `.gitignore` for months because it was public. Those lines
+protected the CLI and the local app and did *nothing at all* for this room:
+`.gitignore` governs `git add`, and this writes through GitHub's contents API
+from a browser with no working tree anywhere in the loop. That API commits an
+ignored path without complaint. So the guard lives here instead and does not
+consult `.gitignore` — `sync()` reads the repository's visibility and **refuses
+to push while it is public**, saying so in the badge. Flip the repo back to
+public and this stops writing rather than quietly publishing a night's events.
+
+Capture is local-first regardless — IndexedDB, instant, offline, never waiting
+on a network, and complete on its own. Sync runs behind it and reports what it
+could not do in a badge; an unreachable GitHub costs a badge, not an event.
+Intake data never enters `public/` or the deployed bundle. EXPORT hands the
+whole log back as the JSONL it already is, byte-identical, because a tool
+holding a record like this one and unable to give it back is a trap.
+
+`npm run ledger:check` asserts **126 properties** and runs in CI. Twenty-nine of
+them are the wire contract — every key name and payload read off `bin/intake`
+and written out as a literal, so that program moving fails the build here rather
+than producing two folds of the same night that disagree.
 
 ## Running it
 

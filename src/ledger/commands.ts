@@ -27,7 +27,6 @@
 import {
   eventId,
   nowLocal,
-  SOURCE,
   unitId,
   validate,
   type Confidence,
@@ -38,6 +37,7 @@ import {
   type Reconciliation,
   type AdjustmentKind,
 } from './events.ts'
+import { SOURCE } from './wire.ts'
 
 /**
  * One event minus the three fields every event gets stamped with here.
@@ -72,6 +72,9 @@ const text = (value: string | undefined | null) => {
 
 export type NewUnit = {
   substance: string
+  /** The catalogue id from `intake/substances.json`, when the name matched one. */
+  substanceId?: string
+  category?: string
   quantity: number
   uom: string
   receivedAt?: string
@@ -86,6 +89,8 @@ export function openUnit(draft: NewUnit): { event: LedgerEvent; unit: string } {
     type: 'unit_opened' as const,
     unit,
     substance: draft.substance.trim(),
+    substanceId: draft.substanceId,
+    category: draft.category,
     quantity: draft.quantity,
     uom: draft.uom,
     receivedAt: draft.receivedAt ?? nowLocal(),
@@ -173,13 +178,15 @@ export const adjustUnit = (draft: {
     quantity: draft.quantity,
     uom: draft.uom,
     direction: draft.direction ?? 'out',
-    kind: draft.kind ?? 'other',
+    kind: draft.kind ?? 'loss',
     reason: draft.reason.trim(),
   })
 
 /** The unit's own particulars were wrong — the wrong weight, the wrong name. */
 export const amendUnit = (
   unit: string,
+  /** The unit's own `unit_created` row, which is what upstream corrects. */
+  target: string,
   patch: {
     substance?: string
     quantity?: number
@@ -189,7 +196,7 @@ export const amendUnit = (
     note?: string | null
   },
   reason: string,
-) => seal({ type: 'unit_amended' as const, unit, patch, reason: reason.trim() })
+) => seal({ type: 'unit_amended' as const, unit, target, patch, reason: reason.trim() })
 
 export type Closing = {
   unit: string
@@ -218,7 +225,7 @@ export function closeUnit(draft: Closing): LedgerEvent[] {
   // consumption event inside a closure where no dose statistic would ever see
   // it, which is exactly the sort of quiet loss this ledger is built against.
   if (
-    draft.reconciliation === 'final-intake-estimated' &&
+    draft.reconciliation === 'final_intake' &&
     typeof draft.unaccounted === 'number' &&
     draft.unaccounted > 0 &&
     draft.uom
@@ -231,7 +238,11 @@ export function closeUnit(draft: Closing): LedgerEvent[] {
         measurement: 'estimated',
         confidence: 'low',
         occurredAt: draft.closedAt ?? nowLocal(),
-        note: 'reconstructed at closing from the unaccounted remainder',
+        // The same sentence `bin/intake` writes for this row, so the two
+              // interfaces produce the same record of the same decision.
+        note:
+          'reconciliation at close — the remainder of the unit, recorded as one ' +
+          'estimated final intake',
       }),
     )
   }

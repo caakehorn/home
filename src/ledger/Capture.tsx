@@ -17,9 +17,10 @@
  * component that renders it cannot drop the sign.
  */
 
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { adjustUnit, openUnit } from './commands.ts'
 import { exportLog } from './store.ts'
+import { substances, type Substance } from './sync.ts'
 import { nowLocal, type LedgerEvent } from './events.ts'
 import { CODES, format } from './uom.ts'
 import type { UnitRecord } from './project.ts'
@@ -198,13 +199,39 @@ export function NewUnit({ onDone }: { onDone: (events: LedgerEvent[], unit: stri
   const [uom, setUom] = useState('g')
   const [origin, setOrigin] = useState('')
   const [receivedAt, setReceivedAt] = useState<string | null>(null)
+  const [catalogue, setCatalogue] = useState<Substance[]>([])
+
+  // `intake/substances.json` upstream — what `bin/intake` calls the select box,
+  // and what it resolves a substance against rather than creating one on the
+  // fly, "because silently creating one is how a select box degrades back into
+  // free text". Offered here for the same reason. An unreachable catalogue
+  // leaves the field as free text rather than blocking a unit.
+  useEffect(() => {
+    if (open) void substances().then(setCatalogue)
+  }, [open])
+
+  /** The catalogue row this text names, by id or by name, case-folded. */
+  const matched = useMemo(() => {
+    const q = substance.trim().toLowerCase()
+    if (!q) return null
+    return catalogue.find((s) => s.id.toLowerCase() === q || s.name.toLowerCase() === q) ?? null
+  }, [substance, catalogue])
+
+  // Picking a known substance adopts the unit it is normally measured in. Only
+  // until the box is touched — an override stands.
+  const [uomTouched, setUomTouched] = useState(false)
+  useEffect(() => {
+    if (matched?.default_unit && !uomTouched) setUom(matched.default_unit)
+  }, [matched, uomTouched])
 
   const quantity = Number(text.trim().replace(/,/g, '.'))
   const ready = substance.trim().length > 0 && Number.isFinite(quantity) && quantity > 0
 
   const create = () => {
     const { event, unit } = openUnit({
-      substance,
+      substance: matched?.name ?? substance,
+      substanceId: matched?.id,
+      category: matched?.category,
       quantity,
       uom,
       origin,
@@ -241,11 +268,26 @@ export function NewUnit({ onDone }: { onDone: (events: LedgerEvent[], unit: stri
       <input
         id="lg-substance"
         className="lg__field"
+        list="lg-substances"
         value={substance}
         onChange={(e) => setSubstance(e.target.value)}
         placeholder="cocaine, bupropion, nicotine — anything with a finite amount"
         autoComplete="off"
       />
+      <datalist id="lg-substances">
+        {catalogue.map((s) => (
+          <option key={s.id} value={s.name}>
+            {s.category}
+          </option>
+        ))}
+      </datalist>
+      {substance.trim() && !matched && catalogue.length > 0 && (
+        <p className="lg__hint">
+          Not in <code>intake/substances.json</code>. The unit files fine and every figure
+          works, but <code>bin/intake</code> groups by catalogue id — add it there with{' '}
+          <code>bin/intake substance add</code> to have it counted with the rest.
+        </p>
+      )}
 
       <label className="lg__label" htmlFor="lg-qty">
         Quantity received
@@ -263,7 +305,10 @@ export function NewUnit({ onDone }: { onDone: (events: LedgerEvent[], unit: stri
         <select
           className="lg__uom"
           value={uom}
-          onChange={(e) => setUom(e.target.value)}
+          onChange={(e) => {
+            setUomTouched(true)
+            setUom(e.target.value)
+          }}
           aria-label="Unit of measure"
         >
           {CODES.map((code) => (

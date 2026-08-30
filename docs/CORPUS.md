@@ -7,7 +7,7 @@ re-derive any of this, and so that a build that finds a number here and a
 different number in the data knows the snapshot has moved.
 
 **Generated** from a full crawl of the repo at `main` (wiki snapshot
-`generatedAt 2026-08-28T10:50:43Z`, 519 pages / 765,809 words).
+`generatedAt 2026-08-30T01:29:34Z`, 471 pages / 772,641 words).
 
 **How to use it.** Numbers here are load-bearing. A pipeline that reads this
 corpus should assert against them and exit non-zero when they drift — the pattern
@@ -20,7 +20,7 @@ a working build.
 ## 0. Where everything lives
 
 ```
-public/wiki/          519 page JSONs + index + gaps + sage + lexicon + assets
+public/wiki/          471 page JSONs + index + gaps + sage + lexicon + assets
 public/transcript/    index + 91 month files — 134,348 messages
 public/leviathan/     10 derived instrument datasets
 public/gallery/       manifest + 41 media files
@@ -41,15 +41,15 @@ src/arcade/content.ts cabinet copy, star fields, constellation edges
 Five top-level keys: `generatedAt`, `counts`, `domains`, `pages`, `edges`.
 
 ```
-counts   { pages: 519, words: 765809, chartables: 119, briefs: 10,
-           plain: 3, edges: 3851 }          // schema also allows `sealed`
+counts   { pages: 471, words: 772641, chartables: 119, briefs: 10,
+           plain: 3, edges: 3797 }          // schema also allows `sealed`
 domains  [{ id, count }] × 10
-pages    [IndexEntry] × 519
-edges    [[int, int]] × 3851                // undirected index pairs into `pages`
-                                            // no self-loops, all 3851 distinct
+pages    [IndexEntry] × 471
+edges    [[int, int]] × 3797                // undirected index pairs into `pages`
+                                            // no self-loops, all 3797 distinct
 ```
 
-`IndexEntry` — 14 keys, present on all 519 rows:
+`IndexEntry` — 14 keys, present on all 471 rows:
 
 | field | type | notes |
 |---|---|---|
@@ -70,33 +70,33 @@ edges    [[int, int]] × 3851                // undirected index pairs into `pag
 Optional `locked` exists in the schema for sealed pages — **0 in this snapshot**
 (`wiki.locks.json` at the repo root reads `{ locked: [] }`).
 
-**Graph shape.** 3,851 edges over 519 nodes. Highest degree:
-`timeline/master-timeline` 344 · `meta/recent-activity` 232 · `people/index` 172 ·
+**Graph shape.** 3,797 edges over 471 nodes. Highest degree:
+`timeline/master-timeline` 360 · `meta/recent-activity` 219 · `people/index` 172 ·
 `people/annie-ulmer` 165 · `meta/open-questions` 164 ·
-`interests/concert-record/index` 95 · `people/suzanne-frank` 88 · `mind/index` 76 ·
+`people/suzanne-frank` 88 · `meta/digest` 83 · `mind/index` 76 ·
 `self/message-corpora/master-message-dump` 76 · `self/context-core` 69 ·
 `mind/synthesis/totality-themes` 67 · `people/alexis-armel` 66.
 
-### 1.2 `pages/*.json` — 519 files, 7.28 MB
+### 1.2 `pages/*.json` — 471 files, 7.26 MB
 
 Filename is the slug with `/` → `__`. **Every file carries the same 18 keys**
-(verified across all 519).
+(verified across all 471).
 
 | key | type | population / shape |
 |---|---|---|
-| `slug` `domain` `title` | str | 519 |
-| `meta` | dict | 519 — `Record<string,string>`, **all values stringified**, 23 distinct keys |
+| `slug` `domain` `title` | str | 471 |
+| `meta` | dict | 471 — `Record<string,string>`, **all values stringified**, 23 distinct keys |
 | `infobox` | dict \| null | **179 dicts / 340 null**, 39 distinct keys |
-| `lists` | dict | 519 — `Record<string,string[]>`, 10 distinct keys. **Lossy for `connections`** |
-| `fmRaw` | str | 519 — raw YAML front-matter verbatim, 148–27,973 chars. **The only lossless source of typed edges** |
+| `lists` | dict | 471 — `Record<string,string[]>`, 10 distinct keys. **Lossy for `connections`** |
+| `fmRaw` | str | 471 — raw YAML front-matter verbatim, 107–27,973 chars. **The only lossless source of typed edges** |
 | `h1` | str \| null | 517 / 2 — leading `# Heading`, stripped from `body` |
 | `links` | str[] | 404 non-empty / 115 empty. **4,466 total**, min/med/max 0/4/342 |
-| `body` | str | 519 — markdown with the H1 removed |
-| `words` | int | min/med/max 12 / 611 / 99,927; total 765,809 |
+| `body` | str | 471 — markdown with the H1 removed |
+| `words` | int | min/med/max 12 / 694 / 113,514; total 772,641 |
 | `charts` | int | 0–9; **119 total across 51 pages** |
 | `brief` | bool | 10 true |
-| `gaps` | dict[] | 151 pages non-empty; **485 entries**; each `{ text, label }` |
-| `staged` | null | **null on all 519** (source is `meta.pending_ingest`) |
+| `gaps` | dict[] | 151 pages non-empty; **484 entries**; each `{ text, label }` |
+| `staged` | null | **null on all 471** (source is `meta.pending_ingest`) |
 | `plain` | dict \| null | **3 dicts** — `{ title, body, words, readingLevel, against, stale }` |
 | `backlinks` | str[] | 516 non-empty / 3 empty. **4,414 total**, min/med/max 0/5/160 |
 
@@ -104,7 +104,7 @@ Filename is the slug with `/` → `__`. **Every file carries the same 18 keys**
 
 | key | pages | | key | pages |
 |---|---|---|---|---|
-| `domain` `page_type` `status` | 519 | | `date_range_end` | 162 |
+| `domain` `page_type` `status` | 471 | | `date_range_end` | 162 |
 | `date_created` `date_modified` | 512 | | `sources` | 146 |
 | `tags` | 483 | | `aliases` | 102 |
 | `knowledge` | 257 | | `importance` | 82 |
@@ -137,7 +137,7 @@ arrays).
 
 ### 1.3 Front-matter — the `fmRaw` census
 
-518 of 519 parse as YAML. **One failure:**
+470 of 471 parse as YAML. **One failure:**
 `mind/synthesis/august-grievance-verdict` — block-scalar syntax error at line 12.
 **A YAML parser silently loses that page's 12 typed edges**; read the block by
 line instead (`scripts/core-frontmatter.mjs`) and there is nothing to lose.
@@ -203,14 +203,14 @@ taste 1 · vocabulary 1 · trust 1.
 
 ### 1.4 Typed edges — the rarest thing in the corpus
 
-**2,398 connections across 404 pages.** Every entry is `{ page, type, claim }`,
+**2,304 connections across 355 pages.** Every entry is `{ page, type, claim }`,
 all three keys present, zero exceptions. `claim` is prose asserting *why* the
 edge exists — length min/median/max **65 / 221 / 704** chars.
 
-> **Two totals, and which one is right.** A YAML parser reaches **2,386** across
-> 402 pages, because `mind/synthesis/august-grievance-verdict` throws on a
+> **Two totals, and which one is right.** A YAML parser reaches **2,292** across
+> 354 pages, because `mind/synthesis/august-grievance-verdict` throws on a
 > block-scalar error at line 12 and takes its 12 edges with it. A line reader
-> reaches all **2,398** across 404 pages, because the block shape is completely
+> reaches all **2,304** across 355 pages, because the block shape is completely
 > uniform: every item is indented exactly two spaces and **no value wraps onto a
 > second line**, corpus-wide. `scripts/core-frontmatter.mjs` reads it that way
 > and needs no YAML dependency and no fallback. The per-type table below is the
@@ -271,7 +271,14 @@ connections:
             self-dated to being stuck inside."
 ```
 
-> **Trap.** `index.json.edges` (3,851) is the **untyped** wikilink graph. The 2,386
+> **Trap (2026-08-30).** Do not count typed edges with a bare `- page:` regex
+> over `fmRaw`. Three `meta/journeys/*` pages list their stops as `- page:` items
+> under a `stops:` key, not `connections:` — a naive scan counts 2,320 and
+> credits `meta` with 16 typed edges it does not have. Scope the match to the
+> `connections:` block (as `build-core.mjs` does) and the total is 2,304 with
+> `meta` at 0.
+
+> **Trap.** `index.json.edges` (3,797) is the **untyped** wikilink graph. The 2,304
 > typed connections are a *different, smaller, richer* graph that exists **only in
 > `fmRaw`**. `lists.connections` flattens each entry to the string `"page: ..."`
 > and drops `type` and `claim` entirely. To mine typed edges you must parse
@@ -279,7 +286,7 @@ connections:
 
 ### 1.5 `gaps.json`, `sage.json`, `lexicon.json`
 
-**`gaps.json`** (300 KB) — `{ generatedAt, counts: { open: 485, pages: 151,
+**`gaps.json`** (299 KB) — `{ generatedAt, counts: { open: 484, pages: 151,
 staged: 0 }, pages: [...] }`. Page entry `{ slug, domain, title, staged: null,
 gaps: [{ text, label }] }`. Mirrors the per-page `gaps` arrays exactly.
 By domain: people 68 · mind 42 · timeline 17 · self 8 · interests 4 · places 4 ·
@@ -304,17 +311,17 @@ inline `![](…)` markdown images anywhere in any body.**
 
 | domain | pages | words | avg | charts | outlinks | backlinks | gaps | infoboxes | typed edges out |
 |---|---|---|---|---|---|---|---|---|---|
-| people | 174 | 187,589 | 1,078 | 17 | 1,000 | 1,520 | 168 | 173 | 622 |
-| interests | 144 | 47,677 | 331 | 13 | 462 | 515 | 10 | 0 | 270 |
-| mind | 77 | 196,102 | 2,546 | 41 | 1,098 | 1,205 | 150 | 0 | 888 |
-| timeline | 42 | 196,201 | 4,671 | 5 | 703 | 431 | 82 | 4 | 264 |
-| self | 40 | 62,727 | 1,568 | 38 | 413 | 353 | 45 | 2 | 114 |
-| work | 15 | 16,494 | 1,099 | 0 | 112 | 158 | 6 | 0 | 76 |
-| places | 10 | 13,686 | 1,368 | 0 | 105 | 116 | 10 | 0 | 80 |
-| meta | 8 | 30,738 | 3,842 | 4 | 475 | 21 | 0 | 0 | 0 |
+| people | 174 | 187,589 | 1,078 | 17 | 1,000 | 1,518 | 168 | 173 | 622 |
+| interests | 96 | 41,075 | 428 | 13 | 372 | 432 | 10 | 0 | 176 |
+| mind | 77 | 196,102 | 2,547 | 41 | 1,098 | 1,226 | 150 | 0 | 900 |
+| timeline | 42 | 209,788 | 4,995 | 5 | 720 | 428 | 81 | 4 | 264 |
+| self | 40 | 62,727 | 1,568 | 38 | 413 | 358 | 45 | 2 | 114 |
+| work | 15 | 16,494 | 1,100 | 0 | 112 | 157 | 6 | 0 | 76 |
+| places | 10 | 13,686 | 1,369 | 0 | 105 | 117 | 10 | 0 | 80 |
+| meta | 8 | 30,585 | 3,823 | 4 | 492 | 27 | 0 | 0 | 0 |
 | health | 5 | 9,507 | 1,901 | 1 | 62 | 46 | 11 | 0 | 46 |
 | legal | 4 | 5,088 | 1,272 | 0 | 36 | 49 | 3 | 0 | 26 |
-| **total** | **519** | **765,809** | 1,476 | **119** | **4,466** | **4,414** | **485** | **179** | **2,386** |
+| **total** | **471** | **772,641** | 1,640 | **119** | **4,410** | **4,358** | **484** | **179** | **2,304** |
 
 Note the inversion: `people` has the most pages, but `mind` and `timeline` each
 carry more words, and `mind` dominates typed edges.
@@ -427,7 +434,7 @@ vendored here**.
 | `chronology.json` | 361 K | **6,937** dated mentions mined from wiki prose. `months[318]` 1900-01→2027-03, `years[83]` each with a `sample[]` of citing pages. Binned by the date *named*, not the date written. |
 | `clock.json` | 321 K | **Every message as one integer.** `marks[134348]` delta-encoded; decode by prefix-sum then `value = day*2880 + minute*2 + dir`. Plus `hours[24] {all,sent,received}`, `years[11]`, `gaps[5]` with day indices. **The densest reusable payload in the repo.** |
 | `lexicon.json` | 30 K | 965,583 tokens, 19,873 distinct, 2,592 shouts. `stoplist[182]` shipped inside the dataset so the one editorial choice is inspectable. `top[400]` post-stoplist `{word, all, sent, received}`, `topAll[60]` pre-stoplist, `months[91] {bin, count, shouts}`. |
-| `mass.json` | 55 K | `domains[10]` and `pages[519] {slug,title,domain,words}` summing to 765,809. |
+| `mass.json` | 55 K | `domains[10]` and `pages[471] {slug,title,domain,words}` summing to 772,641. |
 | `pen.json` | 8 K | `rows[128] { year, mentions, pages, domains, openings }`, 1900–2027. `openings` = pages whose earliest date is that year. |
 | `recorder.json` | 14 K | `rows[129] { bin, covered, sent, received, words, days, messages, chars }` — **includes the 38 uncovered months as `covered: 0`.** The ready-made array for drawing gaps at real width. |
 | `atlas.json` | 230 K | Hand-typed geography + IPF-reconstructed movement. `nodes[550]`, `edges[840] [a,b,roadIdx,metres]`, `roads[94]`, `cities[35]`, `waters[10]`, `places[86]`, `routes` (595 precomputed shortest paths), `days[1992] { d, s:[placeIdx,arriveMin,departMin,…] }`. |
@@ -452,7 +459,7 @@ vendored here**.
 
 > **Drift warning.** `wiki.json` was built 2026-08-21 against **486 pages /
 > 630,514 words**. `mass.json`, `public/wiki/index.json` and `public/agent/*` were
-> rebuilt 2026-08-28 against **519 pages / 765,809 words**. Do not cross-join
+> rebuilt 2026-08-30 against **471 pages / 772,641 words**. Do not cross-join
 > `wiki.json` with the newer sets without accounting for the 33-page delta.
 
 ---
@@ -487,8 +494,8 @@ crossed,documented,collateral,role,note,short}`), `LINES` (5), `DESCENT`,
 **`src/arcade/content.ts`** (21 KB) — `CABS`, `DROPS`, `SHELF`, `CATS`, `SCENES`,
 `CANCER` (star field), `CANCER_EDGES` (constellation edges), `PRIZES`.
 
-**Other payloads** — `public/agent/search.json` (349 KB, gitignored, built at
-`prebuild`): `{ pages[519], lookup{823 keys} }`, an **alias→slug index** worth
+**Other payloads** — `public/agent/search.json` (314 KB, gitignored, built at
+`prebuild`): `{ pages[471], lookup{775 keys} }`, an **alias→slug index** worth
 reusing for any search box. `public/llms-full.txt` (5.2 MB, gitignored) is the
 whole corpus as one markdown stream.
 
@@ -616,13 +623,13 @@ and an early return when `motion` is false. `Atlas.tsx` adds the 10 Hz
 
 ## 7. Ranked: the best payloads to build on
 
-1. **`fmRaw` typed connections** — 2,386 argued, typed, bidirectional edges with
+1. **`fmRaw` typed connections** — 2,304 argued, typed, bidirectional edges with
    prose claims. Nothing on the site draws them. The rarest asset here.
 2. **`clock.json.marks`** — 134,348 messages as packed ints, 320 KB. The only
    GPU-scale substrate in the repo.
-3. **`index.json`** — 519 nodes with solved `x,y` + 3,851 integer-indexed edges.
+3. **`index.json`** — 471 nodes with solved `x,y` + 3,797 integer-indexed edges.
    A graph you can draw without simulating.
-4. **`gaps.json`** — 485 written statements of what is not known. Drawable absence.
+4. **`gaps.json`** — 484 written statements of what is not known. Drawable absence.
 5. **`chronology.json`** — 6,937 dated mentions, 1900→2027. The corpus's own sense
    of time, distinct from when it was written.
 6. **`wiki.json.evidence` + per-page `sources`** — a page↔raw-corpus bipartite

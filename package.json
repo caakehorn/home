@@ -16,6 +16,7 @@
     "leviathan": "node --experimental-strip-types scripts/build-leviathan.mjs",
     "transcript": "node scripts/sync-transcript.mjs",
     "accretion": "node --experimental-strip-types scripts/build-accretion.mjs",
+    "atlas:check": "node scripts/check-atlas.mjs",
     "atlas": "node scripts/build-atlas.mjs",
     "core": "node scripts/build-core.mjs",
     "docket": "node scripts/build-docket.mjs",

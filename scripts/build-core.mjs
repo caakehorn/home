@@ -54,7 +54,7 @@ const EXPECT = {
   gapPages: 151,
   gaps: 484,
   domains: 10,
-  words: 772641,
+  words: 772653,
 }
 
 /**

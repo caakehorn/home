@@ -25,6 +25,7 @@
     "recorder": "node scripts/build-recorder.mjs",
     "ask": "node scripts/build-ask.mjs",
     "wiki-instruments": "node scripts/build-wiki-instruments.mjs",
+    "wiki-history": "node scripts/build-wiki-history.mjs",
     "gallery": "node scripts/build-gallery.mjs",
     "gallery:capture": "node scripts/capture-gallery.mjs",
     "gate:verify": "node scripts/make-verify.mjs",

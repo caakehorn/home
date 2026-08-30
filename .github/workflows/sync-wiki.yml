@@ -27,11 +27,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # fetch-depth: 0 because the page-history derivation reads the log, and a
+      # shallow clone's log does not reach the first version of any page — it
+      # would render as "created on the day the clone was cut," which is a
+      # confident wrong claim about when the writing happened.
+      # build-wiki-history.mjs refuses to run against a shallow checkout rather
+      # than publish that, so removing this line takes the feature down loudly.
+      # The whole repository is ~270 MB packed; the clone costs well under a
+      # minute against the hour this job already runs on.
       - name: Check out the wiki source
         uses: actions/checkout@v4
         with:
           repository: caakehorn/wiki-brain
           path: .wiki-brain
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -51,6 +60,13 @@ jobs:
         env:
           WIKI_LOCK_PASSPHRASE: ${{ secrets.WIKI_LOCK_PASSPHRASE }}
 
+      # Page history, from the log of the checkout above. Must come after the
+      # sync: it reads the index that sync just wrote to know which pages exist
+      # and which of them are sealed, and it writes `updated` and `revisions`
+      # back into that same index. It exits 1 rather than publish a history it
+      # could not reproduce from git exactly.
+      - run: node scripts/build-wiki-history.mjs .wiki-brain
+
       # sync-wiki embeds the current wall-clock time in three JSON datasets.
       # Those files are one-line JSON, so a normal diff sees the whole file as
       # changed every hour even when the source wiki did not move. Detect that
@@ -66,6 +82,10 @@ jobs:
             'public/wiki/index.json',
             'public/wiki/gaps.json',
             'public/wiki/sage.json',
+            // The per-page files under public/wiki/history/ deliberately carry
+            // no timestamp, so they only change when a page's history does.
+            // This one summary file does, and churns like the three above.
+            'public/wiki/history.json',
           ])
           const changed = execFileSync('git', ['diff', '--name-only', '--', 'public/wiki'], { encoding: 'utf8' })
             .trim()

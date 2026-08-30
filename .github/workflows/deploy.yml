@@ -53,6 +53,14 @@ jobs:
       - name: Check the intake ledger's arithmetic
         run: npm run ledger:check
 
+      # And the page-history chain. No wiki-brain is checked out here, so this
+      # run cannot compare against git — it proves the half that needs no
+      # source: that the diff the panel would draw carries the same counts the
+      # panel prints beside it, over every revision of every page. A dataset
+      # corrupted between the sync and here does not reach the site.
+      - name: Check the page-history chain
+        run: npm run history:check
+
       # The gate's verifier, written from the repository secret so the
       # passphrase never enters the repository. Without the secret the site
       # deploys with the door unconfigured, which the gate says out loud

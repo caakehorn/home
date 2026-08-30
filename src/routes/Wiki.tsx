@@ -10,6 +10,7 @@ import { Cortex } from '../wiki/Cortex'
 import { Gaps } from '../wiki/Gaps'
 import { StartRail } from '../wiki/StartRail'
 import { useWikiIndex, type IndexEntry, type WikiIndex } from '../wiki/data'
+import { ago, shortDate } from '../wiki/history'
 import { HIDDEN_LABELS, hiddenEntries, inboundCounts, readingTime, type HiddenKind } from '../wiki/entry'
 import { allDrafts } from '../wiki/store'
 import { hasRead } from '../wiki/trail'
@@ -120,6 +121,19 @@ export function WikiIndexRoute() {
   const requested = (params.get('view') ?? 'map') as View
   const view: View = data && !mappable(data) && requested === 'map' ? 'list' : requested
 
+  /* ---- order ---------------------------------------------------------------
+   *
+   * Longest-first has been the only order this page had, and it answers "where
+   * is the substance." It cannot answer "what has this thing been doing," which
+   * is the question a returning reader arrives with, and which the corpus can
+   * now answer: `updated` is when a page's file actually last changed, from the
+   * wiki-brain log.
+   *
+   * Both are counts — a length and a date. Neither ranks pages by anything
+   * anybody scored.
+   */
+  const order = (params.get('sort') ?? 'words') as 'words' | 'recent'
+
   const setParam = (key: string, value: string | null) => {
     const next = new URLSearchParams(params)
     if (value === null) next.delete(key)
@@ -148,8 +162,15 @@ export function WikiIndexRoute() {
             p.slug.toLowerCase().includes(q) ||
             (p.knownFor ?? '').toLowerCase().includes(q),
       )
-      .sort((a, b) => b.words - a.words)
-  }, [data, view, domain, type, query])
+      .sort((a, b) =>
+        order === 'recent'
+          ? // A page with no `updated` sorts last rather than first. It means
+            // the history build has not seen it yet, and putting an unknown at
+            // the top of "most recently changed" would be a claim, not a gap.
+            (b.updated ?? '').localeCompare(a.updated ?? '') || b.words - a.words
+          : b.words - a.words,
+      )
+  }, [data, view, domain, type, query, order])
 
   /* Type counts respect the domain filter but not their own, so the row reads
      as "what else is in here" rather than collapsing to the one chip you just
@@ -208,7 +229,8 @@ export function WikiIndexRoute() {
             {data.counts.chartables} tables drawn as charts
             {data.counts.briefs ? ` · ${data.counts.briefs} briefs unpacked` : ''}
             {data.counts.plain ? ` · ${data.counts.plain} in plain english` : ''}
-            {data.counts.sealed ? ` · ${data.counts.sealed} sealed` : ''}.
+            {data.counts.sealed ? ` · ${data.counts.sealed} sealed` : ''}
+            {data.counts.revisions ? ` · ${data.counts.revisions.toLocaleString()} revisions kept` : ''}.
           </p>
         )}
       </header>
@@ -264,6 +286,27 @@ export function WikiIndexRoute() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
+
+        {/* Only where there is a list to order. The map has its own arrangement
+            and the brief deck is a deck. */}
+        {view !== 'map' && data?.counts.revisions ? (
+          <div className="wiki__sort" role="group" aria-label="Order">
+            <button
+              type="button"
+              aria-pressed={order === 'words'}
+              onClick={() => setParam('sort', null)}
+            >
+              LONGEST
+            </button>
+            <button
+              type="button"
+              aria-pressed={order === 'recent'}
+              onClick={() => setParam('sort', 'recent')}
+            >
+              RECENT
+            </button>
+          </div>
+        ) : null}
 
         <p className="wiki__count" aria-live="polite">
           {results.length} {results.length === 1 ? 'page' : 'pages'}
@@ -484,6 +527,19 @@ function PageCard({
           {page.brief && <span className="wiki__card-brief">brief</span>}
           {page.plain && <span className="wiki__card-plain">plain english</span>}
           {page.links > 0 && <span>{page.links} links</span>}
+          {/* When the file last actually changed, coarse. The exact stamp and
+              the revision count are one hover away; on a grid of 472 cards the
+              thing worth knowing is whether this is current writing. */}
+          {page.updated && (
+            <span
+              className="wiki__card-when"
+              title={`${shortDate(page.updated)} · ${page.revisions} revision${
+                page.revisions === 1 ? '' : 's'
+              }`}
+            >
+              {ago(page.updated)}
+            </span>
+          )}
           {draft && <span className="wiki__card-draft">edited</span>}
           {read && <span className="wiki__card-read">read</span>}
         </span>

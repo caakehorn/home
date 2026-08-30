@@ -442,6 +442,11 @@ for (const entry of index.pages) {
       removed,
       created: i === revs.length - 1,
       renamedFrom: rev.from ? rev.from.replace(/^wiki\/|\.md$/g, '') : null,
+      // Only when the file was somewhere else at this revision — which is rare,
+      // and is the difference between `git show <sha>:<path>` working and not.
+      // Emitted so the checker can address the blob without re-deriving the
+      // rename chain, and so the panel can say what the page used to be called.
+      path: rev.path === path ? undefined : rev.path.replace(/^wiki\/|\.md$/g, ''),
     }
   })
   revisionCount += revisions.length

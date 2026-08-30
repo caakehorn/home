@@ -1081,3 +1081,43 @@
   background: var(--n4);
   border-color: var(--n4);
 }
+
+/* ---- order -------------------------------------------------------------
+ *
+ * Two orders, both of them counts: a length and a date. Sits beside the search
+ * box rather than in the domain rows, because it changes how the same set is
+ * arranged and those rows change which set it is.
+ */
+.wiki__sort {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.wiki__sort button {
+  padding: 0.2rem 0.6rem;
+  font-family: var(--f-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  background: none;
+  border: 2px solid color-mix(in srgb, var(--text-dim) 40%, transparent);
+  cursor: pointer;
+}
+
+.wiki__sort button[aria-pressed='true'] {
+  color: var(--edge);
+  background: var(--n4);
+  border-color: var(--n4);
+}
+
+.wiki__sort button:hover:not([aria-pressed='true']),
+.wiki__sort button:focus-visible:not([aria-pressed='true']) {
+  color: var(--text);
+  border-color: var(--text-dim);
+}
+
+/* Dim on purpose: on a card, when a page last moved is context for the title,
+   never the headline. */
+.wiki__card-when {
+  color: color-mix(in srgb, var(--text-dim) 80%, transparent);
+}

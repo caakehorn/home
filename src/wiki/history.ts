@@ -35,6 +35,12 @@ export type Revision = {
   created: boolean
   /** The slug this page had before this commit, if it was moved. */
   renamedFrom: string | null
+  /**
+   * Where the file lived at this revision, when that is not where it lives
+   * now. Present only on revisions older than a rename — most pages have never
+   * moved and carry it on none of theirs.
+   */
+  path?: string
 }
 
 export type PageHistory = {

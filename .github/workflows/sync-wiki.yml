@@ -67,6 +67,14 @@ jobs:
       # could not reproduce from git exactly.
       - run: node scripts/build-wiki-history.mjs .wiki-brain
 
+      # The same claim, proved a second way before it is committed: the SHIPPED
+      # files, folded through the applier the browser runs (a separate copy from
+      # the build's), against the blobs git holds. The build proving itself
+      # against itself would pass even if both halves were wrong in the same
+      # direction — this is the run that has the source repository to check
+      # against, so it is the run that does the whole check.
+      - run: npm run history:check -- .wiki-brain
+
       # sync-wiki embeds the current wall-clock time in three JSON datasets.
       # Those files are one-line JSON, so a normal diff sees the whole file as
       # changed every hour even when the source wiki did not move. Detect that

@@ -4,7 +4,7 @@ import { Nav } from '../components/Nav'
 import { SubHead } from '../components/Wordmark'
 import { Closing } from '../ledger/Closing'
 import { LogSheet } from '../ledger/LogSheet'
-import { NewUnit, UnitCard, emptyMessage } from '../ledger/Capture'
+import { Export, NewUnit, UnitCard, emptyMessage } from '../ledger/Capture'
 import { Report } from '../ledger/Report'
 import { Trends } from '../ledger/Trends'
 import { Instant, pluralise, since } from '../ledger/bits'
@@ -164,9 +164,12 @@ export function LedgerRoute() {
                 : 'THIS DEVICE ONLY'}
         </span>
         {syncNote && <span className="lg__sync-note">{syncNote}</span>}
-        <button type="button" className="lg__linkish lg__linkish--end" onClick={() => void push()} disabled={syncing}>
-          SYNC NOW
-        </button>
+        <span className="lg__bar-end">
+          <Export />
+          <button type="button" className="lg__linkish" onClick={() => void push()} disabled={syncing}>
+            SYNC NOW
+          </button>
+        </span>
       </div>
 
       {state.problems.length > 0 && (

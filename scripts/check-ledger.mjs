@@ -411,6 +411,32 @@ console.log('ledger: the commands claim less than they are told, never more')
   check('a lost unit closes without reconciliation', lost.length === 1 && !lost[0].reconciliation)
 }
 
+console.log('ledger: reopening is a different history from never having closed')
+{
+  const shut = {
+    id: 'evt_TESTFIXTURECLOSE0000000002', type: 'unit_closed', loggedAt: at(new Date(clock)),
+    unit: UNIT, closedAt: at(new Date(clock)), disposition: 'consumed',
+    reconciliation: 'discrepancy', unaccounted: 2.3, uom: 'g',
+    source: { app: 'home', tool: 'intake-ledger', v: 1 },
+  }
+  const back = {
+    id: 'evt_TESTFIXTUREREOPEN000000000', type: 'unit_reopened', loggedAt: at(tick(5)),
+    unit: UNIT, reason: 'closed it by mistake',
+    source: { app: 'home', tool: 'intake-ledger', v: 1 },
+  }
+  const reopened = project([...events, shut, back]).units[0]
+  check('a reopened unit is active again', reopened.status === 'active')
+  // The closure is deliberately NOT cleared. A unit that was closed and
+  // reopened is a different history from one that was never closed, and the
+  // report goes on showing how it ended.
+  check('the closure stays on the record', reopened.closure !== null)
+  check('the closure keeps what it said', reopened.closure.disposition === 'consumed')
+  check(
+    'reopening reopens the right unit only',
+    project([...events, shut, { ...back, unit: 'unit_OTHER' }]).units[0].status === 'closed',
+  )
+}
+
 console.log('ledger: the log file converges no matter who writes it')
 {
   const half = events.slice(0, 6)

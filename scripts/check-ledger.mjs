@@ -23,7 +23,13 @@
  * No test framework: this repo has none, and one assertion helper is cheaper
  * than a dependency. Exits 1 on any failure.
  */
-import { nowLocal, parseJsonl, serialize, toJsonl, ulid, validate } from '../src/ledger/events.ts'
+import {
+  mergeLogs, nowLocal, orderLog, parseJsonl, serialize, shardOf, toJsonl, ulid, validate,
+} from '../src/ledger/events.ts'
+import {
+  amendUnit, adjustUnit, closeUnit, correctIntake, intake as makeIntake, openUnit,
+  reopenUnit, voidIntake,
+} from '../src/ledger/commands.ts'
 import { project, unaccounted } from '../src/ledger/project.ts'
 import { burnQuarters, densestWindow, median, reportOn } from '../src/ledger/analyze.ts'
 import { convert, commensurable, format } from '../src/ledger/uom.ts'
@@ -345,6 +351,84 @@ console.log('ledger: time')
   check('a local instant keeps its offset', /[+-]\d{2}:\d{2}$/.test(nowLocal()))
   check('ids sort by creation', ulid(new Date(1)) < ulid(new Date(2)))
   check('ids of the same millisecond still differ', ulid(new Date(1)) !== ulid(new Date(1)))
+}
+
+console.log('ledger: the commands claim less than they are told, never more')
+{
+  const { event: opened, unit: fresh } = openUnit({ substance: 'cocaine', quantity: 3.5, uom: 'g' })
+  check('opening a unit mints an id', fresh.startsWith('unit_') && opened.unit === fresh)
+  check('opening a unit stamps a received time', Boolean(opened.receivedAt))
+
+  const zero = makeIntake({ unit: fresh, quantity: 0 })
+  check('a zero quantity is unquantified, not a dose of zero', zero.measurement === 'unquantified')
+  check('a zero quantity carries no number at all', zero.quantity === undefined)
+
+  const blank = makeIntake({ unit: fresh, quantity: null, descriptor: 'one line' })
+  check('an empty box is unquantified', blank.measurement === 'unquantified')
+  check('the words are kept', blank.descriptor === 'one line')
+
+  const real = makeIntake({ unit: fresh, quantity: 0.18, uom: 'g' })
+  check('a number defaults to measured', real.measurement === 'measured')
+  check('a measured dose carries no confidence', real.confidence === undefined)
+
+  const guess = makeIntake({ unit: fresh, quantity: 0.2, uom: 'g', measurement: 'estimated' })
+  check('an estimate without a stated confidence gets one', guess.confidence === 'medium')
+
+  const lying = makeIntake({ unit: fresh, quantity: NaN, uom: 'g', measurement: 'measured' })
+  check('a NaN cannot become a measurement', lying.measurement === 'unquantified')
+
+  check('there is no delete', typeof globalThis.deleteIntake === 'undefined')
+  check('a correction demands a reason',
+    (() => { try { correctIntake('evt_x', { quantity: 1 }, '  '); return false } catch { return true } })())
+  check('voiding demands a reason',
+    (() => { try { voidIntake('evt_x', ''); return false } catch { return true } })())
+  check('an amendment demands a reason',
+    (() => { try { amendUnit(fresh, { quantity: 3 }, ''); return false } catch { return true } })())
+  check('reopening demands a reason',
+    (() => { try { reopenUnit(fresh, ''); return false } catch { return true } })())
+  check('an adjustment demands a reason',
+    (() => { try { adjustUnit({ unit: fresh, quantity: 0.1, uom: 'g', reason: '' }); return false }
+             catch { return true } })())
+
+  // A reconstructed last dose is a dose. Burying it in the closure would keep
+  // it out of every dose statistic, which is the quiet loss this design exists
+  // to prevent.
+  const reconstructed = closeUnit({
+    unit: fresh, disposition: 'consumed', reconciliation: 'final-intake-estimated',
+    unaccounted: 0.66, uom: 'g',
+  })
+  check('reconstructing a last dose writes a dose AND a closure', reconstructed.length === 2)
+  check('the dose comes first', reconstructed[0].type === 'intake_logged')
+  check('the reconstructed dose is an estimate of low confidence',
+    reconstructed[0].measurement === 'estimated' && reconstructed[0].confidence === 'low')
+  check('the reconstructed dose says so', /reconstructed/.test(reconstructed[0].note ?? ''))
+
+  const plain = closeUnit({ unit: fresh, disposition: 'consumed', reconciliation: 'discrepancy',
+    unaccounted: 0.66, uom: 'g' })
+  check('recording a discrepancy invents no dose', plain.length === 1)
+
+  const lost = closeUnit({ unit: fresh, disposition: 'lost' })
+  check('a lost unit closes without reconciliation', lost.length === 1 && !lost[0].reconciliation)
+}
+
+console.log('ledger: the log file converges no matter who writes it')
+{
+  const half = events.slice(0, 6)
+  const other = events.slice(4)
+  const a = mergeLogs(half, other)
+  const b = mergeLogs(other, half)
+  check('a union is a union whichever way round', toJsonl(a) === toJsonl(b))
+  check('a union loses nothing', a.length === events.length)
+  check('merging with itself is a no-op', toJsonl(mergeLogs(events, events)) === toJsonl(orderLog(events)))
+  check(
+    'a shuffled log serialises identically',
+    toJsonl(orderLog([...events].reverse())) === toJsonl(orderLog(events)),
+  )
+  check('shards are named for the month a row was written', shardOf(events[0]) === 'events-2026-08.jsonl')
+  check(
+    'a backdated dose does not reopen an old shard',
+    shardOf({ loggedAt: '2026-09-01T00:10:00-04:00' }) === 'events-2026-09.jsonl',
+  )
 }
 
 console.log('')

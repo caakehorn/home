@@ -370,6 +370,43 @@ export function serialize(event: LedgerEvent): string {
 export const toJsonl = (events: LedgerEvent[]) =>
   events.length ? events.map(serialize).join('\n') + '\n' : ''
 
+/**
+ * Which file an event belongs in — the month it was written down.
+ *
+ * On `loggedAt` rather than `occurredAt`, so a dose backdated to last week does
+ * not reopen last week's file. A closed month is never rewritten, which means
+ * the only shard two devices can collide on is the current one.
+ */
+export const shardOf = (event: LedgerEvent) => `events-${event.loggedAt.slice(0, 7)}.jsonl`
+
+/** The shard filenames this ledger recognises. */
+export const SHARD = /^events-\d{4}-\d{2}\.jsonl$/
+
+/**
+ * Order the log the same way every time, on every device.
+ *
+ * By `loggedAt`, then by id. Without a total order, two devices holding exactly
+ * the same events would serialise different bytes, each would see the other's
+ * file as changed, and they would take turns rewriting it forever.
+ */
+export const orderLog = (events: LedgerEvent[]) =>
+  [...events].sort((a, b) => instant(a.loggedAt) - instant(b.loggedAt) || a.id.localeCompare(b.id))
+
+/**
+ * Union two copies of the log by event id.
+ *
+ * This is the whole merge, and it is total: the log is append-only and every
+ * event carries a ULID, so there is no last-writer-wins, no field-level
+ * conflict, and nothing that two devices writing at once can lose. First
+ * occurrence wins on a duplicate id, which only matters if a byte was corrupted
+ * in transit, and either copy is equally good then.
+ */
+export function mergeLogs(a: LedgerEvent[], b: LedgerEvent[]): LedgerEvent[] {
+  const byId = new Map<string, LedgerEvent>()
+  for (const event of [...a, ...b]) if (!byId.has(event.id)) byId.set(event.id, event)
+  return orderLog([...byId.values()])
+}
+
 export type ParseResult = { events: LedgerEvent[]; problems: string[] }
 
 /**

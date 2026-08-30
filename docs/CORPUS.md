@@ -6,21 +6,52 @@ build that reads it. It exists so that the next visualiser does not have to
 re-derive any of this, and so that a build that finds a number here and a
 different number in the data knows the snapshot has moved.
 
-**Generated** from a full crawl of the repo at `main` (wiki snapshot
-`generatedAt 2026-08-30T17:45:00Z`, 471 pages / 772,670 words).
+**Generated** from a full crawl of the repo at `main`. The wiki figures below are
+the snapshot of **2026-08-30, 472 pages / 774,912 words**; the distribution tables
+in §1.2 and §1.3 are older crawls and say so where they differ. The live counts
+are always one command away, and are the thing to trust:
 
-**How to use it.** Numbers here are load-bearing. A pipeline that reads this
-corpus should assert against them and exit non-zero when they drift — the pattern
-`scripts/build-atlas.mjs` uses, where the build refuses to write a dataset whose
-totals no longer match the source. A silently-halved edge count looks exactly like
-a working build.
+```
+node -p "require('./public/core/structure.json').counts"
+node -p "require('./public/wiki/index.json').counts"
+```
+
+**How to use it.** These numbers are a description of the corpus, not a contract
+with it. Read them to know what shape a payload is and what it will do to a
+pipeline; do not wire a build to require that they still hold.
+
+That distinction was learned the hard way and is worth the paragraph.
+`scripts/build-core.mjs` used to assert eight of the figures on this page for
+exact equality, on the reasoning in §8 — and the corpus it describes is a wiki
+somebody writes in every day, synced hourly. So an ordinary page edit upstream
+turned the sync red, the snapshot froze, and the site went on deploying green
+from a corpus that had stopped advancing: eight days of `wiki.json`, then 22 of
+25 Reader's Digest twins, merged and never published. Worse, the remedy for
+`words: got 772670, says 772653` was to type 772670, so the check taught everyone
+who met it to clear it without looking.
+
+**What a build should assert instead** — both of these, and neither of them is a
+number anybody maintains:
+
+- **Self-consistency.** Does the output agree with the input it was derived from
+  in this same run? Node count against index rows against files on disk; a
+  summed field against the count that claims to summarise it; every index in
+  range. These hold on any corpus of any size and catch a truncated read the
+  moment it happens.
+- **Movement.** Has the corpus *collapsed* since the last build — measured
+  against the last build's own committed output, so the baseline advances
+  itself? Growth never fails. `build-core.mjs` is the worked example.
+
+`scripts/build-atlas.mjs` still asserts published totals exactly, and correctly:
+its source is a finished reconstruction that does not move. The difference is not
+strictness, it is whether the thing being asserted is still being written.
 
 ---
 
 ## 0. Where everything lives
 
 ```
-public/wiki/          471 page JSONs + index + gaps + sage + lexicon + assets
+public/wiki/          472 page JSONs + index + gaps + sage + lexicon + assets
 public/transcript/    index + 91 month files — 134,348 messages
 public/leviathan/     10 derived instrument datasets
 public/gallery/       manifest + 41 media files
@@ -41,15 +72,17 @@ src/arcade/content.ts cabinet copy, star fields, constellation edges
 Five top-level keys: `generatedAt`, `counts`, `domains`, `pages`, `edges`.
 
 ```
-counts   { pages: 471, words: 772670, chartables: 119, briefs: 10,
-           plain: 3, edges: 3797 }          // schema also allows `sealed`
+counts   { pages: 472, words: 774912, chartables: 121, briefs: 10,
+           plain: 25, edges: 3801 }         // schema also allows `sealed`
 domains  [{ id, count }] × 10
-pages    [IndexEntry] × 471
-edges    [[int, int]] × 3797                // undirected index pairs into `pages`
-                                            // no self-loops, all 3797 distinct
+pages    [IndexEntry] × 472
+edges    [[int, int]] × 3801                // undirected index pairs into `pages`
+                                            // no self-loops, all 3801 distinct
+                                            // build-core.mjs re-checks all three
+                                            // properties on every build
 ```
 
-`IndexEntry` — 14 keys, present on all 471 rows:
+`IndexEntry` — 14 keys, present on all 472 rows:
 
 | field | type | notes |
 |---|---|---|
@@ -64,43 +97,48 @@ edges    [[int, int]] × 3797                // undirected index pairs into `pag
 | `charts` | int | chartable-table count |
 | `links` | int | outbound count; the array is on the page JSON |
 | `brief` | bool | 10 true |
-| `plain` | bool | 3 true |
+| `plain` | bool | 25 true |
 | `x`, `y` | float | **precomputed 2-D force layout, baked at sync.** x ∈ [−0.8515, 0.7256], y ∈ [−1.0543, 0.9325] |
 
 Optional `locked` exists in the schema for sealed pages — **0 in this snapshot**
 (`wiki.locks.json` at the repo root reads `{ locked: [] }`).
 
-**Graph shape.** 3,797 edges over 471 nodes. Highest degree:
-`timeline/master-timeline` 360 · `meta/recent-activity` 219 · `people/index` 172 ·
-`people/annie-ulmer` 165 · `meta/open-questions` 164 ·
-`people/suzanne-frank` 88 · `meta/digest` 83 · `mind/index` 76 ·
+**Graph shape.** 3,801 edges over 472 nodes. Highest degree:
+`timeline/master-timeline` 360 · `meta/recent-activity` 220 · `people/index` 172 ·
+`people/annie-ulmer` 165 · `meta/open-questions` 165 ·
+`people/suzanne-frank` 88 · `meta/digest` 84 · `mind/index` 76 ·
 `self/message-corpora/master-message-dump` 76 · `self/context-core` 69 ·
 `mind/synthesis/totality-themes` 67 · `people/alexis-armel` 66.
 
-### 1.2 `pages/*.json` — 471 files, 7.26 MB
+### 1.2 `pages/*.json` — 472 files, 7.49 MB
 
-Filename is the slug with `/` → `__`. **Every file carries the same 18 keys**
-(verified across all 471).
+Filename is the slug with `/` → `__`. **Every file carries the same 17 keys**
+(verified across all 472 — one key set, no exceptions).
 
 | key | type | population / shape |
 |---|---|---|
-| `slug` `domain` `title` | str | 471 |
-| `meta` | dict | 471 — `Record<string,string>`, **all values stringified**, 23 distinct keys |
-| `infobox` | dict \| null | **179 dicts / 340 null**, 39 distinct keys |
-| `lists` | dict | 471 — `Record<string,string[]>`, 10 distinct keys. **Lossy for `connections`** |
-| `fmRaw` | str | 471 — raw YAML front-matter verbatim, 107–27,973 chars. **The only lossless source of typed edges** |
-| `h1` | str \| null | 517 / 2 — leading `# Heading`, stripped from `body` |
-| `links` | str[] | 404 non-empty / 115 empty. **4,466 total**, min/med/max 0/4/342 |
-| `body` | str | 471 — markdown with the H1 removed |
-| `words` | int | min/med/max 12 / 694 / 113,514; total 772,670 |
-| `charts` | int | 0–9; **119 total across 51 pages** |
+| `slug` `domain` `title` | str | 472 |
+| `meta` | dict | 472 — `Record<string,string>`, **all values stringified**, 23 distinct keys |
+| `infobox` | dict \| null | **179 dicts / 293 null**, 39 distinct keys |
+| `lists` | dict | 472 — `Record<string,string[]>`, 10 distinct keys. **Lossy for `connections`** |
+| `fmRaw` | str | 472 — raw YAML front-matter verbatim, 107–27,973 chars. **The only lossless source of typed edges** |
+| `h1` | str \| null | 470 / 2 — leading `# Heading`, stripped from `body` |
+| `links` | str[] | 404 non-empty / 68 empty. **4,416 total**, min/med/max 0/5/359 |
+| `body` | str | 472 — markdown with the H1 removed |
+| `words` | int | min/med/max 12 / 699 / 113,514; total 774,912 |
+| `charts` | int | 0–9; **121 total across 52 pages** |
 | `brief` | bool | 10 true |
 | `gaps` | dict[] | 151 pages non-empty; **484 entries**; each `{ text, label }` |
-| `staged` | null | **null on all 471** (source is `meta.pending_ingest`) |
+| `staged` | null | **null on all 472** (source is `meta.pending_ingest`) |
 | `plain` | dict \| null | **25 dicts** — `{ title, body, words, readingLevel, against, stale }` |
-| `backlinks` | str[] | 516 non-empty / 3 empty. **4,414 total**, min/med/max 0/5/160 |
+| `backlinks` | str[] | 469 non-empty / 3 empty. **4,364 total**, min/med/max 0/6/160 |
 
 #### `meta` key census (values are all strings)
+
+> The populations in this census and in §1.3 are an **earlier crawl of a larger
+> corpus** — the counts above 472 are the giveaway. They are kept because the
+> shapes and the traps they name are what these two sections are for, and those
+> have not moved. Re-crawl before quoting a population from either.
 
 | key | pages | | key | pages |
 |---|---|---|---|---|
@@ -137,7 +175,7 @@ arrays).
 
 ### 1.3 Front-matter — the `fmRaw` census
 
-470 of 471 parse as YAML. **One failure:**
+All but one page parses as YAML. **The one failure:**
 `mind/synthesis/august-grievance-verdict` — block-scalar syntax error at line 12.
 **A YAML parser silently loses that page's 12 typed edges**; read the block by
 line instead (`scripts/core-frontmatter.mjs`) and there is nothing to lose.
@@ -278,7 +316,7 @@ connections:
 > `connections:` block (as `build-core.mjs` does) and the total is 2,304 with
 > `meta` at 0.
 
-> **Trap.** `index.json.edges` (3,797) is the **untyped** wikilink graph. The 2,304
+> **Trap.** `index.json.edges` (3,801) is the **untyped** wikilink graph. The 2,304
 > typed connections are a *different, smaller, richer* graph that exists **only in
 > `fmRaw`**. `lists.connections` flattens each entry to the string `"page: ..."`
 > and drops `type` and `claim` entirely. To mine typed edges you must parse
@@ -318,10 +356,10 @@ inline `![](…)` markdown images anywhere in any body.**
 | self | 40 | 62,727 | 1,568 | 38 | 413 | 358 | 45 | 2 | 114 |
 | work | 15 | 16,494 | 1,100 | 0 | 112 | 157 | 6 | 0 | 76 |
 | places | 10 | 13,686 | 1,369 | 0 | 105 | 117 | 10 | 0 | 80 |
-| meta | 8 | 30,614 | 3,825 | 4 | 492 | 27 | 0 | 0 | 0 |
+| meta | 9 | 32,856 | 3,651 | 6 | 498 | 33 | 0 | 0 | 0 |
 | health | 5 | 9,507 | 1,901 | 1 | 62 | 46 | 11 | 0 | 46 |
 | legal | 4 | 5,088 | 1,272 | 0 | 36 | 49 | 3 | 0 | 26 |
-| **total** | **471** | **772,670** | 1,640 | **119** | **4,410** | **4,358** | **484** | **179** | **2,304** |
+| **total** | **472** | **774,912** | 1,642 | **121** | **4,416** | **4,364** | **484** | **179** | **2,304** |
 
 Note the inversion: `people` has the most pages, but `mind` and `timeline` each
 carry more words, and `mind` dominates typed edges.
@@ -434,7 +472,7 @@ vendored here**.
 | `chronology.json` | 361 K | **6,937** dated mentions mined from wiki prose. `months[318]` 1900-01→2027-03, `years[83]` each with a `sample[]` of citing pages. Binned by the date *named*, not the date written. |
 | `clock.json` | 321 K | **Every message as one integer.** `marks[134348]` delta-encoded; decode by prefix-sum then `value = day*2880 + minute*2 + dir`. Plus `hours[24] {all,sent,received}`, `years[11]`, `gaps[5]` with day indices. **The densest reusable payload in the repo.** |
 | `lexicon.json` | 30 K | 965,583 tokens, 19,873 distinct, 2,592 shouts. `stoplist[182]` shipped inside the dataset so the one editorial choice is inspectable. `top[400]` post-stoplist `{word, all, sent, received}`, `topAll[60]` pre-stoplist, `months[91] {bin, count, shouts}`. |
-| `mass.json` | 55 K | `domains[10]` and `pages[471] {slug,title,domain,words}` summing to 772,670. |
+| `mass.json` | 55 K | `domains[10]` and `pages[472] {slug,title,domain,words}` summing to 774,912. |
 | `pen.json` | 8 K | `rows[128] { year, mentions, pages, domains, openings }`, 1900–2027. `openings` = pages whose earliest date is that year. |
 | `recorder.json` | 14 K | `rows[129] { bin, covered, sent, received, words, days, messages, chars }` — **includes the 38 uncovered months as `covered: 0`.** The ready-made array for drawing gaps at real width. |
 | `atlas.json` | 230 K | Hand-typed geography + IPF-reconstructed movement. `nodes[550]`, `edges[840] [a,b,roadIdx,metres]`, `roads[94]`, `cities[35]`, `waters[10]`, `places[86]`, `routes` (595 precomputed shortest paths), `days[1992] { d, s:[placeIdx,arriveMin,departMin,…] }`. |
@@ -457,10 +495,14 @@ vendored here**.
 | `schema` | — | `{ fields[21] {field,count,share}, byDomain[9], types[11] }`. `domain`/`page_type`/`status`/`date_created`/`date_modified` at 100%; `tags` 94%; `importance` 13%. |
 | `echo` | — | `{ measured: 464, total: 59586, identical: 32, byOverlap[200], byShared[200] }` — pairwise vocabulary Jaccard. A set operation, not embeddings. |
 
-> **Drift warning.** `wiki.json` was built 2026-08-21 against **486 pages /
-> 630,514 words**. `mass.json`, `public/wiki/index.json` and `public/agent/*` were
-> rebuilt 2026-08-30 against **471 pages / 772,670 words**. Do not cross-join
-> `wiki.json` with the newer sets without accounting for the 33-page delta.
+> **Drift warning, and how it was closed.** `wiki.json` sat at a 2026-08-21 build
+> of **486 pages / 630,514 words** for eight days while `mass.json`,
+> `public/wiki/index.json` and `public/agent/*` moved on, because nothing but a
+> hand-run rebuilt it — a 33-page delta that made any cross-join wrong. `npm run
+> wiki-instruments` joined the sync on 2026-08-29 and it now rebuilds with
+> everything else; all of these payloads carry the **same** `generatedAt` as the
+> snapshot they were derived from, which is the thing to compare before
+> cross-joining any two of them.
 
 ---
 
@@ -495,7 +537,7 @@ crossed,documented,collateral,role,note,short}`), `LINES` (5), `DESCENT`,
 `CANCER` (star field), `CANCER_EDGES` (constellation edges), `PRIZES`.
 
 **Other payloads** — `public/agent/search.json` (314 KB, gitignored, built at
-`prebuild`): `{ pages[471], lookup{775 keys} }`, an **alias→slug index** worth
+`prebuild`): `{ pages[472], lookup{~775 keys} }`, an **alias→slug index** worth
 reusing for any search box. `public/llms-full.txt` (5.2 MB, gitignored) is the
 whole corpus as one markdown stream.
 
@@ -627,7 +669,7 @@ and an early return when `motion` is false. `Atlas.tsx` adds the 10 Hz
    prose claims. Nothing on the site draws them. The rarest asset here.
 2. **`clock.json.marks`** — 134,348 messages as packed ints, 320 KB. The only
    GPU-scale substrate in the repo.
-3. **`index.json`** — 471 nodes with solved `x,y` + 3,797 integer-indexed edges.
+3. **`index.json`** — 472 nodes with solved `x,y` + 3,801 integer-indexed edges.
    A graph you can draw without simulating.
 4. **`gaps.json`** — 484 written statements of what is not known. Drawable absence.
 5. **`chronology.json`** — 6,937 dated mentions, 1900→2027. The corpus's own sense
@@ -645,7 +687,24 @@ and an early return when `motion` is false. `Atlas.tsx` adds the 10 Hz
 
 ## 8. Maintaining this file
 
-Regenerate the counts when the wiki snapshot is resynced. Anything reading this
-corpus should assert against the numbers above and fail loudly on drift rather
-than shipping a quietly-truncated dataset. If a number here is wrong, the fix is
-to re-crawl and correct it — not to relax the assertion.
+Re-crawl when you need a number and the stamp at the top is old. A figure here
+being out of date is a documentation defect, and it is the only thing it is: no
+build reads this file, and none should be made to.
+
+That last clause is the whole lesson of 2026-08-29. This section used to say
+"anything reading this corpus should assert against the numbers above and fail
+loudly on drift", `build-core.mjs` did exactly that, and the result was a
+mechanically-enforced requirement that a human re-crawl a 650-line dictionary
+within the hour, every hour, forever — held against a wiki being actively
+written. It failed for two days, froze the published snapshot behind a green
+deploy, and trained its readers to clear it by retyping the number it printed.
+
+A pipeline still refuses to ship a quietly-truncated dataset. It just proves the
+dataset is whole by checking it against **its own input** and against **its own
+last build**, both of which are present at build time, rather than against prose
+somebody has to remember to update. See "How to use it" at the top for the two
+questions and `scripts/build-core.mjs` for the worked implementation.
+
+Where the source genuinely does not move — `build-atlas.mjs`'s published totals,
+`check-atlas.mjs`'s bank counts — exact equality against a written figure is
+still right, and those checks stay.

@@ -5,6 +5,8 @@ import { SubHead } from '../components/Wordmark'
 import { Closing } from '../ledger/Closing'
 import { LogSheet } from '../ledger/LogSheet'
 import { NewUnit, UnitCard, emptyMessage } from '../ledger/Capture'
+import { Report } from '../ledger/Report'
+import { Trends } from '../ledger/Trends'
 import { Instant, pluralise, since } from '../ledger/bits'
 import { loadLedger, record, sync, type LedgerState } from '../ledger/sync'
 import type { LedgerEvent } from '../ledger/events'
@@ -46,6 +48,7 @@ export function LedgerRoute() {
   const [syncing, setSyncing] = useState(false)
   const [syncNote, setSyncNote] = useState<string | null>(null)
   const [syncedAt, setSyncedAt] = useState<string | null>(null)
+  const [pane, setPane] = useState<'units' | 'trends'>('units')
 
   /**
    * Push and pull, without ever letting the result reach an error boundary.
@@ -125,6 +128,7 @@ export function LedgerRoute() {
   const open = ledger.units.filter((u) => u.status === 'active')
   const shut = ledger.units.filter((u) => u.status === 'closed')
   const sheetUnit = sheet ? ledger.units.find((u) => u.id === sheet.unit) : null
+  const reported = focused ? ledger.units.find((u) => u.id === focused) : null
 
   return (
     <div className="lg">
@@ -173,7 +177,48 @@ export function LedgerRoute() {
         </p>
       )}
 
+      <nav className="wrap lg__tabs" aria-label="Views">
+        <button
+          type="button"
+          className={`lg__tab${pane === 'units' && !focused ? ' lg__tab--on' : ''}`}
+          onClick={() => {
+            setPane('units')
+            if (focused) navigate('/ledger')
+          }}
+        >
+          UNITS
+        </button>
+        <button
+          type="button"
+          className={`lg__tab${pane === 'trends' && !focused ? ' lg__tab--on' : ''}`}
+          onClick={() => {
+            setPane('trends')
+            if (focused) navigate('/ledger')
+          }}
+        >
+          ACROSS UNITS
+        </button>
+      </nav>
+
       <main className="wrap lg__body">
+        {focused && !reported && (
+          <p className="lg__state">
+            No unit with that id is in this device's log. It may be on another device and not
+            yet synced.
+          </p>
+        )}
+
+        {reported && (
+          <Report
+            unit={reported}
+            onCommit={(events) => void commit(events)}
+            onBack={() => navigate('/ledger')}
+          />
+        )}
+
+        {!focused && pane === 'trends' && <Trends ledger={ledger} />}
+
+        {!focused && pane === 'units' && (
         <section className="lg__units">
           {open.length === 0 && <p className="lg__empty">{emptyMessage(shut.length)}</p>}
           {open.map((unit) => (
@@ -188,8 +233,9 @@ export function LedgerRoute() {
           ))}
           <NewUnit onDone={(events) => void commit(events)} />
         </section>
+        )}
 
-        {shut.length > 0 && (
+        {!focused && pane === 'units' && shut.length > 0 && (
           <section className="lg__closed">
             <h2 className="lg__h2">CLOSED — {shut.length}</h2>
             <ul className="lg__closed-list">
@@ -236,7 +282,6 @@ export function LedgerRoute() {
         </div>
       )}
 
-      {focused && <p className="lg__state wrap">unit reports arrive in the next checkpoint</p>}
     </div>
   )
 }

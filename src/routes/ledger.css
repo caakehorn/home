@@ -774,3 +774,355 @@
     grid-template-columns: 1fr auto;
   }
 }
+
+/* ---- tabs ---------------------------------------------------------------- */
+.lg__tabs {
+  display: flex;
+  gap: 0.5rem;
+  padding-block: 0.8rem 0;
+}
+
+.lg__tab {
+  min-height: 2.75rem;
+  padding: 0.5rem 1rem;
+  border: 2px solid color-mix(in srgb, var(--text-dim) 36%, transparent);
+  background: none;
+  color: var(--text-dim);
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.12em;
+  cursor: pointer;
+}
+
+.lg__tab--on {
+  border-color: var(--n5);
+  color: var(--n5);
+}
+
+/* ---- the report ---------------------------------------------------------- */
+.lg__report {
+  display: grid;
+  gap: 1.25rem;
+  max-width: 46rem;
+}
+
+.lg__report-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 1rem;
+}
+
+.lg__report-name {
+  font-family: var(--f-head);
+  font-size: var(--step-2);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.lg__report-size {
+  font-family: var(--f-mono);
+  font-size: var(--step-1);
+  color: var(--n5);
+}
+
+.lg__report-state {
+  padding: 0.15rem 0.5rem;
+  border: 1px solid currentColor;
+  font-family: var(--f-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+}
+
+.lg__report-state--active {
+  color: var(--n5);
+}
+
+.lg__report-state--closed {
+  color: var(--text-dim);
+}
+
+.lg__report-origin {
+  margin: 0;
+  font-size: var(--step--1);
+  color: var(--text-dim);
+}
+
+.lg__h3 {
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.14em;
+  color: var(--n5);
+}
+
+.lg__h4 {
+  margin-bottom: 0.4rem;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  color: var(--text-dim);
+}
+
+/* ---- the figures table --------------------------------------------------- */
+.lg__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--step--1);
+}
+
+.lg__table th,
+.lg__table td {
+  padding: 0.4rem 0.5rem 0.4rem 0;
+  text-align: left;
+  vertical-align: baseline;
+  border-bottom: 1px solid color-mix(in srgb, var(--text-dim) 16%, transparent);
+}
+
+.lg__table th[scope='row'] {
+  width: 55%;
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.lg__table th em {
+  display: block;
+  font-size: 0.62rem;
+  font-style: normal;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  opacity: 0.75;
+}
+
+.lg__table td {
+  text-align: right;
+  font-family: var(--f-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.lg__table--wide th[scope='col'] {
+  font-family: var(--f-mono);
+  font-size: 0.65rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.lg__table--wide td {
+  text-align: left;
+}
+
+.lg__table--wide td:last-child {
+  text-align: right;
+}
+
+.lg__table-sub {
+  font-size: 0.65rem;
+  color: var(--text-dim);
+}
+
+.lg__table-gap td {
+  height: 0.6rem;
+  border-bottom: 0;
+}
+
+/* ---- burn quarters ------------------------------------------------------- */
+.lg__quarter-list {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lg__quarter-list li {
+  display: grid;
+  grid-template-columns: 6rem 5rem 1fr;
+  gap: 0.5rem;
+  align-items: center;
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+}
+
+.lg__quarter-list b {
+  font-weight: 400;
+  color: var(--text-dim);
+}
+
+.lg__quarter-bar {
+  grid-column: 1 / -1;
+  height: 4px;
+  background: color-mix(in srgb, var(--text-dim) 20%, transparent);
+}
+
+.lg__quarter-bar span {
+  display: block;
+  height: 100%;
+  background: var(--n5);
+}
+
+@media (min-width: 34rem) {
+  .lg__quarter-list li {
+    grid-template-columns: 6rem 5rem 6rem 1fr;
+  }
+
+  .lg__quarter-bar {
+    grid-column: auto;
+  }
+}
+
+/* ---- the event list ------------------------------------------------------ */
+.lg__event-list {
+  display: grid;
+  gap: 1px;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  list-style: none;
+  background: color-mix(in srgb, var(--text-dim) 18%, transparent);
+}
+
+.lg__event {
+  padding: 0.6rem 0.7rem;
+  background: var(--void-2);
+}
+
+.lg__event--void {
+  opacity: 0.55;
+}
+
+.lg__event--void .lg__event-qty {
+  text-decoration: line-through;
+}
+
+.lg__event-main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.8rem;
+  font-size: var(--step--1);
+}
+
+.lg__event-qty {
+  font-family: var(--f-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.lg__event-words {
+  font-style: italic;
+  color: var(--text-dim);
+}
+
+.lg__event-note {
+  margin: 0.3rem 0 0;
+  font-size: var(--step--1);
+  color: var(--text-dim);
+}
+
+.lg__event-prov {
+  margin: 0.3rem 0 0;
+  font-family: var(--f-mono);
+  font-size: 0.65rem;
+  color: var(--text-dim);
+}
+
+/* ---- across units -------------------------------------------------------- */
+.lg__trends {
+  display: grid;
+  gap: 2rem;
+  max-width: 52rem;
+}
+
+.lg__trend-block {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.lg__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 0.8rem 1rem;
+  margin: 0;
+}
+
+.lg__stat dt {
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.lg__stat dd {
+  margin: 0.15rem 0 0;
+  font-family: var(--f-mono);
+  font-size: var(--step-0);
+  font-variant-numeric: tabular-nums;
+}
+
+.lg__stat em {
+  display: block;
+  font-family: var(--f-ui);
+  font-size: 0.62rem;
+  font-style: normal;
+  color: var(--text-dim);
+}
+
+/* ---- bars ---------------------------------------------------------------- */
+.lg__chart {
+  margin: 0;
+}
+
+.lg__chart figcaption {
+  font-family: var(--f-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+}
+
+.lg__chart-bars {
+  display: flex;
+  align-items: end;
+  gap: 2px;
+  height: 6rem;
+  margin-top: 0.4rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--text-dim) 30%, transparent);
+}
+
+.lg__chart-col {
+  position: relative;
+  display: flex;
+  flex: 1 1 0;
+  min-width: 0;
+  height: 100%;
+  align-items: end;
+}
+
+.lg__chart-bar {
+  width: 100%;
+  min-height: 1px;
+  background: var(--n5);
+}
+
+.lg__chart-label {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  font-family: var(--f-mono);
+  font-size: 0.55rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.lg__chart-scale {
+  display: block;
+  margin-top: 0.2rem;
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+}

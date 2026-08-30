@@ -1133,3 +1133,22 @@
   gap: 1rem;
   margin-left: auto;
 }
+
+/* Local-only is the working configuration against a public wiki repo, so it is
+   an explanation rather than a warning — no red rule, no alarm colour. The
+   sentence exists because a badge alone reading LOCAL ONLY was being read as a
+   fault, and a working tool that looks broken gets abandoned. */
+.lg__local {
+  margin: 0;
+  padding: 0.7rem 0.9rem;
+  border-left: 3px solid var(--n5);
+  background: color-mix(in srgb, var(--n5) 8%, transparent);
+  font-size: var(--step--1);
+  line-height: 1.6;
+}
+
+.lg__local code {
+  font-family: var(--f-mono);
+  font-size: 0.9em;
+  overflow-wrap: anywhere;
+}

@@ -169,15 +169,27 @@ would fork a shared format for one interface's benefit, so it is gone. The
 unaccounted amount and the unquantified count are both still on every report,
 which is the honest half of what it did.
 
-**The interlock, which is the part to read twice.** That repository held its
-ledger data in `.gitignore` for months because it was public. Those lines
-protected the CLI and the local app and did *nothing at all* for this room:
-`.gitignore` governs `git add`, and this writes through GitHub's contents API
-from a browser with no working tree anywhere in the loop. That API commits an
-ignored path without complaint. So the guard lives here instead and does not
-consult `.gitignore` — `sync()` reads the repository's visibility and **refuses
-to push while it is public**, saying so in the badge. Flip the repo back to
-public and this stops writing rather than quietly publishing a night's events.
+**Local-only is the normal mode, and it is not a fault.** `caakehorn/wiki-brain`
+is public, so **this room does not sync at all** — the badge says `LOCAL ONLY`
+and a line under it says why. Everything works: every unit, every event, every
+report and every figure is computed from the copy on the device. What a public
+wiki repository costs is automatic sync *between* devices, and nothing else.
+EXPORT hands the whole log back in exactly the format `bin/intake` appends, so
+`cat it >> intake/events.jsonl && bin/intake rebuild` joins the two whenever you
+want them joined.
+
+The mechanism is a visibility check: `sync()` reads the repository's `private`
+flag and does not push while it is false. It exists because `.gitignore` — which
+is what holds the ledger's data out of git upstream — **governs `git add` and
+nothing else.** This room writes through GitHub's contents API from a browser
+with no working tree anywhere in the loop, and that API commits an ignored path
+without complaint, so those lines guard the CLI and the local app and have never
+guarded this. Two paths, two guards, neither a substitute for the other.
+
+It shipped once phrased as a refusal — `HELD — REPO IS PUBLIC`, styled like an
+error — which made a complete, working tool look broken to the only person using
+it. A tool that looks broken gets abandoned, so it now states which of its two
+modes it is in and gets on with it.
 
 Capture is local-first regardless — IndexedDB, instant, offline, never waiting
 on a network, and complete on its own. Sync runs behind it and reports what it

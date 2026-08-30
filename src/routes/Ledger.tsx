@@ -62,19 +62,19 @@ export function LedgerRoute() {
     setSyncing(true)
     try {
       const report = await sync()
-      const stuck = report.problems.length > 0 || report.refused !== null
+      const stuck = report.problems.length > 0
       setSyncNote(
         // A refusal is not a failure and is not transient: the ledger is
         // working exactly as designed and will keep working locally forever.
         // It is first in line because it is the one the reader has to act on.
-        report.refused ??
+        report.localOnly ??
           (report.problems.length
             ? report.problems[0]
             : report.pushed || report.pulled
               ? `${report.pushed} up · ${report.pulled} down`
               : null),
       )
-      setHeld(report.refused !== null)
+      setHeld(report.localOnly !== null)
       // Only a clean pass sets the timestamp. A badge reading SYNCED above an
       // error is the worst of both — it is the reassurance without the fact,
       // and this is the one screen where "it is only on this phone" has to be
@@ -158,13 +158,13 @@ export function LedgerRoute() {
       <div className="wrap lg__bar">
         <span
           className={`lg__sync${syncing ? ' lg__sync--busy' : ''}${
-            !syncing && (held || (syncNote && !syncedAt)) ? ' lg__sync--stuck' : ''
+            !syncing && !held && syncNote && !syncedAt ? ' lg__sync--stuck' : ''
           }`}
         >
           {syncing
             ? 'SYNCING…'
             : held
-              ? 'HELD — REPO IS PUBLIC'
+              ? 'LOCAL ONLY'
               : state.waiting > 0
                 ? `${pluralise(state.waiting, 'event')} on this device only`
                 : syncedAt
@@ -179,6 +179,17 @@ export function LedgerRoute() {
           </button>
         </span>
       </div>
+
+      {held && (
+        <p className="wrap lg__local">
+          <b>Running local-only.</b> Everything you log is on this device and complete —
+          every unit, every report, every figure below is computed from it. What the public
+          wiki repository costs is automatic sync between devices, and nothing else. Press{' '}
+          <b>EXPORT</b> for the whole log in the format <code>bin/intake</code> appends, then{' '}
+          <code>cat it &gt;&gt; intake/events.jsonl &amp;&amp; bin/intake rebuild</code> to
+          join the two. No intake data goes into a public repository by any path.
+        </p>
+      )}
 
       {state.problems.length > 0 && (
         <p className="wrap lg__warn">

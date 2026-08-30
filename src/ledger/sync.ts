@@ -53,8 +53,12 @@ export type SyncReport = {
   at: string
   pushed: number
   pulled: number
-  /** Set when the interlock stopped the push. Not an error — a refusal. */
-  refused: string | null
+  /**
+   * Set while the ledger is running local-only, which is the normal mode
+   * against a public wiki-brain. Not an error and not a failure — the tool is
+   * complete without the network, and this says which mode it is in.
+   */
+  localOnly: string | null
   problems: string[]
 }
 
@@ -68,7 +72,7 @@ export type SyncReport = {
  */
 export async function sync(): Promise<SyncReport> {
   const at = new Date().toISOString()
-  const report: SyncReport = { at, pushed: 0, pulled: 0, refused: null, problems: [] }
+  const report: SyncReport = { at, pushed: 0, pulled: 0, localOnly: null, problems: [] }
 
   const local = await loadLocal()
   report.problems.push(...local.problems.map((p) => `local log: ${p}`))
@@ -82,11 +86,21 @@ export async function sync(): Promise<SyncReport> {
   }
 
   if (!priv) {
-    // The whole reason this function exists in the shape it does.
-    report.refused =
-      `${SOURCE_REPO} is a public repository — nothing is being pushed. ` +
-      'Make it private and this syncs on the next pass; everything logged here ' +
-      'is safe on this device until then.'
+    // Local-only, and that is a working configuration rather than a fault.
+    //
+    // `${SOURCE_REPO}` is public. Nothing about this ledger is going into a
+    // public repository — not by this path and not by any other — so the push
+    // does not happen and the tool carries on doing the thing it is actually
+    // for. Everything is in IndexedDB, every figure and every report is
+    // computed from there, and EXPORT hands the whole log back in exactly the
+    // format `bin/intake` appends, so merging it is a `cat` and a `rebuild`
+    // whenever you want the two joined.
+    //
+    // This used to read as a refusal, which made a working tool look broken.
+    // The only thing the public repo actually costs is automatic device-to-
+    // device sync; it costs nothing else, and the badge now says so in those
+    // terms.
+    report.localOnly = 'not syncing — the wiki repo is public. EXPORT to merge by hand.'
     return report
   }
 

@@ -47,14 +47,14 @@ const OUT = 'public/core'
    ========================================================================== */
 
 const EXPECT = {
-  nodes: 471,
-  untyped: 3797,
+  nodes: 472,
+  untyped: 3801,
   typed: 2304,
   typeCount: 19,
   gapPages: 151,
   gaps: 484,
   domains: 10,
-  words: 772670,
+  words: 774912,
 }
 
 /**
@@ -348,6 +348,26 @@ if (problems.length) {
   console.error('\nThe corpus does not match docs/CORPUS.md:')
   for (const p of problems) console.error(`  ${p}`)
   console.error('\nRe-crawl, correct docs/CORPUS.md, then update EXPECT here. Do not relax the check.')
+
+  // The check stays exactly as strict; this only removes the archaeology.
+  // Every failure here has to be resolved by hand-deriving eight numbers out of
+  // three payloads, and on 2026-08-30 that cost the site a day: the sync went
+  // red at 08:09, deploy stayed green, and 22 merged plain-language twins sat
+  // unpublished because nobody knew where to look. Printing the block that
+  // WOULD match turns that into a copy-paste — after a human has looked at the
+  // diff above and agreed the corpus really did move.
+  console.error('\nIf the corpus legitimately moved, this is the block that matches it now:\n')
+  console.error('const EXPECT = {')
+  for (const [k, v] of [
+    ['nodes', nodes.length], ['untyped', index.edges.length],
+    ['typed', typed.length + dangling], ['typeCount', types.length],
+    ['gapPages', gapsFor.size], ['gaps', structure.counts.gaps],
+    ['domains', index.domains.length], ['words', index.counts.words],
+  ]) console.error(`  ${k}: ${v},${v === EXPECT[k] ? '' : `   // was ${EXPECT[k]}`}`)
+  console.error('}')
+  console.error('\ndocs/CORPUS.md carries these figures in several places — the header line,')
+  console.error('the `counts` block, the per-page `words` row, the domain aggregate table and')
+  console.error('its total row, and mass.json\'s summing figure. Correct all of them.')
   process.exit(1)
 }
 if (dangling) console.log(`  ${dangling} connections name a page the snapshot does not carry — dropped, not faked`)

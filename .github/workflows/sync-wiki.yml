@@ -110,20 +110,45 @@ jobs:
       # wiki does — see the note in scripts/build-docket.mjs.
       - run: npm run docket
 
+      # The derivation is all-or-nothing on purpose: every step above runs before
+      # anything is staged, so a build that fails leaves the whole snapshot at
+      # its previous state rather than committing a half-updated one where
+      # public/wiki has moved and public/core has not.
       - id: commit
         name: Commit the snapshot if it moved
         run: |
+          set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add public/wiki public/leviathan public/docket public/core
           if git diff --cached --quiet; then
             echo 'changed=false' >> "$GITHUB_OUTPUT"
             echo 'Snapshot already current.'
-          else
-            git commit -m 'Resync the wiki snapshot'
-            git push
-            echo 'changed=true' >> "$GITHUB_OUTPUT"
+            exit 0
           fi
+          git commit -m 'Resync the wiki snapshot'
+
+          # A merge landing on main during the ~60s this job takes rejects the
+          # push as non-fast-forward, and the snapshot then waits an hour for a
+          # collision nobody was told about. Rebase and retry instead.
+          #
+          # The replay is safe because the only writer of these paths is this
+          # job, and `concurrency: sync-wiki` means there is never a second one:
+          # whatever moved main touched something else, so there is nothing to
+          # conflict with. A conflict here would mean that assumption is wrong,
+          # which is worth failing on rather than resolving blind — the next
+          # hourly run re-derives the whole snapshot from scratch regardless.
+          for attempt in 1 2 3; do
+            if git push; then
+              echo 'changed=true' >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "::notice::push rejected (attempt $attempt) — main moved; rebasing onto it"
+            git fetch origin main
+            git rebase origin/main
+          done
+          echo '::error::could not push the resynced snapshot after three attempts'
+          exit 1
 
   # A push made with GITHUB_TOKEN does not trigger other workflows, so the
   # deploy is called rather than waited for.

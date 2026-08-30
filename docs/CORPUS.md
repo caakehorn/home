@@ -7,7 +7,7 @@ re-derive any of this, and so that a build that finds a number here and a
 different number in the data knows the snapshot has moved.
 
 **Generated** from a full crawl of the repo at `main` (wiki snapshot
-`generatedAt 2026-08-30T01:29:34Z`, 471 pages / 772,641 words).
+`generatedAt 2026-08-30T01:48:13Z`, 471 pages / 772,653 words).
 
 **How to use it.** Numbers here are load-bearing. A pipeline that reads this
 corpus should assert against them and exit non-zero when they drift — the pattern
@@ -41,7 +41,7 @@ src/arcade/content.ts cabinet copy, star fields, constellation edges
 Five top-level keys: `generatedAt`, `counts`, `domains`, `pages`, `edges`.
 
 ```
-counts   { pages: 471, words: 772641, chartables: 119, briefs: 10,
+counts   { pages: 471, words: 772653, chartables: 119, briefs: 10,
            plain: 3, edges: 3797 }          // schema also allows `sealed`
 domains  [{ id, count }] × 10
 pages    [IndexEntry] × 471
@@ -92,7 +92,7 @@ Filename is the slug with `/` → `__`. **Every file carries the same 18 keys**
 | `h1` | str \| null | 517 / 2 — leading `# Heading`, stripped from `body` |
 | `links` | str[] | 404 non-empty / 115 empty. **4,466 total**, min/med/max 0/4/342 |
 | `body` | str | 471 — markdown with the H1 removed |
-| `words` | int | min/med/max 12 / 694 / 113,514; total 772,641 |
+| `words` | int | min/med/max 12 / 694 / 113,514; total 772,653 |
 | `charts` | int | 0–9; **119 total across 51 pages** |
 | `brief` | bool | 10 true |
 | `gaps` | dict[] | 151 pages non-empty; **484 entries**; each `{ text, label }` |
@@ -318,10 +318,10 @@ inline `![](…)` markdown images anywhere in any body.**
 | self | 40 | 62,727 | 1,568 | 38 | 413 | 358 | 45 | 2 | 114 |
 | work | 15 | 16,494 | 1,100 | 0 | 112 | 157 | 6 | 0 | 76 |
 | places | 10 | 13,686 | 1,369 | 0 | 105 | 117 | 10 | 0 | 80 |
-| meta | 8 | 30,585 | 3,823 | 4 | 492 | 27 | 0 | 0 | 0 |
+| meta | 8 | 30,597 | 3,825 | 4 | 492 | 27 | 0 | 0 | 0 |
 | health | 5 | 9,507 | 1,901 | 1 | 62 | 46 | 11 | 0 | 46 |
 | legal | 4 | 5,088 | 1,272 | 0 | 36 | 49 | 3 | 0 | 26 |
-| **total** | **471** | **772,641** | 1,640 | **119** | **4,410** | **4,358** | **484** | **179** | **2,304** |
+| **total** | **471** | **772,653** | 1,640 | **119** | **4,410** | **4,358** | **484** | **179** | **2,304** |
 
 Note the inversion: `people` has the most pages, but `mind` and `timeline` each
 carry more words, and `mind` dominates typed edges.
@@ -434,7 +434,7 @@ vendored here**.
 | `chronology.json` | 361 K | **6,937** dated mentions mined from wiki prose. `months[318]` 1900-01→2027-03, `years[83]` each with a `sample[]` of citing pages. Binned by the date *named*, not the date written. |
 | `clock.json` | 321 K | **Every message as one integer.** `marks[134348]` delta-encoded; decode by prefix-sum then `value = day*2880 + minute*2 + dir`. Plus `hours[24] {all,sent,received}`, `years[11]`, `gaps[5]` with day indices. **The densest reusable payload in the repo.** |
 | `lexicon.json` | 30 K | 965,583 tokens, 19,873 distinct, 2,592 shouts. `stoplist[182]` shipped inside the dataset so the one editorial choice is inspectable. `top[400]` post-stoplist `{word, all, sent, received}`, `topAll[60]` pre-stoplist, `months[91] {bin, count, shouts}`. |
-| `mass.json` | 55 K | `domains[10]` and `pages[471] {slug,title,domain,words}` summing to 772,641. |
+| `mass.json` | 55 K | `domains[10]` and `pages[471] {slug,title,domain,words}` summing to 772,653. |
 | `pen.json` | 8 K | `rows[128] { year, mentions, pages, domains, openings }`, 1900–2027. `openings` = pages whose earliest date is that year. |
 | `recorder.json` | 14 K | `rows[129] { bin, covered, sent, received, words, days, messages, chars }` — **includes the 38 uncovered months as `covered: 0`.** The ready-made array for drawing gaps at real width. |
 | `atlas.json` | 230 K | Hand-typed geography + IPF-reconstructed movement. `nodes[550]`, `edges[840] [a,b,roadIdx,metres]`, `roads[94]`, `cities[35]`, `waters[10]`, `places[86]`, `routes` (595 precomputed shortest paths), `days[1992] { d, s:[placeIdx,arriveMin,departMin,…] }`. |
@@ -459,7 +459,7 @@ vendored here**.
 
 > **Drift warning.** `wiki.json` was built 2026-08-21 against **486 pages /
 > 630,514 words**. `mass.json`, `public/wiki/index.json` and `public/agent/*` were
-> rebuilt 2026-08-30 against **471 pages / 772,641 words**. Do not cross-join
+> rebuilt 2026-08-30 against **471 pages / 772,653 words**. Do not cross-join
 > `wiki.json` with the newer sets without accounting for the 33-page delta.
 
 ---

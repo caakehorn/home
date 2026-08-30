@@ -47,14 +47,14 @@ const OUT = 'public/core'
    ========================================================================== */
 
 const EXPECT = {
-  nodes: 519,
-  untyped: 3851,
-  typed: 2398,
+  nodes: 471,
+  untyped: 3797,
+  typed: 2304,
   typeCount: 19,
   gapPages: 151,
-  gaps: 485,
+  gaps: 484,
   domains: 10,
-  words: 765809,
+  words: 772641,
 }
 
 /**

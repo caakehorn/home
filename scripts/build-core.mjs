@@ -87,17 +87,21 @@ const OUT = 'public/core'
  * The one thing that is not derivable from the snapshot: how much of the corpus
  * may disappear between two builds before somebody should be made to look.
  *
- * A wiki loses pages legitimately — a housekeeping pass merged eight away on
- * 2026-08-29 — so this is not zero. It is a cliff, not a tolerance: 10% of the
- * previous build in one hourly step is not editing, it is a truncated read, a
- * half-written snapshot, or a reader that stopped understanding the front
- * matter. `floor` catches the same failure on a corpus small enough that a
- * percentage would not.
+ * A wiki loses pages legitimately, and in quantity: a deletion pass took 48 of
+ * 519 pages away on 2026-08-29 (see `a3a88ac` in this repository). So this is
+ * not zero, and it is set from that precedent rather than from taste — 15%
+ * clears the largest purge the record actually holds, with room.
+ *
+ * It is a cliff, not a tolerance. A fall past it in one hourly step is not
+ * editing; it is a truncated read, a half-written snapshot, or a reader that
+ * stopped understanding the front matter, and every one of those loses far more
+ * than a purge does. `floor` catches the same failure on a corpus small enough
+ * that a percentage would not.
  *
  * Growth is never checked. Nothing about this instrument breaks when the corpus
  * gets bigger, and a ceiling would be one more number to bump.
  */
-const COLLAPSE = { fraction: 0.9, floor: 20 }
+const COLLAPSE = { fraction: 0.85, floor: 25 }
 
 /** Counts compared against the previous build. Anything else is shape. */
 const TRACKED = ['nodes', 'words', 'typed', 'untyped', 'gaps', 'gapPages']

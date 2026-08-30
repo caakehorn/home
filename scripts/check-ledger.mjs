@@ -24,12 +24,13 @@
  * than a dependency. Exits 1 on any failure.
  */
 import {
-  mergeLogs, nowLocal, orderLog, parseJsonl, serialize, shardOf, toJsonl, ulid, validate,
+  mergeLogs, nowLocal, orderLog, parseJsonl, serialize, toJsonl, ulid, validate,
 } from '../src/ledger/events.ts'
 import {
   amendUnit, adjustUnit, closeUnit, correctIntake, intake as makeIntake, openUnit,
   reopenUnit, voidIntake,
 } from '../src/ledger/commands.ts'
+import { fromWire } from '../src/ledger/wire.ts'
 import { project, unaccounted } from '../src/ledger/project.ts'
 import { burnQuarters, densestWindow, median, reportOn } from '../src/ledger/analyze.ts'
 import { convert, commensurable, format } from '../src/ledger/uom.ts'
@@ -62,14 +63,14 @@ function at(date) {
   return `${shifted.toISOString().slice(0, 19)}-04:00`
 }
 
-const UNIT = 'unit_TESTFIXTURE00000000000000'
+const UNIT = 'intake_unit_TESTFIXTURE0000000'
 const events = []
 let n = 0
 const push = (event) => {
   events.push({
-    id: `evt_TESTFIXTURE${String(++n).padStart(14, '0')}`,
+    id: `intake_evt_TESTFIXTURE${String(++n).padStart(7, '0')}`,
     loggedAt: at(new Date(clock)),
-    source: { app: 'home', tool: 'intake-ledger', v: 1 },
+    source: { application: 'wiki-brain', tool: 'intake-ledger', interface: 'portal' },
     ...event,
   })
   return events[events.length - 1]
@@ -165,7 +166,7 @@ console.log('ledger: the event log round-trips')
 
 console.log('ledger: validation refuses what the projection would have to guess')
 {
-  const base = { id: 'evt_x', loggedAt: '2026-08-29T13:42:00-04:00', source: {} }
+  const base = { id: 'intake_evt_x', loggedAt: '2026-08-29T13:42:00-04:00', source: {} }
   check('an unquantified intake may not carry a quantity', Boolean(validate({
     ...base, type: 'intake_logged', unit: UNIT, occurredAt: base.loggedAt,
     measurement: 'unquantified', quantity: 0.2,
@@ -247,31 +248,30 @@ console.log('ledger: closing reconciles rather than assumes')
   const closed = project([
     ...events,
     {
-      id: 'evt_TESTFIXTURECLOSE0000000000',
+      id: 'intake_evt_TESTFIXTURECLOSE00',
       type: 'unit_closed',
       loggedAt: at(new Date(clock)),
       unit: UNIT,
       closedAt: at(new Date(clock)),
       disposition: 'consumed',
-      reconciliation: 'attributed-to-unquantified',
+      reconciliation: 'final_intake',
       unaccounted: 2.3,
       uom: 'g',
-      source: { app: 'home', tool: 'intake-ledger', v: 1 },
+      source: { application: 'wiki-brain', tool: 'intake-ledger', interface: 'portal' },
     },
   ]).units[0]
   const shut = reportOn(closed, 6, clock)
   check('a closed unit stops the clock', shut.open === false)
-  check(
-    'attributing the gap to unquantified events yields a derived figure',
-    near(shut.impliedUnquantifiedDose, 2.3, 1e-9),
-    String(shut.impliedUnquantifiedDose),
-  )
-  check('the quantified mean is untouched by that attribution', near(shut.meanDose, 1.1 / 6, 1e-9))
+  // The fifth reconciliation this portal used to offer — "the unquantified
+  // events took the remainder" — is gone rather than forked into upstream's
+  // format, so nothing is ever derived from one.
+  check('no reconciliation derives a figure any more', shut.impliedUnquantifiedDose === null)
+  check('the quantified mean is untouched by closing', near(shut.meanDose, 1.1 / 6, 1e-9))
 
   const discrepancy = project([
     ...events,
     {
-      id: 'evt_TESTFIXTURECLOSE0000000001',
+      id: 'intake_evt_TESTFIXTURECLOSE01',
       type: 'unit_closed',
       loggedAt: at(new Date(clock)),
       unit: UNIT,
@@ -280,7 +280,7 @@ console.log('ledger: closing reconciles rather than assumes')
       reconciliation: 'discrepancy',
       unaccounted: 2.3,
       uom: 'g',
-      source: { app: 'home', tool: 'intake-ledger', v: 1 },
+      source: { application: 'wiki-brain', tool: 'intake-ledger', interface: 'portal' },
     },
   ]).units[0]
   check(
@@ -293,13 +293,15 @@ console.log('ledger: units of measure')
 {
   check('g to mg', convert(3.5, 'g', 'mg') === 3500)
   check('mg to g', convert(500, 'mg', 'g') === 0.5)
-  check('an ounce is exact', near(convert(1, 'oz', 'g'), 28.349523125, 1e-9))
   check('mass and volume do not mix', convert(1, 'g', 'ml') === null)
   check('mass and count do not mix', convert(1, 'g', 'tab') === null)
-  check('a tablet is not a capsule', convert(1, 'tab', 'cap') === null)
   check('a tablet is a count', convert(3, 'tab', 'ct') === 3)
-  check('aliases resolve', convert(1, 'grams', 'mg') === 1000)
-  check('commensurability agrees', commensurable('g', 'oz') && !commensurable('g', 'ml'))
+  // Upstream lets every count unit convert to every other. A tablet is not a
+  // puff, but the ledger is unit-agnostic and a count is a count — and a table
+  // that disagreed with theirs would accept rows their rebuild rejects.
+  check('count converts freely, as it does upstream', convert(1, 'tab', 'cap') === 1)
+  check('micrograms are grams', convert(1000, 'mcg', 'mg') === 1)
+  check('commensurability agrees', commensurable('g', 'kg') && !commensurable('g', 'ml'))
   check('display drops invented precision', format(0.18, 'g') === '0.18')
   check('display keeps real zeros', format(3, 'g') === '3')
 
@@ -308,7 +310,7 @@ console.log('ledger: units of measure')
   const mixed = project([
     events[0],
     {
-      id: 'evt_TESTFIXTUREMIXED000000000',
+      id: 'intake_evt_TESTFIXTUREMIXED0',
       type: 'intake_logged',
       loggedAt: at(new Date(clock)),
       unit: UNIT,
@@ -316,7 +318,7 @@ console.log('ledger: units of measure')
       measurement: 'measured',
       quantity: 2,
       uom: 'tab',
-      source: { app: 'home', tool: 'intake-ledger', v: 1 },
+      source: { application: 'wiki-brain', tool: 'intake-ledger', interface: 'portal' },
     },
   ]).units[0]
   check('an unconvertible dose is counted as an event', mixed.tally.events === 1)
@@ -356,7 +358,7 @@ console.log('ledger: time')
 console.log('ledger: the commands claim less than they are told, never more')
 {
   const { event: opened, unit: fresh } = openUnit({ substance: 'cocaine', quantity: 3.5, uom: 'g' })
-  check('opening a unit mints an id', fresh.startsWith('unit_') && opened.unit === fresh)
+  check('opening a unit mints an id', fresh.startsWith('intake_unit_') && opened.unit === fresh)
   check('opening a unit stamps a received time', Boolean(opened.receivedAt))
 
   const zero = makeIntake({ unit: fresh, quantity: 0 })
@@ -383,7 +385,7 @@ console.log('ledger: the commands claim less than they are told, never more')
   check('voiding demands a reason',
     (() => { try { voidIntake('evt_x', ''); return false } catch { return true } })())
   check('an amendment demands a reason',
-    (() => { try { amendUnit(fresh, { quantity: 3 }, ''); return false } catch { return true } })())
+    (() => { try { amendUnit(fresh, 'intake_evt_x', { quantity: 3 }, ''); return false } catch { return true } })())
   check('reopening demands a reason',
     (() => { try { reopenUnit(fresh, ''); return false } catch { return true } })())
   check('an adjustment demands a reason',
@@ -394,35 +396,37 @@ console.log('ledger: the commands claim less than they are told, never more')
   // it out of every dose statistic, which is the quiet loss this design exists
   // to prevent.
   const reconstructed = closeUnit({
-    unit: fresh, disposition: 'consumed', reconciliation: 'final-intake-estimated',
+    unit: fresh, disposition: 'consumed', reconciliation: 'final_intake',
     unaccounted: 0.66, uom: 'g',
   })
   check('reconstructing a last dose writes a dose AND a closure', reconstructed.length === 2)
   check('the dose comes first', reconstructed[0].type === 'intake_logged')
   check('the reconstructed dose is an estimate of low confidence',
     reconstructed[0].measurement === 'estimated' && reconstructed[0].confidence === 'low')
-  check('the reconstructed dose says so', /reconstructed/.test(reconstructed[0].note ?? ''))
+  // Upstream's own sentence for this row, verbatim, so the two interfaces
+  // produce the same record of the same decision.
+  check('the reconstructed dose says so', /reconciliation at close/.test(reconstructed[0].note ?? ''))
 
   const plain = closeUnit({ unit: fresh, disposition: 'consumed', reconciliation: 'discrepancy',
     unaccounted: 0.66, uom: 'g' })
   check('recording a discrepancy invents no dose', plain.length === 1)
 
-  const lost = closeUnit({ unit: fresh, disposition: 'lost' })
-  check('a lost unit closes without reconciliation', lost.length === 1 && !lost[0].reconciliation)
+  const lost = closeUnit({ unit: fresh, disposition: 'discarded' })
+  check('a discarded unit closes without reconciliation', lost.length === 1 && !lost[0].reconciliation)
 }
 
 console.log('ledger: reopening is a different history from never having closed')
 {
   const shut = {
-    id: 'evt_TESTFIXTURECLOSE0000000002', type: 'unit_closed', loggedAt: at(new Date(clock)),
+    id: 'intake_evt_TESTFIXTURECLOSE02', type: 'unit_closed', loggedAt: at(new Date(clock)),
     unit: UNIT, closedAt: at(new Date(clock)), disposition: 'consumed',
     reconciliation: 'discrepancy', unaccounted: 2.3, uom: 'g',
-    source: { app: 'home', tool: 'intake-ledger', v: 1 },
+    source: { application: 'wiki-brain', tool: 'intake-ledger', interface: 'portal' },
   }
   const back = {
-    id: 'evt_TESTFIXTUREREOPEN000000000', type: 'unit_reopened', loggedAt: at(tick(5)),
+    id: 'intake_evt_TESTFIXTUREREOPEN', type: 'unit_reopened', loggedAt: at(tick(5)),
     unit: UNIT, reason: 'closed it by mistake',
-    source: { app: 'home', tool: 'intake-ledger', v: 1 },
+    source: { application: 'wiki-brain', tool: 'intake-ledger', interface: 'portal' },
   }
   const reopened = project([...events, shut, back]).units[0]
   check('a reopened unit is active again', reopened.status === 'active')
@@ -435,6 +439,92 @@ console.log('ledger: reopening is a different history from never having closed')
     'reopening reopens the right unit only',
     project([...events, shut, { ...back, unit: 'unit_OTHER' }]).units[0].status === 'closed',
   )
+}
+
+console.log("ledger: the file is bin/intake's file, not this portal's")
+{
+  // Every key here was read off `bin/intake` in caakehorn/wiki-brain. If that
+  // program's `append()` or its `data` payloads move, these fail — which is the
+  // whole point of writing them out as literals rather than deriving them.
+  // Through `serialize`, not `toWire`: the key order is applied there, and the
+  // bytes on disk are the contract rather than the intermediate object.
+  const wire = (event) => JSON.parse(serialize(event))
+
+  const opened = wire(openUnit({
+    substance: 'Cocaine', substanceId: 'cocaine', category: 'stimulant',
+    quantity: 3.5, uom: 'g', origin: 'test',
+  }).event)
+
+  check('the envelope is upstream\'s', JSON.stringify(Object.keys(opened)) ===
+    JSON.stringify(['id', 'type', 'timestamp', 'occurred_at', 'unit_id', 'data', 'source']))
+  check('ids carry upstream\'s prefix', /^intake_evt_[0-9A-HJKMNP-TV-Z]{26}$/.test(opened.id))
+  check('unit ids too', /^intake_unit_[0-9A-HJKMNP-TV-Z]{26}$/.test(opened.unit_id))
+  check('the source names the interface', opened.source.application === 'wiki-brain' &&
+    opened.source.tool === 'intake-ledger' && opened.source.interface === 'portal')
+
+  check('a unit is a unit_created', opened.type === 'unit_created')
+  check('its occurred_at is the received time', typeof opened.occurred_at === 'string')
+  check('its payload is upstream\'s', JSON.stringify(Object.keys(opened.data).sort()) ===
+    JSON.stringify(['category', 'note', 'quantity', 'source_context', 'substance',
+                    'substance_id', 'unit']))
+  check('the uom is called `unit` upstream', opened.data.unit === 'g')
+  check('the origin is called `source_context`', opened.data.source_context === 'test')
+
+  const dose = wire(makeIntake({ unit: UNIT, quantity: 0.18, uom: 'g' }))
+  check('a dose is an intake_logged', dose.type === 'intake_logged')
+  check('its payload is upstream\'s', JSON.stringify(Object.keys(dose.data).sort()) ===
+    JSON.stringify(['confidence', 'descriptor', 'measurement', 'note', 'quantity', 'unit']
+      .filter((k) => k !== 'measurement').concat('measurement_type').sort()))
+  check('the class is `measurement_type`', dose.data.measurement_type === 'measured')
+
+  const words = wire(makeIntake({ unit: UNIT, descriptor: 'one line' }))
+  check('an unquantified dose carries a null quantity, not a missing one',
+    words.data.quantity === null && words.data.measurement_type === 'unquantified')
+
+  const fixed = wire(correctIntake('intake_evt_x', { quantity: 0.05 }, 'decimal entry error'))
+  check('a correction is an event_corrected', fixed.type === 'event_corrected')
+  check('it carries target/fields/reason', JSON.stringify(Object.keys(fixed.data).sort()) ===
+    JSON.stringify(['fields', 'reason', 'target']))
+  check('the corrected value is under `fields`', fixed.data.fields.quantity === 0.05)
+
+  const gone = wire(voidIntake('intake_evt_x', 'double tap'))
+  check('a void is an event_voided', gone.type === 'event_voided')
+
+  const spilt = wire(adjustUnit({ unit: UNIT, quantity: 0.1, uom: 'g', kind: 'spill',
+    reason: 'knocked the tray' }))
+  check('an adjustment is upstream\'s shape', JSON.stringify(Object.keys(spilt.data).sort()) ===
+    JSON.stringify(['kind', 'note', 'quantity', 'unit']))
+  check('the reason is called `note`', spilt.data.note === 'knocked the tray')
+  const back = wire(adjustUnit({ unit: UNIT, quantity: 0.1, uom: 'g', direction: 'in',
+    kind: 'found', reason: 'turned up' }))
+  check('direction is carried by the kind, as upstream has no such field',
+    back.data.kind === 'found' && !('direction' in back.data))
+
+  const shut = wire(closeUnit({ unit: UNIT, disposition: 'consumed',
+    reconciliation: 'discrepancy', unaccounted: 0.66, uom: 'g' })[0])
+  check('a closure is a unit_closed', shut.type === 'unit_closed')
+  check('reconciliation is a record, not a string', typeof shut.data.reconciliation === 'object')
+  check('and it names the resolution', shut.data.reconciliation.resolution === 'discrepancy')
+  check('a balanced close says so', wire(closeUnit({ unit: UNIT, disposition: 'consumed' })[0])
+    .data.reconciliation.resolution === 'balanced')
+
+  // Round trip: what goes out has to come back as the same event.
+  for (const original of events) {
+    const back = fromWire(JSON.parse(serialize(original)))
+    if (!back) { check(`round trip ${original.type}`, false, 'came back null'); continue }
+    check(`round trip ${original.type}`, back.id === original.id && back.type === original.type)
+  }
+
+  // A row upstream wrote that this portal has no use for is skipped, not broken.
+  check('substance_added is skipped rather than failing', fromWire({
+    id: 'intake_evt_x', type: 'substance_added', timestamp: at(new Date(clock)),
+    occurred_at: at(new Date(clock)), unit_id: null,
+    data: { id: 'kratom', name: 'Kratom' }, source: {},
+  }) === null)
+  check('and the parser does not call it a problem',
+    parseJsonl(JSON.stringify({ id: 'intake_evt_y', type: 'substance_added',
+      timestamp: at(new Date(clock)), occurred_at: at(new Date(clock)), unit_id: null,
+      data: {}, source: {} }) + '\n').problems.length === 0)
 }
 
 console.log('ledger: the log file converges no matter who writes it')
@@ -450,11 +540,7 @@ console.log('ledger: the log file converges no matter who writes it')
     'a shuffled log serialises identically',
     toJsonl(orderLog([...events].reverse())) === toJsonl(orderLog(events)),
   )
-  check('shards are named for the month a row was written', shardOf(events[0]) === 'events-2026-08.jsonl')
-  check(
-    'a backdated dose does not reopen an old shard',
-    shardOf({ loggedAt: '2026-09-01T00:10:00-04:00' }) === 'events-2026-09.jsonl',
-  )
+
 }
 
 console.log('')

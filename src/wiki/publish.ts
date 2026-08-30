@@ -157,6 +157,29 @@ export async function publishFile(path: string, text: string, message: string) {
   return putFile(SOURCE_REPO, path, encode(text), message)
 }
 
+const visibility = new Map<string, boolean>()
+
+/**
+ * Whether a repository is private.
+ *
+ * Exists for one caller and one reason: the intake ledger writes a consumption
+ * record into `caakehorn/wiki-brain`, and `.gitignore` — which is what protects
+ * that data from the CLI — has no bearing whatsoever on this API. An ignored
+ * path is committed by it without complaint. So the guard is a visibility check
+ * before the push, and `sync.ts` refuses rather than publishing.
+ *
+ * Cached for the session: it is a property of the repository, not of the write,
+ * and asking once per dose would be a request per dose.
+ */
+export async function repoIsPrivate(repo: string): Promise<boolean> {
+  const known = visibility.get(repo)
+  if (known !== undefined) return known
+  const info = await call(`/repos/${repo}`)
+  const isPrivate = Boolean(info.private)
+  visibility.set(repo, isPrivate)
+  return isPrivate
+}
+
 /**
  * Read one file out of the source repository.
  *
@@ -191,36 +214,23 @@ export async function readFile(
   if (!res.ok) throw new Error(`could not read ${path} (${res.status})`)
   const body = await res.json()
   if (Array.isArray(body)) throw new Error(`${path} is a directory`)
-  return { text: decode(body.content as string), sha: body.sha as string }
+
+  // Past a megabyte the contents API answers with the metadata and an empty
+  // `content`, which a naive reader takes for an empty file — and for an
+  // append-only log that reads as "nothing upstream", which would then be
+  // overwritten with the local copy. The blobs API serves the same object up
+  // to a hundred megabytes, so fall through to it rather than trusting a blank.
+  const sha = body.sha as string
+  if (!body.content && body.size) return { text: await blob(repo, sha), sha }
+
+  return { text: decode(body.content as string), sha }
 }
 
-/** What is in a directory, or an empty list when there is no directory yet. */
-export async function listDir(
-  repo: string,
-  path: string,
-): Promise<{ name: string; path: string; sha: string }[]> {
-  const token = await credential()
-  const branch = await branchOf(repo)
-  const res = await reach(
-    `${API}/repos/${repo}/contents/${path}?ref=${encodeURIComponent(branch)}`,
-    {
-      headers: {
-        Accept: 'application/vnd.github+json',
-        Authorization: `Bearer ${token}`,
-        'X-GitHub-Api-Version': '2022-11-28',
-        'Cache-Control': 'no-cache',
-      },
-    },
-  )
-  if (res.status === 404) return []
-  if (!res.ok) throw new Error(`could not list ${path} (${res.status})`)
-  const body = await res.json()
-  if (!Array.isArray(body)) throw new Error(`${path} is not a directory`)
-  return body.map((f: { name: string; path: string; sha: string }) => ({
-    name: f.name,
-    path: f.path,
-    sha: f.sha,
-  }))
+/** One blob by sha, for a file too large for the contents API to inline. */
+async function blob(repo: string, sha: string): Promise<string> {
+  const body = await call(`/repos/${repo}/git/blobs/${sha}`)
+  if (body.encoding !== 'base64') throw new Error(`blob ${sha.slice(0, 8)} is not base64`)
+  return decode(body.content as string)
 }
 
 /**

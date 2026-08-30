@@ -57,8 +57,14 @@
 /** Bumped only for a change the readers above cannot absorb silently. */
 export const LOG_VERSION = 1
 
-/** What the log calls this writer, so a second one is distinguishable later. */
-export const SOURCE = { app: 'home', tool: 'intake-ledger', v: LOG_VERSION } as const
+/**
+ * What the log calls this writer.
+ *
+ * `bin/intake`'s own shape, with `interface: 'portal'` — that field is upstream's
+ * discriminator between its CLI, the local app's Special:Intake, and this. The
+ * value is re-exported from `wire.ts`, which owns the format.
+ */
+export { SOURCE } from './wire.ts'
 
 // ---------------------------------------------------------------------------
 // the vocabulary
@@ -77,7 +83,7 @@ export type Measurement = 'measured' | 'estimated' | 'unquantified'
 export type Confidence = 'low' | 'medium' | 'high'
 
 /** How a unit left the record. */
-export type Disposition = 'consumed' | 'lost' | 'transferred' | 'unknown' | 'other'
+export type Disposition = 'consumed' | 'discarded' | 'transferred' | 'unknown' | 'other'
 
 /**
  * What the closer says happened to the difference between the initial quantity
@@ -89,9 +95,7 @@ export type Disposition = 'consumed' | 'lost' | 'transferred' | 'unknown' | 'oth
  */
 export type Reconciliation =
   /** A last intake nobody logged, recorded now as an estimate of that size. */
-  | 'final-intake-estimated'
-  /** The unquantified events collectively account for it. */
-  | 'attributed-to-unquantified'
+  | 'final_intake'
   /** The scale and the log disagree and nobody knows why. Recorded as unknown. */
   | 'discrepancy'
   | 'lost'
@@ -99,7 +103,15 @@ export type Reconciliation =
   | 'other'
 
 /** Why material left a unit without being taken. */
-export type AdjustmentKind = 'spill' | 'discard' | 'transfer' | 'correction' | 'other'
+export type AdjustmentKind =
+  | 'spill'
+  | 'loss'
+  | 'transfer'
+  | 'seizure'
+  | 'disposal'
+  /** The one that puts material back. Carries the direction upstream. */
+  | 'found'
+  | 'correction'
 
 // ---------------------------------------------------------------------------
 // the events
@@ -108,7 +120,7 @@ type Base = {
   id: string
   /** When the row was written down, which is not when the thing happened. */
   loggedAt: string
-  source: { app: string; tool: string; v: number }
+  source: { application: string; tool: string; interface: string }
 }
 
 /** A finite object enters the record. */
@@ -116,6 +128,9 @@ export type UnitOpened = Base & {
   type: 'unit_opened'
   unit: string
   substance: string
+  /** The catalogue id from `intake/substances.json`, which upstream resolves. */
+  substanceId?: string
+  category?: string
   quantity: number
   uom: string
   receivedAt: string
@@ -162,6 +177,8 @@ export type IntakePatch = {
 export type IntakeCorrected = Base & {
   type: 'intake_corrected'
   target: string
+  /** Carried only so the wire envelope's `unit_id` can be filled in. */
+  unit?: string
   reason: string
   patch: IntakePatch
 }
@@ -170,6 +187,7 @@ export type IntakeCorrected = Base & {
 export type IntakeVoided = Base & {
   type: 'intake_voided'
   target: string
+  unit?: string
   reason: string
 }
 
@@ -189,6 +207,8 @@ export type UnitAdjusted = Base & {
 export type UnitAmended = Base & {
   type: 'unit_amended'
   unit: string
+  /** Upstream aims one `event_corrected` at the unit's own `unit_created` row. */
+  target: string
   reason: string
   patch: {
     substance?: string
@@ -275,8 +295,10 @@ function randomBytes(n: number): Uint8Array {
   return out
 }
 
-export const unitId = (at?: Date) => `unit_${ulid(at)}`
-export const eventId = (at?: Date) => `evt_${ulid(at)}`
+// The prefixes are upstream's. A reader that greps `intake_unit_` out of the
+// log must not miss the rows this portal wrote.
+export const unitId = (at?: Date) => `intake_unit_${ulid(at)}`
+export const eventId = (at?: Date) => `intake_evt_${ulid(at)}`
 
 // ---------------------------------------------------------------------------
 // instants
@@ -323,71 +345,28 @@ export function localDay(iso: string): number {
 // the file
 
 /**
- * One event, one line.
+ * One event, one line — in `bin/intake`'s format, not this module's.
  *
- * Keys are written in a fixed order rather than whatever order the object
- * happens to carry, so that a diff of the log shows what changed instead of a
- * reshuffle, and so two writers producing the same event produce the same
- * bytes.
+ * The translation is `wire.ts`, and the reason it is not here is that it is the
+ * one file that has to be diffed against a Python program in another repository
+ * when either end moves.
  */
-const ORDER = [
-  'id',
-  'type',
-  'loggedAt',
-  'unit',
-  'target',
-  'substance',
-  'quantity',
-  'uom',
-  'receivedAt',
-  'occurredAt',
-  'closedAt',
-  'measurement',
-  'confidence',
-  'descriptor',
-  'direction',
-  'kind',
-  'disposition',
-  'reconciliation',
-  'unaccounted',
-  'origin',
-  'reason',
-  'note',
-  'patch',
-  'source',
-]
+import { fromWire, serialize } from './wire.ts'
 
-export function serialize(event: LedgerEvent): string {
-  const row = event as unknown as Record<string, unknown>
-  const out: Record<string, unknown> = {}
-  for (const key of ORDER) if (row[key] !== undefined) out[key] = row[key]
-  // Anything the order list has not heard of still ships, at the end, rather
-  // than being dropped by a writer that is older than the event it is handed.
-  for (const key of Object.keys(row)) if (!(key in out) && row[key] !== undefined) out[key] = row[key]
-  return JSON.stringify(out)
-}
+export { serialize }
 
 export const toJsonl = (events: LedgerEvent[]) =>
   events.length ? events.map(serialize).join('\n') + '\n' : ''
 
 /**
- * Which file an event belongs in — the month it was written down.
- *
- * On `loggedAt` rather than `occurredAt`, so a dose backdated to last week does
- * not reopen last week's file. A closed month is never rewritten, which means
- * the only shard two devices can collide on is the current one.
- */
-export const shardOf = (event: LedgerEvent) => `events-${event.loggedAt.slice(0, 7)}.jsonl`
-
-/** The shard filenames this ledger recognises. */
-export const SHARD = /^events-\d{4}-\d{2}\.jsonl$/
-
-/**
  * Order the log the same way every time, on every device.
  *
- * By `loggedAt`, then by id. Without a total order, two devices holding exactly
- * the same events would serialise different bytes, each would see the other's
- * file as changed, and they would take turns rewriting it forever.
+ * By `timestamp`, then by id. Without a total order, two devices holding
+ * exactly the same events would serialise different bytes, each would see the
+ * other's file as changed, and they would take turns rewriting it forever.
+ *
+ * `bin/intake` appends in wall-clock order and never rewrites, so a file it
+ * wrote is already in this order and re-ordering it is a no-op.
  */
 export const orderLog = (events: LedgerEvent[]) =>
   [...events].sort((a, b) => instant(a.loggedAt) - instant(b.loggedAt) || a.id.localeCompare(b.id))
@@ -431,12 +410,20 @@ export function parseJsonl(text: string): ParseResult {
       problems.push(`line ${i + 1}: not JSON`)
       return
     }
-    const problem = validate(parsed)
+    const event = fromWire(parsed)
+    if (!event) {
+      // `substance_added` is the catalogue rather than the record, and this
+      // reader has no use for it. Silence is right for that and wrong for
+      // everything else, so the row's own type decides which it gets.
+      const type = (parsed as { type?: string })?.type
+      if (type !== 'substance_added') problems.push(`line ${i + 1}: unusable ${type ?? 'row'}`)
+      return
+    }
+    const problem = validate(event)
     if (problem) {
       problems.push(`line ${i + 1}: ${problem}`)
       return
     }
-    const event = parsed as LedgerEvent
     // Appending the same file from two devices can duplicate a line. The id is
     // the identity, so the second copy is dropped rather than double-counted.
     if (seen.has(event.id)) return

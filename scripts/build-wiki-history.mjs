@@ -563,6 +563,14 @@ writeFileSync(join(OUT, 'index.json'), JSON.stringify(index))
 // deliberate click rather than a cost on every page view. It costs nothing:
 // these values change only when the page does, and the page's file is rewritten
 // then anyway.
+//
+// A SEALED page gets these two fields like any other, and that is deliberate
+// rather than an oversight in a code path with no instances yet. The seal covers
+// what the page SAYS; when a commit touched the file is a fact about this
+// repository's log, which is public, and withholding it would leave the browse
+// card claiming the page has never moved. What a sealed page does not get is a
+// history file — that would publish every earlier version in the clear, and it
+// is skipped by slug above, before any text is read.
 for (const page of summary) {
   if (!page.updated) continue
   const file = join(OUT, 'pages', `${page.slug.replace(/\//g, '__')}.json`)

@@ -29,7 +29,7 @@
  */
 
 import { useState } from 'react'
-import { correctIntake, voidIntake } from './commands.ts'
+import { correctIntake, reopenUnit, voidIntake } from './commands.ts'
 import type { LedgerEvent } from './events.ts'
 import { duration, reportOn, WINDOW_HOURS } from './analyze.ts'
 import { live, type IntakeRecord, type UnitRecord } from './project.ts'
@@ -212,6 +212,10 @@ export function Report({
         </tbody>
       </table>
 
+      {closed && (
+        <Reopen unit={unit} onCommit={onCommit} />
+      )}
+
       {r.quarters && (
         <section className="lg__quarters">
           <h3 className="lg__h3">HOW IT WENT</h3>
@@ -243,6 +247,67 @@ export function Report({
 
       <Events unit={unit} onCommit={onCommit} />
     </article>
+  )
+}
+
+/**
+ * Putting a closed unit back.
+ *
+ * Closed by mistake, or the material turned up. The closure stays on the record
+ * either way — a unit that was closed and reopened is a different history from
+ * one that was never closed, and the report goes on showing how it ended.
+ */
+function Reopen({
+  unit,
+  onCommit,
+}: {
+  unit: UnitRecord
+  onCommit: (events: LedgerEvent[]) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const [reason, setReason] = useState('')
+
+  if (!open) {
+    return (
+      <button type="button" className="lg__linkish" onClick={() => setOpen(true)}>
+        REOPEN THIS UNIT
+      </button>
+    )
+  }
+
+  return (
+    <div className="lg__inline">
+      <p className="lg__hint">
+        The closure stays on the record. A unit that was closed and reopened is a different
+        history from one that was never closed.
+      </p>
+      <div className="lg__inline-row">
+        <input
+          className="lg__field"
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          placeholder="why — required"
+          aria-label="Reason for reopening"
+          autoFocus
+        />
+      </div>
+      <div className="lg__inline-actions">
+        <button
+          type="button"
+          className="lg__save lg__save--small"
+          disabled={!reason.trim()}
+          onClick={() => {
+            setOpen(false)
+            onCommit([reopenUnit(unit.id, reason)])
+          }}
+        >
+          REOPEN
+        </button>
+        <button type="button" className="lg__linkish" onClick={() => setOpen(false)}>
+          CANCEL
+        </button>
+      </div>
+    </div>
   )
 }
 

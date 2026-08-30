@@ -19,6 +19,7 @@
 
 import { useState } from 'react'
 import { adjustUnit, openUnit } from './commands.ts'
+import { exportLog } from './store.ts'
 import { nowLocal, type LedgerEvent } from './events.ts'
 import { CODES, format } from './uom.ts'
 import type { UnitRecord } from './project.ts'
@@ -304,6 +305,48 @@ export function NewUnit({ onDone }: { onDone: (events: LedgerEvent[], unit: stri
         </button>
       </div>
     </section>
+  )
+}
+
+/**
+ * Hand the whole log back, as the file it already is.
+ *
+ * `store.ts` keeps the local copy as JSONL rather than as rows precisely so
+ * that this is a download and not a serialiser — what comes out is
+ * byte-identical to what goes upstream, and it opens in anything.
+ *
+ * This is not a debugging affordance. A tool that holds a record like this one
+ * and cannot give it back is a trap, and the person most likely to want it out
+ * is the person least likely to be in a position to ask nicely.
+ */
+export function Export() {
+  const [state, setState] = useState<'idle' | 'empty'>('idle')
+
+  const download = async () => {
+    const text = await exportLog()
+    if (!text.trim()) {
+      setState('empty')
+      return
+    }
+    const url = URL.createObjectURL(new Blob([text], { type: 'application/x-ndjson' }))
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `intake-ledger-${new Date().toISOString().slice(0, 10)}.jsonl`
+    link.click()
+    // Revoking immediately races the download in Safari; a tick is enough and
+    // the object is a few hundred kilobytes at worst.
+    setTimeout(() => URL.revokeObjectURL(url), 10_000)
+  }
+
+  return (
+    <button
+      type="button"
+      className="lg__linkish"
+      onClick={() => void download()}
+      title="the whole log, as the JSONL file it already is"
+    >
+      {state === 'empty' ? 'NOTHING TO EXPORT' : 'EXPORT'}
+    </button>
   )
 }
 

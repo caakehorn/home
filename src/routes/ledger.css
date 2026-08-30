@@ -1126,3 +1126,10 @@
   letter-spacing: 0.1em;
   color: var(--text-dim);
 }
+
+/* EXPORT and SYNC NOW, pushed to the end of the sync bar together. */
+.lg__bar-end {
+  display: flex;
+  gap: 1rem;
+  margin-left: auto;
+}

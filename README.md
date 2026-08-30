@@ -156,7 +156,7 @@ edit. Intake data never enters `public/` or the deployed bundle; the room reads
 its own shards live. `bin/wiki-intake` upstream is the analysis side and shares
 no code with this one on purpose — two independent folds of the same log
 agreeing is the only thing that actually tests the contract, so
-`npm run ledger:check` asserts 88 properties here and
+`npm run ledger:check` asserts 91 properties here and
 `tests/test_wiki_intake.py` asserts them there, over the same worked unit. Both
 run in CI. The data contract is `data/intake/README.md` upstream.
 

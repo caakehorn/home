@@ -24,8 +24,23 @@ export type IndexEntry = {
   locked?: boolean
 }
 
+/**
+ * Which wiki-brain commit the snapshot was derived from — the last one that
+ * touched any path the sync reads, not HEAD. Written by `scripts/sync-wiki.mjs`
+ * and read by the sync light; see `sync-status.ts` for why the distinction
+ * matters. Null when the sync ran against something that was not a git
+ * checkout, which the light reports as "cannot tell" rather than guessing.
+ */
+export type WikiSource = {
+  repo: string
+  commit: string
+  committedAt: string
+  paths: string[]
+}
+
 export type WikiIndex = {
   generatedAt: string
+  source?: WikiSource | null
   counts: {
     pages: number
     words: number

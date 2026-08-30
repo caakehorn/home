@@ -7,6 +7,15 @@ on:
   # Callable, so the wiki sync can deploy what it just committed — a push made
   # with GITHUB_TOKEN never triggers a workflow of its own.
   workflow_call:
+  # `src/blog/publish-blog.ts` has fired this at the repository since the blog
+  # editor shipped, and nothing listened: the handler was never written. It was
+  # harmless only by luck — the contents-API commit that precedes it is made
+  # with a PAT, so it triggers the `push` above on its own — but the editor
+  # tells the writer "asking the site to rebuild…" and then, on failure,
+  # "the deploy will run on its next scheduled pass", and there is no scheduled
+  # pass. Listening makes both sentences true.
+  repository_dispatch:
+    types: [deploy]
 
 # Required by actions/deploy-pages: read the repo, write a Pages deployment,
 # and mint the OIDC token it verifies the deployment with.

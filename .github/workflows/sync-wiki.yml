@@ -51,42 +51,50 @@ jobs:
         env:
           WIKI_LOCK_PASSPHRASE: ${{ secrets.WIKI_LOCK_PASSPHRASE }}
 
-      # sync-wiki embeds the current wall-clock time in three JSON datasets.
+      # sync-wiki embeds the current wall-clock time in the datasets it writes.
       # Those files are one-line JSON, so a normal diff sees the whole file as
       # changed every hour even when the source wiki did not move. Detect that
       # exact timestamp-only case before staging; real content changes still
       # proceed normally and get the new generatedAt value.
+      #
+      # This used to name the three files it knew about. `lexicon.json` shipped
+      # after it was written, was never added, and quietly defeated the whole
+      # step: one un-listed file in the changed set failed the `every` test, so
+      # every hourly run committed a no-op diff and called a full Pages deploy
+      # behind it. A guard against churn that is itself a hand-maintained list
+      # of the things that churn is a guard with an expiry date on it — so the
+      # test is now the property rather than the filenames. Any changed file
+      # whose only difference is its `generatedAt` is churn, whatever it is
+      # called; page JSONs carry no such field, so a real edit can never
+      # normalise away, and a new or deleted page moves index.json's content
+      # too.
       - name: Ignore timestamp-only wiki churn
         run: |
           node <<'NODE'
           import { execFileSync } from 'node:child_process'
           import { readFileSync } from 'node:fs'
 
-          const generated = new Set([
-            'public/wiki/index.json',
-            'public/wiki/gaps.json',
-            'public/wiki/sage.json',
-          ])
           const changed = execFileSync('git', ['diff', '--name-only', '--', 'public/wiki'], { encoding: 'utf8' })
             .trim()
             .split('\n')
             .filter(Boolean)
 
-          if (!changed.length || !changed.every((path) => generated.has(path))) process.exit(0)
+          if (!changed.length) process.exit(0)
 
           const normalize = (text) => text.replace(/"generatedAt":"[^"]*"/g, '"generatedAt":"<normalized>"')
           for (const path of changed) {
-            const current = normalize(readFileSync(path, 'utf8'))
+            let current
             let previous
             try {
+              current = normalize(readFileSync(path, 'utf8'))
               previous = normalize(execFileSync('git', ['show', `HEAD:${path}`], { encoding: 'utf8' }))
             } catch {
-              process.exit(0)
+              process.exit(0) // added, deleted, or unreadable — a real change
             }
             if (current !== previous) process.exit(0)
           }
 
-          console.log('Only generatedAt changed; restoring the existing snapshot.')
+          console.log(`Only generatedAt moved in ${changed.length} file(s); restoring the existing snapshot.`)
           execFileSync('git', ['restore', '--source=HEAD', '--', 'public/wiki'], { stdio: 'inherit' })
           NODE
 
@@ -110,20 +118,45 @@ jobs:
       # wiki does — see the note in scripts/build-docket.mjs.
       - run: npm run docket
 
+      # The derivation is all-or-nothing on purpose: every step above runs before
+      # anything is staged, so a build that fails leaves the whole snapshot at
+      # its previous state rather than committing a half-updated one where
+      # public/wiki has moved and public/core has not.
       - id: commit
         name: Commit the snapshot if it moved
         run: |
+          set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add public/wiki public/leviathan public/docket public/core
           if git diff --cached --quiet; then
             echo 'changed=false' >> "$GITHUB_OUTPUT"
             echo 'Snapshot already current.'
-          else
-            git commit -m 'Resync the wiki snapshot'
-            git push
-            echo 'changed=true' >> "$GITHUB_OUTPUT"
+            exit 0
           fi
+          git commit -m 'Resync the wiki snapshot'
+
+          # A merge landing on main during the ~60s this job takes rejects the
+          # push as non-fast-forward, and the snapshot then waits an hour for a
+          # collision nobody was told about. Rebase and retry instead.
+          #
+          # The replay is safe because the only writer of these paths is this
+          # job, and `concurrency: sync-wiki` means there is never a second one:
+          # whatever moved main touched something else, so there is nothing to
+          # conflict with. A conflict here would mean that assumption is wrong,
+          # which is worth failing on rather than resolving blind — the next
+          # hourly run re-derives the whole snapshot from scratch regardless.
+          for attempt in 1 2 3; do
+            if git push; then
+              echo 'changed=true' >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "::notice::push rejected (attempt $attempt) — main moved; rebasing onto it"
+            git fetch origin main
+            git rebase origin/main
+          done
+          echo '::error::could not push the resynced snapshot after three attempts'
+          exit 1
 
   # A push made with GITHUB_TOKEN does not trigger other workflows, so the
   # deploy is called rather than waited for.

@@ -53,6 +53,7 @@ const WritingDashboardRoute = lazy(() =>
 const LeviathanRoute = lazy(() =>
   import('./routes/Leviathan').then((m) => ({ default: m.LeviathanRoute })),
 )
+const LedgerRoute = lazy(() => import('./routes/Ledger').then((m) => ({ default: m.LedgerRoute })))
 const LineageRoute = lazy(() =>
   import('./routes/Lineage').then((m) => ({ default: m.LineageRoute })),
 )
@@ -119,6 +120,11 @@ function Site() {
           <Route path="/core/*" element={<CoreRoute />} />
           <Route path="/gallery" element={<GalleryRoute />} />
           <Route path="/gallery/:id" element={<GalleryRoute />} />
+          {/* Not in SECTIONS, so not a chip in the nav bar. Behind the same
+              door as everything else, reached by its URL — which on a phone
+              means the home screen, and two taps from locked to logged. */}
+          <Route path="/ledger" element={<LedgerRoute />} />
+          <Route path="/ledger/u/:unit" element={<LedgerRoute />} />
           <Route path="/leviathan" element={<LeviathanRoute />} />
           <Route path="/leviathan/:id" element={<LeviathanRoute />} />
           <Route path="/sage" element={<SageRoute />} />

@@ -1,0 +1,776 @@
+/* THE INTAKE LEDGER
+ *
+ * One accent for the whole room (--n5) rather than a colour per state. Two of
+ * the five palettes collapse the accent ramp — griptape has --n1 === --n5, riot
+ * has --n1 === --n4 and --n2 === --n5 and inverts the ground besides — so a
+ * design that separates three things by hue separates two of them in two of
+ * five themes. The three measurement classes are separated by border style
+ * instead: solid for a weight, dashed for an estimate, dotted for an event with
+ * no figure. That survives every palette, reads in greyscale, and does not
+ * depend on colour vision.
+ *
+ * Touch targets are sized in fingers, per CLAUDE.md §5: the LOG button and the
+ * quick picks are the reason this tool gets used at 4am, and a 32px control is
+ * not a control on a phone. Nothing here claims a gesture — no touch-action, no
+ * onWheel — so the page pans and pinches exactly as the reader expects.
+ */
+
+.lg {
+  position: relative;
+  z-index: 1;
+  min-height: 100%;
+  padding-bottom: 5rem;
+  background:
+    radial-gradient(80% 45% at 50% 0%, color-mix(in srgb, var(--n5) 14%, transparent), transparent 70%),
+    var(--void);
+}
+
+.lg__state,
+.lg__empty {
+  padding: 2rem 0;
+  font-family: var(--f-mono);
+  font-size: var(--step-0);
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+
+/* ---- masthead ----------------------------------------------------------- */
+.lg__masthead {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 0.3rem 1rem;
+  padding-block: clamp(1.4rem, 4vh, 2.6rem) 0.6rem;
+}
+
+.lg__mast-title {
+  font-size: clamp(1.4rem, 5vw, 3.4rem);
+  line-height: 0.95;
+}
+
+.lg__mast-kana {
+  font-size: clamp(1.4rem, 4.5vw, 3rem);
+  line-height: 1;
+  color: var(--n5);
+  text-shadow: 0 0 calc(var(--glow-r) * 0.8) var(--n5);
+}
+
+.lg__mast-note {
+  grid-column: 1 / -1;
+  max-width: 74ch;
+  font-size: var(--step--1);
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+/* ---- the sync bar -------------------------------------------------------- */
+.lg__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  padding-block: 0.6rem;
+  border-block: 1px solid color-mix(in srgb, var(--text-dim) 26%, transparent);
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.08em;
+}
+
+.lg__sync {
+  color: var(--n5);
+}
+
+.lg__sync--busy {
+  opacity: 0.6;
+}
+
+.lg__sync--stuck {
+  color: var(--n2);
+}
+
+.lg__sync-note {
+  color: var(--text-dim);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* ---- layout -------------------------------------------------------------- */
+.lg__body {
+  display: grid;
+  gap: 2rem;
+  padding-block: 1.5rem;
+}
+
+.lg__units {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 26rem), 1fr));
+  align-items: start;
+}
+
+.lg__h2 {
+  margin-bottom: 0.6rem;
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.14em;
+  color: var(--text-dim);
+}
+
+/* ---- a unit card --------------------------------------------------------- */
+.lg__card {
+  display: grid;
+  gap: 0.8rem;
+  padding: 1rem;
+  border: 2px solid color-mix(in srgb, var(--n5) 38%, transparent);
+  background: var(--void-2);
+}
+
+.lg__card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.lg__card-name {
+  font-family: var(--f-head);
+  font-size: var(--step-1);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.lg__card-size {
+  font-family: var(--f-mono);
+  font-size: var(--step-0);
+  color: var(--n5);
+}
+
+.lg__card-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: 0.6rem 1rem;
+  margin: 0;
+}
+
+.lg__card-facts dt {
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.lg__card-facts dd {
+  margin: 0.15rem 0 0;
+  font-size: var(--step--1);
+}
+
+.lg__card-aside {
+  display: block;
+  font-size: 0.68rem;
+  color: var(--text-dim);
+}
+
+/* ---- the button that matters --------------------------------------------- */
+.lg__log {
+  min-height: 3.5rem;
+  padding: 0.85rem 1rem;
+  border: 2px solid var(--n5);
+  background: color-mix(in srgb, var(--n5) 16%, transparent);
+  color: var(--text);
+  font-family: var(--f-head);
+  font-size: var(--step-1);
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: background var(--snap) ease;
+}
+
+.lg__log:hover,
+.lg__log:focus-visible {
+  background: color-mix(in srgb, var(--n5) 32%, transparent);
+}
+
+.lg__log:active {
+  background: color-mix(in srgb, var(--n5) 46%, transparent);
+}
+
+.lg__card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+}
+
+.lg__linkish {
+  padding: 0.5rem 0;
+  border: 0;
+  background: none;
+  color: var(--text-dim);
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.lg__linkish:hover:not(:disabled),
+.lg__linkish:focus-visible {
+  color: var(--n5);
+}
+
+.lg__linkish:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.lg__linkish--end {
+  margin-left: auto;
+}
+
+.lg__new-toggle {
+  min-height: 3.5rem;
+  border: 2px dashed color-mix(in srgb, var(--text-dim) 44%, transparent);
+  background: none;
+  color: var(--text-dim);
+  font-family: var(--f-mono);
+  font-size: var(--step-0);
+  letter-spacing: 0.12em;
+  cursor: pointer;
+}
+
+.lg__new-toggle:hover,
+.lg__new-toggle:focus-visible {
+  border-color: var(--n5);
+  color: var(--n5);
+}
+
+/* ---- coverage ------------------------------------------------------------ */
+.lg__coverage {
+  display: grid;
+  gap: 0.3rem;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+
+.lg__coverage-bar {
+  display: block;
+  height: 4px;
+  background: color-mix(in srgb, var(--text-dim) 24%, transparent);
+}
+
+.lg__coverage-fill {
+  display: block;
+  height: 100%;
+  background: var(--n5);
+}
+
+/* ---- figures ------------------------------------------------------------- */
+.lg__amount {
+  font-family: var(--f-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.lg__amount--bound {
+  color: var(--n5);
+}
+
+.lg__blank {
+  color: var(--text-dim);
+  opacity: 0.7;
+  cursor: help;
+}
+
+.lg__when {
+  font-family: var(--f-mono);
+  font-size: 0.95em;
+  font-variant-numeric: tabular-nums;
+}
+
+.lg__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The three measurement classes, told apart by border style so they survive
+   every palette and read in greyscale. */
+.lg__class {
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  border: 1px solid color-mix(in srgb, var(--text-dim) 60%, transparent);
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+}
+
+.lg__class--measured {
+  border-style: solid;
+  border-color: var(--n5);
+  color: var(--n5);
+}
+
+.lg__class--estimated {
+  border-style: dashed;
+}
+
+.lg__class--unquantified {
+  border-style: dotted;
+  opacity: 0.85;
+}
+
+/* ---- sheets -------------------------------------------------------------- */
+.lg__scrim {
+  position: fixed;
+  inset: 0;
+  /* Over the nav (200) and the HUD (8000), under the Fx atmosphere (9000),
+     which is pointer-events:none and belongs on top of everything. A modal
+     that the header paints over is not a modal. */
+  z-index: 8500;
+  display: grid;
+  place-items: end center;
+  padding: 1rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: color-mix(in srgb, var(--edge) 82%, transparent);
+}
+
+@media (min-width: 44rem) {
+  .lg__scrim {
+    place-items: center;
+  }
+}
+
+/* The width lives here, not on the sheet.
+   `justify-items: center` on the scrim makes this wrapper max-content wide, so
+   a `min(100%, 34rem)` on the sheet inside it resolves 100% against a box that
+   is as wide as its own content — which is to say it does not constrain
+   anything, and the sheet runs off the side of a phone. Constraining the
+   wrapper and letting the sheet fill it is the fix. */
+.lg__sheet-wrap {
+  width: min(100%, 34rem);
+  max-width: 100%;
+  /* Without this the specified width is ignored. A grid item's automatic
+     minimum size is its min-content, and a sheet full of `<input>`s has a
+     min-content of about 490px — an input's intrinsic width comes from the
+     `size` attribute, which defaults to 20 characters whatever the CSS says.
+     So the wrapper refused to shrink below 490 on a 390px phone and the right
+     edge of every sheet was simply gone. */
+  min-width: 0;
+}
+
+.lg__sheet,
+.lg__new {
+  display: grid;
+  /* Same reasoning one level down: an auto column will not go below the
+     min-content of the widest child. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.7rem;
+  width: 100%;
+  max-width: 34rem;
+  padding: 1rem;
+  border: 2px solid var(--n5);
+  background: var(--void-2);
+}
+
+/* The one thing in a sheet allowed to be wider than the sheet: a long unit
+   name in the head. Everything else wraps. */
+.lg__sheet-sub {
+  overflow-wrap: anywhere;
+}
+
+.lg__new {
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--n5) 60%, transparent);
+}
+
+.lg__sheet-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.lg__sheet-title {
+  display: block;
+  font-family: var(--f-head);
+  font-size: var(--step-1);
+  letter-spacing: 0.04em;
+}
+
+.lg__sheet-sub {
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  color: var(--text-dim);
+}
+
+.lg__x {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  border: 0;
+  background: none;
+  color: var(--text-dim);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.lg__x:hover,
+.lg__x:focus-visible {
+  color: var(--n5);
+}
+
+/* ---- quick picks --------------------------------------------------------- */
+.lg__picks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.lg__picks-label {
+  font-family: var(--f-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  color: var(--text-dim);
+}
+
+.lg__pick {
+  display: grid;
+  min-height: 3rem;
+  padding: 0.4rem 0.9rem;
+  border: 2px solid color-mix(in srgb, var(--n5) 50%, transparent);
+  background: none;
+  color: var(--text);
+  font-family: var(--f-mono);
+  font-size: var(--step-0);
+  line-height: 1.1;
+  cursor: pointer;
+}
+
+.lg__pick em {
+  font-size: 0.6rem;
+  font-style: normal;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.lg__pick:hover,
+.lg__pick:focus-visible {
+  border-color: var(--n5);
+  background: color-mix(in srgb, var(--n5) 18%, transparent);
+}
+
+/* ---- fields -------------------------------------------------------------- */
+.lg__qty {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.lg__qty-field {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 3.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid color-mix(in srgb, var(--text-dim) 44%, transparent);
+  background: var(--void);
+  color: var(--text);
+  font-family: var(--f-mono);
+  /* 16px minimum, or iOS zooms the whole document on focus and takes the
+     layout with it. */
+  font-size: max(1.6rem, 16px);
+  font-variant-numeric: tabular-nums;
+}
+
+.lg__qty-field--bad {
+  border-color: var(--n2);
+}
+
+.lg__uom,
+.lg__field {
+  /* An input reports a min-content width of ~20 characters. Every one of them
+     in here is inside a grid or flex row that would otherwise honour it. */
+  min-width: 0;
+  min-height: 3rem;
+  padding: 0.5rem 0.7rem;
+  border: 2px solid color-mix(in srgb, var(--text-dim) 44%, transparent);
+  background: var(--void);
+  color: var(--text);
+  font-family: var(--f-mono);
+  font-size: max(var(--step-0), 16px);
+}
+
+.lg__uom {
+  flex: 0 0 auto;
+  min-width: 5.5rem;
+}
+
+.lg__field--qty {
+  flex: 0 0 7rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.lg__qty-field:focus-visible,
+.lg__field:focus-visible,
+.lg__uom:focus-visible {
+  border-color: var(--n5);
+  outline: none;
+}
+
+.lg__label {
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.lg__hint {
+  margin: 0;
+  font-size: var(--step--1);
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+.lg__warn {
+  margin: 0;
+  padding: 0.6rem 0.8rem;
+  border-left: 3px solid var(--n2);
+  background: color-mix(in srgb, var(--n2) 10%, transparent);
+  font-size: var(--step--1);
+  line-height: 1.5;
+}
+
+.lg__check,
+.lg__radio {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.6rem;
+  align-items: start;
+  padding: 0.5rem 0;
+  font-size: var(--step--1);
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.lg__check input,
+.lg__radio input {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0.1rem;
+  accent-color: var(--n5);
+}
+
+.lg__check em,
+.lg__radio em {
+  display: block;
+  font-size: 0.7rem;
+  font-style: normal;
+  color: var(--text-dim);
+}
+
+.lg__fieldset {
+  /* `min-width: 0` on a fieldset needs this too — a fieldset has a
+     min-content floor of its own that ignores the property otherwise. */
+  min-inline-size: 0;
+  min-width: 0;
+  margin: 0;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid color-mix(in srgb, var(--text-dim) 30%, transparent);
+}
+
+.lg__fieldset legend {
+  padding-inline: 0.4rem;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.lg__fieldset--recon {
+  border-color: var(--n5);
+}
+
+/* ---- actions ------------------------------------------------------------- */
+.lg__sheet-actions,
+.lg__inline-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1rem;
+}
+
+.lg__save {
+  flex: 1 1 auto;
+  min-height: 3.25rem;
+  padding: 0.7rem 1.2rem;
+  border: 2px solid var(--n5);
+  background: var(--n5);
+  color: var(--on-glow);
+  font-family: var(--f-head);
+  font-size: var(--step-0);
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+
+.lg__save:disabled {
+  border-color: color-mix(in srgb, var(--text-dim) 40%, transparent);
+  background: none;
+  color: var(--text-dim);
+  cursor: default;
+}
+
+.lg__save--small {
+  flex: 0 0 auto;
+  min-height: 2.75rem;
+}
+
+.lg__nofigure {
+  flex: 0 0 auto;
+  min-height: 3.25rem;
+  padding: 0.7rem 1rem;
+  border: 2px dotted color-mix(in srgb, var(--text-dim) 60%, transparent);
+  background: none;
+  color: var(--text);
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.1em;
+  cursor: pointer;
+}
+
+.lg__nofigure:hover,
+.lg__nofigure:focus-visible {
+  border-color: var(--n5);
+  color: var(--n5);
+}
+
+.lg__descriptor {
+  display: grid;
+  gap: 0.5rem;
+}
+
+/* ---- inline forms -------------------------------------------------------- */
+.lg__inline {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.7rem;
+  border: 1px dashed color-mix(in srgb, var(--text-dim) 44%, transparent);
+}
+
+.lg__inline-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.lg__inline-row .lg__field {
+  flex: 1 1 10rem;
+  min-width: 0;
+}
+
+.lg__inline-uom {
+  font-family: var(--f-mono);
+  color: var(--text-dim);
+}
+
+.lg__time {
+  display: flex;
+}
+
+.lg__time .lg__field {
+  flex: 1 1 auto;
+}
+
+/* ---- reconciliation table ------------------------------------------------ */
+.lg__recon {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--step--1);
+}
+
+.lg__recon th,
+.lg__recon td {
+  padding: 0.4rem 0;
+  text-align: left;
+  vertical-align: baseline;
+  border-bottom: 1px solid color-mix(in srgb, var(--text-dim) 20%, transparent);
+}
+
+.lg__recon th {
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.lg__recon td {
+  text-align: right;
+}
+
+.lg__recon-note {
+  display: block;
+  font-size: 0.65rem;
+  color: var(--text-dim);
+}
+
+.lg__recon-gap th,
+.lg__recon-gap td {
+  border-bottom: 0;
+  color: var(--n5);
+  font-weight: 700;
+}
+
+.lg__recon-gap--over th,
+.lg__recon-gap--over td {
+  color: var(--n2);
+}
+
+/* ---- the closed list ----------------------------------------------------- */
+.lg__closed-list {
+  display: grid;
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: color-mix(in srgb, var(--text-dim) 20%, transparent);
+}
+
+.lg__closed-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 0.5rem 1rem;
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.5rem 0.7rem;
+  border: 0;
+  background: var(--void-2);
+  color: var(--text);
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+  text-align: left;
+  cursor: pointer;
+}
+
+.lg__closed-row:hover,
+.lg__closed-row:focus-visible {
+  background: var(--void-3);
+}
+
+.lg__closed-when {
+  color: var(--text-dim);
+}
+
+@media (max-width: 34rem) {
+  .lg__closed-row {
+    grid-template-columns: 1fr auto;
+  }
+}

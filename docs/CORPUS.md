@@ -537,7 +537,7 @@ crossed,documented,collateral,role,note,short}`), `LINES` (5), `DESCENT`,
 `CANCER` (star field), `CANCER_EDGES` (constellation edges), `PRIZES`.
 
 **Other payloads** — `public/agent/search.json` (314 KB, gitignored, built at
-`prebuild`): `{ pages[472], lookup{~775 keys} }`, an **alias→slug index** worth
+`prebuild`): `{ pages[472], lookup{776 keys} }`, an **alias→slug index** worth
 reusing for any search box. `public/llms-full.txt` (5.2 MB, gitignored) is the
 whole corpus as one markdown stream.
 

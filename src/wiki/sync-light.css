@@ -1,0 +1,206 @@
+/* ==========================================================================
+   THE SYNC LIGHT
+
+   One lamp in the wiki chrome answering one question: is the wiki on this page
+   the wiki that exists? Blue dot yes; flashing yellow triangle with a red
+   exclamation, no.
+
+   The colours here are the only hard-coded hues on the site, and the reason is
+   in SyncLight.tsx: five palettes, two of which collapse the accent ramp and
+   one of which inverts to paper, and a status light whose meaning depends on
+   which one you picked has no meaning. So blue is blue in all five, and the
+   triangle carries a dark stroke and its own fill so it reads on toner and on
+   paper alike.
+
+   Everything else — type, rules, spacing — is the site's own tokens, because
+   only the signal is exempt.
+   ========================================================================== */
+
+.synclight {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 0 0 auto;
+}
+
+.synclight__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.5rem;
+  font-family: var(--f-head);
+  font-size: var(--step--1);
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  background: color-mix(in srgb, var(--void) 70%, transparent);
+  border: var(--rule) solid color-mix(in srgb, var(--text) 22%, transparent);
+  cursor: pointer;
+}
+
+.synclight__btn:hover,
+.synclight__btn:focus-visible {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--text) 45%, transparent);
+}
+
+.synclight__mark {
+  display: inline-flex;
+  align-items: center;
+  width: 15px;
+  height: 15px;
+}
+
+/* The warning is bigger than the all-clear. A lamp that is the same size in
+   both states is asking the reader to notice a colour change in their
+   peripheral vision, which is the one thing peripheral vision is worst at. */
+.synclight__btn--behind .synclight__mark {
+  width: 19px;
+  height: 19px;
+}
+
+.synclight--compact .synclight__label {
+  /* On a page header the label is redundant next to the breadcrumb; the lamp
+     and its tooltip carry it, and the panel says the rest on click. Hidden
+     visually, still read aloud. */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---- the lamp ------------------------------------------------------------ */
+
+.synclight__dot {
+  fill: #7d8590; /* drained: checking, or could not find out */
+}
+
+.synclight__btn--current .synclight__dot {
+  fill: #2f81f7;
+  /* A ring rather than a glow: `riot` is paper, and a glow on paper is a smudge. */
+  stroke: #1a4b91;
+  stroke-width: 1;
+}
+
+.synclight__btn--current {
+  color: var(--text);
+  border-color: color-mix(in srgb, #2f81f7 55%, transparent);
+}
+
+.synclight__tri {
+  fill: #ffcc00;
+  stroke: #6b4e00;
+}
+
+.synclight__bang {
+  fill: #d90429;
+}
+
+.synclight__btn--behind {
+  color: var(--text);
+  font-weight: 700;
+  border-color: #ffcc00;
+  background: color-mix(in srgb, #ffcc00 18%, var(--void));
+}
+
+/* Emphasis on top of a warning that is already legible held still — see the
+   note in SyncLight.tsx. Applied only when `motion` is on, which the system's
+   Reduce Motion setting turns off for us. */
+@keyframes synclight-flash {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* The mark flashes; the button does not. Animating the whole control takes the
+   words with it, and a warning whose text is unreadable half the time is worse
+   at its job than one that never blinks. */
+.synclight__btn--flash .synclight__mark {
+  animation: synclight-flash 1s steps(1, end) infinite;
+}
+
+/* ---- the panel ----------------------------------------------------------- */
+
+/* In the flow, not floating over it.
+ *
+ * The obvious build is a dropdown, and the first one was. It cannot work here:
+ * `.wiki` opens a stacking context at `z-index: 1`, the site-wide crawl is
+ * `position: fixed` at 8800 in the *root* context, and nothing inside a context
+ * whose parent is 1 can paint over something outside it at 8800 — so the panel
+ * was cut in half by a marquee whatever z-index it claimed. A portal to
+ * `document.body` would have escaped that, at the cost of hand-computed
+ * coordinates and a scroll listener.
+ *
+ * A block in normal flow needs neither, cannot be covered by anything, and
+ * needs no second layout for a phone. It pushes the page down while it is open,
+ * which is the honest behaviour for a disclosure anyway.
+ */
+.synclight__panel {
+  margin-top: 0.4rem;
+  width: min(34rem, 100%);
+  padding: 0.7rem 0.8rem;
+  background: color-mix(in srgb, var(--void) 88%, transparent);
+  border: var(--rule) solid color-mix(in srgb, var(--text) 35%, transparent);
+  text-align: left;
+}
+
+.synclight__lede {
+  margin: 0 0 0.5rem;
+  font-size: var(--step--1);
+  line-height: 1.55;
+  color: var(--text-dim);
+}
+
+.synclight__lede b {
+  color: var(--text);
+}
+
+.synclight__rows {
+  display: grid;
+  gap: 0.15rem;
+  margin: 0 0 0.5rem;
+  font-size: var(--step--1);
+}
+
+.synclight__rows > div {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  padding: 0.15rem 0;
+  border-bottom: var(--rule) solid color-mix(in srgb, var(--text) 12%, transparent);
+}
+
+.synclight__rows dt {
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+}
+
+.synclight__rows dd {
+  margin: 0;
+  font-family: var(--f-mono);
+  color: var(--text);
+  text-align: right;
+}
+
+.synclight__note {
+  margin: 0;
+  font-size: var(--step--1);
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+.synclight__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

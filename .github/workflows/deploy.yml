@@ -45,6 +45,14 @@ jobs:
       - name: Check the sage question-file contract
         run: npm run sage:check
 
+      # Same reasoning for the intake ledger: its event log is parsed by
+      # `bin/wiki-intake` in wiki-brain, which shares no code with the writer.
+      # These assertions are the refusals — that a remainder is never reported
+      # as exact while an unquantified event stands against the unit, and that
+      # a mean dose is never the initial quantity over the event count.
+      - name: Check the intake ledger's arithmetic
+        run: npm run ledger:check
+
       # The gate's verifier, written from the repository secret so the
       # passphrase never enters the repository. Without the secret the site
       # deploys with the door unconfigured, which the gate says out loud

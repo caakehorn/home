@@ -14,7 +14,8 @@ the room where both of those happened.
 Nine rooms off one hallway: the **wiki-brain** and its map, **THE SAGE**,
 **THE LATTICE**, the **LEVIATHAN** instruments, **THE DOCKET**, **THE
 GALLERY**, **THE TRANSCRIPT**, **TRANSMISSIONS**, and **ALLY LUBIN'S ADVENTURE
-ARCADE**. All nine are open.
+ARCADE**. All nine are open. A tenth, **THE INTAKE LEDGER**, is behind the same
+door and deliberately not in the nav — see below.
 
 ### The sage
 
@@ -102,6 +103,62 @@ Cabinets pay one ticket per hundred points into a till in `localStorage`
 rather than following the vibe switch — an arcade is dark inside whatever the
 weather is doing — and its classes are namespaced `arc-*` so nothing in
 `punk.css` repaints them.
+
+### The intake ledger
+
+`/ledger` is the tenth room and the only one with no chip in the nav bar. It is
+behind the same door as everything else; it is simply not advertised on the
+front page, because a building that lists this beside the arcade is a different
+building from one that holds it. The URL is the affordance — on a phone it goes
+on the home screen, which makes logging two taps from a locked device.
+
+Everything else here reads the corpus. This one writes to it, and it writes the
+one class of fact the corpus is worst at holding: what happened, at the hour it
+happened, rather than what was remembered about it later.
+`wiki/health/cocaine.md` states a dosage arc of *1 g → 3.5–7 g → 0.5–1 g*
+reconstructed across twenty years from messages and memory. This is the
+instrument that would have measured it.
+
+**The model is a finite object, not a diary entry.** A unit enters the record —
+3.5 g of something, received at a time, from somewhere. Every consumption event
+is logged against that unit. When it is gone, the ledger reconciles: how long it
+lasted, how many times it was reached for, how big those times were, and — the
+question a finite unit is actually interesting for — whether it went faster at
+the end than at the start. The schema does not care what the substance is;
+caffeine, a prescription and a bottle of anything all have the same shape.
+
+**Nothing is ever updated in place.** The log is append-only. A mistyped dose is
+followed by a correction carrying the old value and a required reason; a
+double-tap by a void. There is no delete. Merging two copies is set union by
+event id, so two devices can both be offline, both append, and converge with
+nothing lost — which a mutable `units` table synced by timestamp cannot do.
+
+**The three measurement classes are the design.** `measured` came off a scale.
+`estimated` is a number somebody produced by looking. `unquantified` — "one
+line" — is a real event with no number, which counts toward every event total,
+every interval and every time-of-day figure, and contributes to no sum. Dropping
+those events would make the record cleaner and false, so the NO FIGURE button
+sits beside SAVE at the same size: if the honest path is not the fast one, it
+gets a fabricated number instead.
+
+**What it refuses to compute** is the reason it exists. A 3.5 g unit with ten
+logged events totalling 2.84 g did not average 0.35 g — 0.66 g is unexplained,
+and dividing the whole unit by the logged events assumes a completeness nobody
+has. So the remainder prints `≤` and the component that renders it cannot drop
+the sign; the mean dose carries `÷ 10, not ÷ 11` under it; and closing a unit
+disables SAVE until somebody says what happened to the difference, because the
+automatic answer is always "assume it was consumed".
+
+Capture is local-first — IndexedDB, instant, offline, never waiting on a network
+— and `sync.ts` pushes to `data/intake/events-YYYY-MM.jsonl` in
+`caakehorn/wiki-brain` behind it, through the same keyring that publishes a page
+edit. Intake data never enters `public/` or the deployed bundle; the room reads
+its own shards live. `bin/wiki-intake` upstream is the analysis side and shares
+no code with this one on purpose — two independent folds of the same log
+agreeing is the only thing that actually tests the contract, so
+`npm run ledger:check` asserts 88 properties here and
+`tests/test_wiki_intake.py` asserts them there, over the same worked unit. Both
+run in CI. The data contract is `data/intake/README.md` upstream.
 
 ## Running it
 

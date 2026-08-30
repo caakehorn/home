@@ -102,6 +102,14 @@ function encode(text: string) {
   return btoa(binary)
 }
 
+/** The inverse. GitHub wraps its base64 at 60 columns, so strip whitespace. */
+function decode(base64: string) {
+  const binary = atob(base64.replace(/\s+/g, ''))
+  const bytes = new Uint8Array(binary.length)
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
+  return new TextDecoder().decode(bytes)
+}
+
 /** The current file's blob sha, or null when it does not exist yet. */
 async function shaOf(repo: string, path: string, branch: string): Promise<string | null> {
   const token = await credential()
@@ -147,6 +155,123 @@ async function putFile(repo: string, path: string, base64: string, message: stri
  */
 export async function publishFile(path: string, text: string, message: string) {
   return putFile(SOURCE_REPO, path, encode(text), message)
+}
+
+/**
+ * Read one file out of the source repository.
+ *
+ * Null when it is not there, which is a normal state rather than a failure —
+ * the intake ledger's first write of a month creates that month's shard, and
+ * asking for it beforehand should not read as an error.
+ *
+ * The blob sha comes back with the text because every write that is not a
+ * blind overwrite needs it. Two devices appending to the same log is the
+ * ordinary case for that ledger, not an edge one.
+ */
+export async function readFile(
+  repo: string,
+  path: string,
+): Promise<{ text: string; sha: string } | null> {
+  const token = await credential()
+  const branch = await branchOf(repo)
+  const res = await reach(
+    `${API}/repos/${repo}/contents/${path}?ref=${encodeURIComponent(branch)}`,
+    {
+      headers: {
+        Accept: 'application/vnd.github+json',
+        Authorization: `Bearer ${token}`,
+        'X-GitHub-Api-Version': '2022-11-28',
+        // A cached read is a lost update waiting to happen: the sha would be
+        // stale and the write built on it would clobber whatever landed since.
+        'Cache-Control': 'no-cache',
+      },
+    },
+  )
+  if (res.status === 404) return null
+  if (!res.ok) throw new Error(`could not read ${path} (${res.status})`)
+  const body = await res.json()
+  if (Array.isArray(body)) throw new Error(`${path} is a directory`)
+  return { text: decode(body.content as string), sha: body.sha as string }
+}
+
+/** What is in a directory, or an empty list when there is no directory yet. */
+export async function listDir(
+  repo: string,
+  path: string,
+): Promise<{ name: string; path: string; sha: string }[]> {
+  const token = await credential()
+  const branch = await branchOf(repo)
+  const res = await reach(
+    `${API}/repos/${repo}/contents/${path}?ref=${encodeURIComponent(branch)}`,
+    {
+      headers: {
+        Accept: 'application/vnd.github+json',
+        Authorization: `Bearer ${token}`,
+        'X-GitHub-Api-Version': '2022-11-28',
+        'Cache-Control': 'no-cache',
+      },
+    },
+  )
+  if (res.status === 404) return []
+  if (!res.ok) throw new Error(`could not list ${path} (${res.status})`)
+  const body = await res.json()
+  if (!Array.isArray(body)) throw new Error(`${path} is not a directory`)
+  return body.map((f: { name: string; path: string; sha: string }) => ({
+    name: f.name,
+    path: f.path,
+    sha: f.sha,
+  }))
+}
+
+/**
+ * Write one file, refusing to overwrite a version this caller has not seen.
+ *
+ * `putFile` above reads the current sha and writes over whatever is there,
+ * which is right for a wiki page saved by one person in one tab. It is wrong
+ * for an append-only log two devices both write to: the read and the write are
+ * separate round trips, and anything landing between them is silently lost.
+ *
+ * So the sha is the caller's to supply, and a stale one comes back as
+ * `'conflict'` rather than an exception — the caller is expected to re-read,
+ * merge and try again, which for a log keyed by event id is a union and always
+ * safe. Pass `null` to mean "this file should not exist yet"; that also
+ * conflicts if it does.
+ */
+export async function writeFile(
+  repo: string,
+  path: string,
+  text: string,
+  message: string,
+  sha: string | null,
+): Promise<{ sha: string; commit: string } | 'conflict'> {
+  const token = await credential()
+  const branch = await branchOf(repo)
+  const res = await reach(`${API}/repos/${repo}/contents/${path}`, {
+    method: 'PUT',
+    headers: {
+      Accept: 'application/vnd.github+json',
+      Authorization: `Bearer ${token}`,
+      'X-GitHub-Api-Version': '2022-11-28',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      message,
+      content: encode(text),
+      branch,
+      ...(sha ? { sha } : {}),
+    }),
+  })
+  // 409 is the documented stale-sha response; 422 is what the API returns when
+  // a sha is omitted for a file that already exists. Both mean the same thing
+  // to a caller that is about to merge and retry.
+  if (res.status === 409 || res.status === 422) return 'conflict'
+  if (res.status === 401)
+    throw new Error('GitHub rejected the keyring token (401) — it expired; re-run `npm run keyring`')
+  if (res.status === 403)
+    throw new Error('GitHub refused (403) — the keyring token is missing Contents: write')
+  if (!res.ok) throw new Error(`GitHub said ${res.status}: ${(await res.text()).slice(0, 200)}`)
+  const body = await res.json()
+  return { sha: body.content.sha as string, commit: body.commit.html_url as string }
 }
 
 /**

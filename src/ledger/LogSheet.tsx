@@ -27,11 +27,12 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { intake } from './commands.ts'
-import { nowLocal, type LedgerEvent } from './events.ts'
+import { nowLocal, type Extra, type LedgerEvent } from './events.ts'
 import { median, quantifiedDoses } from './analyze.ts'
 import { CODES, commensurable, format } from './uom.ts'
 import type { UnitRecord } from './project.ts'
 import { Instant } from './bits.tsx'
+import { ExtrasEditor } from './Extras.tsx'
 
 /** A local instant, to the minute, in the shape `<input type="datetime-local">` wants. */
 const forInput = (iso: string) => iso.slice(0, 16)
@@ -61,6 +62,7 @@ export function LogSheet({
   const [estimated, setEstimated] = useState(false)
   const [descriptor, setDescriptor] = useState('')
   const [note, setNote] = useState('')
+  const [extra, setExtra] = useState<Extra>({})
   const [at, setAt] = useState<string | null>(null)
   const [showTime, setShowTime] = useState(false)
   const field = useRef<HTMLInputElement>(null)
@@ -116,6 +118,7 @@ export function LogSheet({
         descriptor: quantity === null ? descriptor : undefined,
         note,
         occurredAt: at ?? undefined,
+        extra,
       }),
     ])
   }
@@ -202,6 +205,8 @@ export function LogSheet({
         placeholder="note — optional"
         aria-label="Note"
       />
+
+      <ExtrasEditor value={extra} onChange={setExtra} />
 
       <div className="lg__time">
         {showTime ? (

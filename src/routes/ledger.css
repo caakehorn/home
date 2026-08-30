@@ -1133,3 +1133,148 @@
   gap: 1rem;
   margin-left: auto;
 }
+
+/* Local-only is the working configuration against a public wiki repo, so it is
+   an explanation rather than a warning — no red rule, no alarm colour. The
+   sentence exists because a badge alone reading LOCAL ONLY was being read as a
+   fault, and a working tool that looks broken gets abandoned. */
+.lg__local {
+  margin: 0;
+  padding: 0.7rem 0.9rem;
+  border-left: 3px solid var(--n5);
+  background: color-mix(in srgb, var(--n5) 8%, transparent);
+  font-size: var(--step--1);
+  line-height: 1.6;
+}
+
+.lg__local code {
+  font-family: var(--f-mono);
+  font-size: 0.9em;
+  overflow-wrap: anywhere;
+}
+
+/* ---- single dose --------------------------------------------------------- */
+.lg__quick {
+  display: grid;
+  gap: 0.4rem;
+  padding-bottom: 0.4rem;
+}
+
+.lg__single {
+  justify-self: start;
+  min-height: 3.25rem;
+  padding: 0.7rem 1.3rem;
+  border: 2px solid var(--n5);
+  background: color-mix(in srgb, var(--n5) 12%, transparent);
+  color: var(--text);
+  font-family: var(--f-head);
+  font-size: var(--step-0);
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+
+.lg__single:hover,
+.lg__single:focus-visible {
+  background: color-mix(in srgb, var(--n5) 28%, transparent);
+}
+
+.lg__quick-note {
+  max-width: 60ch;
+  font-size: var(--step--1);
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+/* A unit of one, marked wherever it is listed — it is a dose, not an inventory
+   item, and a reader scanning the closed list should not have to work that out
+   from a zero duration. */
+.lg__single-tag {
+  padding: 0.05rem 0.35rem;
+  border: 1px dotted var(--n5);
+  font-family: var(--f-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  color: var(--n5);
+}
+
+/* ---- the extras bag ------------------------------------------------------ */
+.lg__extras {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.6rem;
+  border: 1px dashed color-mix(in srgb, var(--text-dim) 40%, transparent);
+}
+
+.lg__extra-row {
+  display: grid;
+  grid-template-columns: minmax(4.5rem, 7rem) minmax(0, 1fr) auto;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.lg__extra-key {
+  font-family: var(--f-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  overflow-wrap: anywhere;
+}
+
+.lg__extra-add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.lg__chip {
+  min-height: 2.25rem;
+  padding: 0.25rem 0.6rem;
+  border: 1px solid color-mix(in srgb, var(--text-dim) 44%, transparent);
+  background: none;
+  color: var(--text-dim);
+  font-family: var(--f-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+
+.lg__chip:hover,
+.lg__chip:focus-visible {
+  border-color: var(--n5);
+  color: var(--n5);
+}
+
+.lg__field--key {
+  flex: 0 1 10rem;
+  min-height: 2.25rem;
+  font-size: max(0.75rem, 16px);
+}
+
+/* Read as text, never as numbers — nothing in the bag is ever summed. */
+.lg__extra-read {
+  display: grid;
+  gap: 0.2rem;
+  margin: 0.35rem 0 0;
+}
+
+.lg__extra-read div {
+  display: grid;
+  grid-template-columns: minmax(4.5rem, 7rem) minmax(0, 1fr);
+  gap: 0.5rem;
+}
+
+.lg__extra-read dt {
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.lg__extra-read dd {
+  margin: 0;
+  font-size: var(--step--1);
+  overflow-wrap: anywhere;
+}

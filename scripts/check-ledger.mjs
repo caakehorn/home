@@ -28,8 +28,9 @@ import {
 } from '../src/ledger/events.ts'
 import {
   amendUnit, adjustUnit, closeUnit, correctIntake, intake as makeIntake, openUnit,
-  reopenUnit, voidIntake,
+  reopenUnit, singleDose, voidIntake,
 } from '../src/ledger/commands.ts'
+import { bySubstance } from '../src/ledger/analyze.ts'
 import { fromWire } from '../src/ledger/wire.ts'
 import { project, unaccounted } from '../src/ledger/project.ts'
 import { burnQuarters, densestWindow, median, reportOn } from '../src/ledger/analyze.ts'
@@ -525,6 +526,126 @@ console.log("ledger: the file is bin/intake's file, not this portal's")
     parseJsonl(JSON.stringify({ id: 'intake_evt_y', type: 'substance_added',
       timestamp: at(new Date(clock)), occurred_at: at(new Date(clock)), unit_id: null,
       data: {}, source: {} }) + '\n').problems.length === 0)
+}
+
+console.log('ledger: a single dose is a unit of one, and cannot corrupt a unit statistic')
+{
+  const one = singleDose({ substance: 'Cocaine', quantity: 0.12, uom: 'g' })
+  check('it writes three events', one.events.length === 3)
+  check('opened, taken, closed — in that order',
+    one.events.map((e) => e.type).join(',') === 'unit_opened,intake_logged,unit_closed')
+  // A fourth event type would turn bin/intake's gate red on every run, because
+  // that program validates `type` against a fixed list. These three it knows.
+  check('every type is one upstream already validates',
+    one.events.every((e) => ['unit_opened', 'intake_logged', 'unit_closed'].includes(e.type)))
+  check('the unit is flagged as a unit of one', one.events[0].single === true)
+  check('the unit is sized at the dose', one.events[0].quantity === 0.12)
+  check('the dose is the whole unit', one.events[1].quantity === 0.12)
+  check('it closes consumed', one.events[2].disposition === 'consumed')
+
+  const folded = project(one.events).units[0]
+  check('it reconciles to nothing left', near(folded.tally.remainingAtMost, 0, 1e-9))
+  check('and the remainder is exact', folded.tally.remainingExact === true)
+  check('the dose is a real quantified event', folded.tally.measured === 1)
+
+  // The refusal this flag exists for. Ten single doses beside one real unit
+  // must not drag the median unit life toward zero.
+  const real = openUnit({ substance: 'Cocaine', quantity: 3.5, uom: 'g' })
+  const lived = [
+    real.event,
+    makeIntake({ unit: real.unit, quantity: 0.2, uom: 'g' }),
+    ...closeUnit({ unit: real.unit, disposition: 'consumed', reconciliation: 'discrepancy',
+      unaccounted: 3.3, uom: 'g' }),
+  ]
+  const singles = []
+  for (let i = 0; i < 10; i++) singles.push(...singleDose({ substance: 'Cocaine', quantity: 0.1, uom: 'g' }).events)
+
+  const mixed = project([...lived, ...singles])
+  const [stats] = bySubstance(mixed)
+  check('single doses are counted as such', stats.singleDoses === 10)
+  check('and are not counted as units', stats.units === 1, `units=${stats.units}`)
+  check('nor as closed units', stats.closedUnits === 1, `closed=${stats.closedUnits}`)
+  check('so the unit lifetime is over the real unit alone', stats.trend.length === 1)
+  check('their doses DO count', stats.doses.length === 11, `doses=${stats.doses.length}`)
+  check('and reach the mean', stats.meanDose !== null)
+
+  // With no figure there is nothing to size a unit by, and the 1 that stands in
+  // must never be read as an amount.
+  const wordy = singleDose({ substance: 'Cocaine', descriptor: 'one line' })
+  check('an unquantified single dose still writes three events', wordy.events.length === 3)
+  check('its unit is one `dose`', wordy.events[0].uom === 'dose' && wordy.events[0].quantity === 1)
+  check('its intake carries no quantity', wordy.events[1].quantity === undefined)
+  check('it keeps the words', wordy.events[1].descriptor === 'one line')
+  check('it closes unknown, because the amount genuinely is',
+    wordy.events[2].disposition === 'unknown')
+  const vague = project(wordy.events).units[0]
+  check('nothing is summed from it', vague.tally.quantifiedQuantity === 0)
+  check('and its remainder is not claimed exact', vague.tally.remainingExact === false)
+}
+
+console.log('ledger: the fold does not depend on the order it is handed')
+{
+  // The bug this pins: `loggedAt` is precise to the second, so a burst of
+  // events shares a timestamp and the sort falls through to comparing ids —
+  // arbitrary. A `unit_closed` folded before its `unit_opened` was recorded as
+  // an orphan, the unit stayed open, and its doses vanished from every total.
+  // Logging a single dose writes three events in one millisecond by
+  // construction, and it lost about a third of them.
+  const built = []
+  for (let i = 0; i < 8; i++) built.push(...singleDose({ substance: 'Cocaine', quantity: 0.1, uom: 'g' }).events)
+
+  const straight = project(built)
+  check('eight single doses fold to eight units', straight.units.length === 8)
+  check('with nothing orphaned', straight.orphans.length === 0)
+  check('every one of them closed', straight.units.every((u) => u.status === 'closed'))
+  check('and every dose survived',
+    straight.units.every((u) => u.tally.measured === 1),
+    JSON.stringify(straight.units.map((u) => u.tally.measured)))
+
+  // Deterministic shuffle, so a failure here is reproducible.
+  let seed = 7
+  const shuffled = [...built]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    seed = (seed * 1103515245 + 12345) & 0x7fffffff
+    const j = seed % (i + 1)
+    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  const jumbled = project(shuffled)
+  check('a shuffled log folds to the same units', jumbled.units.length === straight.units.length)
+  check('still nothing orphaned', jumbled.orphans.length === 0)
+  check('still all closed', jumbled.units.every((u) => u.status === 'closed'))
+  check(
+    'and to identical tallies',
+    JSON.stringify(jumbled.units.map((u) => u.tally).sort()) ===
+      JSON.stringify(straight.units.map((u) => u.tally).sort()),
+  )
+  // A reference to something genuinely absent is still an orphan, which is the
+  // only thing that word should ever have meant.
+  check('a real orphan is still reported',
+    project([built[1]]).orphans.length === 1)
+}
+
+console.log('ledger: the extras bag carries anything and is never arithmetic')
+{
+  const bag = { route: 'insufflated', with: 'nobody', 'cut with': 'unknown' }
+  const dosed = singleDose({ substance: 'Cocaine', quantity: 0.1, uom: 'g', extra: bag })
+  const row = JSON.parse(serialize(dosed.events[1]))
+  check('it rides inside data.extra', JSON.stringify(row.data.extra) === JSON.stringify(bag))
+  check('it survives the round trip',
+    JSON.stringify(fromWire(row).extra) === JSON.stringify(bag))
+  check('an absent bag writes no key',
+    !('extra' in JSON.parse(serialize(makeIntake({ unit: UNIT, quantity: 0.1, uom: 'g' }))).data))
+  check('an empty bag writes no key either',
+    !('extra' in JSON.parse(serialize(makeIntake({ unit: UNIT, quantity: 0.1, uom: 'g', extra: {} }))).data))
+  // The bag is text. A number typed into a free-form box has no unit, no
+  // measurement class and no denominator, and nothing here may compute over it.
+  const numeric = fromWire({
+    ...row, data: { ...row.data, extra: { dose: 999, route: 'oral' } },
+  })
+  check('a non-string in the bag is dropped, not coerced',
+    JSON.stringify(numeric.extra) === JSON.stringify({ route: 'oral' }))
+  check('the four dedicated fields are untouched by any of it',
+    numeric.quantity === 0.1 && numeric.uom === 'g' && Boolean(numeric.occurredAt))
 }
 
 console.log('ledger: the log file converges no matter who writes it')

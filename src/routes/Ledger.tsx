@@ -6,6 +6,7 @@ import { Closing } from '../ledger/Closing'
 import { LogSheet } from '../ledger/LogSheet'
 import { Export, NewUnit, UnitCard, emptyMessage } from '../ledger/Capture'
 import { Report } from '../ledger/Report'
+import { SingleDoseSheet } from '../ledger/SingleDose'
 import { Trends } from '../ledger/Trends'
 import { Instant, pluralise, since } from '../ledger/bits'
 import { loadLedger, record, sync, type LedgerState } from '../ledger/sync'
@@ -45,6 +46,7 @@ export function LedgerRoute() {
   const [state, setState] = useState<LedgerState | null>(null)
   const [failed, setFailed] = useState<string | null>(null)
   const [sheet, setSheet] = useState<{ kind: 'log' | 'close'; unit: string } | null>(null)
+  const [dosing, setDosing] = useState(false)
   const [syncing, setSyncing] = useState(false)
   const [syncNote, setSyncNote] = useState<string | null>(null)
   const [syncedAt, setSyncedAt] = useState<string | null>(null)
@@ -62,19 +64,19 @@ export function LedgerRoute() {
     setSyncing(true)
     try {
       const report = await sync()
-      const stuck = report.problems.length > 0 || report.refused !== null
+      const stuck = report.problems.length > 0
       setSyncNote(
         // A refusal is not a failure and is not transient: the ledger is
         // working exactly as designed and will keep working locally forever.
         // It is first in line because it is the one the reader has to act on.
-        report.refused ??
+        report.localOnly ??
           (report.problems.length
             ? report.problems[0]
             : report.pushed || report.pulled
               ? `${report.pushed} up · ${report.pulled} down`
               : null),
       )
-      setHeld(report.refused !== null)
+      setHeld(report.localOnly !== null)
       // Only a clean pass sets the timestamp. A badge reading SYNCED above an
       // error is the worst of both — it is the reassurance without the fact,
       // and this is the one screen where "it is only on this phone" has to be
@@ -158,13 +160,13 @@ export function LedgerRoute() {
       <div className="wrap lg__bar">
         <span
           className={`lg__sync${syncing ? ' lg__sync--busy' : ''}${
-            !syncing && (held || (syncNote && !syncedAt)) ? ' lg__sync--stuck' : ''
+            !syncing && !held && syncNote && !syncedAt ? ' lg__sync--stuck' : ''
           }`}
         >
           {syncing
             ? 'SYNCING…'
             : held
-              ? 'HELD — REPO IS PUBLIC'
+              ? 'LOCAL ONLY'
               : state.waiting > 0
                 ? `${pluralise(state.waiting, 'event')} on this device only`
                 : syncedAt
@@ -179,6 +181,17 @@ export function LedgerRoute() {
           </button>
         </span>
       </div>
+
+      {held && (
+        <p className="wrap lg__local">
+          <b>Running local-only.</b> Everything you log is on this device and complete —
+          every unit, every report, every figure below is computed from it. What the public
+          wiki repository costs is automatic sync between devices, and nothing else. Press{' '}
+          <b>EXPORT</b> for the whole log in the format <code>bin/intake</code> appends, then{' '}
+          <code>cat it &gt;&gt; intake/events.jsonl &amp;&amp; bin/intake rebuild</code> to
+          join the two. No intake data goes into a public repository by any path.
+        </p>
+      )}
 
       {state.problems.length > 0 && (
         <p className="wrap lg__warn">
@@ -230,6 +243,20 @@ export function LedgerRoute() {
         {!focused && pane === 'trends' && <Trends ledger={ledger} />}
 
         {!focused && pane === 'units' && (
+        <>
+        <div className="lg__quick">
+          {/* Beside NEW UNIT rather than buried in it: a dose with no unit
+              behind it is not a lesser case, and on most days it is the more
+              common one. */}
+          <button type="button" className="lg__single" onClick={() => setDosing(true)}>
+            + SINGLE DOSE
+          </button>
+          <span className="lg__quick-note">
+            one dose, nothing tracked behind it — counted in every dose figure, kept out of
+            every figure about units
+          </span>
+        </div>
+
         <section className="lg__units">
           {open.length === 0 && <p className="lg__empty">{emptyMessage(shut.length)}</p>}
           {open.map((unit) => (
@@ -244,6 +271,7 @@ export function LedgerRoute() {
           ))}
           <NewUnit onDone={(events) => void commit(events)} />
         </section>
+        </>
         )}
 
         {!focused && pane === 'units' && shut.length > 0 && (
@@ -253,7 +281,10 @@ export function LedgerRoute() {
               {shut.map((unit) => (
                 <li key={unit.id}>
                   <button type="button" className="lg__closed-row" onClick={() => navigate(`/ledger/u/${unit.id}`)}>
-                    <b>{unit.substance}</b>
+                    <b>
+                      {unit.substance}
+                      {unit.single && <span className="lg__single-tag"> DOSE</span>}
+                    </b>
                     <span>
                       {unit.quantity} {unit.uom}
                     </span>
@@ -276,6 +307,20 @@ export function LedgerRoute() {
               unit={sheetUnit}
               onDone={(events) => void commit(events)}
               onCancel={() => setSheet(null)}
+            />
+          </div>
+        </div>
+      )}
+
+      {dosing && (
+        <div className="lg__scrim" onClick={() => setDosing(false)}>
+          <div className="lg__sheet-wrap" onClick={(e) => e.stopPropagation()}>
+            <SingleDoseSheet
+              onDone={(events) => {
+                setDosing(false)
+                void commit(events)
+              }}
+              onCancel={() => setDosing(false)}
             />
           </div>
         </div>

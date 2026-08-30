@@ -35,6 +35,7 @@ import { duration, reportOn, WINDOW_HOURS } from './analyze.ts'
 import { live, type IntakeRecord, type UnitRecord } from './project.ts'
 import { format, quantity as withUnit } from './uom.ts'
 import { Amount, Blank, Bound, Class, Figure, Instant, Span, pluralise, when } from './bits.tsx'
+import { Extras } from './Extras.tsx'
 
 const DISPOSITION: Record<string, string> = {
   consumed: 'Fully consumed',
@@ -79,9 +80,18 @@ export function Report({
         <span className={`lg__report-state lg__report-state--${unit.status}`}>
           {unit.status === 'active' ? 'OPEN' : 'CLOSED'}
         </span>
+        {unit.single && <span className="lg__single-tag">SINGLE DOSE</span>}
       </header>
 
       {unit.origin && <p className="lg__report-origin">{unit.origin}</p>}
+      <Extras extra={unit.extra} />
+      {unit.single && (
+        <p className="lg__hint">
+          A unit of one — opened, consumed and closed in a single action. Its dose counts in
+          every dose figure; it is kept out of every figure about units, because a lifetime
+          of zero is a fact about how it was logged rather than about how long it lasted.
+        </p>
+      )}
 
       <table className="lg__table">
         <tbody>
@@ -380,6 +390,7 @@ function Events({
             </div>
 
             {intake.note && <p className="lg__event-note">{intake.note}</p>}
+            <Extras extra={intake.extra} />
 
             {intake.corrections.map((c, i) => (
               <p key={i} className="lg__event-prov">

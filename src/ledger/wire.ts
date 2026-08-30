@@ -46,6 +46,7 @@
 import type {
   AdjustmentKind,
   Confidence,
+  Extra,
   Disposition,
   LedgerEvent,
   Measurement,
@@ -100,6 +101,10 @@ export function toWire(event: LedgerEvent): Wire {
           unit: event.uom,
           source_context: event.origin ?? null,
           note: event.note ?? null,
+          // Both ride in `data` where upstream reads past them. `single` is
+          // how a unit of one is told from a tracked unit on the way back in.
+          ...(event.single ? { single: true } : {}),
+          ...(event.extra && Object.keys(event.extra).length ? { extra: event.extra } : {}),
         }),
       }
 
@@ -116,6 +121,7 @@ export function toWire(event: LedgerEvent): Wire {
           confidence: event.confidence ?? null,
           descriptor: event.descriptor ?? null,
           note: event.note ?? null,
+          ...(event.extra && Object.keys(event.extra).length ? { extra: event.extra } : {}),
         }),
       }
 
@@ -228,6 +234,23 @@ export function serialize(event: LedgerEvent): string {
 // in
 
 const str = (v: unknown) => (typeof v === 'string' && v ? v : undefined)
+
+/**
+ * The extras bag, with anything that is not a string dropped.
+ *
+ * Written by this portal as strings and only strings, but the file is shared
+ * and hand-edited, so a number or a nested object arriving here is possible.
+ * Coercing it would invent a value; dropping it loses one key rather than
+ * making the whole row unreadable.
+ */
+function extraOf(value: unknown): Extra | undefined {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined
+  const out: Extra = {}
+  for (const [key, v] of Object.entries(value as Record<string, unknown>)) {
+    if (typeof v === 'string' && v) out[key] = v
+  }
+  return Object.keys(out).length ? out : undefined
+}
 const num = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) ? v : undefined)
 
 /**
@@ -270,6 +293,8 @@ export function fromWire(row: unknown): LedgerEvent | null {
         receivedAt: occurred,
         origin: str(data.source_context),
         note: str(data.note),
+        extra: extraOf(data.extra),
+        single: data.single === true,
       }
 
     case 'intake_logged': {
@@ -286,6 +311,7 @@ export function fromWire(row: unknown): LedgerEvent | null {
         confidence: str(data.confidence) as Confidence | undefined,
         descriptor: str(data.descriptor),
         note: str(data.note),
+        extra: extraOf(data.extra),
       }
     }
 

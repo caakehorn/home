@@ -1064,3 +1064,20 @@
 .wiki__card-plain {
   color: var(--n2);
 }
+
+/* The way into the page's own past. A chip rather than a second poster button
+   next to EDIT THIS PAGE: reading what a page used to say is a smaller act
+   than rewriting it, and the header should not offer them as equals. */
+.wiki__past {
+  cursor: pointer;
+  background: none;
+  letter-spacing: 0.12em;
+}
+
+.wiki__past:hover,
+.wiki__past:focus-visible,
+.wiki__past[aria-expanded='true'] {
+  color: var(--edge);
+  background: var(--n4);
+  border-color: var(--n4);
+}

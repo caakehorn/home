@@ -551,6 +551,22 @@ for (const entry of index.pages) {
 index.counts.revisions = revisionCount
 writeFileSync(join(OUT, 'index.json'), JSON.stringify(index))
 
+// The same two fields onto the page's own JSON. A reader on a page has loaded
+// that file and nothing else, and the header needs to say "12 revisions, last
+// touched three days ago" before anybody asks for the history — putting it here
+// is what keeps the panel's dataset (23 KB on average, 1.2 MB at the worst) a
+// deliberate click rather than a cost on every page view. It costs nothing:
+// these values change only when the page does, and the page's file is rewritten
+// then anyway.
+for (const page of summary) {
+  if (!page.updated) continue
+  const file = join(OUT, 'pages', `${page.slug.replace(/\//g, '__')}.json`)
+  const json = JSON.parse(readFileSync(file, 'utf8'))
+  json.updated = page.updated
+  json.revisions = page.revisions
+  writeFileSync(file, JSON.stringify(json))
+}
+
 const dated = summary.filter((p) => p.updated)
 writeFileSync(
   join(OUT, 'history.json'),

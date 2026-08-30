@@ -17,6 +17,18 @@ export type IndexEntry = {
   brief?: boolean
   /** A Reader's Digest twin exists for this page. */
   plain?: boolean
+  /**
+   * When the file actually last changed, from the wiki-brain git log — an ISO
+   * timestamp, not the frontmatter's `date_modified`. The two disagree on
+   * purpose: `date_modified` is what a session typed, and several operations
+   * deliberately leave it alone (a staged gap answer must not bump it, or every
+   * page reasoning from this one would have its staleness warning cleared by a
+   * page that has not actually been corrected). This is the file's own record.
+   * Absent for a page added since the last history build.
+   */
+  updated?: string
+  /** How many commits have touched this page. */
+  revisions?: number
   /** Map coordinates, baked at sync time. Roughly [-1, 1]. */
   x?: number
   y?: number
@@ -33,6 +45,8 @@ export type WikiIndex = {
     briefs?: number
     /** How many of `pages` have a Reader's Digest twin. */
     plain?: number
+    /** Commits across every page — the size of the record, not of the corpus. */
+    revisions?: number
     edges?: number
     /** How many of `pages` ship sealed. */
     sealed?: number
@@ -85,6 +99,9 @@ export type WikiPage = {
   h1?: string | null
   /** The plain-language twin, or null if none has been written. */
   plain?: PlainTwin | null
+  /** When the file actually last changed, and how often. See `IndexEntry`. */
+  updated?: string
+  revisions?: number
   /**
    * Sealed by `scripts/wiki-locks.mjs`. Everything but the slug, the domain and
    * the title is inside `lock`, and the fields above are empty until `open()`

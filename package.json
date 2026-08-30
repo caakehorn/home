@@ -12,6 +12,7 @@
     "typecheck": "tsc -b --noEmit",
     "briefs": "node --experimental-strip-types scripts/audit-briefs.mjs",
     "sage:check": "node --experimental-strip-types scripts/check-sage.mjs",
+    "ledger:check": "node --experimental-strip-types scripts/check-ledger.mjs",
     "leviathan": "node --experimental-strip-types scripts/build-leviathan.mjs",
     "transcript": "node scripts/sync-transcript.mjs",
     "accretion": "node --experimental-strip-types scripts/build-accretion.mjs",

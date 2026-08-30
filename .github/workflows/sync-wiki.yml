@@ -92,6 +92,19 @@ jobs:
 
       - run: npm run leviathan
 
+      # THE CORTEX's wiki instruments and THE CORE's structure read the same
+      # snapshot. They were absent here until 2026-08-29, which is why
+      # public/leviathan/wiki.json sat 33 pages behind the snapshot for eight
+      # days: nothing rebuilt it but a hand-run, and a wiki change that removed
+      # pages left it naming pages the site no longer had. Both must come after
+      # `npm run leviathan`, since build-core reads its chronology.json.
+      #
+      # Both were also changed to take generatedAt from the snapshot rather
+      # than the clock before being added here — as wall-clock builds they
+      # would have committed a diff and fired a deploy on every hourly run.
+      - run: npm run wiki-instruments
+      - run: npm run core
+
       # THE DOCKET reads the same snapshot. Its own generatedAt is the
       # snapshot's rather than the wall clock's, so it churns only when the
       # wiki does — see the note in scripts/build-docket.mjs.
@@ -102,7 +115,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add public/wiki public/leviathan public/docket
+          git add public/wiki public/leviathan public/docket public/core
           if git diff --cached --quiet; then
             echo 'changed=false' >> "$GITHUB_OUTPUT"
             echo 'Snapshot already current.'

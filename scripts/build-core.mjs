@@ -263,7 +263,12 @@ const typeAt = new Map(types.map((t, i) => [t.id, i]))
    ========================================================================== */
 
 const structure = {
-  generatedAt: new Date().toISOString().slice(0, 19) + 'Z',
+  // The snapshot's own stamp, not the wall clock — the same rule as
+  // build-docket.mjs. This file is committed and the sync workflow rebuilds it
+  // on every run whether or not the wiki moved, so a `new Date()` here commits
+  // a one-line JSON diff every hour and fires a deploy behind it. Keyed off the
+  // snapshot it is byte-identical until the wiki actually changes.
+  generatedAt: index.generatedAt,
   source: `${WIKI} · ${nodes.length} pages`,
   counts: {
     nodes: nodes.length,

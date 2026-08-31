@@ -86,7 +86,7 @@ export function SyncLight({ compact = false }: { compact?: boolean }) {
             <>
               <p className="synclight__lede">
                 <b>This page is behind the source.</b> The wiki you are reading is a snapshot,
-                rebuilt hourly from{' '}
+                rebuilt every few minutes from{' '}
                 <a href="https://github.com/caakehorn/wiki-brain" target="_blank" rel="noreferrer">
                   caakehorn/wiki-brain
                 </a>
@@ -123,7 +123,8 @@ export function SyncLight({ compact = false }: { compact?: boolean }) {
                 >
                   sync workflow
                 </a>{' '}
-                is what closes the gap, hourly or on a push.
+                is what closes the gap — on its own schedule every few minutes, or the moment
+                an edit is made from this site.
               </p>
             </>
           )}

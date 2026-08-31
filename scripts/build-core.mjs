@@ -37,7 +37,7 @@
  * That is the wrong shape for this repository and it failed in the way wrong
  * shapes do. The corpus is a wiki somebody writes in every day; `wiki/meta/`
  * alone carries three generated mirrors whose word counts move when the corpus
- * is merely *described*. The sync runs hourly. So every ordinary page edit
+ * is merely *described*. The sync runs every five minutes. So every ordinary page edit
  * upstream turned this check red, the snapshot froze at whatever it had last
  * managed to write, and the site kept deploying — green — from a corpus that
  * had stopped advancing. Between 2026-08-29 and 2026-08-30 that cost eight
@@ -69,7 +69,8 @@
  *
  * Every count is printed on every run either way, so the log still shows the
  * corpus moving. `docs/CORPUS.md` remains the data dictionary; what it no
- * longer is, is a set of constants an hourly robot must be kept in step with.
+ * longer is, is a set of constants a robot on a five-minute schedule must be
+ * kept in step with.
  */
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -92,8 +93,8 @@ const OUT = 'public/core'
  * not zero, and it is set from that precedent rather than from taste — 15%
  * clears the largest purge the record actually holds, with room.
  *
- * It is a cliff, not a tolerance. A fall past it in one hourly step is not
- * editing; it is a truncated read, a half-written snapshot, or a reader that
+ * It is a cliff, not a tolerance. A fall past it in one step is not editing; it
+ * is a truncated read, a half-written snapshot, or a reader that
  * stopped understanding the front matter, and every one of those loses far more
  * than a purge does. `floor` catches the same failure on a corpus small enough
  * that a percentage would not.
@@ -520,7 +521,7 @@ if (movement.length) {
     `\nA fall past ${((1 - COLLAPSE.fraction) * 100).toFixed(0)}% (or ${COLLAPSE.floor} items) in one build is not editing — it is a\n` +
       'truncated read or a half-written snapshot. Check the source wiki actually lost\n' +
       'this, then re-run with CORPUS_ACCEPT_DROP=1 to accept it and move the baseline.\n' +
-      'The hourly sync does not set that, on purpose: a drop this size wants a person.',
+      'The scheduled sync does not set that, on purpose: a drop this size wants a person.',
   )
   if (!process.env.CORPUS_ACCEPT_DROP) process.exit(1)
   console.error('  CORPUS_ACCEPT_DROP is set — accepted.')

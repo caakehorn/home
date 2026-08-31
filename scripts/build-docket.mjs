@@ -488,7 +488,7 @@ const field = index.pages
 
 const data = {
   // The snapshot's own stamp, not the wall clock. This file is committed, and
-  // the sync workflow rebuilds it hourly whether or not the wiki moved — so a
+  // the sync workflow rebuilds it on every scheduled run whether or not the wiki moved — so a
   // `new Date()` here would produce a one-line JSON diff every hour and a
   // commit to go with it. Keyed off the snapshot instead, the docket is
   // byte-identical until the wiki actually changes, which is also what makes

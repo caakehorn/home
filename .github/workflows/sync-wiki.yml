@@ -5,12 +5,38 @@ name: Sync the wiki snapshot
 # `wiki-updated` at this one, which re-derives the snapshot and redeploys, so
 # the edit is live for everyone rather than only in the browser that made it.
 on:
+  # The fast path, and it is still the fast path: the portal's own client fires
+  # this the moment somebody edits a page, asks a question or catches a word —
+  # `requestResync` in src/wiki/publish.ts, called from there and from
+  # src/sage/ask.ts and src/lexicon/submit.ts. Those reach the site in seconds
+  # and always have. Do not remove this trigger to simplify the schedule below.
   repository_dispatch:
     types: [wiki-updated]
   workflow_dispatch:
-  # A backstop, so an edit still lands if the dispatch never arrived.
+
+  # The other half, and since 2026-08-31 the primary one.
+  #
+  # An edit merged as a pull request in wiki-brain has no browser behind it, so
+  # nothing fires the dispatch above. That was meant to be covered by
+  # `notify-portal.yml` there, which needs a cross-repository token; the token
+  # went missing on 2026-08-28 and the workflow reported success while sending
+  # nothing for three days. Every agent-written page waited for this schedule,
+  # which was `17 * * * *` — up to a full hour, on the half of the corpus that
+  # moves most.
+  #
+  # So the schedule is the mechanism now rather than the safety net, and it is
+  # set to the shortest interval GitHub offers. Five minutes is a floor, not a
+  # promise: scheduled runs are delayed under load, so expect 5–15 in practice.
+  #
+  # This is affordable because a run that finds nothing costs only runner time,
+  # which is free on a public repository. The churn guard below restores the
+  # snapshot when only `generatedAt` moved, `git diff --cached --quiet` then
+  # exits before committing, and the deploy job is gated on `changed == 'true'`
+  # — so 288 runs a day produce exactly as many deploys as 24 did. At ~75s a run
+  # against a 300s interval, and with `concurrency` serialising them, they
+  # cannot pile up either.
   schedule:
-    - cron: '17 * * * *'
+    - cron: '*/5 * * * *'
 
 permissions:
   contents: write
@@ -145,7 +171,7 @@ jobs:
           # whatever moved main touched something else, so there is nothing to
           # conflict with. A conflict here would mean that assumption is wrong,
           # which is worth failing on rather than resolving blind — the next
-          # hourly run re-derives the whole snapshot from scratch regardless.
+          # scheduled run re-derives the whole snapshot from scratch regardless.
           for attempt in 1 2 3; do
             if git push; then
               echo 'changed=true' >> "$GITHUB_OUTPUT"

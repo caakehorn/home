@@ -62,13 +62,54 @@ jobs:
       - name: Check the intake ledger's arithmetic
         run: npm run ledger:check
 
-      # The gate's verifier, written from the repository secret so the
-      # passphrase never enters the repository. Without the secret the site
-      # deploys with the door unconfigured, which the gate says out loud
-      # rather than pretending to be locked.
+      # Which vault the door will be checked against, said out loud on every
+      # run.
+      #
+      # The comment that stood here claimed that without the secret "the site
+      # deploys with the door unconfigured". That is not what happens and never
+      # was: `public/gate/verify.enc` is committed, and on this deployment it is
+      # the source of truth — HOME_PASSPHRASE is unset, the rebuild is skipped,
+      # and the committed vault is what the gate decrypts against. A supported
+      # arrangement, but a skipped step reads exactly like a broken one, and a
+      # wrong sentence in a workflow nobody has reason to doubt survives for
+      # months. So the run now states which of the two vaults it shipped.
+      #
+      # ---- before ever setting HOME_PASSPHRASE, read this ------------------
+      #
+      # Turning that secret on is a change to this file, not a change in the
+      # settings page, because of two traps that both fail silently:
+      #
+      #   1. This job passes HOME_PASSPHRASE and never HOME_COMBINATION, and
+      #      `scripts/phrases.mjs` builds one blob per input it is given. The
+      #      rebuild would therefore write a one-way vault and the KEYPAD and
+      #      the DIAL would stop opening the door.
+      #   2. Nothing here runs `npm run keyring`. `scripts/make-verify.mjs` is
+      #      explicit that the two are rebuilt from the same inputs or not at
+      #      all: the gate stores whichever phrase opened it, and `keyring.enc`
+      #      is opened with that phrase. When they drifted apart on 2026-08-27
+      #      the door opened and every SAVE silently stopped committing.
       - name: Build the gate verifier
         if: env.HOME_PASSPHRASE != ''
-        run: npm run gate:verify
+        run: |
+          npm run gate:verify
+          echo '::notice::gate: verify.enc rebuilt from HOME_PASSPHRASE for this deploy.'
+
+      # The other half, and the one that had nothing to say for itself.
+      - name: Say which verifier is shipping
+        if: env.HOME_PASSPHRASE == ''
+        run: |
+          set -euo pipefail
+          if [ ! -f public/gate/verify.enc ]; then
+            echo '::error::No verifier: HOME_PASSPHRASE is unset AND public/gate/verify.enc is not committed.'
+            echo 'The gate would find nothing to check against, offer ENTER ANYWAY to every'
+            echo 'visitor, and the deploy would stay green while doing it. Refusing to ship that.'
+            exit 1
+          fi
+          echo '::notice::gate: HOME_PASSPHRASE is unset — shipping the committed public/gate/verify.enc.'
+          echo 'That is the supported arrangement here, not a failure.'
+          echo 'To change the door, rebuild BOTH artifacts from the same inputs and commit them:'
+          echo '  HOME_COMBINATION=.. HOME_PASSPHRASE=.. npm run gate:verify'
+          echo '  HOME_COMBINATION=.. HOME_PASSPHRASE=.. GITHUB_TOKEN=.. npm run keyring'
 
       # Project sites are served from /<repo>/, not the domain root. Taken
       # from GITHUB_REPOSITORY rather than github.event.repository, which is

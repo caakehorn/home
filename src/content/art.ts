@@ -1,5 +1,12 @@
 /* THE PLATES — image paths stay relative because this site deploys under /home/. */
-const asset = (file: string) => `${import.meta.env.BASE_URL}${file}`
+
+/**
+ * Exported because the built-in plates are no longer the only ones. A picture
+ * uploaded through THE SLATE ROOM lands in `public/art/` beside these and is
+ * listed in `board.json`, and a second implementation of this one line is a
+ * second place for the leading-slash bug below to come back.
+ */
+export const asset = (file: string) => `${import.meta.env.BASE_URL}${file}`
 
 export type Plate = {
   id: string

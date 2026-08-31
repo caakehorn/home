@@ -3,7 +3,7 @@ import { Crown } from '../components/Crown'
 import { Logo } from '../components/Logo'
 import { Marquee } from '../components/Marquee'
 import { Plate } from '../components/Plate'
-import { sceneById } from '../content/art'
+import { hangs } from '../content/slates'
 import { banner } from '../content/slogans'
 import { usePortal, useRig } from '../state/usePortal'
 import { useWikiIndex } from '../wiki/data'
@@ -163,13 +163,13 @@ export function Splash() {
           title card competing with two pictures at the same depth loses. */}
       <div className="splash__plates">
         <Plate
-          plate={sceneById('kiss-window')}
+          plate={hangs('door-left')}
           cut="shard"
           className="splash__plate splash__plate--l"
           eager
         />
         <Plate
-          plate={sceneById('kiss-neon')}
+          plate={hangs('door-right')}
           cut="torn"
           className="splash__plate splash__plate--r"
         />

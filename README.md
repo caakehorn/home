@@ -104,6 +104,33 @@ rather than following the vibe switch — an arcade is dark inside whatever the
 weather is doing — and its classes are namespaced `arc-*` so nothing in
 `punk.css` repaints them.
 
+### The slate room
+
+`/slates` is the other room with no chip in the nav bar, and it is about the
+building's own pictures. Every plate on this site is hung by a rule — a room
+takes the plate its index lands on in `SCENES`, the front door opens on
+whichever is third in the array — and none of that was ever a decision about
+*this* picture on *that* wall. The room makes it one, and it does the other
+half too: a JPEG or a PNG off a phone is decoded, rotated by its EXIF, resized
+to a stated longest edge and re-encoded as WebP in the browser, then committed
+into `public/art/` with its manifest row in the same commit.
+
+Three surfaces. **INTAKE** converts and commits, previewing the result as a
+real `<Plate>` — cut, screened and washed in the current palette — because the
+only question worth asking of a new picture is whether it works that way.
+**THE BOARD** lists every wall the site reads and what is on it; the two pools
+(every wiki page, every transmission) get toggles instead, since 486 pages
+hashing over a set is a different question from one wall holding one plate.
+**THE ROSTER** is the same board read from the picture's side — where does this
+one show up — and the only place a plate comes down.
+
+`src/content/board.json` is the whole of the overriding, and an empty board is
+the old rule exactly. `npm run slates:check` asserts that in the deploy job,
+along with every way the file can name something that is not there. The
+conversion is deliberately the narrow one: no crop, no letterbox scan, no
+knockout. Those need `sharp` and stay in `scripts/build-art.mjs`, which is
+committed beside its output, and the room says so on its first screen.
+
 ### The intake ledger
 
 `/ledger` is the tenth room and the only one with no chip in the nav bar. It is

@@ -53,6 +53,9 @@ const WritingDashboardRoute = lazy(() =>
 const LeviathanRoute = lazy(() =>
   import('./routes/Leviathan').then((m) => ({ default: m.LeviathanRoute })),
 )
+const MinimartRoute = lazy(() =>
+  import('./routes/Minimart').then((m) => ({ default: m.MinimartRoute })),
+)
 const LedgerRoute = lazy(() => import('./routes/Ledger').then((m) => ({ default: m.LedgerRoute })))
 const LineageRoute = lazy(() =>
   import('./routes/Lineage').then((m) => ({ default: m.LineageRoute })),
@@ -127,6 +130,7 @@ function Site() {
           <Route path="/ledger/u/:unit" element={<LedgerRoute />} />
           <Route path="/leviathan" element={<LeviathanRoute />} />
           <Route path="/leviathan/:id" element={<LeviathanRoute />} />
+          <Route path="/minimart" element={<MinimartRoute />} />
           <Route path="/sage" element={<SageRoute />} />
           <Route path="/words" element={<WordsRoute />} />
           <Route path="/transcript" element={<TranscriptRoute />} />

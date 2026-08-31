@@ -117,6 +117,17 @@ export const SECTIONS: Section[] = [
     chant: banner('arcade'),
   },
   {
+    slug: 'minimart',
+    title: "JERAD'S METRIC MINIMART",
+    short: 'MINIMART',
+    kana: '計数',
+    blurb:
+      "Every other room counts something about Dan. This one counts the two repositories that build the rooms that do — lines of code, commits, pull requests, and how many of them a coding agent made rather than a human at a keyboard. Open for business, receipts included.",
+    status: 'LIVE',
+    accent: 2,
+    chant: banner('minimart'),
+  },
+  {
     slug: 'blog',
     title: 'TRANSMISSIONS',
     kana: '通信',

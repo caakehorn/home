@@ -2,8 +2,7 @@
   "note": "Written by THE SLATE ROOM at /slates. Hand-editable, but the room is the front door.",
   "plates": [],
   "walls": {
-    "void-1": "kiss-dark",
-    "void-3": "kiss-butterfly"
+    "room:lineage": "kiss-window"
   },
   "pools": {}
 }

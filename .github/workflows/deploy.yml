@@ -62,6 +62,14 @@ jobs:
       - name: Check the intake ledger's arithmetic
         run: npm run ledger:check
 
+      # And the slate board, which is the only dataset here written by a form
+      # in a browser rather than by a script in this job. Every way it can be
+      # wrong — a plate id nobody has, a filename with no file behind it, a
+      # wall no component reads — renders as the fallback, which is to say as
+      # a working site with the wrong pictures on it.
+      - name: Check the slate board
+        run: npm run slates:check
+
       # Which vault the door will be checked against, said out loud on every
       # run.
       #

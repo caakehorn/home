@@ -190,10 +190,8 @@ export const poolById = (id: string) => POOLS.find((p) => p.id === id)
 const tone = (n: number): 1 | 2 | 3 | 4 | 5 =>
   (n >= 1 && n <= 5 ? Math.round(n) : 3) as 1 | 2 | 3 | 4 | 5
 
-export const BOARD: Board = board as Board
-
-/** The uploaded plates, as `Plate`s the drawing components already understand. */
-export const UPLOADED: Plate[] = (BOARD.plates ?? []).map((p) => ({
+/** An uploaded row, as the `Plate` the drawing components already understand. */
+export const toPlate = (p: Uploaded): Plate => ({
   id: p.id,
   src: asset(`art/${p.file}`),
   w: p.w,
@@ -201,51 +199,43 @@ export const UPLOADED: Plate[] = (BOARD.plates ?? []).map((p) => ({
   alt: p.alt,
   kana: p.kana,
   tone: tone(p.tone),
-}))
+})
 
-/** Everything hangable: the twelve cut by hand, then everything uploaded. */
-export const ROSTER: Plate[] = [...SCENES, ...UPLOADED]
-
-export const plateById = (id: string): Plate | undefined => ROSTER.find((p) => p.id === id)
-
-/** The uploaded record behind a plate, if it was uploaded rather than cut. */
-export const uploadById = (id: string): Uploaded | undefined =>
-  (BOARD.plates ?? []).find((p) => p.id === id)
+/** Everything hangable on a given board: the twelve cut by hand, then uploads. */
+export const rosterOf = (board: Board): Plate[] => [
+  ...SCENES,
+  ...(board.plates ?? []).map(toPlate),
+]
 
 /**
- * What hangs on a wall.
+ * What hangs on a wall, on a given board.
  *
  * Falls back twice, and the second one matters: a board naming a plate that
- * has since been removed from `public/art/` would otherwise return undefined
- * and blank the largest object on the page. The check script catches that
- * case in CI; this catches it in the browser of somebody running an older
- * deploy against a newer board.
+ * has since been taken down would otherwise return undefined and blank the
+ * largest object on the page. `check-slates.mjs` catches that in CI; this
+ * catches it in the browser of somebody on an older deploy.
  */
-export function hangs(wallId: string): Plate {
+export function hangsOn(board: Board, wallId: string): Plate {
+  const roster = rosterOf(board)
+  const find = (id: string | undefined) => (id ? roster.find((p) => p.id === id) : undefined)
   const wall = wallById(wallId)
-  const chosen = BOARD.walls?.[wallId]
-  return (
-    (chosen ? plateById(chosen) : undefined) ??
-    (wall ? plateById(wall.fallback) : undefined) ??
-    ROSTER[0]
-  )
+  return find(board.walls?.[wallId]) ?? find(wall?.fallback) ?? roster[0]
 }
 
-/** The plate ids a pool may draw from, in board order. */
-export function poolPlates(poolId: string): string[] {
-  const pool = poolById(poolId)
-  const chosen = (BOARD.pools?.[poolId] ?? []).filter((id) => plateById(id))
+/** The plate ids a pool draws from on a given board, in board order. */
+export function poolOf(board: Board, poolId: string): string[] {
+  const roster = rosterOf(board)
+  const chosen = (board.pools?.[poolId] ?? []).filter((id) => roster.some((p) => p.id === id))
   if (chosen.length) return chosen
-  return pool ? pool.fallback : SCENE_ORDER
+  return poolById(poolId)?.fallback ?? SCENE_ORDER
 }
 
 /**
  * A stable index into a pool for one page path.
  *
- * The hash is `SectionArt`'s, unchanged and deliberately so: the index is what
- * picks the cut and the side as well as the picture, and moving to a different
- * hash would reshuffle the layout of 486 pages that nobody asked to have
- * reshuffled.
+ * The hash is `SectionArt`'s, unchanged and deliberately so: the index picks
+ * the cut and the side as well as the picture, and a different hash would
+ * reshuffle the layout of 486 pages nobody asked to have reshuffled.
  */
 export function hash(input: string): number {
   let h = 0
@@ -253,9 +243,31 @@ export function hash(input: string): number {
   return Math.abs(h)
 }
 
-/** Which plate a pooled page opens on, and the index that drew it. */
-export function draws(poolId: string, key: string): { plate: Plate; index: number } {
-  const ids = poolPlates(poolId)
+/** Which plate a pooled page opens on, on a given board, and the index that drew it. */
+export function drawsFrom(board: Board, poolId: string, key: string): { plate: Plate; index: number } {
+  const ids = poolOf(board, poolId)
+  const roster = rosterOf(board)
   const index = hash(key) % ids.length
-  return { plate: plateById(ids[index]) ?? ROSTER[0], index }
+  return { plate: roster.find((p) => p.id === ids[index]) ?? roster[0], index }
 }
+
+/* --------------------------------------------------------------------------
+   The board this deploy was built with
+
+   Everything above takes a board; everything below is that same thing bound
+   to the committed one, which is what the site itself draws from. THE SLATE
+   ROOM works on a copy and never touches these.
+   -------------------------------------------------------------------------- */
+
+export const BOARD: Board = board as Board
+export const ROSTER: Plate[] = rosterOf(BOARD)
+
+export const plateById = (id: string): Plate | undefined => ROSTER.find((p) => p.id === id)
+
+/** The uploaded record behind a plate, if it was uploaded rather than cut. */
+export const uploadById = (id: string): Uploaded | undefined =>
+  (BOARD.plates ?? []).find((p) => p.id === id)
+
+export const hangs = (wallId: string): Plate => hangsOn(BOARD, wallId)
+export const poolPlates = (poolId: string): string[] => poolOf(BOARD, poolId)
+export const draws = (poolId: string, key: string) => drawsFrom(BOARD, poolId, key)

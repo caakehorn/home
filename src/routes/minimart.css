@@ -1,0 +1,246 @@
+/* ==========================================================================
+   JERAD'S METRIC MINIMART — 計数
+
+   A shop front for a room whose stock is entirely arithmetic: five tiles at
+   the top for the combined till, then one shelf per repository. The tube is
+   --n2, the same warm accent THE NET and THE GALLERY run, chosen because this
+   room is playful furniture around serious counting rather than an argument
+   — it does not compete with --n4 (THE DOCKET's red-for-unresolved) or
+   --n3 (THE WIKI-BRAIN's own colour).
+   ========================================================================== */
+
+.mm {
+  position: relative;
+  z-index: 1;
+  min-height: 100%;
+  background:
+    radial-gradient(85% 40% at 50% 0%, color-mix(in srgb, var(--n2) 16%, transparent), transparent 72%),
+    var(--void);
+}
+
+/* ---- masthead ------------------------------------------------------------ */
+
+.mm__mast {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 0.3rem 1rem;
+  padding-block: clamp(1.6rem, 5vh, 3rem) 0.4rem;
+}
+
+.mm__title {
+  font-size: clamp(1.4rem, 5.4vw, 3.4rem);
+  line-height: 0.98;
+}
+
+.mm__kana {
+  font-size: clamp(1.6rem, 5vw, 3.4rem);
+  line-height: 1;
+  color: var(--n2);
+  text-shadow: 0 0 calc(var(--glow-r) * 0.8) var(--n2);
+}
+
+.mm__note {
+  grid-column: 1 / -1;
+  max-width: 82ch;
+  font-size: var(--step-0);
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+.mm__note code {
+  font-family: var(--f-mono);
+  font-size: 0.9em;
+  color: var(--text);
+}
+
+.mm__status {
+  padding-block: 2rem;
+  font-family: var(--f-mono);
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+
+.mm__status--error {
+  color: #ff5c5c;
+}
+
+/* ---- the till: five combined tiles ---------------------------------------- */
+
+.mm__till {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  gap: 1px;
+  margin-block: 1.2rem;
+  background: color-mix(in srgb, var(--n2) 30%, transparent);
+  border: 1px solid color-mix(in srgb, var(--n2) 30%, transparent);
+}
+
+.mm-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 1rem 1.1rem;
+  background: var(--void);
+}
+
+.mm-tile__value {
+  font-family: var(--f-mono);
+  font-size: clamp(1.4rem, 3.4vw, 2.1rem);
+  font-weight: 700;
+  color: var(--text);
+}
+
+.mm-tile__label {
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--n2);
+}
+
+.mm-tile__sub {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+}
+
+.mm-tile--flag .mm-tile__sub {
+  color: #ff5c5c;
+  font-family: var(--f-mono);
+  letter-spacing: 0.04em;
+}
+
+/* ---- the shelves ------------------------------------------------------- */
+
+.mm__shelves {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  gap: 1.4rem;
+  margin-block: 1.6rem;
+}
+
+.mm-shelf {
+  border: 1px solid color-mix(in srgb, var(--n2) 34%, transparent);
+  padding: 1.1rem 1.2rem 1.3rem;
+  background: color-mix(in srgb, var(--n2) 4%, transparent);
+}
+
+.mm-shelf__head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.8rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--n2) 34%, transparent);
+  padding-bottom: 0.5rem;
+}
+
+.mm-shelf__head h3 {
+  font-size: 1.1rem;
+  letter-spacing: 0.04em;
+}
+
+.mm-shelf__subtitle {
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}
+
+.mm-shelf__stats {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0 0 0.9rem;
+}
+
+.mm-shelf__stats > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.86rem;
+}
+
+.mm-shelf__stats dt {
+  color: var(--text-dim);
+}
+
+.mm-shelf__stats dd {
+  margin: 0;
+  font-family: var(--f-mono);
+  text-align: right;
+}
+
+.mm-shelf__soft {
+  color: var(--text-dim);
+  font-size: 0.82em;
+}
+
+.mm-shelf__scope {
+  margin: 0 0 1rem;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: var(--text-dim);
+  border-left: 2px solid color-mix(in srgb, var(--n2) 42%, transparent);
+  padding-left: 0.6rem;
+}
+
+.mm-shelf__authors {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.mm-shelf__authors caption {
+  text-align: left;
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--n2);
+  margin-bottom: 0.4rem;
+}
+
+.mm-shelf__authors th,
+.mm-shelf__authors td {
+  padding: 0.28rem 0;
+  border-top: 1px solid color-mix(in srgb, var(--n2) 20%, transparent);
+  text-align: left;
+  font-weight: 400;
+}
+
+.mm-shelf__authors td {
+  text-align: right;
+  font-family: var(--f-mono);
+}
+
+/* ---- the receipt --------------------------------------------------------- */
+
+.mm__receipt {
+  max-width: 72ch;
+  margin: 2rem auto 3rem;
+  padding-top: 1.4rem;
+  border-top: 1px dashed color-mix(in srgb, var(--n2) 40%, transparent);
+  font-size: 0.84rem;
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+.mm__receipt-title {
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  color: var(--n2);
+  margin-bottom: 0.7rem;
+}
+
+.mm__receipt code {
+  font-family: var(--f-mono);
+  font-size: 0.92em;
+  color: var(--text);
+}
+
+.mm__receipt-stamp {
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  margin-top: 1rem;
+}

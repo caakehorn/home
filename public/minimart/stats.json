@@ -1,0 +1,98 @@
+{
+  "generatedAt": "2026-08-31T21:08:44Z",
+  "repos": {
+    "home": {
+      "name": "caakehorn/home",
+      "commits": {
+        "total": 124,
+        "firstCommit": "2026-08-22",
+        "lastCommit": "2026-08-31",
+        "ageDays": 10,
+        "byAuthor": {
+          "Claude": 44,
+          "caakehorn": 41,
+          "github-actions[bot]": 30,
+          "Dan Frank": 9
+        },
+        "codingAgentSessions": {
+          "count": 13,
+          "spanHours": 81.5
+        }
+      },
+      "pullRequests": {
+        "total": 99,
+        "merged": 93,
+        "capturedAt": "2026-08-31"
+      },
+      "linesOfCode": {
+        "scope": "src/ and scripts/ — application and build-script code. Excludes committed data payloads (public/**, leviathan/*.json), lockfiles, node_modules and dist.",
+        "files": 258,
+        "lines": 67159,
+        "byArea": {
+          "src/ (.ts/.tsx/.css)": {
+            "files": 231,
+            "lines": 58557
+          },
+          "scripts/ (.mjs)": {
+            "files": 27,
+            "lines": 8602
+          }
+        }
+      }
+    },
+    "wikiBrain": {
+      "name": "caakehorn/wiki-brain",
+      "commits": {
+        "total": 305,
+        "firstCommit": "2026-08-16",
+        "lastCommit": "2026-08-31",
+        "ageDays": 15,
+        "byAuthor": {
+          "caakehorn": 189,
+          "Claude": 113,
+          "Dan Frank": 3
+        },
+        "codingAgentSessions": {
+          "count": 24,
+          "spanHours": 69
+        }
+      },
+      "pullRequests": {
+        "total": 231,
+        "merged": 219,
+        "capturedAt": "2026-08-31"
+      },
+      "linesOfCode": {
+        "scope": "bin/ and tests/*.py — the tool code. wiki/ is corpus content, not code; its size is reported separately, in wikiContentLines below, and never added to the code total.",
+        "files": 39,
+        "lines": 18363,
+        "byArea": {
+          "bin/ (all files)": {
+            "files": 31,
+            "lines": 14958
+          },
+          "tests/ (.py)": {
+            "files": 8,
+            "lines": 3405
+          }
+        }
+      },
+      "wikiContentLines": {
+        "files": 473,
+        "lines": 85559
+      }
+    }
+  },
+  "combined": {
+    "commits": 429,
+    "pullRequests": {
+      "total": 330,
+      "merged": 312
+    },
+    "linesOfCode": 85522,
+    "codingAgentSessions": {
+      "count": 37,
+      "spanHours": 150.5
+    }
+  }
+}

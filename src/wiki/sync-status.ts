@@ -6,8 +6,8 @@ import { useWikiIndex, type WikiSource } from './data'
  *
  * ---- why this is a thing on the page at all --------------------------------
  *
- * `public/wiki/` is a derived snapshot of caakehorn/wiki-brain, rebuilt hourly
- * and on dispatch. When that rebuild stops, nothing about the site looks wrong:
+ * `public/wiki/` is a derived snapshot of caakehorn/wiki-brain, rebuilt every
+ * five minutes and on dispatch. When that rebuild stops, nothing about the site looks wrong:
  * the deploy is a separate workflow, it stays green, and it keeps shipping the
  * last snapshot that managed to build. On 2026-08-29 the sync went red on a
  * corpus assertion and stayed red for two days — the site served a frozen wiki

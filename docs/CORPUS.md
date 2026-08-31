@@ -23,7 +23,7 @@ pipeline; do not wire a build to require that they still hold.
 That distinction was learned the hard way and is worth the paragraph.
 `scripts/build-core.mjs` used to assert eight of the figures on this page for
 exact equality, on the reasoning in §8 — and the corpus it describes is a wiki
-somebody writes in every day, synced hourly. So an ordinary page edit upstream
+somebody writes in every day, synced every five minutes. So an ordinary page edit upstream
 turned the sync red, the snapshot froze, and the site went on deploying green
 from a corpus that had stopped advancing: eight days of `wiki.json`, then 22 of
 25 Reader's Digest twins, merged and never published. Worse, the remedy for

@@ -59,7 +59,7 @@ export const EDGES = [1600, 1280, 960, 640] as const
 export const MAX_BYTES = 4_000_000
 
 /** Above this the room says so. The whole existing folder is ~540 kB. */
-export const HEAVY_BYTES = 400_000
+export const HEAVY_BYTES = 409_600
 
 const ACCEPTED = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif']
 

@@ -37,13 +37,26 @@
   margin: 0;
 }
 
+/* The house pattern is a kana pinned to the top right of the masthead — see
+   `.lex__mast-kana`. It works there because THE NET is seven characters. THE
+   SLATE ROOM is fourteen and runs under it on a phone, so the kana only goes
+   absolute once there is room for it beside the title. */
 .sl__mast-kana {
-  position: absolute;
-  top: 1rem;
-  right: 0;
-  font-size: clamp(2rem, 6vw, 3.4rem);
+  display: block;
+  margin-top: 0.6rem;
+  font-size: clamp(2rem, 9vw, 3.4rem);
+  line-height: 1;
   color: color-mix(in srgb, var(--n3) 55%, transparent);
   pointer-events: none;
+}
+
+@media (min-width: 40rem) {
+  .sl__mast-kana {
+    position: absolute;
+    top: 1rem;
+    right: 0;
+    margin-top: 0;
+  }
 }
 
 /* The ATLAS stamp, in this room's words. Deliberately loud and deliberately
@@ -257,7 +270,8 @@
 
 .sl__slider {
   width: 100%;
-  min-height: 2.6rem;
+  /* 2.6rem measured 42px, which is under the coarse-pointer floor by two. */
+  min-height: 2.75rem;
   accent-color: var(--n5);
 }
 
@@ -369,14 +383,30 @@
 }
 
 .sl__preview {
+  display: grid;
+  gap: 1.2rem;
+  align-items: center;
   margin: 1.8rem 0 0;
   padding: 1.2rem;
   border: 2px solid color-mix(in srgb, var(--text-dim) 30%, transparent);
   background: var(--void-2);
 }
 
+/* Wide enough for two columns, and the plate stops growing: past about 26rem
+   it is bigger than it will ever be drawn on the site, which makes the
+   preview a worse answer to the only question it is here to settle. */
+@media (min-width: 46rem) {
+  .sl__preview {
+    grid-template-columns: minmax(0, 26rem) 1fr;
+  }
+}
+
 .sl__preview-plate {
   max-width: min(100%, 26rem);
+}
+
+.sl__preview figcaption {
+  margin: 0;
 }
 
 .sl__actions {

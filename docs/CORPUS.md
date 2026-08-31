@@ -56,7 +56,7 @@ public/transcript/    index + 91 month files — 134,348 messages
 public/leviathan/     10 derived instrument datasets
 public/gallery/       manifest + 41 media files
 public/agent/         generated at build time (gitignored)
-public/art/           11 webp plates          public/ally/  5 photographs
+public/art/           14 webp plates          public/ally/  5 photographs
 public/gate/          two AES-GCM vaults — not data
 src/content/          sections, art manifests, crawl copy, slogans
 src/lineage/data.ts   a transcribed 515-person GEDCOM, reduced to 47
@@ -516,16 +516,35 @@ item. The manifest is fully derived — `build-gallery.mjs` parses JPEG SOF / PN
 IHDR / GIF / WebP VP8 headers for intrinsic size so cards lay out before media
 arrives.
 
-**`public/art/`** — 11 WebP (~563 KB), no JSON. Manifest is `SCENES` (9 entries)
-in `src/content/art.ts`. **Nine sections ↔ nine scenes, mapped by array index —
-a tenth section wraps onto `brain`'s plate unless a tenth scene is added.**
+**`public/art/`** — 14 WebP (~570 KB), no JSON. Two manifests, and the second
+one overrules the first:
+
+- `SCENES` (12 entries) in `src/content/art.ts` — the plates cut by
+  `scripts/build-art.mjs`, each `{ id, src, w, h, alt, kana, tone }`. Two more
+  files (`face-back`, `face-front`) are not scenes: they fill the silhouettes
+  in `src/components/Kiss.tsx` and are reached through `KISS_FACES`.
+  **Twelve sections ↔ twelve scenes, mapped by array index — a thirteenth
+  section wraps onto `brain`'s plate unless a thirteenth scene is added.**
+- `src/content/board.json` — the hand-assignment, written by THE SLATE ROOM at
+  `/slates`. `{ note?, plates[], walls{}, pools{} }`: `plates` are pictures
+  uploaded through the room (`{ id, file, w, h, alt, kana, tone, added, from?,
+  bytes? }`, files sitting beside the cut ones in `public/art/`), `walls` maps
+  a wall id to a plate id, `pools` maps `wiki`/`blog` to the plate ids their
+  path hashes may draw from. **An empty board is the index rule above,
+  exactly.** `src/content/slates.ts` is the registry of what is assignable and
+  the only place either manifest is resolved; `scripts/check-slates.mjs`
+  (`npm run slates:check`, run in the deploy job) fails the build on a plate
+  id nobody has, a filename with no file behind it, or a wall no component
+  reads.
 
 **`public/ally/`** — 5 JPEGs (~329 KB). Manifest is `ALLY` (5 entries) in the same
 file, each with a dated quote and a wiki deep link.
 
-**`src/content/`** — `sections.ts` (9 rooms), `art.ts` (`SCENES`, `ALLY`,
-`SCENE_ORDER`, `KISS_FACES`), `crawls.ts` (`RATIO` 165 entries, `JET_FUEL` 17,
-both deduped), `slogans.ts` (~12 lines, shuffled per seed by `banner()`).
+**`src/content/`** — `sections.ts` (12 rooms), `art.ts` (`SCENES`, `ALLY`,
+`SCENE_ORDER`, `KISS_FACES`, `asset`), `slates.ts` (`WALLS` 18, `POOLS` 2, and
+the resolvers `hangsOn` / `poolOf` / `drawsFrom`), `board.json` (the
+assignment), `crawls.ts` (`RATIO` 165 entries, `JET_FUEL` 17, both deduped),
+`slogans.ts` (~12 lines, shuffled per seed by `banner()`).
 
 **`src/lineage/data.ts`** — a 515-person / 218-family GEDCOM reduced to `PEOPLE`
 (~47 records: `{id,name,gen,line,slot,born,died,birthPlace,deathPlace,wiki,

@@ -131,7 +131,10 @@ export function BoardPane({ board, onChange }: Props) {
                       value={chosen}
                       onChange={(e) => hang(wallId, e.target.value)}
                     >
-                      <option value="">— leave it to the code · {fallback?.id} —</option>
+                      {/* The plate name comes first because a `<select>` this
+                          narrow truncates, and the one word worth keeping is
+                          which picture you get back. */}
+                      <option value="">↺ {fallback?.id} — the code's choice</option>
                       {roster.map((p) => (
                         <option key={p.id} value={p.id}>
                           {p.id}

@@ -1,6 +1,8 @@
 {
   "note": "Written by THE SLATE ROOM at /slates. Hand-editable, but the room is the front door.",
   "plates": [],
-  "walls": {},
+  "walls": {
+    "void-1": "kiss-dark"
+  },
   "pools": {}
 }

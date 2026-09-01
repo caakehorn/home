@@ -123,6 +123,22 @@ const FIXTURES = [
     expect: { rows: 0 },
   },
   {
+    name: 'imessage-named-target',
+    tool: 'imessage',
+    why: 'A contact picked from the address book: the name has to reach the rows.',
+    answers: {
+      home: '$HOME',
+      target: 'number',
+      handle: 'Annie Example <+1 555 010 4477>',
+      scope: 'handle',
+      window: 'all',
+      format: 'csv',
+    },
+    // The same eight rows as the handle-scope fixture; what is checked here is
+    // that the emitted CASE compiles and stamps the name onto every one of them.
+    expect: { rows: 8, named: 'Annie Example' },
+  },
+  {
     name: 'imessage-everyone-all-txt',
     tool: 'imessage',
     why: 'Every message, as a transcript. The widest query the tool can emit.',
@@ -175,9 +191,11 @@ function sqlBlocks(script) {
 
 async function main() {
   const entryPath = await bundle()
-  const { MODULES, sh, sq, slug, heredoc, parseRange, encodeRange, parseDay } = await import(
-    `file://${entryPath}`
-  )
+  const {
+    MODULES, sh, sq, slug, heredoc,
+    parseRange, encodeRange, parseDay,
+    fromGoogleCsv, fromVcard, parseContacts, findContacts,
+  } = await import(`file://${entryPath}`)
 
   mkdirSync(GOLDEN, { recursive: true })
 
@@ -229,6 +247,107 @@ async function main() {
     if (!parseRange(bad).error) note(`parseRange accepted ${JSON.stringify(bad)}, which is not a window`)
   }
   if (parseDay('31 feb 2019') !== null) note('parseDay rolled 31 February into a real date')
+
+  /* ---- 0c. the contacts parsers ----------------------------------------- */
+  // The CSV cases are the ones that matter. A field may hold a comma, a
+  // newline and a doubled quote, and a parser that splits on commas shifts
+  // every column after the offending row — which puts phone numbers in the
+  // name column and is noticed only when an export comes back empty.
+  const CSV_TRICKY = [
+    'Name,Phone 1 - Value,E-mail 1 - Value',
+    '"Example, Annie",+1 555 010 4477,annie@example.com',
+    '"He said ""hello""",5550104477,',
+    '"Two',
+    'lines",+447700900123,uk@example.com',
+    'No Number,,',
+  ].join('\n')
+
+  const csv = fromGoogleCsv(CSV_TRICKY)
+  const csvWant = [
+    ['Example, Annie', '+1 555 010 4477'],
+    ['He said "hello"', '5550104477'],
+    ['Two\nlines', '+447700900123'],
+  ]
+  if (csv.contacts.length !== 3) {
+    note(
+      `Google CSV: parsed ${csv.contacts.length} contacts, expected 3.`,
+      `  got: ${JSON.stringify(csv.contacts.map((c) => c.name))}`,
+    )
+  } else {
+    csvWant.forEach(([name, first], i) => {
+      if (csv.contacts[i].name !== name) {
+        note(
+          `Google CSV row ${i}: name is ${JSON.stringify(csv.contacts[i].name)}, wanted ${JSON.stringify(name)}.`,
+          '  A quoted field holding a comma, a doubled quote or a newline was mis-split.',
+        )
+      }
+      if (csv.contacts[i].handles[0] !== first) {
+        note(
+          `Google CSV row ${i}: first handle is ${JSON.stringify(csv.contacts[i].handles[0])}, wanted ${JSON.stringify(first)}.`,
+          '  Columns shifted — the usual sign of a naive comma split.',
+        )
+      }
+    })
+  }
+  if (csv.skipped !== 1) {
+    note(`Google CSV: reported ${csv.skipped} skipped, expected 1 (the contact with no number).`)
+  }
+
+  // Folded lines, an item-prefixed property, and two handles on one card.
+  //
+  // The fold is subtle and this fixture is written to the spec rather than to
+  // intuition: unfolding removes the line break AND the single whitespace that
+  // follows it, so an exporter that wants a space in the output puts it BEFORE
+  // the break. A fixture with the space after the break is asserting that the
+  // parser should insert one, which would be wrong — real exporters fold at 75
+  // octets, mid-word, and a parser that added a space there would corrupt every
+  // long name it touched.
+  const VCF = [
+    'BEGIN:VCARD', 'VERSION:3.0',
+    'N:Example;Annie;;;', 'FN:Annie Example',
+    'item1.TEL;type=CELL:+1 555 010 4477',
+    'EMAIL;type=INTERNET:annie@example.com',
+    'END:VCARD',
+    'BEGIN:VCARD', 'VERSION:3.0',
+    'FN:A Name Long Enough That The Exporter Wrapped ',
+    ' It Across A Line',
+    'TEL:+447700900123',
+    'END:VCARD',
+    'BEGIN:VCARD', 'VERSION:3.0', 'FN:No Handles', 'END:VCARD',
+  ].join('\r\n')
+
+  const vcf = fromVcard(VCF)
+  if (vcf.contacts.length !== 2) {
+    note(
+      `vCard: parsed ${vcf.contacts.length} contacts, expected 2.`,
+      `  got: ${JSON.stringify(vcf.contacts.map((c) => c.name))}`,
+    )
+  } else {
+    if (vcf.contacts[0].handles.length !== 2) {
+      note(
+        'vCard: the item-prefixed TEL or the EMAIL was dropped.',
+        `  handles: ${JSON.stringify(vcf.contacts[0].handles)}`,
+      )
+    }
+    const folded = 'A Name Long Enough That The Exporter Wrapped It Across A Line'
+    if (vcf.contacts[1].name !== folded) {
+      note('vCard: a folded line was not unfolded.', `  got: ${JSON.stringify(vcf.contacts[1].name)}`)
+    }
+  }
+  if (parseContacts('x.vcf', VCF).format !== 'vcard') note('parseContacts misread a .vcf as CSV.')
+  if (parseContacts('x.csv', CSV_TRICKY).format !== 'google-csv') {
+    note('parseContacts misread a .csv as vCard.')
+  }
+
+  // Finding by digits: the whole point is that a stored "+1 (555) 010-4477" is
+  // found by typing 5550104477 — the same normalisation the SQL does.
+  const found = findContacts(csv.contacts, '5550104477')
+  if (!found.some((c) => c.name === 'Example, Annie')) {
+    note(
+      'findContacts did not match a formatted number by its digits.',
+      `  got: ${JSON.stringify(found.map((c) => c.name))}`,
+    )
+  }
 
   /* ---- 1-3. every fixture ------------------------------------------------ */
   const queryFiles = []
@@ -312,7 +431,7 @@ async function main() {
       const path = join(GOLDEN, `.${fx.name}.${marker}.sql`)
       writeFileSync(path, sql)
       queryFiles.push(path)
-      wanted.push({ fixture: fx.name, marker, rows: fx.expect.rows })
+      wanted.push({ fixture: fx.name, marker, rows: fx.expect.rows, named: fx.expect.named })
     }
   }
 
@@ -348,6 +467,19 @@ async function main() {
         `${want.fixture} / ${want.marker}: returned ${result.rows} rows, expected ${want.rows}.`,
         '  The expectation is hand-computed from scripts/tool-chatdb.py. One of the two is wrong.',
       )
+    }
+    // A name that reaches the SQL but not the rows is the failure worth
+    // catching: the CASE compiles either way, and an export full of blank names
+    // reads as though the address book simply had no match for that person.
+    if (want.named) {
+      const at = result.columns?.indexOf('contact_name') ?? -1
+      const stamped = at >= 0 && result.values.every((row) => row[at] === want.named)
+      if (!stamped) {
+        note(
+          `${want.fixture} / ${want.marker}: contact_name is not "${want.named}" on every row.`,
+          `  got: ${JSON.stringify((result.values[0] ?? [])[at] ?? null)}`,
+        )
+      }
     }
   })
 
@@ -425,6 +557,7 @@ async function main() {
   console.log(`THE TOOL — ${FIXTURES.length} fixtures, ${queryFiles.length} queries run against a synthetic chat.db`)
   console.log('  deterministic, golden, valid bash, injection-safe, every column resolves')
   console.log('  attributedBody recovered exactly, including >127 bytes and emoji')
+  console.log('  contacts parsed from Google CSV and vCard, quoting and folding included')
 }
 
 main()

@@ -21,9 +21,11 @@ import { imessage } from './tools/imessage/module'
 import { COLUMNS, SCHEMA } from './tools/imessage/schema'
 import { sh, sq, slug, heredoc } from './shell/quote'
 import { parseRange, encodeRange, parseDay } from './shell/dates'
+import { fromGoogleCsv, fromVcard, parseContacts, parseCsv, findContacts } from './tools/imessage/contacts'
 
 export const MODULES: Record<string, ToolModule> = {
   imessage,
 }
 
 export { TOOLS, SCHEMA, COLUMNS, sh, sq, slug, heredoc, parseRange, encodeRange, parseDay }
+export { fromGoogleCsv, fromVcard, parseContacts, parseCsv, findContacts }

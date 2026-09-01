@@ -535,3 +535,35 @@
     margin-left: 0.8rem;
   }
 }
+
+/* ---- the focus ring -------------------------------------------------------
+   global.css paints a 3px dashed --n3 ring on everything focusable, which is
+   right for the rest of the building and arrives in here as a stripe of acid
+   green across a bench that has exactly one accent colour. Kept — a focus ring
+   is not decoration and removing it would be worse than the clash — but
+   restated in this room's terms: solid, tighter, and the tool's own colour.
+
+   `--t-edge` rather than `--t-hue`, because the edge is the brighter of the two
+   and a focus ring has to clear the panel it sits on at a glance. ---------- */
+
+.tool :focus-visible {
+  outline: 2px solid var(--t-edge);
+  outline-offset: 2px;
+}
+
+/* An input already has a border in the accent when focused; a ring outside it
+   as well reads as two boxes. */
+.tool .im__search:focus-visible,
+.tool .sh__input:focus-visible {
+  outline: none;
+}
+
+.tool .sh__input:focus-visible {
+  /* The caret is the affordance in a terminal, so the focus indication is the
+     prompt block rather than a ring around a borderless field. */
+  box-shadow: none;
+}
+
+.tool .sh__prompt:focus-within {
+  color: var(--t-edge);
+}

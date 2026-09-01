@@ -23,25 +23,70 @@
  */
 
 import type { Answers, ToolModule } from '../../core'
+import { Panels } from './Panels'
 import { decodeRange, describeRange } from '../../shell/dates'
 import { buildScript, outputName } from './script'
 import type { Format } from './script'
 import type { Scope, Target } from './sql'
 import { digitsOf } from './sql'
 
-/** Reader-supplied handles, one per line or comma-separated. */
+/**
+ * Read the handles out of the answer.
+ *
+ * Two shapes, because there are two ways in. Typed by hand it is a bare number
+ * or address; picked from the address book beside the terminal it arrives as
+ * `Name <handle>`, which reads correctly in the echo and carries the name into
+ * the export without the panel having to reach into the plan. Keeping the name
+ * inside the answer string is what lets `compose` stay a pure function of the
+ * answers, and therefore what lets the build gate reproduce any deliverable.
+ */
+/**
+ * Does this look like something chat.db could match on?
+ *
+ * The separator between several targets is a comma — and a great many people
+ * are filed in an address book as "Example, Annie". So the comma cannot be
+ * split on blindly, and the ambiguity is resolved by content rather than by
+ * punctuation: a piece is a handle if it has an @ or at least five digits, and
+ * anything else sitting in front of a <handle> is part of that person's name.
+ */
+const looksLikeHandle = (piece: string) => piece.includes('@') || digitsOf(piece).length >= 5
+
+export function readHandles(raw: string): Target[] {
+  const out: Target[] = []
+  const angle = /<([^<>]+)>/g
+  let cursor = 0
+  let found: RegExpExecArray | null
+
+  while ((found = angle.exec(raw))) {
+    const pieces = raw.slice(cursor, found.index).split(/[,\n]+/).map((s) => s.trim())
+    // Walk back from the < : everything that is not itself a handle belongs to
+    // this entry's name, and the first thing that IS one ends the name.
+    const nameParts: string[] = []
+    while (pieces.length && !looksLikeHandle(pieces[pieces.length - 1])) {
+      const piece = pieces.pop()
+      if (piece) nameParts.unshift(piece)
+    }
+    for (const piece of pieces) if (piece) out.push({ handle: piece })
+    const name = nameParts.join(', ').trim()
+    const handle = found[1].trim()
+    out.push(name ? { handle, name } : { handle })
+    cursor = found.index + found[0].length
+  }
+
+  for (const piece of raw.slice(cursor).split(/[,\n]+/).map((s) => s.trim())) {
+    if (piece) out.push({ handle: piece })
+  }
+  return out
+}
+
 function readTargets(answers: Answers): Target[] {
   if (answers.target === 'everyone') return []
-  const raw = answers.handle ?? ''
-  return raw
-    .split(/[,\n]+/)
-    .map((s) => s.trim())
-    .filter(Boolean)
-    .map((handle) => ({ handle }))
+  return readHandles(answers.handle ?? '')
 }
 
 export const imessage: ToolModule = {
   id: 'imessage',
+  Panels,
 
   steps: [
     {
@@ -75,9 +120,9 @@ export const imessage: ToolModule = {
       placeholder: '+1 555 010 4477   ·   someone@icloud.com',
       when: (a) => a.target !== 'everyone',
       validate: (value, a) => {
-        const parts = value.split(/[,\n]+/).map((s) => s.trim()).filter(Boolean)
+        const parts = readHandles(value)
         if (!parts.length) return 'nothing to look for.'
-        for (const part of parts) {
+        for (const { handle: part } of parts) {
           if (a.target === 'appleid') {
             if (!part.includes('@') || !part.includes('.')) {
               return `"${part}" is not an email address. For a phone number, go \`back\` and pick number.`
@@ -140,21 +185,27 @@ export const imessage: ToolModule = {
       range,
       format,
       home: answers.home ?? '$HOME',
-      label: targets.length ? targets.map((t) => t.handle).join('-') : 'everyone',
+      label: targets.length ? targets.map((t) => t.name ?? t.handle).join('-') : 'everyone',
     }
+
+    const who = targets.map((t) => (t.name ? `${t.name} (${t.handle})` : t.handle)).join(', ')
 
     const notes = [
       `Writes ${outputName(plan)}-<timestamp>.${format} to the Desktop, and a manifest beside it.`,
       targets.length
         ? scope === 'conversation'
-          ? `Everything in any conversation involving ${targets.map((t) => t.handle).join(', ')}, group threads included.`
-          : `Only messages to and from ${targets.map((t) => t.handle).join(', ')} — no group threads.`
+          ? `Everything in any conversation involving ${who}, group threads included.`
+          : `Only messages to and from ${who} — no group threads.`
         : 'Every message in the database, from everybody.',
       `Covering ${describeRange(range)}.`,
       'Snapshots the database and its write-ahead log first, so a running Messages.app cannot change it mid-read and the last few days are not missed.',
       'Counts the rows back against the database when it finishes, and fails rather than leaving you a short file.',
       'Phone numbers are matched on their last ten digits, so formatting differences between devices do not split one person into several.',
     ]
+
+    if (targets.some((t) => t.name)) {
+      notes.push('Each row carries the name from your address book as well as the raw handle.')
+    }
 
     const warnings = [
       'It will ask macOS for the Messages database. If Full Disk Access is not granted to this terminal, it stops and tells you which toggle to flip — it cannot grant that itself.',

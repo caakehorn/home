@@ -41,6 +41,7 @@
   "walls": {
     "room:arcade": "centralpark",
     "room:brain": "makeoutbed",
+    "room:gallery": "makeoutbed",
     "room:lineage": "kiss-window",
     "room:minimart": "bedkissrb",
     "void-1": "bedkissrb"

@@ -16,7 +16,8 @@
   ],
   "walls": {
     "room:lineage": "kiss-window",
-    "room:minimart": "bedkissrb"
+    "room:minimart": "bedkissrb",
+    "void-1": "bedkissrb"
   },
   "pools": {}
 }

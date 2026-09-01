@@ -12,6 +12,18 @@
       "added": "2026-09-01",
       "from": "IMG_2918.jpeg",
       "bytes": 225680
+    },
+    {
+      "id": "makeoutbed",
+      "file": "makeoutbed.jpg",
+      "w": 1280,
+      "h": 720,
+      "alt": "Two girls making out",
+      "kana": "接吻",
+      "tone": 4,
+      "added": "2026-09-01",
+      "from": "3dSkl5_Original.jpeg",
+      "bytes": 209450
     }
   ],
   "walls": {
@@ -19,32 +31,5 @@
     "room:minimart": "bedkissrb",
     "void-1": "bedkissrb"
   },
-  "pools": {
-    "blog": [
-      "kiss-neon",
-      "kiss-close",
-      "kiss-window",
-      "kiss-dark",
-      "kiss-butterfly",
-      "kiss-mirror",
-      "kiss-blush",
-      "kiss-uniform",
-      "kiss-hearts",
-      "kiss-neon-gaze",
-      "kiss-garden"
-    ],
-    "wiki": [
-      "kiss-neon",
-      "kiss-close",
-      "kiss-window",
-      "kiss-dark",
-      "kiss-butterfly",
-      "kiss-mirror",
-      "kiss-blush",
-      "kiss-uniform",
-      "kiss-hearts",
-      "kiss-neon-gaze",
-      "kiss-garden"
-    ]
-  }
+  "pools": {}
 }

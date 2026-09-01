@@ -78,6 +78,19 @@ jobs:
       - name: Check the slate board
         run: npm run slates:check
 
+      # THE TOOL hands readers a command they run against their own machine, so
+      # its gate asserts things a typecheck cannot: that the same answers
+      # produce the same command twice, that every emitted script is valid bash,
+      # that a hostile contact name cannot break out of the quoting, and that
+      # every generated query actually runs — against a synthetic chat.db built
+      # from the real schema, with hand-computed row counts. It also runs the
+      # emitted attributedBody decoder over a message longer than 127 bytes and
+      # one full of emoji, which is where the length prefix goes wrong.
+      #
+      # This needs python3 for its sqlite3 module. Both ship on the runner.
+      - name: Check the tools
+        run: npm run tool:check
+
       # Which vault the door will be checked against, said out loud on every
       # run.
       #

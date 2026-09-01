@@ -11,11 +11,14 @@ the room where both of those happened.
 > THESIS · ANTITHESIS · ANOTHER BUMP · SYNTHESIS · CITE YOUR SOURCES ·
 > LOSE THE ARGUMENT · LOG IT ANYWAY
 
-Nine rooms off one hallway: the **wiki-brain** and its map, **THE SAGE**,
+Ten rooms off one hallway: the **wiki-brain** and its map, **THE SAGE**,
 **THE LATTICE**, the **LEVIATHAN** instruments, **THE DOCKET**, **THE
-GALLERY**, **THE TRANSCRIPT**, **TRANSMISSIONS**, and **ALLY LUBIN'S ADVENTURE
-ARCADE**. All nine are open. A tenth, **THE INTAKE LEDGER**, is behind the same
-door and deliberately not in the nav — see below.
+GALLERY**, **THE TRANSCRIPT**, **TRANSMISSIONS**, **ALLY LUBIN'S ADVENTURE
+ARCADE**, and **THE TOOL**. All ten are open. An eleventh, **THE INTAKE
+LEDGER**, is behind the same door and deliberately not in the nav — see below.
+
+Nine of the ten are instruments: they draw a corpus that is already in the
+building and argue about it. THE TOOL is the one that is not.
 
 ### The sage
 
@@ -1868,6 +1871,104 @@ instead of a hard-coded number.
 The chaos dial and the palette switch also ride in the header on every page —
 the console keeps the big versions, both surfaces drive the same state.
 
+## THE TOOL
+
+`/tool` is a workbench, not an instrument. Every other room here draws a corpus
+that is already in the building; this one draws nothing. You tell a terminal
+what you want done, and it hands back one block of shell to paste into
+Terminal.app, after which nothing further is asked of you.
+
+That is the bar, and it is written down in `docs/TOOL.md` because five tools are
+planned and more than one agent is building them:
+
+> **ONE PASTE. NO TINKERING AFTERWARDS.**
+
+A tool that emits a command needing a hand-edited path, a follow-up command, or
+a "now open this file and change line 3" does not ship. Where a human genuinely
+is unavoidable — macOS will not let a script grant itself Full Disk Access, and
+no amount of cleverness changes that — the emitted script says so in plain
+words, opens the right settings pane itself, and exits non-zero rather than
+writing an empty file that looks like an answer.
+
+### It looks nothing like the rest of the building
+
+Deliberately. The house style is right for an argument about a person and wrong
+for a thing that is about to hand you a command you will run against your own
+machine; a tool has to read as precise, because you are about to trust it. So
+the room is flat, monospace, near-black, with one accent colour that belongs to
+whichever tool is selected, and no motion that was not asked for.
+
+The header, nav and footer stay — a reader still needs the way out — but are
+repainted. The repaint is done by writing `data-room="tool"` on `<html>` rather
+than by branching in `App.tsx`: the chrome it restyles (the two crawls, the HUD,
+the Fx stack) is mounted globally, and `App.tsx` is exactly the file that should
+not collect five agents' conflicting edits. It follows the `term-fx-*`
+precedent already in the shell rig.
+
+The room brings its own palette rather than borrowing `--n1..--n5`, because two
+of the five collapse the accent ramp and `riot` inverts, and a bench that needs
+one dependable accent cannot survive that.
+
+### The ornament
+
+There is a strip of switches, a sweeping trace, a dial and a counter above the
+bench. They do nothing, and the strip says so on its own face: **ORNAMENT —
+THESE READ NOTHING**. THE RULE governs anything that draws the corpus and this
+draws none of it, so it is not bound; the spirit is, and a readout that looks
+measured and is not is a lie whether or not a rule forbids it. The one honest
+readout in the room is the terminal's step counter, and it is deliberately over
+there rather than in the strip, where it would lend its credibility to its
+neighbours.
+
+### EXTRACT IMESSAGE
+
+The first tool. It pulls text out of `~/Library/Messages/chat.db` — by phone
+number or Apple ID, over relative dates, absolute dates or everything — with
+every scrap of metadata the database holds, to a CSV or TXT on the Desktop with
+a manifest beside it saying what was taken and how.
+
+Four things make that query correct, and each of them is a silent wrong answer
+if missed:
+
+- **Two date encodings.** `message.date` is nanoseconds since 2001 on High
+  Sierra and later and *seconds* before it, and any database of age holds both.
+- **Row multiplication.** A message can be in more than one chat and have more
+  than one attachment. Both are resolved with correlated subqueries rather than
+  joins — a duplicated export looks exactly like a correct one.
+- **Which side the filter goes on.** `message.handle_id` gets a one-to-one
+  thread whole and nothing from any group; `chat_handle_join` gets the whole
+  conversation and every other group that person is in. There is no right
+  answer, so the tool asks.
+- **The text is usually not in the text column.** On Ventura and later it is in
+  `attributedBody`, an NSKeyedArchiver blob, whose length prefix is *variable
+  width*. Read as a single byte it truncates everything over 127 bytes and
+  mangles emoji — which is to say it passes every short ASCII test anybody
+  writes and fails on the messages people care about.
+
+An address book can be loaded beside the terminal — Google Contacts CSV or a
+macOS `.vcf` — so a number does not have to be gone and fetched. It is parsed
+in the page and kept in that browser: there is no server behind this site to
+send it to, and that is printed next to the drop zone rather than in a footnote.
+
+### The gate
+
+`npm run tool:check`. A typecheck proves the code that assembles a command
+compiles; it proves nothing about whether the SQL names a real column, whether a
+contact called `Robert'); DROP` survives quoting, or whether the same answers
+produce the same command twice. So the gate bundles each tool's real
+`compose` with Vite and asserts: determinism across two composes; the golden
+files in `scripts/fixtures/tool/`; `bash -n` on every emitted script; an
+adversarial answer set that cannot break the outer heredoc; and every generated
+query executed against a synthetic `chat.db` built from the real schema, with
+hand-computed row counts. Finally it pulls the SQL and the python back *out* of
+an emitted script and runs the decoder over three blob rows — short, over 127
+bytes, and emoji — so what is tested is what a reader would paste.
+
+It earned itself on its first run, reporting zero queries. That was not a
+checker bug: the emitted script had `<<'SQL' … SQL > file`, and a redirection
+after a heredoc terminator stops it terminating, so the rest of the script is
+swallowed as data. Invisible in a diff, fatal on somebody's Mac.
+
 ## Layout
 
 ```
@@ -1884,6 +1985,7 @@ src/
   gallery/           the wall, the lightbox, the manifest loader
   transcript/        the message record: spine, month reader, whole-record search
   wiki/              snapshot loading, markdown, charts, infoboxes, briefs, the map
+  tool/              the workbench: registry, shell kernel, ornament, the tools
 ```
 
 `/` renders Home with Splash layered over it; entering dismisses the gate for

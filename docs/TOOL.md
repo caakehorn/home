@@ -22,7 +22,7 @@ does not.
 
 | id | title | status | owner | notes |
 |---|---|---|---|---|
-| `imessage` | EXTRACT IMESSAGE | LIVE | first build | chat.db → CSV/TXT on the Desktop |
+| `imessage` | EXTRACT IMESSAGE | LIVE | first build | chat.db → CSV/TXT on the Desktop, with an address book |
 | | | | | |
 
 `status` is one of `SEALED` (claimed, unbuilt), `WIRING` (being built now),
@@ -70,7 +70,34 @@ export type ToolModule = {
 `{ script, notes, warnings }` — `notes` say what the command will do, `warnings`
 say what it cannot do or does only approximately. **Never drop a warning to make
 the output look tidier.** A tool that quietly ships truncated data is worse than
-one that says it is truncating.
+one that says it is truncating. The gate fails a fixture that emits no warnings
+at all: every command in this room has something it cannot do.
+
+### Branching without a graph
+
+Every step takes an optional `when?: (answers) => boolean`. A step whose `when`
+returns false is not asked, and `back` steps over it the same way — so a tool
+lists every question it might ask and says which ones apply, rather than wiring
+a graph of next-step pointers with unreachable states in it. It must be a pure
+predicate over the answers: no DOM, no clock, same rule as `compose`.
+
+`validate` on a text step receives the answers too, so a question can be checked
+against an earlier one — EXTRACT IMESSAGE uses it to insist on an @ when the
+reader said Apple ID and on digits when they said phone number.
+
+### Panels
+
+A tool may export `Panels`, mounted beside the terminal. It gets four verbs from
+`useShell()` and no more: `answer`, `say`, `answers`, `waitingOn`. A panel can
+answer the question on screen and print a line; it cannot move the step pointer,
+rewrite history, or reach the input. The shell owns the conversation, and a
+panel that could drive it would be a second source of truth for where the reader
+is.
+
+Anything a panel gathers has to end up **inside an answer string**, because
+`compose` sees nothing else. EXTRACT IMESSAGE writes `Name <handle>` for a
+contact picked from the address book for exactly this reason: it reads correctly
+in the terminal echo, and it keeps the deliverable reproducible by the gate.
 
 ### `compose` must be deterministic
 

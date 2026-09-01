@@ -35,6 +35,11 @@
 }
 
 .sh__term {
+  /* Grid children are min-width:auto by default, which means sized by their
+     widest content — so a 200-column line inside the terminal or the script
+     block widens the whole page instead of scrolling in its own box. This is
+     the fix, and it has to be on the child, not the track. */
+  min-width: 0;
   border: 1px solid var(--t-line);
   background: var(--t-panel);
   cursor: text;
@@ -195,6 +200,7 @@
    is a command that will be copied wrong. -------------------------------- */
 
 .sh__deliver {
+  min-width: 0;
   border: 1px solid var(--t-hue);
   background: var(--t-panel);
   box-shadow: 0 0 40px -14px var(--t-glow);

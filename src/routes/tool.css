@@ -156,6 +156,23 @@
   background: transparent;
   border: 1px solid #1d262f;
   color: #6b7986;
+  /* 32px, against the 20-23px these are site-wide. A control that cannot be
+     hit with a thumb is a control that is not there on a phone, and this room
+     is repainting them anyway. */
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+}
+
+:root[data-room='tool'] .hctl__vibe,
+:root[data-room='tool'] .nav__collapse,
+:root[data-room='tool'] .nav__link {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
 }
 
 :root[data-room='tool'] .hctl__edition .jp,
@@ -177,13 +194,13 @@
 
 :root[data-room='tool'] .hctl__label,
 :root[data-room='tool'] .hctl__vibe-name {
-  color: #6b7986;
+  color: #8a99a6;
 }
 
 :root[data-room='tool'] .hctl__chaos {
   border: 1px solid #1d262f;
   background: transparent;
-  color: #6b7986;
+  color: #8a99a6;
 }
 
 :root[data-room='tool'] .hctl__chaos input {
@@ -206,15 +223,21 @@
   filter: grayscale(1) contrast(1.1) opacity(0.8);
 }
 
+/* Turned down, not off — they are the building's voice and this is a room in
+   it. Brightness as well as saturation, because RIOT inverts: its tape is
+   PAPER, and grayscale alone leaves a pale band across the top of a bench that
+   is otherwise near-black. Restored on hover for anyone who wants to read
+   them. */
 :root[data-room='tool'] .crawl,
 :root[data-room='tool'] .hud {
   opacity: 0.22;
-  filter: grayscale(1);
+  filter: grayscale(1) brightness(0.55);
 }
 
 :root[data-room='tool'] .crawl:hover,
 :root[data-room='tool'] .hud:hover {
   opacity: 0.55;
+  filter: grayscale(1) brightness(0.85);
 }
 
 /* ---- the masthead --------------------------------------------------------- */

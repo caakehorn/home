@@ -26,7 +26,7 @@
  */
 
 import { credential, configured } from '../wiki/keyring'
-import { publishFile, requestResync, SOURCE_REPO } from '../wiki/publish'
+import { publishFile, requestResync, requestSageAsked, SOURCE_REPO } from '../wiki/publish'
 import { questionId, toMarkdown, validate, type Draft } from './format'
 
 export { MAX_ASKER, MAX_QUESTION, validate, type Draft } from './format'
@@ -71,6 +71,14 @@ export async function ask(
     await requestResync(`sage/${id}`)
   } catch {
     onProgress('filed — it will appear in the log on the next scheduled sync')
+  }
+
+  // sage-drain.yml already listens for this. Filing is durable if the nudge
+  // fails; the daily cron is the backstop, same as requestResync above.
+  try {
+    await requestSageAsked(id)
+  } catch {
+    // drain will pick it up on its next scheduled run
   }
 
   return id

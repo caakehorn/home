@@ -22,7 +22,7 @@ does not.
 
 | id | title | status | owner | notes |
 |---|---|---|---|---|
-| `imessage` | EXTRACT IMESSAGE | WIRING | first build | chat.db → CSV/TXT on the Desktop |
+| `imessage` | EXTRACT IMESSAGE | LIVE | first build | chat.db → CSV/TXT on the Desktop |
 | | | | | |
 
 `status` is one of `SEALED` (claimed, unbuilt), `WIRING` (being built now),

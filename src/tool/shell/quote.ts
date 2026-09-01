@@ -77,6 +77,13 @@ export function sqlId(name: string): string {
  * Wrap a body in a heredoc with a quoted delimiter, so the shell expands
  * nothing inside it.
  *
+ * A caller must put any redirection BEFORE the `<<` — `cmd > out <<'X'`, never
+ * `cmd <<'X' ... X > out`. The terminator has to be alone on its line, and a
+ * redirection trailing it turns the terminator into ordinary text, at which
+ * point the heredoc never closes and the rest of the script is swallowed as
+ * data. It is invisible in a diff and fatal at run time; `npm run tool:check`
+ * runs `bash -n` over every emitted script for exactly this.
+ *
  * The delimiter is checked against the body rather than assumed unique. A body
  * containing its own delimiter on a line by itself would end the heredoc early
  * and hand the rest of the payload to the shell as commands — which is the one

@@ -30,3 +30,10 @@ public/agent/
 
 # Scratch servers and capture scripts used while checking a build locally
 *.tmp.mjs
+
+# THE TOOL's build gate: the bundled check entry, and the SQL / python / script
+# it pulls back out of an emitted command to run them. Regenerated every run.
+# The golden files beside them are NOT ignored — they are the check.
+node_modules/.tool-check/
+scripts/fixtures/tool/.*
+scripts/__pycache__/

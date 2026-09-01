@@ -1,8 +1,10 @@
 import { useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Nav } from '../components/Nav'
+import { Shell } from '../tool/shell/Shell'
 import { TOOLS, toolById } from '../tool/core'
-import type { Tool } from '../tool/core'
+import type { Tool, ToolModule } from '../tool/core'
+import { imessage } from '../tool/tools/imessage/module'
 import './tool.css'
 
 /**
@@ -49,7 +51,9 @@ import './tool.css'
    when a tool lands. Do not reorder — every other agent has this file open.
    ========================================================================== */
 
-const BUILT: Record<string, () => React.ReactNode> = {}
+const BUILT: Record<string, ToolModule> = {
+  imessage,
+}
 
 export function ToolRoute() {
   const { id } = useParams()
@@ -175,7 +179,7 @@ function Rack() {
 /* ---- one tool, selected -------------------------------------------------- */
 
 function Bench({ tool }: { tool: Tool }) {
-  const Built = BUILT[tool.id]
+  const built = BUILT[tool.id]
 
   return (
     <main className="tool__bench">
@@ -195,8 +199,8 @@ function Bench({ tool }: { tool: Tool }) {
         </span>
       </div>
 
-      {Built ? (
-        Built()
+      {built ? (
+        <Shell tool={tool} module={built} />
       ) : (
         <div className="tool__pending">
           <p className="tool__pending-lead">{tool.blurb}</p>

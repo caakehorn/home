@@ -33,7 +33,8 @@
     "gallery:capture": "node scripts/capture-gallery.mjs",
     "gate:verify": "node scripts/make-verify.mjs",
     "wiki:lock": "node scripts/wiki-locks.mjs",
-    "keyring": "node scripts/make-keyring.mjs"
+    "keyring": "node scripts/make-keyring.mjs",
+    "tool:check": "node scripts/check-tool.mjs"
   },
   "dependencies": {
     "marked": "^18.0.9",

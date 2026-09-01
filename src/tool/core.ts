@@ -58,39 +58,50 @@ export type ToolStatus =
   /** Being built right now, by somebody. Not reachable from the rack. */
   | 'WIRING'
 
-/** One question the shell puts to the reader, in order. */
-export type Step =
-  | {
-      kind: 'choice'
-      id: string
-      /** The line printed above the options. */
-      ask: string
-      options: { value: string; label: string; note?: string }[]
-      /** Pre-selected value. A step with a default can be skipped with `next`. */
-      fallback?: string
-    }
-  | {
-      kind: 'text'
-      id: string
-      ask: string
-      placeholder?: string
-      fallback?: string
-      /** Return null when the value is good, or the complaint to print. */
-      validate?: (value: string) => string | null
-    }
-  | {
-      kind: 'dates'
-      id: string
-      ask: string
-    }
-  /**
-   * A step the reader answers by handing over a file rather than typing. The
-   * shell renders the drop zone; the tool's own Panels do the parsing, and
-   * write the result back as an ordinary answer.
-   */
-  | { kind: 'file'; id: string; ask: string; accept: string }
-
 export type Answers = Record<string, string>
+
+/**
+ * Common to every question.
+ *
+ * `when` is what makes a linear list of steps enough for a branching
+ * conversation: a step whose `when` returns false is not asked, and `back`
+ * steps over it in the same way, so the reader never sees a question that does
+ * not apply and never has to walk through one to get behind it. It is a pure
+ * predicate over the answers so far — it must not read the DOM or the clock,
+ * for the same reason `compose` must not.
+ */
+type StepBase = {
+  id: string
+  /** The line printed above the options. */
+  ask: string
+  /** Asked only when this returns true. Absent means always. */
+  when?: (answers: Answers) => boolean
+}
+
+/** One question the shell puts to the reader, in order. */
+export type Step = StepBase &
+  (
+    | {
+        kind: 'choice'
+        options: { value: string; label: string; note?: string }[]
+        /** Pre-selected value. A step with a default is answered by Enter alone. */
+        fallback?: string
+      }
+    | {
+        kind: 'text'
+        placeholder?: string
+        fallback?: string
+        /** Return null when the value is good, or the complaint to print. */
+        validate?: (value: string, answers: Answers) => string | null
+      }
+    | { kind: 'dates' }
+    /**
+     * A step the reader answers by handing over a file rather than typing. The
+     * shell renders the prompt; the tool's own Panels do the parsing and write
+     * the result back as an ordinary answer.
+     */
+    | { kind: 'file'; accept: string }
+  )
 
 /**
  * What a tool hands back.
@@ -158,7 +169,7 @@ export const TOOLS: Tool[] = [
       'Pull the text out of chat.db — by number, by Apple ID, over any window of dates — with every scrap of metadata the database actually holds.',
     delivers: 'A CSV or TXT on your Desktop, plus a manifest saying what was taken.',
     needs: 'A Mac, its Messages history, and one grant of Full Disk Access to Terminal.',
-    status: 'WIRING',
+    status: 'LIVE',
     accent: { hue: '#00e5b0', edge: '#0affc2', glow: '#00e5b055' },
   },
 ]

@@ -48,6 +48,31 @@ import './shell.css'
 
 const META = ['help', 'back', 'restart', 'answers', 'clear'] as const
 
+/**
+ * Whether a step applies, given what has been answered.
+ *
+ * A step with no `when` always applies. This is the whole of the branching in
+ * the room: rather than a graph of next-step pointers, the tool lists every
+ * question it might ask and says which ones apply, and the shell walks past the
+ * ones that do not. It reads in one glance, and there is no unreachable state
+ * to get wrong.
+ */
+const applies = (step: Step, answers: Answers) => step.when?.(answers) ?? true
+
+/** The next applicable step at or after `from`, or `steps.length` when none. */
+function seekForward(steps: Step[], from: number, answers: Answers) {
+  let i = from
+  while (i < steps.length && !applies(steps[i], answers)) i += 1
+  return i
+}
+
+/** The previous applicable step strictly before `from`, or -1 when none. */
+function seekBack(steps: Step[], from: number, answers: Answers) {
+  let i = from - 1
+  while (i >= 0 && !applies(steps[i], answers)) i -= 1
+  return i
+}
+
 export function Shell({ tool, module }: { tool: Tool; module: ToolModule }) {
   const banner = useMemo<Line[]>(
     () => [
@@ -68,7 +93,7 @@ export function Shell({ tool, module }: { tool: Tool; module: ToolModule }) {
 
   const [lines, setLines] = useState<Line[]>(banner)
   const [answers, setAnswers] = useState<Answers>({})
-  const [at, setAt] = useState(0)
+  const [at, setAt] = useState(() => seekForward(module.steps, 0, {}))
   const [value, setValue] = useState('')
   const [history, setHistory] = useState<string[]>([])
   const [cursor, setCursor] = useState(-1)
@@ -84,6 +109,12 @@ export function Shell({ tool, module }: { tool: Tool; module: ToolModule }) {
   const steps = module.steps
   const step: Step | null = at < steps.length ? steps[at] : null
   const done = at >= steps.length
+
+  // Counted over the questions that actually apply, so a reader who chose
+  // "everybody" is not told they are on 3 of 6 and then handed the command
+  // after question four.
+  const askable = steps.filter((s) => applies(s, answers)).length
+  const asking = steps.slice(0, at).filter((s) => applies(s, answers)).length + 1
 
   const print = useCallback((...next: Line[]) => setLines((cur) => [...cur, ...next]), [])
   const say = useCallback((kind: LineKind, text: string) => print({ kind, text }), [print])
@@ -153,11 +184,15 @@ export function Shell({ tool, module }: { tool: Tool; module: ToolModule }) {
 
   const accept = useCallback(
     (id: string, stored: string, echo: string) => {
-      setAnswers((cur) => ({ ...cur, [id]: stored }))
+      // The answer decides which question comes next — a target of "everybody"
+      // skips the two questions about which person — so the pointer is moved
+      // against the answers INCLUDING this one, not the ones on screen.
+      const next = { ...answers, [id]: stored }
+      setAnswers(next)
       print({ kind: 'ok', text: `  ✓ ${echo}` }, { kind: 'art', text: '' })
-      setAt((n) => n + 1)
+      setAt((n) => seekForward(steps, n + 1, next))
     },
-    [print],
+    [print, answers, steps],
   )
 
   /** Read one raw input against one step. Returns the complaint, or null. */
@@ -195,12 +230,12 @@ export function Shell({ tool, module }: { tool: Tool; module: ToolModule }) {
 
       const settled = !text && s.fallback !== undefined ? s.fallback : text
       if (!settled) return 'that cannot be empty.'
-      const complaint = s.validate?.(settled)
+      const complaint = s.validate?.(settled, answers)
       if (complaint) return complaint
       accept(s.id, settled, settled)
       return null
     },
-    [accept],
+    [accept, answers],
   )
 
   /* ---- the verbs --------------------------------------------------------- */
@@ -209,14 +244,14 @@ export function Shell({ tool, module }: { tool: Tool; module: ToolModule }) {
     asked.current = -1
     composed.current = false
     setAnswers({})
-    setAt(0)
+    setAt(seekForward(steps, 0, {}))
     setCopied(false)
     setLines([...banner, { kind: 'ok', text: 'started over.' }, { kind: 'art', text: '' }])
-  }, [banner])
+  }, [banner, steps])
 
   const back = useCallback(() => {
-    if (at === 0) return print({ kind: 'err', text: 'already at the first question.' })
-    const target = at - 1
+    const target = seekBack(steps, at, answers)
+    if (target < 0) return print({ kind: 'err', text: 'already at the first question.' })
     const dropped = steps[target]
     // Re-asking means the question must be allowed to print again, and the
     // answer being replaced must not linger — otherwise `answers` would show a
@@ -230,7 +265,7 @@ export function Shell({ tool, module }: { tool: Tool; module: ToolModule }) {
     })
     setAt(target)
     print({ kind: 'ok', text: `back to: ${dropped.ask}` })
-  }, [at, steps, print])
+  }, [at, steps, answers, print])
 
   const runVerb = useCallback(
     (verb: string): boolean => {
@@ -252,7 +287,10 @@ export function Shell({ tool, module }: { tool: Tool; module: ToolModule }) {
           restart()
           return true
         case 'answers': {
-          const entries = steps.slice(0, at).map((s) => `${s.id.padEnd(12)}${answers[s.id] || '—'}`)
+          const entries = steps
+            .slice(0, at)
+            .filter((s) => applies(s, answers))
+            .map((s) => `${s.id.padEnd(12)}${answers[s.id] || '—'}`)
           print(
             ...(entries.length
               ? entries.map((text): Line => ({ kind: 'out', text }))
@@ -352,10 +390,11 @@ export function Shell({ tool, module }: { tool: Tool; module: ToolModule }) {
         // panel answering some other step records the value without moving the
         // pointer, so an upload three steps early is remembered rather than
         // skipping the questions in between.
-        setAnswers((cur) => ({ ...cur, [id]: val }))
+        const next = { ...answers, [id]: val }
+        setAnswers(next)
         if (target === at) {
           print({ kind: 'ok', text: `  ✓ ${val || 'answered'}` }, { kind: 'art', text: '' })
-          setAt((n) => n + 1)
+          setAt((n) => seekForward(steps, n + 1, next))
         }
       },
     }),
@@ -387,9 +426,7 @@ export function Shell({ tool, module }: { tool: Tool; module: ToolModule }) {
             <div className="sh__bar" aria-hidden="true">
               <span className="sh__led" />
               <span className="sh__bar-name">{tool.id}</span>
-              <span className="sh__bar-step">
-                {done ? 'DONE' : `${at + 1}/${steps.length}`}
-              </span>
+              <span className="sh__bar-step">{done ? 'DONE' : `${asking}/${askable}`}</span>
             </div>
 
             <div

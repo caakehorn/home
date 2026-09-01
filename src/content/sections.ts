@@ -143,7 +143,7 @@ export const SECTIONS: Section[] = [
     kana: '工具',
     blurb:
       'The one room that does something for you rather than showing you something. A bench of terminals: answer the questions, take the block of shell it hands back, paste it into Terminal.app, and the job finishes on its own. Nothing is tinkered with after it leaves this page.',
-    status: 'WIRING',
+    status: 'LIVE',
     accent: 1,
     chant: banner('tool'),
   },

@@ -1,6 +1,19 @@
 {
   "note": "Written by THE SLATE ROOM at /slates. Hand-editable, but the room is the front door.",
-  "plates": [],
+  "plates": [
+    {
+      "id": "bedkissrb",
+      "file": "bedkissrb.jpg",
+      "w": 1024,
+      "h": 1024,
+      "alt": "Two girls kissing in a bed",
+      "kana": "接吻",
+      "tone": 1,
+      "added": "2026-09-01",
+      "from": "IMG_2918.jpeg",
+      "bytes": 225680
+    }
+  ],
   "walls": {
     "room:lineage": "kiss-window"
   },

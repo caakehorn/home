@@ -24,6 +24,18 @@
       "added": "2026-09-01",
       "from": "3dSkl5_Original.jpeg",
       "bytes": 209450
+    },
+    {
+      "id": "centralpark",
+      "file": "centralpark.jpg",
+      "w": 427,
+      "h": 640,
+      "alt": "Girl on wall",
+      "kana": "接吻",
+      "tone": 1,
+      "added": "2026-09-01",
+      "from": "IMG_2890.jpeg",
+      "bytes": 70254
     }
   ],
   "walls": {

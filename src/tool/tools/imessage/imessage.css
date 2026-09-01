@@ -1,0 +1,183 @@
+/* ==========================================================================
+   EXTRACT IMESSAGE — the address book panel
+
+   Same bench as the shell beside it: flat, monospace, one accent. Deliberately
+   quiet, because it is optional — a reader who knows the number never needs to
+   look at it, and it should not read as a step.
+   ========================================================================== */
+
+.im {
+  border: 1px solid var(--t-line);
+  background: var(--t-panel);
+  font-size: 12px;
+}
+
+.im__head {
+  display: flex;
+  align-items: center;
+  padding: 0.55rem 0.8rem;
+  border-bottom: 1px solid var(--t-line);
+  background: var(--t-panel-2);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--t-hue);
+}
+
+.im__forget {
+  margin-left: auto;
+  font: inherit;
+  letter-spacing: 0.16em;
+  min-height: 28px;
+  padding: 0.2em 0.7em;
+  background: transparent;
+  border: 1px solid var(--t-line);
+  color: var(--t-dim);
+  cursor: pointer;
+}
+
+.im__forget:hover {
+  color: #ff6b5e;
+  border-color: #ff6b5e;
+}
+
+/* The file input itself is never the affordance — the label is, so the whole
+   zone is both a drop target and a click target. */
+.im__file {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.im__drop {
+  display: grid;
+  gap: 0.35rem;
+  justify-items: center;
+  text-align: center;
+  margin: 0.8rem;
+  padding: 1.6rem 1rem;
+  border: 1px dashed var(--t-line);
+  color: var(--t-dim);
+  cursor: pointer;
+}
+
+.im__drop b {
+  color: var(--t-text);
+  font-weight: 600;
+}
+
+.im__drop code {
+  color: var(--t-edge);
+}
+
+.im__drop-mark {
+  font-size: 1.5rem;
+  color: var(--t-hue);
+}
+
+.im__drop-or {
+  font-size: 11px;
+  color: #4d5a66;
+}
+
+.im__drop:hover,
+.im__drop--over {
+  border-color: var(--t-hue);
+  color: var(--t-text);
+  background: var(--t-panel-2);
+}
+
+/* The promise, at the moment of decision rather than after it. */
+.im__privacy {
+  margin: 0;
+  padding: 0 0.8rem 0.9rem;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--t-dim);
+}
+
+.im__privacy b {
+  color: var(--t-edge);
+  font-weight: 600;
+}
+
+.im__loaded {
+  margin: 0;
+  padding: 0.7rem 0.8rem 0;
+  color: var(--t-hue);
+  font-size: 11px;
+}
+
+.im__search {
+  display: block;
+  width: calc(100% - 1.6rem);
+  margin: 0.7rem 0.8rem;
+  padding: 0.5rem 0.6rem;
+  background: var(--t-ink);
+  border: 1px solid var(--t-line);
+  color: #eef4f9;
+  font: inherit;
+  /* 16px keeps iOS from zooming the document when this takes focus. */
+  font-size: max(16px, 12px);
+  outline: none;
+}
+
+.im__search:focus {
+  border-color: var(--t-hue);
+}
+
+.im__none {
+  margin: 0;
+  padding: 0 0.8rem 0.9rem;
+  color: var(--t-dim);
+}
+
+.im__hits {
+  list-style: none;
+  margin: 0;
+  padding: 0 0.8rem 0.9rem;
+  display: grid;
+  gap: 0.7rem;
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.im__hit-name {
+  display: block;
+  color: var(--t-text);
+  margin-bottom: 0.25rem;
+}
+
+.im__hit {
+  font: inherit;
+  font-size: 11px;
+  min-height: 32px;
+  margin: 0 0.3rem 0.3rem 0;
+  padding: 0.25em 0.7em;
+  background: transparent;
+  border: 1px solid var(--t-line);
+  color: var(--t-dim);
+  cursor: pointer;
+}
+
+.im__hit:hover:not(:disabled) {
+  color: var(--t-edge);
+  border-color: var(--t-hue);
+}
+
+.im__hit:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* A file that did not parse says so here, where the drop zone is, rather than
+   leaving the reader looking at an empty picker wondering what happened. */
+.im__problem {
+  margin: 0;
+  padding: 0.7rem 0.8rem;
+  border-bottom: 1px solid var(--t-line);
+  color: #ffc14d;
+  font-size: 11px;
+  line-height: 1.5;
+}

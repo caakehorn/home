@@ -745,6 +745,30 @@ a `MAX_FRAME_MS` clamp, a `visibilitychange` reset, one `translate3d` per frame,
 and an early return when `motion` is false. `Atlas.tsx` adds the 10 Hz
 `setTick` throttle that lets React render at 10 Hz while the canvas paints at 60.
 
+### The one room with no payload
+
+**THE TOOL (`/tool`) reads nothing in this file, and nothing in this file should
+be written for it.** It is the only room here that is not an instrument: it
+draws no corpus, ships no dataset, and fetches nothing from `public/`. What it
+produces is a block of shell that the reader runs on their own machine against
+their own data, which never comes near this repository.
+
+Consequences worth knowing before you go looking:
+
+- It has no build script and no entry in the payload table above. Its gate,
+  `npm run tool:check`, asserts things about a *generated command* rather than
+  about a dataset — see `docs/TOOL.md`.
+- Anything a reader loads into it — an address book, for one — is parsed in the
+  browser and kept in `localStorage`. It is never committed, never fetched, and
+  never leaves the tab. Do not add a path that would change that.
+- It brings its own palette instead of reading `--n1..--n5`, for the reason
+  stated in the five-palette warning above: two of the five collapse the accent
+  ramp and `riot` inverts, and a bench that needs one dependable accent cannot
+  survive either.
+- Its ornament is labelled ORNAMENT. THE RULE governs anything that draws this
+  corpus and that strip draws none of it, but nothing in that room may render a
+  number that looks measured and is not.
+
 ---
 
 ## 7. Ranked: the best payloads to build on

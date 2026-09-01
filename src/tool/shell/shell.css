@@ -1,0 +1,296 @@
+/* ==========================================================================
+   THE SHELL
+
+   The terminal every tool is asked through. It borrows the behaviour of the
+   shell rig on the front page — history, tab completion, a scrollback that is a
+   real log element — and none of its paint: that one is a CRT in a drug den,
+   and this one is a bench.
+
+   No scanlines, no glow, no flicker. Anything that moved in here would be
+   asking the reader to distrust a command they are about to run against their
+   own machine.
+   ========================================================================== */
+
+.sh {
+  display: grid;
+  gap: 1px;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+
+/* The panel column appears only when a tool brings panels. Below this width it
+   goes under the terminal rather than beside it — a 300px column next to a
+   terminal is unreadable on both counts. */
+@media (min-width: 1020px) {
+  .sh:has(.sh__panels) {
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 1.2rem;
+  }
+}
+
+.sh__stack {
+  min-width: 0;
+  display: grid;
+  gap: 1.2rem;
+}
+
+.sh__term {
+  /* Grid children are min-width:auto by default, which means sized by their
+     widest content — so a 200-column line inside the terminal or the script
+     block widens the whole page instead of scrolling in its own box. This is
+     the fix, and it has to be on the child, not the track. */
+  min-width: 0;
+  border: 1px solid var(--t-line);
+  background: var(--t-panel);
+  cursor: text;
+}
+
+.sh__bar {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.5rem 0.8rem;
+  border-bottom: 1px solid var(--t-line);
+  background: var(--t-panel-2);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--t-dim);
+}
+
+.sh__led {
+  width: 7px;
+  height: 7px;
+  background: var(--t-hue);
+  border-radius: 50%;
+}
+
+.sh__bar-name {
+  text-transform: uppercase;
+}
+
+.sh__bar-step {
+  margin-left: auto;
+  color: var(--t-hue);
+}
+
+.sh__screen {
+  height: clamp(340px, 52vh, 620px);
+  overflow-y: auto;
+  overflow-x: auto;
+  padding: 1rem 1.1rem 1.2rem;
+  /* Momentum scrolling inside the log, and — crucially — no `touch-action`
+     override anywhere in this room. Nothing here claims the reader's pan or
+     pinch, so nothing here owes them a replacement. See CLAUDE.md §5. */
+  overscroll-behavior: contain;
+}
+
+.sh__line {
+  margin: 0;
+  font: inherit;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--t-text);
+  /* A hanging indent, so a line that wraps — an option with a long note, on a
+     phone — continues under its own text rather than back at the margin. The
+     column alignment the shell prints with `padEnd` only survives on a wide
+     screen; this is what keeps the narrow one readable instead of ragged. */
+  padding-left: 2.6ch;
+  text-indent: -2.6ch;
+}
+
+.sh__line--in {
+  color: #eef4f9;
+}
+
+.sh__line--out {
+  color: var(--t-dim);
+}
+
+.sh__line--ask {
+  color: #eef4f9;
+  margin-top: 0.4rem;
+}
+
+.sh__line--ok {
+  color: var(--t-hue);
+}
+
+.sh__line--err {
+  color: #ff6b5e;
+}
+
+/* Warnings are the one thing in this room allowed to be loud. They say what a
+   command cannot do, and they are printed immediately above the command. */
+.sh__line--warn {
+  color: #ffc14d;
+}
+
+.sh__line--art {
+  color: var(--t-line);
+}
+
+.sh__prompt {
+  padding-left: 0;
+  text-indent: 0;
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  margin-top: 0.3rem;
+  color: var(--t-hue);
+}
+
+.sh__input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: 0;
+  outline: none;
+  color: #eef4f9;
+  font: inherit;
+  /* 16px stops iOS zooming the whole document on focus, which on a page that
+     is mostly a fixed-height scroller is a layout the reader cannot get back. */
+  font-size: max(16px, 1em);
+  padding: 0;
+}
+
+.sh__input::placeholder {
+  color: #38454f;
+}
+
+.sh__keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.6rem 0.8rem;
+  border-top: 1px solid var(--t-line);
+  background: var(--t-panel-2);
+}
+
+.sh__keys-gap {
+  flex: 1 0 0;
+}
+
+.sh__key {
+  font: inherit;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  /* 44px of vertical target. A tap target measured in fingers, not pixels. */
+  min-height: 34px;
+  padding: 0.3em 0.8em;
+  background: transparent;
+  border: 1px solid var(--t-line);
+  color: var(--t-dim);
+  cursor: pointer;
+}
+
+.sh__key:hover,
+.sh__key:focus-visible {
+  color: var(--t-edge);
+  border-color: var(--t-hue);
+  outline: none;
+}
+
+.sh__key--meta {
+  color: #4d5a66;
+}
+
+/* ---- the deliverable ------------------------------------------------------
+   The thing the reader came for. It gets its own block, its own border in the
+   tool's accent, and a copy button — a command that has to be selected by hand
+   is a command that will be copied wrong. -------------------------------- */
+
+.sh__deliver {
+  min-width: 0;
+  border: 1px solid var(--t-hue);
+  background: var(--t-panel);
+  box-shadow: 0 0 40px -14px var(--t-glow);
+}
+
+.sh__deliver-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.6rem 0.9rem;
+  border-bottom: 1px solid var(--t-line);
+  background: var(--t-panel-2);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--t-hue);
+}
+
+.sh__copy {
+  margin-left: auto;
+  font: inherit;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  min-height: 32px;
+  padding: 0.3em 1.1em;
+  background: var(--t-hue);
+  border: 1px solid var(--t-hue);
+  color: #05070a;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.sh__copy:hover {
+  background: var(--t-edge);
+  border-color: var(--t-edge);
+}
+
+.sh__script {
+  margin: 0;
+  padding: 1rem 1.1rem;
+  /* Wide content scrolls inside its own box. The page never scrolls sideways. */
+  overflow-x: auto;
+  white-space: pre;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #d8e4ee;
+  max-height: 420px;
+  overflow-y: auto;
+  user-select: all;
+}
+
+.sh__deliver-note {
+  margin: 0;
+  padding: 0.7rem 1.1rem 0.9rem;
+  border-top: 1px solid var(--t-line);
+  font-size: 11px;
+  color: var(--t-dim);
+}
+
+/* ---- a tool's own panels -------------------------------------------------- */
+
+.sh__panels {
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+  align-content: start;
+}
+
+/* On a narrow screen the terminal gives up a little type size rather than a
+   lot of wrapping: at 14px a 40-column option line wraps twice on a phone. */
+@media (max-width: 620px) {
+  .sh {
+    font-size: 12.5px;
+  }
+
+  .sh__screen {
+    padding: 0.8rem 0.7rem 1rem;
+  }
+
+  /* Every key is reachable with a thumb, and the row wraps rather than
+     scrolling sideways — a horizontally scrolling button row hides its own
+     contents. */
+  .sh__key {
+    min-height: 40px;
+    flex: 1 1 auto;
+    text-align: center;
+  }
+
+  .sh__keys-gap {
+    flex-basis: 100%;
+    height: 0;
+  }
+}

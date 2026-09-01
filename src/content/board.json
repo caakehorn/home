@@ -39,6 +39,7 @@
     }
   ],
   "walls": {
+    "room:brain": "makeoutbed",
     "room:lineage": "kiss-window",
     "room:minimart": "bedkissrb",
     "void-1": "bedkissrb"

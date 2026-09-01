@@ -66,6 +66,7 @@ const WordsRoute = lazy(() => import('./routes/Words').then((m) => ({ default: m
 const TranscriptRoute = lazy(() =>
   import('./routes/Transcript').then((m) => ({ default: m.TranscriptRoute })),
 )
+const ToolRoute = lazy(() => import('./routes/Tool').then((m) => ({ default: m.ToolRoute })))
 
 /** What a room looks like on the way in, on a connection slow enough to see. */
 function Arriving() {
@@ -138,6 +139,8 @@ function Site() {
           <Route path="/slates" element={<SlatesRoute />} />
           <Route path="/words" element={<WordsRoute />} />
           <Route path="/transcript" element={<TranscriptRoute />} />
+          <Route path="/tool" element={<ToolRoute />} />
+          <Route path="/tool/:id" element={<ToolRoute />} />
           <Route path="/:slug" element={<Stub />} />
         </Routes>
       </Suspense>

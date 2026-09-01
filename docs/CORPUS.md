@@ -52,6 +52,7 @@ strictness, it is whether the thing being asserted is still being written.
 
 ```
 public/wiki/          472 page JSONs + index + gaps + sage + lexicon + assets
+public/wiki/history/  473 per-page revision chains — every version ever, §1.5a
 public/transcript/    index + 91 month files — 134,348 messages
 public/leviathan/     10 derived instrument datasets
 public/gallery/       manifest + 41 media files
@@ -337,6 +338,70 @@ and `raw/*` paths — a Q&A→page citation graph.
 
 **`lexicon.json`** (313 B) — a slang-capture queue with **1 entry**. Effectively
 empty; not worth reading.
+
+### 1.5a `history.json` + `history/*.json` — 473 files, 9.4 MB
+
+**The only dataset here with a time axis through the corpus itself.** Everything
+else in `public/wiki/` is the wiki as it stands; this is every version it has
+ever had. Derived from the `caakehorn/wiki-brain` git log by
+`scripts/build-wiki-history.mjs`, which needs a full clone (`fetch-depth: 0`) and
+refuses to run against a shallow one.
+
+**`history.json`** (~92 KB) — `{ generatedAt, counts: { pages, revisions,
+commits, sealed, withheld }, span: { first, last }, pages: [...] }`. Page entry
+`{ slug, domain, revisions, created, updated, sealed?, withheld? }`. The summary
+only; it carries no page text.
+
+**`history/<slug with __>.json`** — one per page, lazily fetched.
+
+```
+{ slug, domain, title,
+  revisions: [ { sha, date, author, subject, op, bytes, lines,
+                 added, removed, created, renamedFrom, path? } ],   // newest first
+  withheld: null,          // 'moratorium' if the text is deliberately absent
+  head: "---\ntitle: …",   // the CURRENT file, verbatim
+  patches: [ Ops, … ] }    // patches[i] turns revisions[i]'s text into revisions[i+1]'s
+```
+
+An op is `[n]` (keep n lines) or `[n, [...]]` (drop n, emit these). So the
+snapshot at revision *i* is `head` folded through `patches[0..i-1]`, and the
+"what changed" diff for revision *i* is `patches[i]` **inverted** — the lines it
+drops from the newer text are the lines that revision added. `src/wiki/history.ts`
+has `applyOps`, `snapshotAt` and `changesIn`; use them rather than re-deriving.
+
+Shape as of 2026-09-01: **473 pages · 3,603 revisions · 499 commits**, spanning
+2026-07-11 to 2026-08-31. Median file 9 KB; `timeline__master-timeline.json` is
+1.1 MB and is the reason the panel fetches on open rather than on mount. Per-page
+distribution is long-tailed — `people/annie-ulmer` has 92 revisions, most pages
+have fewer than 10, 22 pages have more than 25. `op` is the `<op>:` prefix of the
+commit subject where there is one (`ingest`, `climb`, `close`, `answer`,
+`translate`, `constitution-pass`, …) and null otherwise.
+
+**`updated` and `revisions` are also written back onto `index.json` entries and
+onto each `pages/*.json`** — that is where every last-modified tag on the site
+reads from, so nothing has to fetch a history file to say when a page moved.
+`updated` is an ISO timestamp of the last commit that touched the file. **It is
+not `meta.date_modified`**, which is a date somebody typed and which several
+upstream operations deliberately leave alone. Where the two disagree, this one is
+what happened.
+
+Traps:
+
+- **Not every page has one.** A sealed page gets no history file at all (it
+  would publish every earlier version of a page that ships as ciphertext), and a
+  page added since the last sync has none yet. `loadHistory` returns null; treat
+  that as an answer, not an error.
+- **`head` duplicates `pages/*.json`** — deliberately. The page JSON is parsed
+  (frontmatter split out, H1 stripped) and does not round-trip to the file
+  byte-for-byte: only 2 of 473 do. Reconstructing the head from it would be
+  wrong on 471 pages.
+- **`path` is present only on revisions older than a rename.** `sha:wiki/<slug>.md`
+  will not resolve for those; use `rev.path ?? slug`.
+- `renamedFrom` marks the commit that did the move, `path` marks the revisions
+  affected by it. They are not the same field and both are needed.
+- Every claim above is checked by `npm run history:check`, which folds all 3,603
+  chains through the client's own applier and compares them to git. If you change
+  the format, that is what tells you it broke.
 
 ### 1.6 `assets/` — 6 files, 654 KB
 
@@ -693,6 +758,10 @@ and an early return when `motion` is false. `Atlas.tsx` adds the 10 Hz
 4. **`gaps.json`** — 484 written statements of what is not known. Drawable absence.
 5. **`chronology.json`** — 6,937 dated mentions, 1900→2027. The corpus's own sense
    of time, distinct from when it was written.
+5a. **`history/*.json`** — 3,603 revisions of 473 pages, every one reconstructible
+   to the byte, each labelled with the operation that made it. The other time
+   axis: `chronology.json` is when the corpus says things happened, this is when
+   the corpus changed its mind. Nothing draws it but the history panel.
 6. **`wiki.json.evidence` + per-page `sources`** — a page↔raw-corpus bipartite
    graph with clean type facets.
 7. **`ask.json.records`** — 357 timestamped, categorised events carrying verbatim

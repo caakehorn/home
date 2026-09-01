@@ -62,6 +62,14 @@ jobs:
       - name: Check the intake ledger's arithmetic
         run: npm run ledger:check
 
+      # And the page-history chain. No wiki-brain is checked out here, so this
+      # run cannot compare against git — it proves the half that needs no
+      # source: that the diff the panel would draw carries the same counts the
+      # panel prints beside it, over every revision of every page. A dataset
+      # corrupted between the sync and here does not reach the site.
+      - name: Check the page-history chain
+        run: npm run history:check
+
       # And the slate board, which is the only dataset here written by a form
       # in a browser rather than by a script in this job. Every way it can be
       # wrong — a plate id nobody has, a filename with no file behind it, a
@@ -96,6 +104,7 @@ jobs:
       #      all: the gate stores whichever phrase opened it, and `keyring.enc`
       #      is opened with that phrase. When they drifted apart on 2026-08-27
       #      the door opened and every SAVE silently stopped committing.
+
       - name: Build the gate verifier
         if: env.HOME_PASSPHRASE != ''
         run: |

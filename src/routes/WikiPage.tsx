@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { Nav } from '../components/Nav'
 import { SectionArt } from '../components/SectionArt'
 import { Editor } from '../wiki/Editor'
+import { History } from '../wiki/History'
+import { ago, loadHistory, shortDate, type PageHistory } from '../wiki/history'
 import { SyncLight } from '../wiki/SyncLight'
 import { Infobox } from '../wiki/Infobox'
 import { Markdown, outline } from '../wiki/Markdown'
@@ -34,6 +36,66 @@ export function WikiPageRoute() {
 
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState<{ frontmatter: string; body: string } | null>(null)
+
+  /* ---- history ----------------------------------------------------------
+   *
+   * `?rev=<sha>` rather than component state alone, so a version of a page is
+   * a link somebody can send. The sha is the addressable thing — an index into
+   * the revision list would point at a different commit the moment the page is
+   * edited again, which is the one guarantee a link to an old version has to
+   * make.
+   *
+   * The dataset is fetched on open, never on mount: it averages 23 KB and runs
+   * to 1.2 MB on the longest page, and nobody arriving at a wiki entry asked
+   * for its changelog.
+   */
+  const [query, setQuery] = useSearchParams()
+  const rev = query.get('rev')
+  /** null while it is being fetched; `'none'` once we know there is none. */
+  const [history, setHistory] = useState<PageHistory | 'none' | null>(null)
+  const [historyOpen, setHistoryOpen] = useState(Boolean(rev))
+
+  useEffect(() => {
+    if (!slug || !historyOpen || history !== null) return
+    let live = true
+    loadHistory(slug).then((h) => live && setHistory(h ?? 'none'))
+    return () => {
+      live = false
+    }
+  }, [slug, historyOpen, history])
+
+  // Close and forget when the page changes underneath; the panel belongs to
+  // the entry it was opened on.
+  useEffect(() => {
+    setHistory(null)
+    setHistoryOpen(Boolean(rev))
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `rev` is the
+    // initial state only; changing it must not reopen a panel the reader shut.
+  }, [slug])
+
+  const record = history === 'none' ? null : history
+
+  const selected = useMemo(() => {
+    if (!record) return 0
+    const at = record.revisions.findIndex((r) => r.sha === rev)
+    return at === -1 ? 0 : at
+  }, [record, rev])
+
+  const selectRevision = (index: number) => {
+    if (!record) return
+    const next = new URLSearchParams(query)
+    if (index === 0) next.delete('rev')
+    else next.set('rev', record.revisions[index].sha)
+    setQuery(next, { replace: true })
+  }
+
+  const closeHistory = () => {
+    setHistoryOpen(false)
+    const next = new URLSearchParams(query)
+    next.delete('rev')
+    setQuery(next, { replace: true })
+  }
+
   /** A draft this browser holds that upstream has moved past. See `draftIsStale`. */
   const [stale, setStale] = useState<{ savedAt: string; upstream: string } | null>(null)
 
@@ -206,6 +268,20 @@ export function WikiPageRoute() {
                 {(showDigest && twin ? twin.words : view.words).toLocaleString()} words
               </span>
               {view.charts > 0 && <span className="wiki__chip wiki__chip--hot">{view.charts} charted</span>}
+              {/* When the file last actually changed. Not `date_modified` —
+                  see `IndexEntry.updated`. The title carries the exact stamp;
+                  the chip carries the thing worth knowing at a glance, which
+                  is whether this is current writing or something from June. */}
+              {data?.updated && (
+                <span
+                  className="wiki__chip"
+                  title={`Last commit ${shortDate(data.updated)} · ${data.revisions} revision${
+                    data.revisions === 1 ? '' : 's'
+                  }`}
+                >
+                  updated {ago(data.updated)}
+                </span>
+              )}
               {isDraft && <span className="wiki__chip wiki__chip--draft">local draft</span>}
               {view.open && (
                 <button
@@ -217,11 +293,50 @@ export function WikiPageRoute() {
                   sealed · SEAL AGAIN
                 </button>
               )}
+              {data && (data.revisions ?? 0) > 1 && (
+                <button
+                  type="button"
+                  className="wiki__chip wiki__past"
+                  onClick={() => (historyOpen ? closeHistory() : setHistoryOpen(true))}
+                  aria-expanded={historyOpen}
+                >
+                  {historyOpen ? 'hide history' : `history · ${data.revisions}`}
+                </button>
+              )}
               <button type="button" className="wiki__edit" onClick={() => setEditing((v) => !v)}>
                 {editing ? 'CLOSE EDITOR' : 'EDIT THIS PAGE'}
               </button>
             </div>
           </header>
+
+          {historyOpen && record && (
+            <History
+              history={record}
+              selected={selected}
+              onSelect={selectRevision}
+              onClose={closeHistory}
+            />
+          )}
+
+          {historyOpen && history === null && (
+            <p className="wiki__state" role="status">
+              reading the record…
+            </p>
+          )}
+
+          {/* Fetched, and there is nothing. Said out loud rather than left as a
+              panel that never appears: a page added since the last sync has no
+              history yet, and a sealed one has none by design. */}
+          {historyOpen && history === 'none' && (
+            <div className="wiki__plainless" role="status">
+              <b>No history is published for this entry.</b>
+              <p>
+                Either it was written since the last time the snapshot was rebuilt, or it
+                is a sealed page — those ship as ciphertext, and publishing every earlier
+                version of one would open it through the back door.
+              </p>
+            </div>
+          )}
 
           {stale && (
             <div className="wiki__stale" role="status">

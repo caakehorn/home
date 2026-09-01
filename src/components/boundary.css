@@ -1,0 +1,98 @@
+/* ==========================================================================
+   THE BOUNDARY
+
+   Deliberately plain, and deliberately not dependent on much. This renders
+   when something has already gone wrong, so it uses the base tokens only —
+   no palette-specific accent, no clip-path, no font that might be the thing
+   that failed to load. It has to be legible in all five palettes including
+   the one that inverts, so the panel is a border and the type is `--text`.
+   ========================================================================== */
+
+.boundary {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+}
+
+.boundary__panel {
+  width: min(56rem, 100%);
+  padding: clamp(1.2rem, 4vw, 2.4rem);
+  border: 3px solid var(--n2, currentColor);
+  background: var(--void-2, #111);
+  color: var(--text, #eee);
+}
+
+.boundary__kana {
+  margin: 0;
+  font-size: clamp(1.6rem, 5vw, 2.6rem);
+  line-height: 1;
+  color: var(--n2, currentColor);
+}
+
+.boundary__title {
+  margin: 0.6rem 0 0;
+  font-family: var(--f-head, Impact, sans-serif);
+  font-size: clamp(1.3rem, 4.5vw, 2.2rem);
+  letter-spacing: 0.02em;
+}
+
+.boundary__note {
+  max-width: 62ch;
+  margin: 0.9rem 0 0;
+  font-size: var(--step--1, 0.85rem);
+  line-height: 1.65;
+  color: var(--text-dim, #999);
+}
+
+.boundary__what {
+  margin: 1.2rem 0 0;
+  padding: 0.7rem 0.8rem;
+  overflow-x: auto;
+  border-left: 3px solid var(--text-dim, #999);
+  background: var(--void, #000);
+  font-family: var(--f-mono, monospace);
+  font-size: 0.72rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.boundary__acts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin: 1.4rem 0 0;
+}
+
+.boundary__go,
+.boundary__alt {
+  display: inline-flex;
+  align-items: center;
+  min-height: 3rem;
+  padding: 0.8rem 1.4rem;
+  border: 2px solid var(--n5, currentColor);
+  background: var(--n5, transparent);
+  color: var(--on-glow, #000);
+  font-family: var(--f-mono, monospace);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.boundary__alt {
+  border-color: var(--text-dim, #999);
+  background: transparent;
+  color: var(--text, #eee);
+}
+
+.boundary__go:focus-visible,
+.boundary__alt:focus-visible {
+  outline: 3px solid var(--n3, currentColor);
+  outline-offset: 2px;
+}

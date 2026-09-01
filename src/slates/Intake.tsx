@@ -101,7 +101,7 @@ export function Intake({ board, onPublish, canCommit, busy }: Props) {
     if (!shot || !ready) return
     const plate: Uploaded = {
       id,
-      file: `${id}.webp`,
+      file: `${id}.${shot.ext}`,
       w: shot.w,
       h: shot.h,
       alt: alt.trim(),
@@ -125,7 +125,7 @@ export function Intake({ board, onPublish, canCommit, busy }: Props) {
     if (!shot) return
     const a = document.createElement('a')
     a.href = shot.preview
-    a.download = `${id || 'plate'}.webp`
+    a.download = `${id || 'plate'}.${shot.ext}`
     a.click()
   }
 
@@ -133,10 +133,11 @@ export function Intake({ board, onPublish, canCommit, busy }: Props) {
     <div className="sl__pane">
       <p className="sl__lede">
         A JPEG or a PNG goes in; a WebP at a stated size comes out and lands in{' '}
-        <code>public/art/</code>, with its row in the board committed in the same commit. It is
-        resized and re-encoded here and <b>nothing is cropped</b> — the letterbox scans, the
-        signature crops and the one real knockout live in <code>scripts/build-art.mjs</code>, which
-        needs a machine and is committed beside its output.
+        <code>public/art/</code>, with its row in the board committed in the same commit — or a
+        JPEG, on a browser with no WebP encoder, named for what it actually is. It is resized and
+        re-encoded here and <b>nothing is cropped</b> — the letterbox scans, the signature crops
+        and the one real knockout live in <code>scripts/build-art.mjs</code>, which needs a machine
+        and is committed beside its output.
       </p>
 
       {/* ---- the bench ------------------------------------------------- */}
@@ -228,7 +229,7 @@ export function Intake({ board, onPublish, canCommit, busy }: Props) {
               <div>
                 <dt>ON THE WALL</dt>
                 <dd className={shot.bytes > HEAVY_BYTES ? 'sl__heavy' : undefined}>
-                  {shot.w}×{shot.h} · {weigh(shot.bytes)}
+                  {shot.w}×{shot.h} · {weigh(shot.bytes)} · {shot.ext.toUpperCase()}
                 </dd>
               </div>
               <div>
@@ -248,6 +249,17 @@ export function Intake({ board, onPublish, canCommit, busy }: Props) {
           {shot?.untouched && (
             <p className="sl__hint">
               Already inside {maxEdge} px, so it was re-encoded at its own size and not resized.
+            </p>
+          )}
+          {shot?.fellBack && (
+            <p className="sl__caveat">
+              This browser has no WebP encoder — iOS Safari is the usual one — so this is a{' '}
+              <b>{shot.ext.toUpperCase()}</b>, committed as <code>.{shot.ext}</code> rather than
+              mislabelled as <code>.webp</code>. It will be somewhat larger than the rest of the
+              folder and everything else about it works the same.{' '}
+              {shot.alpha
+                ? 'PNG rather than JPEG because the picture has real transparency, and JPEG would fill it with black.'
+                : 'Re-do it on a desktop browser if the size matters more than doing it now.'}
             </p>
           )}
 
@@ -272,7 +284,7 @@ export function Intake({ board, onPublish, canCommit, busy }: Props) {
                   <b>Lowercase letters, digits and hyphens.</b>
                 ) : (
                   <>
-                    Lands at <code>public/art/{id || '…'}.webp</code>.
+                    Lands at <code>public/art/{id || '…'}.{shot?.ext ?? 'webp'}</code>.
                   </>
                 )}
               </p>
@@ -367,13 +379,13 @@ export function Intake({ board, onPublish, canCommit, busy }: Props) {
               {busy ? 'COMMITTING…' : 'COMMIT IT TO THE REPOSITORY'}
             </button>
             <button type="button" className="sl__alt-go" disabled={!shot} onClick={download}>
-              DOWNLOAD THE WEBP
+              DOWNLOAD THE {shot ? shot.ext.toUpperCase() : 'FILE'}
             </button>
           </div>
           {!canCommit && (
             <p className="sl__warn">
               No keyring in this tab, so nothing here can commit. The conversion still works —
-              download the WebP, drop it in <code>public/art/</code>, and add its row to{' '}
+              download the file, drop it in <code>public/art/</code>, and add its row to{' '}
               <code>src/content/board.json</code> by hand.
             </p>
           )}

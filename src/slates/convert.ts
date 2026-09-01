@@ -28,9 +28,27 @@
    `canvas.toBlob(cb, 'image/webp')` does not throw on a browser that cannot
    encode WebP. It hands back a PNG. The blob is valid, the upload succeeds,
    and `public/art/thing.webp` is a PNG under a WebP name — three times the
-   bytes, served with the wrong type, and nothing anywhere says so. Every
-   conversion here checks `blob.type` against what was asked for and refuses
-   rather than shipping the mislabelled file.
+   bytes, served with the wrong type, and nothing anywhere says so. So every
+   conversion here checks `blob.type` against what it asked for, and the file
+   is named after **what the encoder actually produced**, never after what was
+   requested.
+
+   ---- and the browser that cannot, which is the one in your pocket ---------
+
+   iOS Safari is that browser. It decodes WebP everywhere and encodes it from
+   a canvas in no version this has met, which the probe below finds out by
+   encoding two pixels and reading the type back rather than by testing a
+   version number.
+
+   The first cut of this module *refused* in that case, on the reasoning above.
+   That was the wrong half of the argument: not committing a mislabelled file
+   is right, and not committing anything is not the only other option. A phone
+   is where the pictures are, so a phone has to work. What is wrong with a PNG
+   under a `.webp` name is the lie, not the PNG — so the fallback keeps the
+   truth and drops the format: JPEG for anything opaque, PNG when the picture
+   has real transparency and JPEG would fill it with black, each under its own
+   extension, with the cost of that stated on screen before the button is
+   pressed. `public/ally/` has been five JPEGs this whole time.
    ========================================================================== */
 
 export type Converted = {
@@ -50,7 +68,14 @@ export type Converted = {
   alpha: boolean
   /** True when the source was already smaller than the maximum edge. */
   untouched: boolean
+  /** What the encoder actually produced, and the extension that matches it. */
+  type: string
+  ext: Ext
+  /** True when this browser had no WebP encoder and something else was used. */
+  fellBack: boolean
 }
+
+export type Ext = 'webp' | 'jpg' | 'png'
 
 /** What the room offers. 1280 is the widest plate in `public/art` today. */
 export const EDGES = [1600, 1280, 960, 640] as const
@@ -72,19 +97,39 @@ export const accepts = (type: string) => ACCEPTED.includes(type)
  * arrived. Cached because the answer cannot change inside a session and the
  * room asks on every render.
  */
-let webpProbe: Promise<boolean> | null = null
-export function encodesWebp(): Promise<boolean> {
-  webpProbe ??= new Promise<boolean>((resolve) => {
-    try {
-      const canvas = document.createElement('canvas')
-      canvas.width = 2
-      canvas.height = 2
-      canvas.toBlob((blob) => resolve(!!blob && blob.type === 'image/webp'), 'image/webp', 0.9)
-    } catch {
-      resolve(false)
-    }
-  })
-  return webpProbe
+const probes = new Map<string, Promise<boolean>>()
+
+function canEncode(type: string): Promise<boolean> {
+  let probe = probes.get(type)
+  if (!probe) {
+    probe = new Promise<boolean>((resolve) => {
+      try {
+        const canvas = document.createElement('canvas')
+        canvas.width = 8
+        canvas.height = 8
+        canvas.toBlob((blob) => resolve(!!blob && blob.type === type), type, 0.9)
+      } catch {
+        resolve(false)
+      }
+    })
+    probes.set(type, probe)
+  }
+  return probe
+}
+
+/**
+ * The format this picture will actually be committed in.
+ *
+ * WebP when the browser can make one, which is the whole folder's format and
+ * the smallest of the three. Otherwise PNG for a picture with real
+ * transparency — JPEG has no alpha channel and would fill it with black, which
+ * on the masthead wall is a black rectangle where a figure should be — and
+ * JPEG for everything else, which is every photograph.
+ */
+async function formatFor(alpha: boolean): Promise<{ type: string; ext: Ext }> {
+  if (await canEncode('image/webp')) return { type: 'image/webp', ext: 'webp' }
+  if (alpha) return { type: 'image/png', ext: 'png' }
+  return { type: 'image/jpeg', ext: 'jpg' }
 }
 
 /**
@@ -153,13 +198,6 @@ export async function convert(
       `${file.type || 'that file'} is not a picture this can read — JPEG, PNG, WebP, GIF or AVIF`,
     )
   }
-  if (!(await encodesWebp())) {
-    throw new Error(
-      'this browser cannot encode WebP, and committing a PNG under a .webp name is worse than ' +
-        'not committing it. Convert it outside the browser and use scripts/build-art.mjs.',
-    )
-  }
-
   const { source, w: fromW, h: fromH } = await decode(file)
   if (!fromW || !fromH) throw new Error('that file decoded to nothing — it may be truncated')
 
@@ -178,13 +216,19 @@ export async function convert(
   if ('close' in source && typeof source.close === 'function') source.close()
 
   const alpha = hasAlpha(ctx, w, h)
-  const blob = await toBlob(canvas, 'image/webp', quality)
+  const format = await formatFor(alpha)
+  const blob = await toBlob(canvas, format.type, quality)
 
-  // The whole reason this module exists. `toBlob` degrades to PNG in silence.
-  if (blob.type !== 'image/webp') {
+  // The invariant this module exists to hold: the extension names what is
+  // actually in the file. `toBlob` degrades in silence, so the only way to
+  // know what was made is to read it back off the blob. Reaching here means
+  // the encoder ignored a type its own probe said it supported, which is not
+  // a fallback — it is a browser doing something nothing can predict.
+  if (blob.type !== format.type) {
     throw new Error(
-      `asked for WebP and got ${blob.type} — this browser's encoder degraded silently, and the ` +
-        'file would have been committed under the wrong extension',
+      `asked for ${format.type} and got ${blob.type || 'a blob with no type'} — this browser's ` +
+        'encoder is not doing what it says it does, and the file would be committed under the ' +
+        'wrong extension',
     )
   }
   if (blob.size > MAX_BYTES) {
@@ -206,6 +250,9 @@ export async function convert(
     fromH,
     alpha,
     untouched: scale === 1,
+    type: format.type,
+    ext: format.ext,
+    fellBack: format.ext !== 'webp',
   }
 }
 

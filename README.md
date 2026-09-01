@@ -131,6 +131,13 @@ conversion is deliberately the narrow one: no crop, no letterbox scan, no
 knockout. Those need `sharp` and stay in `scripts/build-art.mjs`, which is
 committed beside its output, and the room says so on its first screen.
 
+**On a phone it will not be a WebP.** iOS Safari decodes WebP and encodes
+none, and `canvas.toBlob` degrades to PNG without throwing, so the room probes
+the encoder rather than trusting it and falls back to JPEG — PNG where the
+picture has real transparency — under an extension that names what is actually
+in the file. The alternative was refusing to upload from the device the
+pictures are on.
+
 ### The intake ledger
 
 `/ledger` is the tenth room and the only one with no chip in the nav bar. It is

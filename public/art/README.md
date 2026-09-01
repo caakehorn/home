@@ -108,10 +108,19 @@ that never went through `build-art.mjs` gets into this folder at all.
   that against the components on every deploy.
 - **The conversion is in the browser and it is the narrow version.** It
   decodes, honours the EXIF rotation a phone photo carries, downscales to a
-  chosen longest edge, and re-encodes as WebP — nothing else. It does not
-  crop, it cannot find a letterbox, and it cannot knock a background out. Any
-  picture that needs one of those still goes through `build-art.mjs` on a
-  machine with `sharp`, and the room says so on its own first screen.
+  chosen longest edge, and re-encodes — nothing else. It does not crop, it
+  cannot find a letterbox, and it cannot knock a background out. Any picture
+  that needs one of those still goes through `build-art.mjs` on a machine with
+  `sharp`, and the room says so on its own first screen.
+- **Not everything in here will be a WebP, and that is the honest outcome.**
+  iOS Safari decodes WebP and encodes none, and `canvas.toBlob` does not say
+  so — it hands back a PNG under whatever name you asked for. A phone is where
+  the pictures are, so the room probes the encoder by encoding two pixels and
+  reading the type back, and falls back to JPEG (PNG where the picture has
+  real transparency, since JPEG would fill it with black). **The extension
+  always names what is actually in the file.** The fallback costs bytes and
+  says so on screen before the button is pressed; re-doing it on a desktop
+  browser gets the WebP.
 - **A plate uploaded that way hangs nowhere until somebody hangs it.** It is
   in the folder, it is in the roster, and every wall is still on its
   fallback. That is deliberate: an upload that silently reassigned 486 wiki

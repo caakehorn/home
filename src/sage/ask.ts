@@ -6,19 +6,22 @@
  * GitHub's contents API. The question is committed to `caakehorn/wiki-brain` as
  * `sage/questions/<id>.md` with the token from `keyring.ts` — shipped encrypted
  * in the deploy and opened by the passphrase the door already asked for — and
- * then the sync workflow is nudged so the question shows up in the log a minute
- * or two later instead of on the hour.
+ * then two dispatches fire from the same keyring token: `wiki-updated` at this
+ * repository, so the question shows up in the log a minute or two later instead
+ * of on the hour, and `sage-asked` at wiki-brain, so the drain does not wait
+ * until morning to pick it up.
  *
  * The file's format lives in `format.ts`, apart from this, because two programs
  * in the other repository parse it and it has to be checkable without a browser.
  *
  * ---- what deliberately does not happen here --------------------------------
  *
- * Nothing answers it. There is no model call in this file, no API key on this
- * site, and no workflow behind the box that will produce an answer while you
- * wait. The question is parked; `bin/wiki-work` in wiki-brain lists it at
- * priority 1; a session working in that repository answers it with citations
- * and dated quotes from the message record.
+ * Nothing answers it in this tab. There is no model call in this file and no
+ * API key on this site. `sage-asked` wakes a drain that may open a draft PR;
+ * that is still not an answer while you wait. The question is parked;
+ * `bin/wiki-work` in wiki-brain lists it at priority 1; a session working in
+ * that repository answers it with citations and dated quotes from the message
+ * record.
  *
  * That is a slower promise than a chat box makes and it is a different promise.
  * An answer here is one that read the corpus — 486 pages and 134,348 messages —
@@ -26,7 +29,7 @@
  */
 
 import { credential, configured } from '../wiki/keyring'
-import { publishFile, requestResync, SOURCE_REPO } from '../wiki/publish'
+import { publishFile, requestResync, requestSageAsked, SOURCE_REPO } from '../wiki/publish'
 import { questionId, toMarkdown, validate, type Draft } from './format'
 
 export { MAX_ASKER, MAX_QUESTION, validate, type Draft } from './format'
@@ -71,6 +74,14 @@ export async function ask(
     await requestResync(`sage/${id}`)
   } catch {
     onProgress('filed — it will appear in the log on the next scheduled sync')
+  }
+
+  // Same credential, other repository. wiki-brain's sage-drain listens for
+  // this; without it a parked question waits until 09:00 UTC.
+  try {
+    await requestSageAsked(id)
+  } catch {
+    // The question is already upstream. The overnight drain is the backstop.
   }
 
   return id

@@ -299,6 +299,19 @@ export async function requestResync(slug: string, repo: string = SITE_REPO) {
   })
 }
 
+/**
+ * Wake wiki-brain's drain so a parked question does not wait for the daily cron.
+ * `sage-drain.yml` already listens for `sage-asked`. Uses the same keyring token
+ * that just wrote the question file — Contents: write is what repository_dispatch
+ * sits under.
+ */
+export async function requestSageAsked(id: string) {
+  await call(`/repos/${SOURCE_REPO}/dispatches`, {
+    method: 'POST',
+    body: JSON.stringify({ event_type: 'sage-asked', client_payload: { id } }),
+  })
+}
+
 // ---------------------------------------------------------------------------
 // pictures
 

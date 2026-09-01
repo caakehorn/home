@@ -1,0 +1,176 @@
+/* ==========================================================================
+   THE ORNAMENT
+
+   Switches, a sweep, a dial and a counter, above the bench. None of them read
+   anything and the strip says so in its own label — see the note at the top of
+   Decor.tsx for why that label is not optional.
+
+   Everything here is a real button, so everything here is reachable from a
+   keyboard, and nothing sets `touch-action`, so nothing takes a gesture away
+   from the reader.
+   ========================================================================== */
+
+.dc {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+  padding: 0.7rem 0.9rem;
+  margin-bottom: 1.2rem;
+  border: 1px solid var(--t-line);
+  background: linear-gradient(180deg, var(--t-panel-2), var(--t-panel));
+}
+
+.dc__label {
+  display: grid;
+  font-size: 9px;
+  letter-spacing: 0.28em;
+  line-height: 1.5;
+  color: var(--t-line);
+}
+
+.dc__label b {
+  font-weight: 400;
+  color: var(--t-dim);
+  letter-spacing: 0.14em;
+}
+
+.dc__cell {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0.35rem 0.5rem;
+  min-height: 38px;
+  background: var(--t-ink);
+  border: 1px solid var(--t-line);
+  color: var(--t-dim);
+  font: inherit;
+  cursor: pointer;
+}
+
+.dc__cell:hover {
+  border-color: var(--t-hue);
+}
+
+/* ---- switches ------------------------------------------------------------ */
+
+.dc__cell--toggles {
+  padding: 0.3rem 0.4rem;
+}
+
+.dc__toggle {
+  width: 12px;
+  /* 30px of vertical target on a 12px-wide switch: the hit area is a finger,
+     the drawn thing is not. */
+  height: 30px;
+  padding: 2px;
+  background: #0a0f14;
+  border: 1px solid var(--t-line);
+  cursor: pointer;
+  display: block;
+}
+
+.dc__toggle span {
+  display: block;
+  height: 11px;
+  background: #26313b;
+  transition: transform 90ms linear, background 90ms linear;
+  transform: translateY(13px);
+}
+
+.dc__toggle--on span {
+  background: var(--t-hue);
+  transform: translateY(0);
+}
+
+/* The switch is the one thing here that must not animate when the site is
+   held still — a toggle that slides is the most obviously moving part of the
+   strip, and `data-still` is the resolved answer PortalProvider paints. */
+:root[data-still='1'] .dc__toggle span {
+  transition: none;
+}
+
+/* ---- the sweep ----------------------------------------------------------- */
+
+.dc__cell--scope {
+  padding: 2px;
+}
+
+.dc__canvas {
+  display: block;
+  width: 56px;
+  height: 32px;
+}
+
+/* ---- the dial ------------------------------------------------------------ */
+
+.dc__cell--dial {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.dc__dial-face {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: start center;
+  transition: transform 120ms ease-out;
+}
+
+:root[data-still='1'] .dc__dial-face {
+  transition: none;
+}
+
+.dc__dial-mark {
+  width: 2px;
+  height: 13px;
+  margin-top: 4px;
+  background: var(--t-hue);
+}
+
+.dc__dial-tick {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1px;
+  height: 3px;
+  margin-left: -0.5px;
+  background: var(--t-line);
+  transform-origin: 50% 0;
+}
+
+/* ---- the counter --------------------------------------------------------- */
+
+.dc__cell--segs {
+  gap: 2px;
+  letter-spacing: 0.1em;
+}
+
+.dc__seg {
+  display: grid;
+  place-items: center;
+  width: 13px;
+  height: 20px;
+  background: #0a0f14;
+  border: 1px solid var(--t-line);
+  color: var(--t-hue);
+  font-size: 12px;
+}
+
+/* On a phone the strip is ornament competing with the thing the reader came
+   for, so it goes last and gets out of the way rather than eating a third of
+   the first screen. */
+@media (max-width: 620px) {
+  .dc {
+    order: 2;
+    gap: 0.6rem;
+    padding: 0.6rem;
+  }
+
+  .dc__label {
+    flex-basis: 100%;
+  }
+}

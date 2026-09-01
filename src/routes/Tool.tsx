@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Nav } from '../components/Nav'
+import { Decor } from '../tool/decor/Decor'
 import { Shell } from '../tool/shell/Shell'
 import { TOOLS, toolById } from '../tool/core'
 import type { Tool, ToolModule } from '../tool/core'
@@ -200,7 +201,10 @@ function Bench({ tool }: { tool: Tool }) {
       </div>
 
       {built ? (
-        <Shell tool={tool} module={built} />
+        <>
+          <Decor toolId={tool.id} />
+          <Shell tool={tool} module={built} />
+        </>
       ) : (
         <div className="tool__pending">
           <p className="tool__pending-lead">{tool.blurb}</p>

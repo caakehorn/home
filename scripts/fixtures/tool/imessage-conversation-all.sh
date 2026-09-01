@@ -131,9 +131,9 @@ WHERE EXISTS (
     SELECT 1
       FROM chat_message_join j
       JOIN chat_handle_join chj ON chj.chat_id = j.chat_id
-      JOIN handle h ON h.ROWID = chj.handle_id
+      JOIN handle hh ON hh.ROWID = chj.handle_id
      WHERE j.message_id = m.ROWID
-       AND (replace(replace(replace(replace(replace(replace(replace(h.id, '+', ''), '-', ''), ' ', ''), '(', ''), ')', ''), '.', ''), ' ', '') LIKE '%5550104477')
+       AND (replace(replace(replace(replace(replace(replace(replace(hh.id, '+', ''), '-', ''), ' ', ''), '(', ''), ')', ''), '.', ''), ' ', '') LIKE '%5550104477')
   )
 ORDER BY sent_epoch ASC, m.ROWID ASC;
 SQL_HEX
@@ -324,9 +324,9 @@ WHERE EXISTS (
     SELECT 1
       FROM chat_message_join j
       JOIN chat_handle_join chj ON chj.chat_id = j.chat_id
-      JOIN handle h ON h.ROWID = chj.handle_id
+      JOIN handle hh ON hh.ROWID = chj.handle_id
      WHERE j.message_id = m.ROWID
-       AND (replace(replace(replace(replace(replace(replace(replace(h.id, '+', ''), '-', ''), ' ', ''), '(', ''), ')', ''), '.', ''), ' ', '') LIKE '%5550104477')
+       AND (replace(replace(replace(replace(replace(replace(replace(hh.id, '+', ''), '-', ''), ' ', ''), '(', ''), ')', ''), '.', ''), ' ', '') LIKE '%5550104477')
   )
 ORDER BY sent_epoch ASC, m.ROWID ASC;
 SQL_PLAIN
@@ -350,11 +350,12 @@ WHERE EXISTS (
     SELECT 1
       FROM chat_message_join j
       JOIN chat_handle_join chj ON chj.chat_id = j.chat_id
-      JOIN handle h ON h.ROWID = chj.handle_id
+      JOIN handle hh ON hh.ROWID = chj.handle_id
      WHERE j.message_id = m.ROWID
-       AND (replace(replace(replace(replace(replace(replace(replace(h.id, '+', ''), '-', ''), ' ', ''), '(', ''), ')', ''), '.', ''), ' ', '') LIKE '%5550104477')
+       AND (replace(replace(replace(replace(replace(replace(replace(hh.id, '+', ''), '-', ''), ' ', ''), '(', ''), ')', ''), '.', ''), ' ', '') LIKE '%5550104477')
   ));
-SQL_COUNT)"
+SQL_COUNT
+)"
 
 if [ "$WROTE" = "unknown" ]; then
   # A CSV field may contain newlines, so records are counted by quote

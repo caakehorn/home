@@ -346,7 +346,8 @@ LEFT JOIN chat c ON c.ROWID = (
   SELECT min(j2.chat_id) FROM chat_message_join j2 WHERE j2.message_id = m.ROWID
 )
 );
-SQL_COUNT)"
+SQL_COUNT
+)"
 
 if [ "$WROTE" = "unknown" ]; then
   # Every record opens at column 0 with its timestamp; message body lines

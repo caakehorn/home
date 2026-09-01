@@ -333,7 +333,8 @@ LEFT JOIN chat c ON c.ROWID = (
   SELECT min(j2.chat_id) FROM chat_message_join j2 WHERE j2.message_id = m.ROWID
 )
 WHERE (replace(replace(replace(replace(replace(replace(replace(h.id, '+', ''), '-', ''), ' ', ''), '(', ''), ')', ''), '.', ''), ' ', '') LIKE '%5550104477'));
-SQL_COUNT)"
+SQL_COUNT
+)"
 
 if [ "$WROTE" = "unknown" ]; then
   # A CSV field may contain newlines, so records are counted by quote

@@ -203,7 +203,8 @@ fi
 # that were written are counted back and compared against what the same
 # predicate says should be there, and a mismatch is a failure rather than a
 # note. See CLAUDE.md section 3.
-EXPECT="$(/usr/bin/sqlite3 "$WORK/chat.db" ${heredoc('SQL_COUNT', count)})"
+EXPECT="$(/usr/bin/sqlite3 "$WORK/chat.db" ${heredoc('SQL_COUNT', count)}
+)"
 
 if [ "$WROTE" = "unknown" ]; then
 ${

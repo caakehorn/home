@@ -333,7 +333,8 @@ LEFT JOIN chat c ON c.ROWID = (
   SELECT min(j2.chat_id) FROM chat_message_join j2 WHERE j2.message_id = m.ROWID
 )
 WHERE (CASE WHEN m.date > 1000000000000 THEN m.date / 1000000000 ELSE m.date END + 978307200) >= strftime('%s', 'now', '-30 days'));
-SQL_COUNT)"
+SQL_COUNT
+)"
 
 if [ "$WROTE" = "unknown" ]; then
   # A CSV field may contain newlines, so records are counted by quote

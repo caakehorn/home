@@ -164,13 +164,17 @@ export function buildQuery(plan: QueryPlan, withBody: boolean): string {
       // The whole conversation: any chat this message is in that has the target
       // as a participant. This is what picks up group threads, and what a
       // reader asking for "my messages with X" almost always means.
+      // `hh` rather than `h`: the outer query already joins `handle h`, and
+      // while an inner `h` would correctly shadow it, this script is one the
+      // reader is told to read before running. A predicate whose meaning turns
+      // on a shadowing rule is one they cannot check.
       where.push(`EXISTS (
     SELECT 1
       FROM chat_message_join j
       JOIN chat_handle_join chj ON chj.chat_id = j.chat_id
-      JOIN handle h ON h.ROWID = chj.handle_id
+      JOIN handle hh ON hh.ROWID = chj.handle_id
      WHERE j.message_id = m.ROWID
-       AND (${anyTarget('h', plan.targets)})
+       AND (${anyTarget('hh', plan.targets)})
   )`)
     }
   }

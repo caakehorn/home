@@ -38,7 +38,7 @@
  * throws: a stack trace is not a message to a person.
  */
 
-import { execFileSync } from 'node:child_process'
+import { execFileSync, spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { bundle } from './build-tool-entry.mjs'
@@ -389,15 +389,34 @@ async function main() {
     // Does bash consider it a program at all? `-n` parses without running,
     // which catches the class of mistake that is invisible in a diff and fatal
     // on the reader's machine — an unterminated heredoc above all.
-    const scriptPath = join(GOLDEN, `.${fx.name}.sh`)
-    writeFileSync(scriptPath, a.script + '\n')
-    try {
-      execFileSync('bash', ['-n', scriptPath], { stdio: 'pipe' })
-    } catch (err) {
-      note(
-        `"${fx.name}" is not valid bash.`,
-        ...String(err.stderr || err.message).trim().split('\n').map((l) => `  ${l}`),
-      )
+    // What actually runs is the INSIDE of the outer heredoc. Running `bash -n`
+    // over the whole emitted block parses one line — `bash <<'IMSGX'` — and
+    // treats every line after it as data, which is why the first version of
+    // this check reported "valid bash" for a script whose inner heredoc never
+    // terminated. The body is unwrapped first, so what is parsed is what runs.
+    //
+    // And the test is that bash says NOTHING, not that it exits clean: an
+    // unterminated heredoc is a warning and a zero exit, and a warning still
+    // reaches the reader on every run of their command.
+    const inner = /^bash <<'IMSGX'\n([\s\S]*)\nIMSGX$/.exec(a.script)
+    if (!inner) {
+      note(`"${fx.name}" is not wrapped in the expected outer heredoc.`)
+    } else {
+      const scriptPath = join(GOLDEN, `.${fx.name}.sh`)
+      writeFileSync(scriptPath, inner[1] + '\n')
+      // spawnSync rather than execFileSync: the warning is on STDERR, and
+      // execFileSync hands back stdout on success.
+      const parsed = spawnSync('bash', ['-n', scriptPath], { encoding: 'utf8' })
+      const said = `${parsed.stderr ?? ''}${parsed.stdout ?? ''}`.trim()
+      if (parsed.status !== 0) {
+        note(`"${fx.name}" is not valid bash.`, ...said.split('\n').map((l) => `  ${l}`))
+      } else if (said) {
+        note(
+          `"${fx.name}": bash parsed it, but complained.`,
+          ...said.split('\n').map((l) => `  ${l}`),
+          '  A warning here reaches the reader on every run of the command.',
+        )
+      }
     }
 
     // Injection: the same fixture with every free-text answer poisoned.
@@ -427,11 +446,18 @@ async function main() {
 
     // Collect the SQL for the run against a real database.
     for (const { marker, sql } of sqlBlocks(a.script)) {
-      if (marker === 'SQL_COUNT') continue
       const path = join(GOLDEN, `.${fx.name}.${marker}.sql`)
       writeFileSync(path, sql)
       queryFiles.push(path)
-      wanted.push({ fixture: fx.name, marker, rows: fx.expect.rows, named: fx.expect.named })
+      // The count query returns ONE row holding the number the row queries
+      // must produce — it is the script's own reconciliation, and it was
+      // previously skipped here, which meant the check that makes a truncated
+      // export loud was itself unchecked.
+      wanted.push(
+        marker === 'SQL_COUNT'
+          ? { fixture: fx.name, marker, rows: 1, counts: fx.expect.rows }
+          : { fixture: fx.name, marker, rows: fx.expect.rows, named: fx.expect.named },
+      )
     }
   }
 
@@ -471,6 +497,15 @@ async function main() {
     // A name that reaches the SQL but not the rows is the failure worth
     // catching: the CASE compiles either way, and an export full of blank names
     // reads as though the address book simply had no match for that person.
+    if (want.counts !== undefined) {
+      const got = (result.values[0] ?? [])[0]
+      if (got !== want.counts) {
+        note(
+          `${want.fixture}: the script's own reconciliation counts ${got}, but the query returns ${want.counts}.`,
+          '  The emitted command would refuse its own correct export as incomplete.',
+        )
+      }
+    }
     if (want.named) {
       const at = result.columns?.indexOf('contact_name') ?? -1
       const stamped = at >= 0 && result.values.every((row) => row[at] === want.named)
@@ -558,6 +593,7 @@ async function main() {
   console.log('  deterministic, golden, valid bash, injection-safe, every column resolves')
   console.log('  attributedBody recovered exactly, including >127 bytes and emoji')
   console.log('  contacts parsed from Google CSV and vCard, quoting and folding included')
+  console.log('  each script reconciles to its own row count, and bash parses it silently')
 }
 
 main()

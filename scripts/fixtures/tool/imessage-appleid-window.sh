@@ -131,9 +131,9 @@ WHERE EXISTS (
     SELECT 1
       FROM chat_message_join j
       JOIN chat_handle_join chj ON chj.chat_id = j.chat_id
-      JOIN handle h ON h.ROWID = chj.handle_id
+      JOIN handle hh ON hh.ROWID = chj.handle_id
      WHERE j.message_id = m.ROWID
-       AND (lower(h.id) = 'someone@icloud.com')
+       AND (lower(hh.id) = 'someone@icloud.com')
   )
   AND date((CASE WHEN m.date > 1000000000000 THEN m.date / 1000000000 ELSE m.date END + 978307200), 'unixepoch', 'localtime') BETWEEN '2020-01-01' AND '2020-12-31'
 ORDER BY sent_epoch ASC, m.ROWID ASC;
@@ -326,9 +326,9 @@ WHERE EXISTS (
     SELECT 1
       FROM chat_message_join j
       JOIN chat_handle_join chj ON chj.chat_id = j.chat_id
-      JOIN handle h ON h.ROWID = chj.handle_id
+      JOIN handle hh ON hh.ROWID = chj.handle_id
      WHERE j.message_id = m.ROWID
-       AND (lower(h.id) = 'someone@icloud.com')
+       AND (lower(hh.id) = 'someone@icloud.com')
   )
   AND date((CASE WHEN m.date > 1000000000000 THEN m.date / 1000000000 ELSE m.date END + 978307200), 'unixepoch', 'localtime') BETWEEN '2020-01-01' AND '2020-12-31'
 ORDER BY sent_epoch ASC, m.ROWID ASC
@@ -365,12 +365,13 @@ WHERE EXISTS (
     SELECT 1
       FROM chat_message_join j
       JOIN chat_handle_join chj ON chj.chat_id = j.chat_id
-      JOIN handle h ON h.ROWID = chj.handle_id
+      JOIN handle hh ON hh.ROWID = chj.handle_id
      WHERE j.message_id = m.ROWID
-       AND (lower(h.id) = 'someone@icloud.com')
+       AND (lower(hh.id) = 'someone@icloud.com')
   )
   AND date((CASE WHEN m.date > 1000000000000 THEN m.date / 1000000000 ELSE m.date END + 978307200), 'unixepoch', 'localtime') BETWEEN '2020-01-01' AND '2020-12-31');
-SQL_COUNT)"
+SQL_COUNT
+)"
 
 if [ "$WROTE" = "unknown" ]; then
   # Every record opens at column 0 with its timestamp; message body lines

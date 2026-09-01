@@ -41,9 +41,13 @@ on:
 permissions:
   contents: write
 
+# Last dispatch wins. A wiki-updated burst is a full rebuild each time, so
+# cancelling an in-flight run loses nothing the later one will not re-derive.
+# cancel-in-progress: false let two portal saves 3s apart both run
+# (2026-08-31 21:33 UTC); the second died on a stale checkout after rebase.
 concurrency:
   group: sync-wiki
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   sync:
@@ -52,6 +56,14 @@ jobs:
       changed: ${{ steps.commit.outputs.changed }}
     steps:
       - uses: actions/checkout@v4
+
+      # repository_dispatch pins the ref at enqueue time. If a previous sync
+      # (or anything else) moved main, start from the tip so we do not rebuild
+      # a stale tree and then lose the push-rebase.
+      - name: Start from current main
+        run: |
+          git fetch origin main
+          git reset --hard origin/main
 
       # fetch-depth: 0 because the page-history derivation reads the log, and a
       # shallow clone's log does not reach the first version of any page — it
@@ -191,11 +203,11 @@ jobs:
           # collision nobody was told about. Rebase and retry instead.
           #
           # The replay is safe because the only writer of these paths is this
-          # job, and `concurrency: sync-wiki` means there is never a second one:
-          # whatever moved main touched something else, so there is nothing to
-          # conflict with. A conflict here would mean that assumption is wrong,
-          # which is worth failing on rather than resolving blind — the next
-          # scheduled run re-derives the whole snapshot from scratch regardless.
+          # job. Overlapping wiki-updated runs are cancelled (last dispatch
+          # wins). If main moved for another reason, rebase. A conflict here
+          # would mean that assumption is wrong, which is worth failing on
+          # rather than resolving blind — the next scheduled run re-derives
+          # the whole snapshot from scratch regardless.
           for attempt in 1 2 3; do
             if git push; then
               echo 'changed=true' >> "$GITHUB_OUTPUT"

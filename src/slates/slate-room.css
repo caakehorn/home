@@ -1,0 +1,664 @@
+/* ==========================================================================
+   THE SLATE ROOM
+
+   A working room rather than a designed one: this is where pictures are
+   handled, so the surfaces are flat, the type is the mono UI face, and
+   nothing here animates. Every other room on the site argues for itself; this
+   one is a bench, a board and a list.
+
+   Two constraints from CLAUDE.md that shape most of what is below:
+
+   - Five palettes, and two of them collapse the accent ramp — `griptape` has
+     --n1 === --n5 and `riot` has two collisions and *inverts* besides. So no
+     state here is signalled by hue alone: the keyring light has a shape, the
+     hung-by-hand tags have a rule through them, and every control keeps a
+     border it can be found by when the glow is invisible.
+   - A touch target is measured in fingers. Every button and every field here
+     clears 44px, and every text input is at least 16px because anything
+     smaller makes iOS zoom the whole document on focus.
+   ========================================================================== */
+
+.sl {
+  /* The Fx layers sit at z-index 0 and will cover a room that omits this. */
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  padding-bottom: 8rem;
+}
+
+/* ---- masthead ------------------------------------------------------------ */
+
+.sl__mast {
+  position: relative;
+  padding-top: 1.6rem;
+}
+
+.sl__title {
+  margin: 0;
+}
+
+/* The house pattern is a kana pinned to the top right of the masthead — see
+   `.lex__mast-kana`. It works there because THE NET is seven characters. THE
+   SLATE ROOM is fourteen and runs under it on a phone, so the kana only goes
+   absolute once there is room for it beside the title. */
+.sl__mast-kana {
+  display: block;
+  margin-top: 0.6rem;
+  font-size: clamp(2rem, 9vw, 3.4rem);
+  line-height: 1;
+  color: color-mix(in srgb, var(--n3) 55%, transparent);
+  pointer-events: none;
+}
+
+@media (min-width: 40rem) {
+  .sl__mast-kana {
+    position: absolute;
+    top: 1rem;
+    right: 0;
+    margin-top: 0;
+  }
+}
+
+/* The ATLAS stamp, in this room's words. Deliberately loud and deliberately
+   above the copy: everything below it is somebody's taste. */
+.sl__stamp {
+  display: inline-block;
+  margin: 0.8rem 0 0;
+  padding: 0.25rem 0.6rem;
+  border: 2px solid currentColor;
+  color: var(--n2);
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  transform: rotate(-1.5deg);
+}
+
+.sl__note {
+  max-width: 68ch;
+  margin: 0.8rem 0 0;
+  font-size: var(--step--1);
+  line-height: 1.65;
+  color: var(--text-dim);
+}
+
+.sl__state {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1rem 0 0;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+}
+
+/* Shape as well as colour: a square that is filled, hollow or halved reads in
+   every palette, including the two that collapse the ramp. */
+.sl__light {
+  width: 0.7rem;
+  height: 0.7rem;
+  flex: 0 0 auto;
+  border: 2px solid currentColor;
+}
+
+.sl__light--on {
+  background: var(--n5);
+  border-color: var(--n5);
+}
+
+.sl__light--off {
+  background: repeating-linear-gradient(
+    45deg,
+    currentColor 0 2px,
+    transparent 2px 4px
+  );
+}
+
+.sl__light--wait {
+  background: transparent;
+}
+
+/* ---- tabs ---------------------------------------------------------------- */
+
+.sl__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.6rem;
+}
+
+.sl__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.9rem;
+  padding: 0.5rem 1rem;
+  border: 2px solid color-mix(in srgb, var(--text-dim) 50%, transparent);
+  background: var(--void-2);
+  color: var(--text-dim);
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+}
+
+.sl__tab .jp {
+  font-size: 0.9rem;
+}
+
+.sl__tab--on {
+  border-color: var(--n3);
+  background: var(--void-3);
+  color: var(--text);
+}
+
+.sl__tab:focus-visible {
+  outline: 3px solid var(--n5);
+  outline-offset: 2px;
+}
+
+/* ---- panes --------------------------------------------------------------- */
+
+.sl__body {
+  margin-top: 1.4rem;
+}
+
+.sl__pane {
+  margin-top: 1.2rem;
+}
+
+.sl__lede {
+  max-width: 72ch;
+  margin: 0 0 1.6rem;
+  font-size: var(--step--1);
+  line-height: 1.65;
+  color: var(--text-dim);
+}
+
+.sl__lede code,
+.sl__hint code,
+.sl__meta code {
+  font-family: var(--f-mono);
+  font-size: 0.92em;
+  color: var(--text);
+}
+
+.sl__label {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.sl__hint {
+  margin: 0.35rem 0 0;
+  font-size: var(--step--1);
+  line-height: 1.55;
+  color: var(--text-dim);
+}
+
+.sl__meta {
+  margin: 0.2rem 0 0;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+
+.sl__caveat,
+.sl__warn {
+  margin: 0.5rem 0 0;
+  padding: 0.55rem 0.75rem;
+  border-left: 3px solid var(--n2);
+  background: color-mix(in srgb, var(--n2) 12%, transparent);
+  font-size: var(--step--1);
+  line-height: 1.55;
+}
+
+.sl__status {
+  margin: 0 0 1rem;
+  padding: 0.6rem 0.8rem;
+  border-left: 3px solid var(--text-dim);
+  background: color-mix(in srgb, var(--text-dim) 10%, transparent);
+  font-family: var(--f-mono);
+  font-size: var(--step--1);
+}
+
+.sl__status--good {
+  border-left-color: var(--n5);
+}
+
+.sl__status a {
+  color: inherit;
+}
+
+/* ---- fields -------------------------------------------------------------- */
+
+.sl__field {
+  width: 100%;
+  min-width: 0;
+  min-height: 2.9rem;
+  padding: 0.5rem 0.7rem;
+  border: 2px solid color-mix(in srgb, var(--text-dim) 44%, transparent);
+  background: var(--void);
+  color: var(--text);
+  font-family: var(--f-mono);
+  /* 16px floor: anything smaller and iOS zooms the document on focus. */
+  font-size: max(var(--step-0), 16px);
+}
+
+.sl__field--area {
+  min-height: 5rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.sl__field--bad {
+  border-color: var(--n2);
+}
+
+.sl__field:focus-visible {
+  border-color: var(--n5);
+  outline: none;
+}
+
+.sl__slider {
+  width: 100%;
+  /* 2.6rem measured 42px, which is under the coarse-pointer floor by two. */
+  min-height: 2.75rem;
+  accent-color: var(--n5);
+}
+
+/* ---- intake -------------------------------------------------------------- */
+
+.sl__drop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1.6rem;
+  border: 3px dashed color-mix(in srgb, var(--text-dim) 55%, transparent);
+  background: color-mix(in srgb, var(--void-2) 70%, transparent);
+}
+
+.sl__drop--over {
+  border-color: var(--n5);
+  border-style: solid;
+}
+
+/* Visually hidden, not display:none — a hidden input cannot be focused, and
+   the label below is the only way in from a keyboard. */
+.sl__file {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.sl__pick {
+  display: inline-block;
+  min-height: 2.9rem;
+  padding: 0.75rem 1.2rem;
+  border: 2px solid var(--n3);
+  background: var(--void-3);
+  color: var(--text);
+  font-family: var(--f-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+}
+
+.sl__file:focus-visible + .sl__pick {
+  outline: 3px solid var(--n5);
+  outline-offset: 2px;
+}
+
+.sl__drop-note {
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+
+.sl__bench {
+  margin-top: 1.6rem;
+}
+
+.sl__dials {
+  display: grid;
+  gap: 1.2rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+}
+
+.sl__receipts {
+  display: grid;
+  gap: 0.9rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+  margin: 1.4rem 0 0;
+  padding: 0.9rem;
+  border: 2px solid color-mix(in srgb, var(--text-dim) 30%, transparent);
+  background: var(--void-2);
+}
+
+.sl__receipts dt {
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  color: var(--text-dim);
+}
+
+.sl__receipts dd {
+  margin: 0.25rem 0 0;
+  font-family: var(--f-mono);
+  font-size: var(--step-0);
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.sl__heavy {
+  color: var(--n2);
+}
+
+.sl__form {
+  display: grid;
+  gap: 1.2rem;
+  margin-top: 1.6rem;
+}
+
+.sl__row--split {
+  display: grid;
+  gap: 1.2rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+}
+
+.sl__preview {
+  display: grid;
+  gap: 1.2rem;
+  align-items: center;
+  margin: 1.8rem 0 0;
+  padding: 1.2rem;
+  border: 2px solid color-mix(in srgb, var(--text-dim) 30%, transparent);
+  background: var(--void-2);
+}
+
+/* Wide enough for two columns, and the plate stops growing: past about 26rem
+   it is bigger than it will ever be drawn on the site, which makes the
+   preview a worse answer to the only question it is here to settle. */
+@media (min-width: 46rem) {
+  .sl__preview {
+    grid-template-columns: minmax(0, 26rem) 1fr;
+  }
+}
+
+.sl__preview-plate {
+  max-width: min(100%, 26rem);
+}
+
+.sl__preview figcaption {
+  margin: 0;
+}
+
+.sl__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 1.6rem;
+}
+
+.sl__go,
+.sl__alt-go {
+  min-height: 3rem;
+  padding: 0.8rem 1.4rem;
+  border: 2px solid var(--n5);
+  background: var(--n5);
+  color: var(--on-glow);
+  font-family: var(--f-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  cursor: pointer;
+}
+
+.sl__alt-go {
+  border-color: color-mix(in srgb, var(--text-dim) 60%, transparent);
+  background: transparent;
+  color: var(--text);
+}
+
+.sl__alt-go--warn {
+  margin-top: 0.8rem;
+  border-color: var(--n2);
+  color: var(--n2);
+}
+
+.sl__go:disabled,
+.sl__alt-go:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.sl__go:focus-visible,
+.sl__alt-go:focus-visible,
+.sl__chip:focus-visible {
+  outline: 3px solid var(--n5);
+  outline-offset: 2px;
+}
+
+/* ---- the board ----------------------------------------------------------- */
+
+.sl__group {
+  margin: 0 0 2.4rem;
+}
+
+.sl__group-title {
+  margin: 0;
+  font-family: var(--f-head);
+  font-size: var(--step-1);
+  letter-spacing: 0.04em;
+}
+
+.sl__walls {
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.8rem;
+}
+
+.sl__wall {
+  display: grid;
+  gap: 0.9rem;
+  align-items: start;
+  grid-template-columns: 5rem 1fr;
+  padding: 0.9rem;
+  border: 2px solid color-mix(in srgb, var(--text-dim) 26%, transparent);
+  background: var(--void-2);
+}
+
+@media (min-width: 46rem) {
+  .sl__wall {
+    grid-template-columns: 6rem 1fr 16rem;
+    align-items: center;
+  }
+}
+
+.sl__thumb {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border: 2px solid color-mix(in srgb, var(--glow, var(--text-dim)) 70%, transparent);
+}
+
+.sl__wall-say {
+  min-width: 0;
+}
+
+.sl__wall-name {
+  font-family: var(--f-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--text);
+}
+
+.sl__wall-pick {
+  min-width: 0;
+  /* On a phone the picker sits under the copy and spans both columns. */
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 46rem) {
+  .sl__wall-pick {
+    grid-column: auto;
+  }
+}
+
+/* ---- pools --------------------------------------------------------------- */
+
+.sl__pool {
+  min-inline-size: 0;
+  margin: 1.2rem 0 0;
+  padding: 0.9rem;
+  border: 2px solid color-mix(in srgb, var(--text-dim) 26%, transparent);
+  background: var(--void-2);
+}
+
+.sl__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.8rem;
+}
+
+.sl__chip {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.9rem;
+  padding: 0.35rem 0.7rem 0.35rem 0.35rem;
+  border: 2px solid color-mix(in srgb, var(--text-dim) 40%, transparent);
+  background: var(--void);
+  color: var(--text-dim);
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+
+.sl__chip img {
+  width: 2.1rem;
+  height: 2.1rem;
+  object-fit: cover;
+}
+
+/* Pressed is a filled border and full-strength type, not a hue: two of the
+   five palettes cannot be relied on to separate --n3 from --n1. */
+.sl__chip--on {
+  border-color: var(--glow, var(--n5));
+  background: var(--void-3);
+  color: var(--text);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--glow, var(--n5)) 35%, transparent);
+}
+
+.sl__sample {
+  display: inline;
+}
+
+/* ---- the roster ---------------------------------------------------------- */
+
+.sl__roster {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sl__card {
+  display: flex;
+  flex-direction: column;
+  border: 2px solid color-mix(in srgb, var(--glow, var(--text-dim)) 45%, transparent);
+  background: var(--void-2);
+}
+
+.sl__card-img {
+  width: 100%;
+  height: 9rem;
+  object-fit: cover;
+  border-bottom: 2px solid color-mix(in srgb, var(--glow, var(--text-dim)) 45%, transparent);
+}
+
+.sl__card-say {
+  padding: 0.8rem;
+}
+
+.sl__where {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.7rem 0 0;
+  font-size: var(--step--1);
+  color: var(--text-dim);
+}
+
+.sl__tag {
+  padding: 0.2rem 0.45rem;
+  border: 1px dashed color-mix(in srgb, var(--text-dim) 60%, transparent);
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+}
+
+/* Hung by hand: solid, filled. Chosen by the code: dashed, hollow. Legible
+   with no colour at all, which is the point. */
+.sl__tag--hand {
+  border-style: solid;
+  border-color: var(--n5);
+  background: color-mix(in srgb, var(--n5) 16%, transparent);
+  color: var(--text);
+}
+
+.sl__tag--pool {
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--text-dim) 60%, transparent);
+}
+
+/* ---- the save bar -------------------------------------------------------- */
+
+.sl__bar {
+  position: sticky;
+  /* Clear of the bottom crawl, which is fixed at the foot of every page. */
+  bottom: calc(var(--crawl-h) + 0.5rem);
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.8rem;
+  /* Same measure as `.wrap`, so the bar lines up with the panes above it. */
+  width: min(1440px, 100% - var(--gutter) * 2);
+  margin: 2rem auto 0;
+  padding: 0.8rem;
+  border: 3px solid var(--n5);
+  background: var(--void-3);
+}
+
+.sl__bar-note {
+  flex: 1 1 14rem;
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  line-height: 1.5;
+  color: var(--text-dim);
+}

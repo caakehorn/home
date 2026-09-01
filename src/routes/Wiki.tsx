@@ -6,6 +6,7 @@ import { SectionArt } from '../components/SectionArt'
 import { SubHead } from '../components/Wordmark'
 import { banner } from '../content/slogans'
 import { BriefDeck } from '../wiki/BriefDeck'
+import { SyncLight } from '../wiki/SyncLight'
 import { Cortex } from '../wiki/Cortex'
 import { Gaps } from '../wiki/Gaps'
 import { StartRail } from '../wiki/StartRail'
@@ -222,6 +223,14 @@ export function WikiIndexRoute() {
         <span className="wiki__mast-kana jp" aria-hidden="true">
           脳
         </span>
+        {/* Beside the counts, not above them, because the counts are the claim
+            it qualifies: "472 pages" is only true of the wiki that exists if
+            this snapshot is standing on it. Left rather than right, because the
+            floating HUD lives in the top-right corner of every route and would
+            sit on top of it there — which the first render of this showed. */}
+        <div className="wiki__mast-status">
+          <SyncLight />
+        </div>
         {data && (
           <p className="wiki__mast-note">
             {data.counts.pages.toLocaleString()} pages · {data.counts.words.toLocaleString()} words

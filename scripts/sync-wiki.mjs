@@ -9,6 +9,7 @@
  * The portal is static, so nothing is read from the source repo at runtime.
  * Re-run this to pull in new writing.
  */
+import { execFileSync } from 'node:child_process'
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { join, relative, resolve } from 'node:path'
 import { layoutWiki, undirectedEdges } from './graph-layout.mjs'
@@ -181,6 +182,47 @@ function countChartableTables(body) {
     i += rows.length + 1
   }
   return count
+}
+
+// ---------------------------------------------------------------------------
+// What this snapshot was derived from
+//
+// The four paths below are every path this file reads out of wiki-brain. They
+// are duplicated in that repository's `notify-portal.yml`, which fires the
+// dispatch that wakes the sync, and the two lists came apart once already —
+// `lexicon/words/` was read here and missing there for as long as the lexicon
+// existed, so a word analysed by a session sat unpublished until the next cron.
+// Naming them once, here, at least gives the drift somewhere to be found.
+//
+// The commit recorded is the last one that touched any of them — **not** HEAD.
+// That distinction is the whole point: a push that only moves `log.md` or
+// `WORK.md` changes HEAD and changes nothing this snapshot could carry, and a
+// status light keyed to HEAD would call the site out of date for a commit it
+// was right to ignore. Keyed to the read paths, the value moves when, and only
+// when, there is something here to catch up with.
+//
+// Empty outside a git checkout — an export, a tarball, a `cpSync` of the
+// directory. Absent rather than faked: the reader can say "I cannot tell",
+// which is true, and is not the same as "current".
+
+const READ_PATHS = ['wiki', 'sage/questions', 'plain', 'lexicon/words']
+
+function sourceCommit() {
+  try {
+    const out = execFileSync(
+      'git',
+      // A space rather than a NUL: execFileSync refuses an argument carrying a
+      // null byte outright, and neither field can contain a space anyway.
+      ['-C', SOURCE, 'log', '-1', '--format=%H %cI', '--', ...READ_PATHS],
+      { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] },
+    ).trim()
+    if (!out) return null
+    const [commit, committedAt] = out.split(' ')
+    if (!commit || !committedAt) return null
+    return { repo: 'caakehorn/wiki-brain', commit, committedAt, paths: READ_PATHS }
+  } catch {
+    return null
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -462,6 +504,10 @@ writeFileSync(
   join(OUT, 'index.json'),
   JSON.stringify({
     generatedAt: new Date().toISOString(),
+    // Which wiki-brain commit this snapshot is standing on. Read by the sync
+    // light in the wiki masthead, which asks GitHub whether anything has
+    // touched those paths since — see src/wiki/sync-status.ts.
+    source: sourceCommit(),
     counts: {
       pages: index.length,
       words: index.reduce((n, p) => n + p.words, 0),

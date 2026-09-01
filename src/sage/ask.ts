@@ -64,7 +64,7 @@ export async function ask(
   )
 
   // The commit is the durable part. If the nudge fails the question is still
-  // upstream and the hourly sync will pick it up, so say what happened rather
+  // upstream and the scheduled sync will pick it up, so say what happened rather
   // than reporting a failure that lost nothing.
   onProgress('asking the site to rebuild…')
   try {

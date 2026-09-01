@@ -36,6 +36,14 @@
   text-shadow: 0 0 calc(var(--glow-r) * 0.8) var(--n3);
 }
 
+/* Its own row across the masthead, left-aligned, directly above the counts.
+   The top-right corner is the HUD's and a lamp placed there is drawn under it. */
+.wiki__mast-status {
+  grid-column: 1 / -1;
+  justify-self: start;
+  padding-top: 0.4rem;
+}
+
 .wiki__mast-note {
   grid-column: 1 / -1;
   max-width: 70ch;
@@ -514,10 +522,20 @@
 }
 
 .wiki__crumbs {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
   font-family: var(--f-mono);
   font-size: 0.68rem;
   letter-spacing: 0.14em;
   color: var(--text-dim);
+}
+
+/* Pushed to the end of the crumb row rather than trailing the domain link, so
+   it sits in the same place on every entry however long the crumbs are. */
+.wiki__crumbs .synclight {
+  margin-left: auto;
 }
 
 .wiki__crumbs a {

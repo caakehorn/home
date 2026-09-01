@@ -6,14 +6,45 @@ build that reads it. It exists so that the next visualiser does not have to
 re-derive any of this, and so that a build that finds a number here and a
 different number in the data knows the snapshot has moved.
 
-**Generated** from a full crawl of the repo at `main` (wiki snapshot
-`generatedAt 2026-08-30T23:53:18Z`, 472 pages / 774,912 words).
+**Generated** from a full crawl of the repo at `main`. The wiki figures below are
+the snapshot of **2026-08-30, 472 pages / 774,912 words**; the distribution tables
+in §1.2 and §1.3 are older crawls and say so where they differ. The live counts
+are always one command away, and are the thing to trust:
 
-**How to use it.** Numbers here are load-bearing. A pipeline that reads this
-corpus should assert against them and exit non-zero when they drift — the pattern
-`scripts/build-atlas.mjs` uses, where the build refuses to write a dataset whose
-totals no longer match the source. A silently-halved edge count looks exactly like
-a working build.
+```
+node -p "require('./public/core/structure.json').counts"
+node -p "require('./public/wiki/index.json').counts"
+```
+
+**How to use it.** These numbers are a description of the corpus, not a contract
+with it. Read them to know what shape a payload is and what it will do to a
+pipeline; do not wire a build to require that they still hold.
+
+That distinction was learned the hard way and is worth the paragraph.
+`scripts/build-core.mjs` used to assert eight of the figures on this page for
+exact equality, on the reasoning in §8 — and the corpus it describes is a wiki
+somebody writes in every day, synced every five minutes. So an ordinary page edit upstream
+turned the sync red, the snapshot froze, and the site went on deploying green
+from a corpus that had stopped advancing: eight days of `wiki.json`, then 22 of
+25 Reader's Digest twins, merged and never published. Worse, the remedy for
+`words: got 772670, says 772653` was to type 772670, so the check taught everyone
+who met it to clear it without looking.
+
+**What a build should assert instead** — both of these, and neither of them is a
+number anybody maintains:
+
+- **Self-consistency.** Does the output agree with the input it was derived from
+  in this same run? Node count against index rows against files on disk; a
+  summed field against the count that claims to summarise it; every index in
+  range. These hold on any corpus of any size and catch a truncated read the
+  moment it happens.
+- **Movement.** Has the corpus *collapsed* since the last build — measured
+  against the last build's own committed output, so the baseline advances
+  itself? Growth never fails. `build-core.mjs` is the worked example.
+
+`scripts/build-atlas.mjs` still asserts published totals exactly, and correctly:
+its source is a finished reconstruction that does not move. The difference is not
+strictness, it is whether the thing being asserted is still being written.
 
 ---
 
@@ -21,12 +52,12 @@ a working build.
 
 ```
 public/wiki/          472 page JSONs + index + gaps + sage + lexicon + assets
-public/wiki/history/  472 per-page revision chains — every version ever, §1.5a
+public/wiki/history/  473 per-page revision chains — every version ever, §1.5a
 public/transcript/    index + 91 month files — 134,348 messages
 public/leviathan/     10 derived instrument datasets
 public/gallery/       manifest + 41 media files
 public/agent/         generated at build time (gitignored)
-public/art/           11 webp plates          public/ally/  5 photographs
+public/art/           14 webp plates          public/ally/  5 photographs
 public/gate/          two AES-GCM vaults — not data
 src/content/          sections, art manifests, crawl copy, slogans
 src/lineage/data.ts   a transcribed 515-person GEDCOM, reduced to 47
@@ -43,15 +74,16 @@ Five top-level keys: `generatedAt`, `counts`, `domains`, `pages`, `edges`.
 
 ```
 counts   { pages: 472, words: 774912, chartables: 121, briefs: 10,
-           plain: 25, edges: 3801, revisions: 3587 }   // also allows `sealed`
+           plain: 25, edges: 3801 }         // schema also allows `sealed`
 domains  [{ id, count }] × 10
 pages    [IndexEntry] × 472
 edges    [[int, int]] × 3801                // undirected index pairs into `pages`
                                             // no self-loops, all 3801 distinct
+                                            // build-core.mjs re-checks all three
+                                            // properties on every build
 ```
 
-`IndexEntry` — 14 keys, present on all 472 rows (plus `updated` and
-`revisions`, added by the history build — see §1.5a):
+`IndexEntry` — 14 keys, present on all 472 rows:
 
 | field | type | notes |
 |---|---|---|
@@ -73,26 +105,26 @@ Optional `locked` exists in the schema for sealed pages — **0 in this snapshot
 (`wiki.locks.json` at the repo root reads `{ locked: [] }`).
 
 **Graph shape.** 3,801 edges over 472 nodes. Highest degree:
-`timeline/master-timeline` 360 · `meta/recent-activity` 219 · `people/index` 172 ·
-`people/annie-ulmer` 165 · `meta/open-questions` 164 ·
-`people/suzanne-frank` 88 · `meta/digest` 83 · `mind/index` 76 ·
+`timeline/master-timeline` 360 · `meta/recent-activity` 220 · `people/index` 172 ·
+`people/annie-ulmer` 165 · `meta/open-questions` 165 ·
+`people/suzanne-frank` 88 · `meta/digest` 84 · `mind/index` 76 ·
 `self/message-corpora/master-message-dump` 76 · `self/context-core` 69 ·
 `mind/synthesis/totality-themes` 67 · `people/alexis-armel` 66.
 
-### 1.2 `pages/*.json` — 472 files, 7.17 MB
+### 1.2 `pages/*.json` — 472 files, 7.49 MB
 
-Filename is the slug with `/` → `__`. **Every file carries the same 18 keys**
-(verified across all 472).
+Filename is the slug with `/` → `__`. **Every file carries the same 17 keys**
+(verified across all 472 — one key set, no exceptions).
 
 | key | type | population / shape |
 |---|---|---|
 | `slug` `domain` `title` | str | 472 |
 | `meta` | dict | 472 — `Record<string,string>`, **all values stringified**, 23 distinct keys |
-| `infobox` | dict \| null | **179 dicts / 340 null**, 39 distinct keys |
+| `infobox` | dict \| null | **179 dicts / 293 null**, 39 distinct keys |
 | `lists` | dict | 472 — `Record<string,string[]>`, 10 distinct keys. **Lossy for `connections`** |
 | `fmRaw` | str | 472 — raw YAML front-matter verbatim, 107–27,973 chars. **The only lossless source of typed edges** |
 | `h1` | str \| null | 470 / 2 — leading `# Heading`, stripped from `body` |
-| `links` | str[] | **4,416 total**, min/med/max 0/4/342 |
+| `links` | str[] | 404 non-empty / 68 empty. **4,416 total**, min/med/max 0/5/359 |
 | `body` | str | 472 — markdown with the H1 removed |
 | `words` | int | min/med/max 12 / 699 / 113,514; total 774,912 |
 | `charts` | int | 0–9; **121 total across 52 pages** |
@@ -100,9 +132,14 @@ Filename is the slug with `/` → `__`. **Every file carries the same 18 keys**
 | `gaps` | dict[] | 151 pages non-empty; **484 entries**; each `{ text, label }` |
 | `staged` | null | **null on all 472** (source is `meta.pending_ingest`) |
 | `plain` | dict \| null | **25 dicts** — `{ title, body, words, readingLevel, against, stale }` |
-| `backlinks` | str[] | 469 non-empty / 3 empty, min/med/max 0/5/160 |
+| `backlinks` | str[] | 469 non-empty / 3 empty. **4,364 total**, min/med/max 0/6/160 |
 
 #### `meta` key census (values are all strings)
+
+> The populations in this census and in §1.3 are an **earlier crawl of a larger
+> corpus** — the counts above 472 are the giveaway. They are kept because the
+> shapes and the traps they name are what these two sections are for, and those
+> have not moved. Re-crawl before quoting a population from either.
 
 | key | pages | | key | pages |
 |---|---|---|---|---|
@@ -139,7 +176,7 @@ arrays).
 
 ### 1.3 Front-matter — the `fmRaw` census
 
-471 of 472 parse as YAML. **One failure:**
+All but one page parses as YAML. **The one failure:**
 `mind/synthesis/august-grievance-verdict` — block-scalar syntax error at line 12.
 **A YAML parser silently loses that page's 12 typed edges**; read the block by
 line instead (`scripts/core-frontmatter.mjs`) and there is nothing to lose.
@@ -302,7 +339,7 @@ and `raw/*` paths — a Q&A→page citation graph.
 **`lexicon.json`** (313 B) — a slang-capture queue with **1 entry**. Effectively
 empty; not worth reading.
 
-### 1.5a `history.json` + `history/*.json` — 472 files, 11 MB
+### 1.5a `history.json` + `history/*.json` — 473 files, 9.4 MB
 
 **The only dataset here with a time axis through the corpus itself.** Everything
 else in `public/wiki/` is the wiki as it stands; this is every version it has
@@ -310,7 +347,7 @@ ever had. Derived from the `caakehorn/wiki-brain` git log by
 `scripts/build-wiki-history.mjs`, which needs a full clone (`fetch-depth: 0`) and
 refuses to run against a shallow one.
 
-**`history.json`** (~90 KB) — `{ generatedAt, counts: { pages, revisions,
+**`history.json`** (~92 KB) — `{ generatedAt, counts: { pages, revisions,
 commits, sealed, withheld }, span: { first, last }, pages: [...] }`. Page entry
 `{ slug, domain, revisions, created, updated, sealed?, withheld? }`. The summary
 only; it carries no page text.
@@ -332,10 +369,10 @@ snapshot at revision *i* is `head` folded through `patches[0..i-1]`, and the
 drops from the newer text are the lines that revision added. `src/wiki/history.ts`
 has `applyOps`, `snapshotAt` and `changesIn`; use them rather than re-deriving.
 
-Shape as of 2026-08-30: **472 pages · 3,587 revisions · 545 commits**, spanning
-2026-07-11 to 2026-08-30. Median file 10 KB; `timeline__master-timeline.json` is
-1.2 MB and is the reason the panel fetches on open rather than on mount. Per-page
-distribution is long-tailed — `people/annie-ulmer` has 86 revisions, most pages
+Shape as of 2026-09-01: **473 pages · 3,603 revisions · 499 commits**, spanning
+2026-07-11 to 2026-08-31. Median file 9 KB; `timeline__master-timeline.json` is
+1.1 MB and is the reason the panel fetches on open rather than on mount. Per-page
+distribution is long-tailed — `people/annie-ulmer` has 92 revisions, most pages
 have fewer than 10, 22 pages have more than 25. `op` is the `<op>:` prefix of the
 commit subject where there is one (`ingest`, `climb`, `close`, `answer`,
 `translate`, `constitution-pass`, …) and null otherwise.
@@ -356,13 +393,13 @@ Traps:
   that as an answer, not an error.
 - **`head` duplicates `pages/*.json`** — deliberately. The page JSON is parsed
   (frontmatter split out, H1 stripped) and does not round-trip to the file
-  byte-for-byte: only 2 of 472 do. Reconstructing the head from it would be
-  wrong on 470 pages.
+  byte-for-byte: only 2 of 473 do. Reconstructing the head from it would be
+  wrong on 471 pages.
 - **`path` is present only on revisions older than a rename.** `sha:wiki/<slug>.md`
   will not resolve for those; use `rev.path ?? slug`.
 - `renamedFrom` marks the commit that did the move, `path` marks the revisions
   affected by it. They are not the same field and both are needed.
-- Every claim above is checked by `npm run history:check`, which folds all 3,587
+- Every claim above is checked by `npm run history:check`, which folds all 3,603
   chains through the client's own applier and compares them to git. If you change
   the format, that is what tells you it broke.
 
@@ -384,17 +421,17 @@ inline `![](…)` markdown images anywhere in any body.**
 | self | 40 | 62,727 | 1,568 | 38 | 413 | 358 | 45 | 2 | 114 |
 | work | 15 | 16,494 | 1,100 | 0 | 112 | 157 | 6 | 0 | 76 |
 | places | 10 | 13,686 | 1,369 | 0 | 105 | 117 | 10 | 0 | 80 |
-| meta | 9 | 32,856 | 3,651 | 6 | 492 | 27 | 0 | 0 | 0 |
+| meta | 9 | 32,856 | 3,651 | 6 | 498 | 33 | 0 | 0 | 0 |
 | health | 5 | 9,507 | 1,901 | 1 | 62 | 46 | 11 | 0 | 46 |
 | legal | 4 | 5,088 | 1,272 | 0 | 36 | 49 | 3 | 0 | 26 |
-| **total** | **472** | **774,912** | 1,642 | **121** | **4,410** | **4,358** | **484** | **179** | **2,304** |
+| **total** | **472** | **774,912** | 1,642 | **121** | **4,416** | **4,364** | **484** | **179** | **2,304** |
 
 Note the inversion: `people` has the most pages, but `mind` and `timeline` each
 carry more words, and `mind` dominates typed edges.
 
 ### 1.8 Other mineable structure in the wiki
 
-- **121 chartable tables across 52 pages.** `countChartableTables` in
+- **119 chartable tables across 51 pages.** `countChartableTables` in
   `scripts/sync-wiki.mjs:161` defines the rule; `src/wiki/table.ts` already turns
   each into `{ form: 'line'|'bar', labelHeader, labels[], series[{name, values}],
   notes[], unit }`. `form` is `line` when ≥80% of ≥3 labels look temporal.
@@ -523,10 +560,14 @@ vendored here**.
 | `schema` | — | `{ fields[21] {field,count,share}, byDomain[9], types[11] }`. `domain`/`page_type`/`status`/`date_created`/`date_modified` at 100%; `tags` 94%; `importance` 13%. |
 | `echo` | — | `{ measured: 464, total: 59586, identical: 32, byOverlap[200], byShared[200] }` — pairwise vocabulary Jaccard. A set operation, not embeddings. |
 
-> **Drift warning.** `wiki.json` was built 2026-08-21 against **486 pages /
-> 630,514 words**. `mass.json`, `public/wiki/index.json` and `public/agent/*` were
-> rebuilt 2026-08-30 against **472 pages / 774,912 words**. Do not cross-join
-> `wiki.json` with the newer sets without accounting for the 33-page delta.
+> **Drift warning, and how it was closed.** `wiki.json` sat at a 2026-08-21 build
+> of **486 pages / 630,514 words** for eight days while `mass.json`,
+> `public/wiki/index.json` and `public/agent/*` moved on, because nothing but a
+> hand-run rebuilt it — a 33-page delta that made any cross-join wrong. `npm run
+> wiki-instruments` joined the sync on 2026-08-29 and it now rebuilds with
+> everything else; all of these payloads carry the **same** `generatedAt` as the
+> snapshot they were derived from, which is the thing to compare before
+> cross-joining any two of them.
 
 ---
 
@@ -540,16 +581,35 @@ item. The manifest is fully derived — `build-gallery.mjs` parses JPEG SOF / PN
 IHDR / GIF / WebP VP8 headers for intrinsic size so cards lay out before media
 arrives.
 
-**`public/art/`** — 11 WebP (~563 KB), no JSON. Manifest is `SCENES` (9 entries)
-in `src/content/art.ts`. **Nine sections ↔ nine scenes, mapped by array index —
-a tenth section wraps onto `brain`'s plate unless a tenth scene is added.**
+**`public/art/`** — 14 WebP (~570 KB), no JSON. Two manifests, and the second
+one overrules the first:
+
+- `SCENES` (12 entries) in `src/content/art.ts` — the plates cut by
+  `scripts/build-art.mjs`, each `{ id, src, w, h, alt, kana, tone }`. Two more
+  files (`face-back`, `face-front`) are not scenes: they fill the silhouettes
+  in `src/components/Kiss.tsx` and are reached through `KISS_FACES`.
+  **Twelve sections ↔ twelve scenes, mapped by array index — a thirteenth
+  section wraps onto `brain`'s plate unless a thirteenth scene is added.**
+- `src/content/board.json` — the hand-assignment, written by THE SLATE ROOM at
+  `/slates`. `{ note?, plates[], walls{}, pools{} }`: `plates` are pictures
+  uploaded through the room (`{ id, file, w, h, alt, kana, tone, added, from?,
+  bytes? }`, files sitting beside the cut ones in `public/art/`), `walls` maps
+  a wall id to a plate id, `pools` maps `wiki`/`blog` to the plate ids their
+  path hashes may draw from. **An empty board is the index rule above,
+  exactly.** `src/content/slates.ts` is the registry of what is assignable and
+  the only place either manifest is resolved; `scripts/check-slates.mjs`
+  (`npm run slates:check`, run in the deploy job) fails the build on a plate
+  id nobody has, a filename with no file behind it, or a wall no component
+  reads.
 
 **`public/ally/`** — 5 JPEGs (~329 KB). Manifest is `ALLY` (5 entries) in the same
 file, each with a dated quote and a wiki deep link.
 
-**`src/content/`** — `sections.ts` (9 rooms), `art.ts` (`SCENES`, `ALLY`,
-`SCENE_ORDER`, `KISS_FACES`), `crawls.ts` (`RATIO` 165 entries, `JET_FUEL` 17,
-both deduped), `slogans.ts` (~12 lines, shuffled per seed by `banner()`).
+**`src/content/`** — `sections.ts` (12 rooms), `art.ts` (`SCENES`, `ALLY`,
+`SCENE_ORDER`, `KISS_FACES`, `asset`), `slates.ts` (`WALLS` 18, `POOLS` 2, and
+the resolvers `hangsOn` / `poolOf` / `drawsFrom`), `board.json` (the
+assignment), `crawls.ts` (`RATIO` 165 entries, `JET_FUEL` 17, both deduped),
+`slogans.ts` (~12 lines, shuffled per seed by `banner()`).
 
 **`src/lineage/data.ts`** — a 515-person / 218-family GEDCOM reduced to `PEOPLE`
 (~47 records: `{id,name,gen,line,slot,born,died,birthPlace,deathPlace,wiki,
@@ -561,7 +621,7 @@ crossed,documented,collateral,role,note,short}`), `LINES` (5), `DESCENT`,
 `CANCER` (star field), `CANCER_EDGES` (constellation edges), `PRIZES`.
 
 **Other payloads** — `public/agent/search.json` (314 KB, gitignored, built at
-`prebuild`): `{ pages[472], lookup{775 keys} }`, an **alias→slug index** worth
+`prebuild`): `{ pages[472], lookup{776 keys} }`, an **alias→slug index** worth
 reusing for any search box. `public/llms-full.txt` (5.2 MB, gitignored) is the
 whole corpus as one markdown stream.
 
@@ -698,7 +758,7 @@ and an early return when `motion` is false. `Atlas.tsx` adds the 10 Hz
 4. **`gaps.json`** — 484 written statements of what is not known. Drawable absence.
 5. **`chronology.json`** — 6,937 dated mentions, 1900→2027. The corpus's own sense
    of time, distinct from when it was written.
-5a. **`history/*.json`** — 3,587 revisions of 472 pages, every one reconstructible
+5a. **`history/*.json`** — 3,603 revisions of 473 pages, every one reconstructible
    to the byte, each labelled with the operation that made it. The other time
    axis: `chronology.json` is when the corpus says things happened, this is when
    the corpus changed its mind. Nothing draws it but the history panel.
@@ -706,7 +766,7 @@ and an early return when `motion` is false. `Atlas.tsx` adds the 10 Hz
    graph with clean type facets.
 7. **`ask.json.records`** — 357 timestamped, categorised events carrying verbatim
    text *and* per-category precision. Ships its own error bars.
-8. **121 chartable tables** — already extractable to `ChartSpec` by
+8. **119 chartable tables** — already extractable to `ChartSpec` by
    `src/wiki/table.ts`.
 9. **`recorder.json.rows`** — 129 months with explicit `covered: 0` gap rows.
 10. **`src/lineage/data.ts`** — 47 people, 5 lines, generation-indexed.
@@ -715,7 +775,24 @@ and an early return when `motion` is false. `Atlas.tsx` adds the 10 Hz
 
 ## 8. Maintaining this file
 
-Regenerate the counts when the wiki snapshot is resynced. Anything reading this
-corpus should assert against the numbers above and fail loudly on drift rather
-than shipping a quietly-truncated dataset. If a number here is wrong, the fix is
-to re-crawl and correct it — not to relax the assertion.
+Re-crawl when you need a number and the stamp at the top is old. A figure here
+being out of date is a documentation defect, and it is the only thing it is: no
+build reads this file, and none should be made to.
+
+That last clause is the whole lesson of 2026-08-29. This section used to say
+"anything reading this corpus should assert against the numbers above and fail
+loudly on drift", `build-core.mjs` did exactly that, and the result was a
+mechanically-enforced requirement that a human re-crawl a 650-line dictionary
+within the hour, every hour, forever — held against a wiki being actively
+written. It failed for two days, froze the published snapshot behind a green
+deploy, and trained its readers to clear it by retyping the number it printed.
+
+A pipeline still refuses to ship a quietly-truncated dataset. It just proves the
+dataset is whole by checking it against **its own input** and against **its own
+last build**, both of which are present at build time, rather than against prose
+somebody has to remember to update. See "How to use it" at the top for the two
+questions and `scripts/build-core.mjs` for the worked implementation.
+
+Where the source genuinely does not move — `build-atlas.mjs`'s published totals,
+`check-atlas.mjs`'s bank counts — exact equality against a written figure is
+still right, and those checks stay.

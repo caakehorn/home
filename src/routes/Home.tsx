@@ -11,7 +11,8 @@ import { SubHead } from '../components/Wordmark'
 import { ChaosDial } from '../components/rigs/ChaosDial'
 import { Terminal } from '../components/rigs/Terminal'
 import { VibeSwitch } from '../components/rigs/VibeSwitch'
-import { ALLY, sceneById } from '../content/art'
+import { ALLY } from '../content/art'
+import { hangs } from '../content/slates'
 import { SECTIONS } from '../content/sections'
 import { banner } from '../content/slogans'
 import { VIBES } from '../state/portal-context'
@@ -86,7 +87,7 @@ export function Home() {
               a figure that fits neatly inside her box reads as an
               illustration rather than as something stuck there. */}
           <Plate
-            plate={sceneById('kiss-uniform')}
+            plate={hangs('mast')}
             cut="none"
             className="mast__plate"
             eager
@@ -145,17 +146,17 @@ export function Home() {
         <div className="wrap void-band__inner">
           <div className="void-band__stack">
             <Plate
-              plate={sceneById('kiss-water')}
+              plate={hangs('void-1')}
               cut="torn"
               className="void-band__plate void-band__plate--1"
             />
             <Plate
-              plate={sceneById('kiss-close')}
+              plate={hangs('void-2')}
               cut="shard"
               className="void-band__plate void-band__plate--2"
             />
             <Plate
-              plate={sceneById('kiss-dark')}
+              plate={hangs('void-3')}
               cut="rip"
               className="void-band__plate void-band__plate--3"
             />

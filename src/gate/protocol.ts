@@ -92,13 +92,82 @@ let challenge: Promise<Vault | null> | null = null
  * gate says so on the passphrase step and lets the visitor through, because a
  * missing build secret should not brick a site for everyone including its
  * owner — and this door gates rendering, not access, either way.
+ *
+ * ---- why `no-store`, and why only a success is remembered ------------------
+ *
+ * This asked for `cache: 'force-cache'` until 2026-08-31, which tells the
+ * browser to serve whatever copy it already holds however old it is, and to
+ * reach the network only when it holds none. The vault is the only part of this
+ * door that ever moves, so that pinned every returning reader to the first
+ * `verify.enc` their browser had ever seen — and since the check is a
+ * decryption, a stale vault is not a stale page. It is a lock that keeps
+ * opening for a key that was withdrawn.
+ *
+ * This deployment was re-keyed twice, on 2026-08-26 and again on 2026-08-27,
+ * and neither re-key reached a browser that had been through the door before.
+ * The owner's own machine went on taking the retired phrase while a private
+ * window — no cache, so a real fetch — demanded the current one. That split is
+ * what finally named the cause.
+ *
+ * `src/wiki/keyring.ts` had already met this and answered it with `no-store`.
+ * The gate never got the same fix, which is the wrong way round: the keyring
+ * fails visibly when it is stale, and this fails by opening.
+ *
+ * Only a success is cached, for the reason that file also gives. A `null`
+ * remembered here does not mean "no verifier was built", it means "one request
+ * failed once" — and the gate answers a null by offering ENTER ANYWAY. Since
+ * `Padlock` asks exactly once, on mount, a single dropped packet used to be
+ * enough to draw that button and leave it there for the session.
+ *
+ * So `ask` retries, and it distinguishes the two cases the old code collapsed:
+ * a served 404 is an answer and resolves null immediately, while an unreachable
+ * host is not an answer and is asked again. A failure that outlives the retries
+ * still resolves null — the door gates rendering rather than access, and its
+ * owner locking themselves out over a flat network would be the worse bug — but
+ * it is no longer remembered, so the next call starts clean.
  */
 export function loadChallenge(): Promise<Vault | null> {
-  challenge ??= fetch(verifyUrl(), { cache: 'force-cache' })
-    .then((r) => (r.ok ? (r.json() as Promise<Vault>) : null))
-    .catch(() => null)
+  challenge ??= ask().catch(() => {
+    // Could not ask. Never remember that as an answer.
+    challenge = null
+    return null
+  })
   return challenge
 }
+
+/** How many times to ask before accepting that the vault cannot be reached. */
+const ATTEMPTS = 3
+const BACKOFF_MS = 400
+
+/**
+ * Fetch the vault, separating "nothing was built" from "could not ask".
+ *
+ * A served 404 is an answer and returns null on the spot: that deployment has
+ * no verifier and the gate should say so. A thrown request or a 5xx is not an
+ * answer, and resolving it to null would be the gate telling the reader the
+ * door does not exist because one packet went missing. Those are retried, and
+ * if they never come back the caller throws them away without remembering.
+ */
+async function ask(): Promise<Vault | null> {
+  for (let attempt = 1; ; attempt++) {
+    let response: Response
+    try {
+      response = await fetch(verifyUrl(), { cache: 'no-store' })
+    } catch {
+      if (attempt >= ATTEMPTS) throw new Error('the verifier could not be reached')
+      await wait(BACKOFF_MS * attempt)
+      continue
+    }
+
+    if (response.ok) return (await response.json()) as Vault
+    if (response.status === 404) return null
+
+    if (attempt >= ATTEMPTS) throw new Error(`the verifier answered ${response.status}`)
+    await wait(BACKOFF_MS * attempt)
+  }
+}
+
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 export async function tryPassphrase(phrase: string): Promise<'open' | 'wrong' | 'unconfigured'> {
   const vault = await loadChallenge()

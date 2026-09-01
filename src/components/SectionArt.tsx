@@ -1,5 +1,5 @@
-import { SCENE_ORDER, sceneById } from '../content/art'
 import { SECTIONS } from '../content/sections'
+import { draws, hangs } from '../content/slates'
 import { Plate, type Cut } from './Plate'
 import './section-art.css'
 
@@ -17,7 +17,7 @@ import './section-art.css'
    Deterministic by name, not random and not by scroll position. Two rules,
    in order:
 
-   1. THE NAMED ROOMS get one scene each, by their fixed position in
+   1. THE NAMED ROOMS get one plate each, by their fixed position in
       `SECTIONS`. When the counts match exactly, every room's picture is
       distinct from every other room's on the nav bar; a room added after the
       picture count wraps rather than colliding outright, which is honest
@@ -28,6 +28,18 @@ import './section-art.css'
       hundreds of wiki pages and a handful of pictures; nothing stops two of
       them landing on the same plate; the hash's only job there is that
       reopening the same page does not reshuffle it.
+
+   ---- and where a person overrules both -----------------------------------
+
+   Both rules are the *default*, not the assignment. `src/content/slates.ts`
+   holds a board written from THE SLATE ROOM at /slates: name a plate for a
+   room's wall and rule 1 steps aside for that room; name the set of plates a
+   pool may draw from and rule 2 hashes over that set instead. An empty board
+   is the two rules above, exactly, which is why this file kept them.
+
+   The index still comes from the rules even when the plate does not. It picks
+   the cut and the side, and a room reassigned to a different picture should
+   change its picture — not slide to the other margin and tear differently.
 
    ---- why one component instead of copying the void band ------------------
 
@@ -52,12 +64,6 @@ import './section-art.css'
 
 const CUTS: Cut[] = ['torn', 'shard', 'rip']
 
-function hash(input: string): number {
-  let h = 0
-  for (let i = 0; i < input.length; i++) h = (h * 31 + input.charCodeAt(i)) | 0
-  return Math.abs(h)
-}
-
 type SectionArtProps = {
   /** The section's own slug — `brain`, `sage`, `arcade`, and so on. Anything
       stable works; wiki pages and blog posts pass their own path so entries
@@ -68,8 +74,13 @@ type SectionArtProps = {
 
 export function SectionArt({ slug, tone }: SectionArtProps) {
   const named = SECTIONS.findIndex((s) => s.slug === slug)
-  const i = named >= 0 ? named % SCENE_ORDER.length : hash(slug) % SCENE_ORDER.length
-  const plate = sceneById(SCENE_ORDER[i])
+  // Two pools, split on the one prefix that distinguishes them. Everything
+  // that reaches here unnamed is either `brain/<page>` or `blog/<post>`; a
+  // third kind of path would land in the wiki pool, which is the larger and
+  // more general of the two.
+  const pooled = named >= 0 ? null : draws(slug.startsWith('blog/') ? 'blog' : 'wiki', slug)
+  const i = pooled ? pooled.index : named
+  const plate = pooled ? pooled.plate : hangs(`room:${slug}`)
   const cut = CUTS[i % CUTS.length]
   // Alternate sides by index rather than by hash: two adjacent rooms landing
   // on the same side back to back is a coincidence nobody chose, and the

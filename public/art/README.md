@@ -1,10 +1,14 @@
 # public/art — the frames
 
-Nine frames of animation, cut from screenshots and illustrations. They hang
-on the front door, in the masthead, on the void band, and — via
-`<SectionArt>` — under the nav on every section route, the wiki index, every
-wiki page and every blog post. `SCENES` in `src/content/art.ts` is the
-manifest and `<Plate>` draws them.
+Twelve frames of animation, cut from screenshots and illustrations, plus two
+faces that are not frames. They hang on the front door, in the masthead, on
+the void band, and — via `<SectionArt>` — under the nav on every section
+route, the wiki index, every wiki page and every blog post. `SCENES` in
+`src/content/art.ts` is the manifest and `<Plate>` draws them.
+
+**The table below is now the fallback rather than the assignment.** Anything
+in it can be overruled from THE SLATE ROOM at `/slates` — see *Hanging them
+somewhere else*, at the bottom of this file.
 
 | file                  | what it is | where it hangs |
 | ---------------------- | ---------- | -------------- |
@@ -86,6 +90,36 @@ No colour grading. The halftone screen and the palette wash are both CSS
 (`src/components/plate.css`), so a frame follows `[data-vibe]` — neon in VOID,
 sodium in LOVE HOTEL, a second-generation photocopy in RIOT — off one file.
 Baking any of it in would freeze every frame to whichever room it was baked for.
+
+## Hanging them somewhere else
+
+Everything above is a rule rather than a decision: a room gets the plate its
+index lands on, the front door opens on whichever is third in the array. THE
+SLATE ROOM at `/slates` is where that becomes a choice, and where a picture
+that never went through `build-art.mjs` gets into this folder at all.
+
+- **`src/content/board.json`** is the whole of the overriding. `walls` names a
+  plate for one specific place — the masthead figure, the left half of the
+  front door, the banner over one room. `pools` names the set the wiki and
+  blog path hashes may draw from, because 486 wiki pages cannot each be given
+  a picture by hand. `plates` lists the pictures uploaded through the room,
+  which live in this folder beside the cut ones. An **empty board is exactly
+  the assignment described above**, and `scripts/check-slates.mjs` asserts
+  that against the components on every deploy.
+- **The conversion is in the browser and it is the narrow version.** It
+  decodes, honours the EXIF rotation a phone photo carries, downscales to a
+  chosen longest edge, and re-encodes as WebP — nothing else. It does not
+  crop, it cannot find a letterbox, and it cannot knock a background out. Any
+  picture that needs one of those still goes through `build-art.mjs` on a
+  machine with `sharp`, and the room says so on its own first screen.
+- **A plate uploaded that way hangs nowhere until somebody hangs it.** It is
+  in the folder, it is in the roster, and every wall is still on its
+  fallback. That is deliberate: an upload that silently reassigned 486 wiki
+  banners would be a worse tool than one that made you say where.
+
+`src/content/slates.ts` is the registry of what is assignable, and adding a
+wall there is the only way to make one appear in the dashboard — a dashboard
+that offers a wall no component reads is a dashboard that lies quietly.
 
 ## Paths
 

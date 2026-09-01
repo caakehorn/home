@@ -53,11 +53,15 @@ const WritingDashboardRoute = lazy(() =>
 const LeviathanRoute = lazy(() =>
   import('./routes/Leviathan').then((m) => ({ default: m.LeviathanRoute })),
 )
+const MinimartRoute = lazy(() =>
+  import('./routes/Minimart').then((m) => ({ default: m.MinimartRoute })),
+)
 const LedgerRoute = lazy(() => import('./routes/Ledger').then((m) => ({ default: m.LedgerRoute })))
 const LineageRoute = lazy(() =>
   import('./routes/Lineage').then((m) => ({ default: m.LineageRoute })),
 )
 const SageRoute = lazy(() => import('./routes/Sage').then((m) => ({ default: m.SageRoute })))
+const SlatesRoute = lazy(() => import('./routes/Slates').then((m) => ({ default: m.SlatesRoute })))
 const WordsRoute = lazy(() => import('./routes/Words').then((m) => ({ default: m.WordsRoute })))
 const TranscriptRoute = lazy(() =>
   import('./routes/Transcript').then((m) => ({ default: m.TranscriptRoute })),
@@ -127,7 +131,11 @@ function Site() {
           <Route path="/ledger/u/:unit" element={<LedgerRoute />} />
           <Route path="/leviathan" element={<LeviathanRoute />} />
           <Route path="/leviathan/:id" element={<LeviathanRoute />} />
+          <Route path="/minimart" element={<MinimartRoute />} />
           <Route path="/sage" element={<SageRoute />} />
+          {/* Not in SECTIONS either — see the note on /ledger above. The room
+              that chooses the pictures is reached by its URL. */}
+          <Route path="/slates" element={<SlatesRoute />} />
           <Route path="/words" element={<WordsRoute />} />
           <Route path="/transcript" element={<TranscriptRoute />} />
           <Route path="/:slug" element={<Stub />} />

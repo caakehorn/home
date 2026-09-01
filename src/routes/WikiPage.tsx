@@ -5,6 +5,7 @@ import { SectionArt } from '../components/SectionArt'
 import { Editor } from '../wiki/Editor'
 import { History } from '../wiki/History'
 import { ago, loadHistory, shortDate, type PageHistory } from '../wiki/history'
+import { SyncLight } from '../wiki/SyncLight'
 import { Infobox } from '../wiki/Infobox'
 import { Markdown, outline } from '../wiki/Markdown'
 import { QuickAdd } from '../wiki/QuickAdd'
@@ -249,6 +250,10 @@ export function WikiPageRoute() {
               <Link to="/brain">WIKI-BRAIN</Link>
               <span aria-hidden="true"> / </span>
               <Link to={`/brain?domain=${view.domain}`}>{view.domain.toUpperCase()}</Link>
+              {/* On the entry itself, because this is where somebody is
+                  actually reading a claim and where "is this current" is a
+                  question about what is in front of them. */}
+              <SyncLight compact />
             </nav>
 
             <h1 className="wiki__title">{view.title}</h1>

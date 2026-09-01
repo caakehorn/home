@@ -19,5 +19,32 @@
     "room:minimart": "bedkissrb",
     "void-1": "bedkissrb"
   },
-  "pools": {}
+  "pools": {
+    "blog": [
+      "kiss-neon",
+      "kiss-close",
+      "kiss-window",
+      "kiss-dark",
+      "kiss-butterfly",
+      "kiss-mirror",
+      "kiss-blush",
+      "kiss-uniform",
+      "kiss-hearts",
+      "kiss-neon-gaze",
+      "kiss-garden"
+    ],
+    "wiki": [
+      "kiss-neon",
+      "kiss-close",
+      "kiss-window",
+      "kiss-dark",
+      "kiss-butterfly",
+      "kiss-mirror",
+      "kiss-blush",
+      "kiss-uniform",
+      "kiss-hearts",
+      "kiss-neon-gaze",
+      "kiss-garden"
+    ]
+  }
 }

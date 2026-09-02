@@ -427,7 +427,12 @@ export function CoreRoute() {
         bloom: live.bloom,
         sheathAlpha: live.selected === null ? 0.5 : 0.24,
         sheathFraction: live.fraction,
-        window: live.win ? [yearToY(live.win[0]), yearToY(live.win[1])] : null,
+        window: live.win
+          ? [
+              (live.win[0] - AXIS.from) / (AXIS.to - AXIS.from),
+              (live.win[1] - AXIS.from) / (AXIS.to - AXIS.from),
+            ]
+          : null,
       }
       scene.draw(camera, w, h, palette, vis, live.motion ? dt : 0)
 

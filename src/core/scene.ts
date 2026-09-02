@@ -29,7 +29,7 @@
 
 import { attrib, buffer, lut, program, quad, target } from './gl'
 import type { Program, Target } from './gl'
-import { AXIS, SHEATH_R, yearToY } from './data'
+import { holeRings } from './data'
 import type { Layout, Sheath, Structure } from './data'
 import type { Camera } from './camera'
 
@@ -46,15 +46,24 @@ const HEAD = `#version 300 es
 precision highp float;
 `
 
-/** Shared: fade anything outside the scrubbed window rather than cutting it. */
+/**
+ * Shared: fade anything outside the scrubbed window rather than cutting it.
+ *
+ * The window is in **measure units**, 0 → 1, read off a per-vertex attribute —
+ * not off world height, which is what it used to be. Height was the measure
+ * only while the measure was always the date and the shape was always the
+ * column; on the sphere the measure is latitude and on the disc it is radius,
+ * and a window read off `y` there fades a band of the wrong pages.
+ */
 const WINDOW = `
-uniform vec2 u_window;   // lo, hi in world Y
+in float a_m;            // where this vertex sits on the axis, 0 -> 1
+uniform vec2 u_window;   // lo, hi on the same axis
 uniform float u_windowed;
-float windowFade(float y) {
+float windowFade() {
   if (u_windowed < 0.5) return 1.0;
-  float edge = 26.0;
-  float lo = smoothstep(u_window.x - edge, u_window.x + edge, y);
-  float hi = 1.0 - smoothstep(u_window.y - edge, u_window.y + edge, y);
+  float edge = 0.014;
+  float lo = smoothstep(u_window.x - edge, u_window.x + edge, a_m);
+  float hi = 1.0 - smoothstep(u_window.y - edge, u_window.y + edge, a_m);
   return mix(0.09, 1.0, min(lo, hi));
 }
 `
@@ -65,7 +74,7 @@ uniform mat4 u_vp;
 ${WINDOW}
 out float v_fade;
 void main() {
-  v_fade = windowFade(a_pos.y);
+  v_fade = windowFade();
   gl_Position = u_vp * vec4(a_pos, 1.0);
 }`
 
@@ -87,7 +96,7 @@ out vec3 v_colour;
 out float v_fade;
 void main() {
   v_colour = a_dir > 0.5 ? u_sent : u_recv;
-  v_fade = windowFade(a_pos.y);
+  v_fade = windowFade();
   vec4 clip = u_vp * vec4(a_pos, 1.0);
   gl_Position = clip;
   gl_PointSize = max(1.0, u_size * (300.0 / max(1.0, clip.w)));
@@ -132,7 +141,7 @@ void main() {
   else if (state == 2) { v_alpha = 0.30 * ramp * crawl; v_colour = tint; }
   else { v_alpha = 0.98 * ramp; v_colour = mix(tint, vec3(1.0), 0.55); }
 
-  v_alpha *= windowFade(a_pos.y);
+  v_alpha *= windowFade();
   gl_Position = u_vp * vec4(a_pos, 1.0);
 }`
 
@@ -167,7 +176,7 @@ void main() {
   else if (state == 2) { v_alpha = 0.92; }
   else { v_alpha = 1.0; scale = 1.9; v_ring = 1.0; tint = mix(tint, vec3(1.0), 0.45); }
   v_colour = tint;
-  v_alpha *= windowFade(a_pos.y);
+  v_alpha *= windowFade();
   vec4 clip = u_vp * vec4(a_pos, 1.0);
   gl_Position = clip;
   gl_PointSize = max(2.0, a_size * scale * (620.0 / max(1.0, clip.w)));
@@ -290,6 +299,7 @@ export type Visible = {
   sheathAlpha: number
   /** 0→1 of the message record to draw. Below 1 the room says so. */
   sheathFraction: number
+  /** The scrub window, in measure units 0 → 1 — not in world coordinates. */
   window: [number, number] | null
 }
 
@@ -304,6 +314,7 @@ export class Scene {
   private blurT: Target
   private pickT: Target
   private counts: { sheath: number; edge: number; link: number; axis: number; node: number }
+  private holes: { pos: Float32Array; m: Float32Array }
   private flow = 0
 
   constructor(
@@ -314,26 +325,29 @@ export class Scene {
   ) {
     this.gl = gl
     const N = structure.nodes.length
-    const familyOf = new Map(FAMILIES.map((f, i) => [f, i]))
 
     this.progs = {
-      plain: program(gl, PLAIN_VS, PLAIN_FS, ['u_vp', 'u_colour', 'u_window', 'u_windowed'], ['a_pos']),
+      plain: program(
+        gl, PLAIN_VS, PLAIN_FS,
+        ['u_vp', 'u_colour', 'u_window', 'u_windowed'],
+        ['a_pos', 'a_m'],
+      ),
       sheath: program(
         gl, SHEATH_VS, SHEATH_FS,
         ['u_vp', 'u_size', 'u_sent', 'u_recv', 'u_alpha', 'u_window', 'u_windowed'],
-        ['a_pos', 'a_dir'],
+        ['a_pos', 'a_dir', 'a_m'],
       ),
       edges: program(
         gl, EDGE_VS, EDGE_FS,
         ['u_vp', 'u_lut', 'u_flow', 'u_window', 'u_windowed',
          ...Array.from({ length: 6 }, (_, i) => `u_family[${i}]`)],
-        ['a_pos', 'a_id', 'a_t', 'a_family'],
+        ['a_pos', 'a_id', 'a_t', 'a_family', 'a_m'],
       ),
       nodes: program(
         gl, NODE_VS, NODE_FS,
         ['u_vp', 'u_lut', 'u_window', 'u_windowed',
          ...Array.from({ length: 10 }, (_, i) => `u_domain[${i}]`)],
-        ['a_pos', 'a_id', 'a_size', 'a_domain'],
+        ['a_pos', 'a_id', 'a_size', 'a_domain', 'a_m'],
       ),
       pick: program(gl, PICK_VS, PICK_FS, ['u_vp', 'u_lut'], ['a_pos', 'a_id', 'a_size']),
       bright: program(gl, FULL_VS, BRIGHT_FS, ['u_src', 'u_cut'], ['a_pos']),
@@ -341,59 +355,7 @@ export class Scene {
       composite: program(gl, FULL_VS, COMPOSITE_FS, ['u_scene', 'u_bloom', 'u_strength', 'u_void'], ['a_pos']),
     }
 
-    /* ---- node geometry: pos, id, size, domain ---------------------------- */
-    const domainAt = new Map(structure.domains.map((d, i) => [d.id, i]))
-    const nodeData = new Float32Array(N * 6)
-    for (let i = 0; i < N; i++) {
-      const n = structure.nodes[i]
-      nodeData[i * 6] = layout.pos[i * 3]
-      nodeData[i * 6 + 1] = layout.pos[i * 3 + 1]
-      nodeData[i * 6 + 2] = layout.pos[i * 3 + 2]
-      nodeData[i * 6 + 3] = i
-      // Area by word count, so a 99,927-word page is not four hundred times the
-      // dot of a 250-word one.
-      nodeData[i * 6 + 4] = 1.5 + Math.sqrt(n.w) / 24
-      nodeData[i * 6 + 5] = domainAt.get(n.d) ?? 0
-    }
-
-    /* ---- edge geometry: pos, id, t, family ------------------------------- */
-    const EV = layout.edgeVerts
-    const edgeData = new Float32Array(EV * 6)
-    for (let v = 0; v < EV; v++) {
-      const e = layout.edgeId[v]
-      edgeData[v * 6] = layout.edgePos[v * 3]
-      edgeData[v * 6 + 1] = layout.edgePos[v * 3 + 1]
-      edgeData[v * 6 + 2] = layout.edgePos[v * 3 + 2]
-      edgeData[v * 6 + 3] = e
-      edgeData[v * 6 + 4] = layout.edgeT[v]
-      edgeData[v * 6 + 5] = familyOf.get(structure.types[structure.typed[e][2]].family) ?? 5
-    }
-
-    /* ---- the axis, and the five holes in the record ---------------------- */
-    const axis: number[] = []
-    axis.push(0, yearToY(AXIS.from), 0, 0, yearToY(AXIS.to), 0)
-    for (let year = 1900; year <= 2020; year += 10) {
-      const y = yearToY(year)
-      for (let k = 0; k < 24; k++) {
-        const a0 = (k / 24) * Math.PI * 2
-        const a1 = ((k + 1) / 24) * Math.PI * 2
-        axis.push(Math.sin(a0) * 11, y, Math.cos(a0) * 11, Math.sin(a1) * 11, y, Math.cos(a1) * 11)
-      }
-    }
-    // The 38 uncovered months, drawn at their true height as rings the sheath
-    // does not fill. A hole in an export is not a quiet stretch.
-    for (const hole of sheath.holes) {
-      for (const y of [hole.from, hole.to]) {
-        for (let k = 0; k < 48; k++) {
-          const a0 = (k / 48) * Math.PI * 2
-          const a1 = ((k + 1) / 48) * Math.PI * 2
-          axis.push(
-            Math.sin(a0) * SHEATH_R, y, Math.cos(a0) * SHEATH_R,
-            Math.sin(a1) * SHEATH_R, y, Math.cos(a1) * SHEATH_R,
-          )
-        }
-      }
-    }
+    /* ---- the sheath, which never changes shape --------------------------- */
 
     /**
      * The sheath goes into the buffer shuffled, and the shuffle is the whole
@@ -405,6 +367,11 @@ export class Scene {
      * without saying so. Shuffled deterministically first, the first N are an
      * unbiased sample of the whole eleven years, every gap still falls where it
      * falls, and the instrument can say "one in four" and mean it.
+     *
+     * It is built once and never rebuilt: the sheath is the message record
+     * placed by date, so it belongs to one axis and one shape. Everywhere else
+     * the room switches it off and says why, rather than floating 134,348 marks
+     * against an axis they are not on.
      */
     const order = new Uint32Array(sheath.count)
     for (let i = 0; i < sheath.count; i++) order[i] = i
@@ -416,30 +383,29 @@ export class Scene {
       order[i] = order[j]
       order[j] = t
     }
-    const sheathData = new Float32Array(sheath.count * 4)
+    const sheathData = new Float32Array(sheath.count * 5)
     for (let k = 0; k < sheath.count; k++) {
       const i = order[k]
-      sheathData[k * 4] = sheath.pos[i * 3]
-      sheathData[k * 4 + 1] = sheath.pos[i * 3 + 1]
-      sheathData[k * 4 + 2] = sheath.pos[i * 3 + 2]
-      sheathData[k * 4 + 3] = sheath.dir[i]
+      sheathData[k * 5] = sheath.pos[i * 3]
+      sheathData[k * 5 + 1] = sheath.pos[i * 3 + 1]
+      sheathData[k * 5 + 2] = sheath.pos[i * 3 + 2]
+      sheathData[k * 5 + 3] = sheath.dir[i]
+      sheathData[k * 5 + 4] = sheath.t[i]
     }
 
+    this.holes = holeRings(sheath)
     this.bufs = {
-      node: buffer(gl, nodeData),
-      edge: buffer(gl, edgeData),
-      link: buffer(gl, layout.linkPos),
-      axis: buffer(gl, new Float32Array(axis)),
       sheath: buffer(gl, sheathData),
       quad: quad(gl),
+      // Replaced wholesale by `setLayout`; allocated here so the field is never
+      // half-populated and the draw path never has to test for it.
+      node: buffer(gl, new Float32Array(0)),
+      edge: buffer(gl, new Float32Array(0)),
+      link: buffer(gl, new Float32Array(0)),
+      axis: buffer(gl, new Float32Array(0)),
     }
-    this.counts = {
-      node: N,
-      edge: EV,
-      link: layout.linkVerts,
-      axis: axis.length / 3,
-      sheath: sheath.count,
-    }
+    this.counts = { node: 0, edge: 0, link: 0, axis: 0, sheath: sheath.count }
+    this.setLayout(structure, layout, false)
 
     this.nodeLut = lut(gl, Math.max(512, N))
     this.edgeLut = lut(gl, Math.max(4096, structure.typed.length))
@@ -452,6 +418,98 @@ export class Scene {
     this.brightT = target(gl, 2, 2)
     this.blurT = target(gl, 2, 2)
     this.pickT = target(gl, 2, 2)
+  }
+
+  /**
+   * Swap in a new arrangement — a different measure, a different shape, or both.
+   *
+   * Filtering and highlighting never touch geometry: that is what the lookup
+   * textures are for, and a filter is a two-kilobyte `texSubImage2D`. Changing
+   * the *measure* or the *shape* is the one thing that genuinely moves every
+   * vertex, so it genuinely rebuilds the buffers — four of them, about 1.6 MB,
+   * once per change. The programs, the lookup textures and the sheath survive
+   * it, which is the difference between this and throwing the scene away: no
+   * shader is recompiled and 134,348 marks are not re-uploaded to draw a word
+   * count.
+   *
+   * `withHoles` appends the rings the message export does not cover. They are a
+   * fact about the message record and belong to the date axis, so the room
+   * passes false everywhere else rather than ruling a word count with them.
+   */
+  setLayout(structure: Structure, layout: Layout, withHoles: boolean) {
+    const gl = this.gl
+    const N = structure.nodes.length
+    const familyOf = new Map(FAMILIES.map((f, i) => [f, i]))
+    const domainAt = new Map(structure.domains.map((d, i) => [d.id, i]))
+
+    /* ---- node geometry: pos, id, size, domain, axis position ------------- */
+    const nodeData = new Float32Array(N * 7)
+    for (let i = 0; i < N; i++) {
+      const n = structure.nodes[i]
+      nodeData[i * 7] = layout.pos[i * 3]
+      nodeData[i * 7 + 1] = layout.pos[i * 3 + 1]
+      nodeData[i * 7 + 2] = layout.pos[i * 3 + 2]
+      nodeData[i * 7 + 3] = i
+      // Area by word count, so a 113,514-word page is not four hundred times
+      // the dot of a 250-word one. This is the one channel that stays put when
+      // the axis changes: a dot's size is always the length of its page.
+      nodeData[i * 7 + 4] = 1.5 + Math.sqrt(n.w) / 24
+      nodeData[i * 7 + 5] = domainAt.get(n.d) ?? 0
+      nodeData[i * 7 + 6] = layout.m[i]
+    }
+
+    /* ---- edge geometry: pos, id, t, family, axis position ---------------- */
+    const EV = layout.edgeVerts
+    const edgeData = new Float32Array(EV * 7)
+    for (let v = 0; v < EV; v++) {
+      const e = layout.edgeId[v]
+      edgeData[v * 7] = layout.edgePos[v * 3]
+      edgeData[v * 7 + 1] = layout.edgePos[v * 3 + 1]
+      edgeData[v * 7 + 2] = layout.edgePos[v * 3 + 2]
+      edgeData[v * 7 + 3] = e
+      edgeData[v * 7 + 4] = layout.edgeT[v]
+      edgeData[v * 7 + 5] = familyOf.get(structure.types[structure.typed[e][2]].family) ?? 5
+      edgeData[v * 7 + 6] = layout.edgeM[v]
+    }
+
+    /* ---- the untyped mesh ------------------------------------------------ */
+    const LV = layout.linkVerts
+    const linkData = new Float32Array(LV * 4)
+    for (let v = 0; v < LV; v++) {
+      linkData[v * 4] = layout.linkPos[v * 3]
+      linkData[v * 4 + 1] = layout.linkPos[v * 3 + 1]
+      linkData[v * 4 + 2] = layout.linkPos[v * 3 + 2]
+      linkData[v * 4 + 3] = layout.linkM[v]
+    }
+
+    /* ---- the ruling, plus the holes where they mean something ------------ */
+    const holeVerts = withHoles ? this.holes.m.length : 0
+    const AV = layout.axisVerts + holeVerts
+    const axisData = new Float32Array(AV * 4)
+    for (let v = 0; v < layout.axisVerts; v++) {
+      axisData[v * 4] = layout.axisPos[v * 3]
+      axisData[v * 4 + 1] = layout.axisPos[v * 3 + 1]
+      axisData[v * 4 + 2] = layout.axisPos[v * 3 + 2]
+      axisData[v * 4 + 3] = layout.axisM[v]
+    }
+    for (let k = 0; k < holeVerts; k++) {
+      const v = layout.axisVerts + k
+      axisData[v * 4] = this.holes.pos[k * 3]
+      axisData[v * 4 + 1] = this.holes.pos[k * 3 + 1]
+      axisData[v * 4 + 2] = this.holes.pos[k * 3 + 2]
+      axisData[v * 4 + 3] = this.holes.m[k]
+    }
+
+    for (const key of ['node', 'edge', 'link', 'axis'] as const)
+      if (this.bufs[key]) gl.deleteBuffer(this.bufs[key])
+    this.bufs.node = buffer(gl, nodeData)
+    this.bufs.edge = buffer(gl, edgeData)
+    this.bufs.link = buffer(gl, linkData)
+    this.bufs.axis = buffer(gl, axisData)
+    this.counts.node = N
+    this.counts.edge = EV
+    this.counts.link = LV
+    this.counts.axis = AV
   }
 
   get nodeStates() {
@@ -495,9 +553,9 @@ export class Scene {
     gl.activeTexture(gl.TEXTURE0)
     gl.bindTexture(gl.TEXTURE_2D, this.nodeLut.tex)
     gl.uniform1i(p.u.u_lut, 0)
-    attrib(gl, this.bufs.node, p.a.a_pos, 3, 6, 0)
-    attrib(gl, this.bufs.node, p.a.a_id, 1, 6, 3)
-    attrib(gl, this.bufs.node, p.a.a_size, 1, 6, 4)
+    attrib(gl, this.bufs.node, p.a.a_pos, 3, 7, 0)
+    attrib(gl, this.bufs.node, p.a.a_id, 1, 7, 3)
+    attrib(gl, this.bufs.node, p.a.a_size, 1, 7, 4)
     gl.drawArrays(gl.POINTS, 0, this.counts.node)
 
     // GL's origin is bottom-left; the pointer's is top-left.
@@ -570,12 +628,14 @@ export class Scene {
       setWindow(p)
       if (vis.untyped) {
         gl.uniform4f(p.u.u_colour, ...palette.link, 0.055)
-        attrib(gl, this.bufs.link, p.a.a_pos, 3, 3, 0)
+        attrib(gl, this.bufs.link, p.a.a_pos, 3, 4, 0)
+        attrib(gl, this.bufs.link, p.a.a_m, 1, 4, 3)
         gl.drawArrays(gl.LINES, 0, this.counts.link)
       }
       if (vis.axis) {
         gl.uniform4f(p.u.u_colour, ...palette.axis, 0.4)
-        attrib(gl, this.bufs.axis, p.a.a_pos, 3, 3, 0)
+        attrib(gl, this.bufs.axis, p.a.a_pos, 3, 4, 0)
+        attrib(gl, this.bufs.axis, p.a.a_m, 1, 4, 3)
         gl.drawArrays(gl.LINES, 0, this.counts.axis)
       }
     }
@@ -590,8 +650,9 @@ export class Scene {
       gl.uniform3f(p.u.u_sent, ...palette.sent)
       gl.uniform3f(p.u.u_recv, ...palette.recv)
       gl.uniform1f(p.u.u_alpha, vis.sheathAlpha)
-      attrib(gl, this.bufs.sheath, p.a.a_pos, 3, 4, 0)
-      attrib(gl, this.bufs.sheath, p.a.a_dir, 1, 4, 3)
+      attrib(gl, this.bufs.sheath, p.a.a_pos, 3, 5, 0)
+      attrib(gl, this.bufs.sheath, p.a.a_dir, 1, 5, 3)
+      attrib(gl, this.bufs.sheath, p.a.a_m, 1, 5, 4)
       // Fewer points at a proportionally higher alpha, so a sampled sheath has
       // roughly the brightness of a whole one rather than fading out.
       const n = Math.max(1, Math.round(this.counts.sheath * vis.sheathFraction))
@@ -610,10 +671,11 @@ export class Scene {
       gl.activeTexture(gl.TEXTURE0)
       gl.bindTexture(gl.TEXTURE_2D, this.edgeLut.tex)
       gl.uniform1i(p.u.u_lut, 0)
-      attrib(gl, this.bufs.edge, p.a.a_pos, 3, 6, 0)
-      attrib(gl, this.bufs.edge, p.a.a_id, 1, 6, 3)
-      attrib(gl, this.bufs.edge, p.a.a_t, 1, 6, 4)
-      attrib(gl, this.bufs.edge, p.a.a_family, 1, 6, 5)
+      attrib(gl, this.bufs.edge, p.a.a_pos, 3, 7, 0)
+      attrib(gl, this.bufs.edge, p.a.a_id, 1, 7, 3)
+      attrib(gl, this.bufs.edge, p.a.a_t, 1, 7, 4)
+      attrib(gl, this.bufs.edge, p.a.a_family, 1, 7, 5)
+      attrib(gl, this.bufs.edge, p.a.a_m, 1, 7, 6)
       gl.drawArrays(gl.LINES, 0, this.counts.edge)
     }
 
@@ -627,10 +689,11 @@ export class Scene {
       gl.activeTexture(gl.TEXTURE0)
       gl.bindTexture(gl.TEXTURE_2D, this.nodeLut.tex)
       gl.uniform1i(p.u.u_lut, 0)
-      attrib(gl, this.bufs.node, p.a.a_pos, 3, 6, 0)
-      attrib(gl, this.bufs.node, p.a.a_id, 1, 6, 3)
-      attrib(gl, this.bufs.node, p.a.a_size, 1, 6, 4)
-      attrib(gl, this.bufs.node, p.a.a_domain, 1, 6, 5)
+      attrib(gl, this.bufs.node, p.a.a_pos, 3, 7, 0)
+      attrib(gl, this.bufs.node, p.a.a_id, 1, 7, 3)
+      attrib(gl, this.bufs.node, p.a.a_size, 1, 7, 4)
+      attrib(gl, this.bufs.node, p.a.a_domain, 1, 7, 5)
+      attrib(gl, this.bufs.node, p.a.a_m, 1, 7, 6)
       gl.drawArrays(gl.POINTS, 0, this.counts.node)
     }
 

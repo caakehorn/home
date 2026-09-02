@@ -299,6 +299,22 @@ export async function requestResync(slug: string, repo: string = SITE_REPO) {
   })
 }
 
+/**
+ * Wake wiki-brain's sage drain so a parked question is looked at now rather
+ * than overnight.
+ *
+ * Same credential as `requestResync`. The keyring token already has Contents
+ * write on both repositories, and that is the permission `repository_dispatch`
+ * sits under — wiki-brain's `notify-portal.yml` records the same fact for the
+ * return leg. No extra secret.
+ */
+export async function requestSageAsked(id: string, repo: string = SOURCE_REPO) {
+  await call(`/repos/${repo}/dispatches`, {
+    method: 'POST',
+    body: JSON.stringify({ event_type: 'sage-asked', client_payload: { id } }),
+  })
+}
+
 // ---------------------------------------------------------------------------
 // pictures
 

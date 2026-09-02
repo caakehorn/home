@@ -33,17 +33,28 @@ on:
   # snapshot when only `generatedAt` moved, `git diff --cached --quiet` then
   # exits before committing, and the deploy job is gated on `changed == 'true'`
   # — so 288 runs a day produce exactly as many deploys as 24 did. At ~75s a run
-  # against a 300s interval, and with `concurrency` serialising them, they
-  # cannot pile up either.
+  # against a 300s interval, and with `concurrency` serialising them (a new
+  # dispatch cancelling an in-flight one), they cannot pile up either.
   schedule:
     - cron: '*/5 * * * *'
 
 permissions:
   contents: write
 
+# One sync at a time, last dispatch wins. Two saves a minute apart used to
+# queue (`cancel-in-progress: false`); the second run then checked out the SHA
+# captured when its dispatch fired — still the main from before the first run
+# pushed — and died rebasing two snapshots of `public/wiki` onto each other.
+# That was 2026-08-31 around 17:33 ET.
+#
+# A new `wiki-updated` cancels whatever is in flight. The cancelled run's
+# derivation is discarded; the new one re-derives from current wiki-brain,
+# which already holds every save that dispatched. A scheduled run does not
+# cancel: cancelling a dispatch that has already pushed but not yet deployed
+# would leave the snapshot on main and never call Pages.
 concurrency:
   group: sync-wiki
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'repository_dispatch' }}
 
 jobs:
   sync:
@@ -187,23 +198,35 @@ jobs:
           git commit -m 'Resync the wiki snapshot'
 
           # A merge landing on main during the ~60s this job takes rejects the
-          # push as non-fast-forward, and the snapshot then waits an hour for a
-          # collision nobody was told about. Rebase and retry instead.
+          # push as non-fast-forward. Two wiki-updated runs can also both commit
+          # on the same parent: repository_dispatch checks out the SHA captured
+          # at fire time, so a second save serialised behind the first still
+          # starts from the old main and then dies rebasing two snapshots of
+          # public/wiki onto each other (2026-08-31, 17:33 ET).
           #
-          # The replay is safe because the only writer of these paths is this
-          # job, and `concurrency: sync-wiki` means there is never a second one:
-          # whatever moved main touched something else, so there is nothing to
-          # conflict with. A conflict here would mean that assumption is wrong,
-          # which is worth failing on rather than resolving blind — the next
-          # scheduled run re-derives the whole snapshot from scratch regardless.
+          # Last-dispatch-wins: on a rejected push, take origin/main and plant
+          # THIS run's derived snapshot on top of it. Replaying hunks is the
+          # thing that conflicts; the files themselves are a complete snapshot
+          # and replacing them is the point of the job. The later dispatch
+          # derived from current wiki-brain, so it is the one that should land.
+          OURS=$(git rev-parse HEAD)
           for attempt in 1 2 3; do
             if git push; then
               echo 'changed=true' >> "$GITHUB_OUTPUT"
               exit 0
             fi
-            echo "::notice::push rejected (attempt $attempt) — main moved; rebasing onto it"
+            echo "::notice::push rejected (attempt $attempt) — main moved; planting this snapshot on it"
             git fetch origin main
-            git rebase origin/main
+            git reset --hard origin/main
+            git rm -r --quiet --ignore-unmatch public/wiki public/leviathan public/docket public/core
+            git checkout "$OURS" -- public/wiki public/leviathan public/docket public/core
+            git add public/wiki public/leviathan public/docket public/core
+            if git diff --cached --quiet; then
+              echo 'changed=false' >> "$GITHUB_OUTPUT"
+              echo 'Snapshot already current on origin/main.'
+              exit 0
+            fi
+            git commit -m 'Resync the wiki snapshot'
           done
           echo '::error::could not push the resynced snapshot after three attempts'
           exit 1

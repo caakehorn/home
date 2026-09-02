@@ -26,6 +26,8 @@
  * column's height carrying every one of its 134,348 marks.
  */
 
+import { FAR, HEIGHT, NEAR } from './axes'
+import type { Axis, Shape } from './axes'
 import type { Camera } from './camera'
 
 /* ==========================================================================
@@ -149,10 +151,20 @@ export const SHEATH_R = 40
 export type Sheath = {
   /** xyz per message. */ pos: Float32Array
   /** 1 sent, 0 received. */ dir: Float32Array
+  /**
+   * Where each mark sits on the date axis, 0 → 1 — the same number the pages
+   * carry, so the scrub window can be expressed in the measure rather than in
+   * world units. It is the date and only ever the date: the sheath is drawn on
+   * the date axis or it is not drawn at all.
+   */
+  t: Float32Array
   count: number
-  /** The five stretches the export does not cover, as heights on the column. */
+  /** The five stretches the export does not cover, on the date axis, 0 → 1. */
   holes: { from: number; to: number; months: number; label: string }[]
 }
+
+/** The date axis the sheath is placed against — the ruling the column has always had. */
+const dateT = (year: number) => (year - AXIS.from) / (AXIS.to - AXIS.from)
 
 /**
  * Unpack the clock.
@@ -171,6 +183,7 @@ export function unpackSheath(clock: Clock): Sheath {
   const n = clock.marks.length
   const pos = new Float32Array(n * 3)
   const dir = new Float32Array(n)
+  const t = new Float32Array(n)
   const day0 = isoToDay(clock.from)
 
   let value = 0
@@ -193,16 +206,17 @@ export function unpackSheath(clock: Clock): Sheath {
     pos[i * 3 + 1] = yearToY(year)
     pos[i * 3 + 2] = Math.cos(angle) * r
     dir[i] = sent
+    t[i] = dateT(year)
   }
 
   const holes = clock.gaps.map((g) => ({
-    from: yearToY(dayToYear(day0 + g.fromDay)),
-    to: yearToY(dayToYear(day0 + g.toDay)),
+    from: dateT(dayToYear(day0 + g.fromDay)),
+    to: dateT(dayToYear(day0 + g.toDay)),
     months: g.months,
     label: g.from === g.to ? g.from : `${g.from} → ${g.to}`,
   }))
 
-  return { pos, dir, count: n, holes }
+  return { pos, dir, t, count: n, holes }
 }
 
 /* ==========================================================================
@@ -210,36 +224,84 @@ export function unpackSheath(clock: Clock): Sheath {
    ========================================================================== */
 
 export type Layout = {
-  /** xyz per node. */ pos: Float32Array
+  /** xyz per node. */
+  pos: Float32Array
+  /**
+   * Where each node sits on the current axis, 0 → 1.
+   *
+   * This travels beside every position because the scrub window is expressed in
+   * the measure and not in world units. It used to be read off `pos.y`, which
+   * worked only while the measure was always the date and the shape was always
+   * the column — on a sphere the measure is latitude and on a disc it is
+   * radius, and a window read off the height there would fade the wrong pages.
+   */
+  m: Float32Array
   /** Tessellated typed edges, and which edge each vertex belongs to. */
   edgePos: Float32Array
   edgeId: Float32Array
   /** Position along its own curve, 0→1, for the direction ramp. */
   edgeT: Float32Array
+  /** The axis position of each edge vertex, interpolated between its ends. */
+  edgeM: Float32Array
   edgeVerts: number
   /** The same for the untyped wikilink mesh, straight rather than curved. */
   linkPos: Float32Array
+  linkM: Float32Array
   linkVerts: number
+  /** The reference rings and the spine, which are now the shape's business. */
+  axisPos: Float32Array
+  axisM: Float32Array
+  axisVerts: number
   iterations: number
 }
 
+/**
+ * What to draw and how — everything about the arrangement that is a choice.
+ *
+ * `axis` is the data half: which measure, on which scale, and where every page
+ * lands on it. `shape` is the drawing half. `groups` exists for the one shape
+ * that separates the pages rather than mixing them, and is the domain ids in
+ * alphabetical order, so which column stands where is a stated rule rather than
+ * a ranking.
+ */
+export type Projection = {
+  axis: Axis
+  shape: Shape
+  groups: string[]
+  /** Only true where the sheath belongs to this axis: the date, linear, column. */
+  sheath: boolean
+}
+
+/** The domain ids, alphabetically — the ring order, and it is arbitrary on purpose. */
+export const groupsOf = (structure: Structure) =>
+  structure.domains.map((d) => d.id).sort((a, b) => a.localeCompare(b))
+
 const SEGMENTS = 14
+const RING_SEGMENTS = 48
 
 /**
- * Settle the pages horizontally.
+ * Settle the pages, then hand them to a shape.
  *
- * Every node's height is already fixed by its date. What is left is an angle
- * and a radius each, and this is a plain force relaxation over the **typed**
- * graph to choose them: pages that argue with each other are pulled together,
- * every pair pushes apart, and a weak spring holds the whole thing off the
- * axis and inside the frame.
+ * Every node's position on the axis is already fixed by the measure. What is
+ * left is a bearing and a depth each, and this is a plain force relaxation over
+ * the **typed** graph to choose them: pages that argue with each other are
+ * pulled together, every pair pushes apart, and a weak spring holds the whole
+ * thing off the axis and inside the frame.
  *
- * It runs on the CPU, once, at load. 519 nodes is not a GPU problem — the
+ * The solve is deliberately the same in every shape and on every measure — it
+ * runs in the column's own coordinates and the shape reads its answer as a
+ * bearing and a normalised depth afterwards. Two consequences worth knowing:
+ * the COLUMN on the date axis is exactly the picture the room has always drawn,
+ * to the unit; and switching shape re-poses the same settled structure rather
+ * than re-settling it, so a page keeps its neighbours across the change.
+ *
+ * It runs on the CPU, once per projection. 491 nodes is not a GPU problem — the
  * honest reason the GPU is here is the 134,000-point sheath and the compositing,
  * not this. Seeded from the deterministic layout `index.json` already carries,
  * so the structure looks the same on every reload and in every screenshot.
  */
-export function solve(structure: Structure, iterations = 190): Layout {
+export function solve(structure: Structure, projection: Projection, iterations = 190): Layout {
+  const { axis, shape, groups } = projection
   const N = structure.nodes.length
   const px = new Float64Array(N)
   const pz = new Float64Array(N)
@@ -256,7 +318,7 @@ export function solve(structure: Structure, iterations = 190): Layout {
     const r = RING * (0.45 + 0.55 * Math.min(1, Math.hypot(node.x, node.y)))
     px[i] = Math.sin(a) * r
     pz[i] = Math.cos(a) * r
-    y[i] = node.t === null ? yearToY(AXIS.from) : yearToY(node.t)
+    y[i] = (axis.t[i] - 0.5) * HEIGHT
   }
 
   // Springs over the typed graph only. The untyped wikilink graph is drawn but
@@ -270,7 +332,7 @@ export function solve(structure: Structure, iterations = 190): Layout {
       vz[i] *= 0.72
     }
 
-    // Repulsion. 519 nodes is 134k pairs — small enough to do honestly.
+    // Repulsion. 491 nodes is 120k pairs — small enough to do honestly.
     for (let i = 0; i < N; i++) {
       for (let j = i + 1; j < N; j++) {
         const dx = px[i] - px[j]
@@ -303,7 +365,7 @@ export function solve(structure: Structure, iterations = 190): Layout {
     // visible down the middle and nothing escapes the frame.
     for (let i = 0; i < N; i++) {
       const r = Math.hypot(px[i], pz[i]) || 1
-      const want = Math.max(SHEATH_R + 26, Math.min(RING * 1.5, r))
+      const want = Math.max(NEAR, Math.min(RING * 1.5, r))
       const pull = (want - r) * 0.06
       vx[i] += (px[i] / r) * pull
       vz[i] += (pz[i] / r) * pull
@@ -312,11 +374,25 @@ export function solve(structure: Structure, iterations = 190): Layout {
     }
   }
 
+  /* ---- hand the settled seats to the shape ------------------------------- */
+
+  const groupAt = new Map(groups.map((g, i) => [g, i]))
   const pos = new Float32Array(N * 3)
+  const m = new Float32Array(N)
   for (let i = 0; i < N; i++) {
-    pos[i * 3] = px[i]
-    pos[i * 3 + 1] = y[i]
-    pos[i * 3 + 2] = pz[i]
+    const radius = Math.hypot(px[i], pz[i]) || 1
+    const [x, yy, z] = shape.place({
+      t: axis.t[i],
+      angle: Math.atan2(px[i], pz[i]),
+      depth: Math.max(0, Math.min(1, (radius - NEAR) / (FAR - NEAR))),
+      radius,
+      group: groupAt.get(structure.nodes[i].d) ?? 0,
+      groups: groups.length,
+    })
+    pos[i * 3] = x
+    pos[i * 3 + 1] = yy
+    pos[i * 3 + 2] = z
+    m[i] = axis.t[i]
   }
 
   /* ---- tessellate the typed edges ---------------------------------------- */
@@ -326,6 +402,7 @@ export function solve(structure: Structure, iterations = 190): Layout {
   const edgePos = new Float32Array(edgeVerts * 3)
   const edgeId = new Float32Array(edgeVerts)
   const edgeT = new Float32Array(edgeVerts)
+  const edgeM = new Float32Array(edgeVerts)
 
   let v = 0
   for (let e = 0; e < E; e++) {
@@ -337,15 +414,18 @@ export function solve(structure: Structure, iterations = 190): Layout {
     const by = pos[to * 3 + 1]
     const bz = pos[to * 3 + 2]
 
-    // A quadratic bend, bowed away from the axis. Two pages arguing across
-    // fifteen years should not be a chord through the middle of the record.
+    // A quadratic bend, bowed away from whatever this shape is built around —
+    // the vertical axis for the column, the helix and the rings; the centre of
+    // the world for the sphere and the disc. Two pages arguing across fifteen
+    // years should not be a chord through the middle of the record.
     const mx = (ax + bx) / 2
+    const my = (ay + by) / 2
     const mz = (az + bz) / 2
-    const mr = Math.hypot(mx, mz) || 1
     const bow = 1 + Math.min(0.55, Math.hypot(ax - bx, ay - by, az - bz) / 900)
-    const cx = (mx / mr) * mr * bow
-    const cz = (mz / mr) * mr * bow
-    const cy = (ay + by) / 2
+    const spread = shape.bow === 'centre' ? bow : 1
+    const cx = mx * bow
+    const cz = mz * bow
+    const cy = my * spread
 
     let prevX = ax
     let prevY = ay
@@ -362,6 +442,7 @@ export function solve(structure: Structure, iterations = 190): Layout {
       edgePos[v * 3 + 2] = prevZ
       edgeId[v] = e
       edgeT[v] = (s - 1) / SEGMENTS
+      edgeM[v] = m[from] + (m[to] - m[from]) * ((s - 1) / SEGMENTS)
       v++
 
       edgePos[v * 3] = x
@@ -369,6 +450,7 @@ export function solve(structure: Structure, iterations = 190): Layout {
       edgePos[v * 3 + 2] = z
       edgeId[v] = e
       edgeT[v] = t
+      edgeM[v] = m[from] + (m[to] - m[from]) * t
       v++
 
       prevX = x
@@ -381,6 +463,7 @@ export function solve(structure: Structure, iterations = 190): Layout {
 
   const L = structure.untyped.length
   const linkPos = new Float32Array(L * 6)
+  const linkM = new Float32Array(L * 2)
   for (let i = 0; i < L; i++) {
     const [a, b] = structure.untyped[i]
     linkPos[i * 6] = pos[a * 3]
@@ -389,9 +472,122 @@ export function solve(structure: Structure, iterations = 190): Layout {
     linkPos[i * 6 + 3] = pos[b * 3]
     linkPos[i * 6 + 4] = pos[b * 3 + 1]
     linkPos[i * 6 + 5] = pos[b * 3 + 2]
+    linkM[i * 2] = m[a]
+    linkM[i * 2 + 1] = m[b]
   }
 
-  return { pos, edgePos, edgeId, edgeT, edgeVerts, linkPos, linkVerts: L * 2, iterations }
+  const { pos: axisPos, m: axisM } = rule(projection)
+
+  return {
+    pos,
+    m,
+    edgePos,
+    edgeId,
+    edgeT,
+    edgeM,
+    edgeVerts,
+    linkPos,
+    linkM,
+    linkVerts: L * 2,
+    axisPos,
+    axisM,
+    axisVerts: axisPos.length / 3,
+    iterations,
+  }
+}
+
+/**
+ * The ruling: a spine, and one reference ring per tick.
+ *
+ * This used to be a hard-coded decade ladder from 1900 to 2020 with the axis
+ * running up the middle. It is now whatever the shape says a ring at position
+ * `t` looks like — a small circle round the column, a latitude on the sphere, a
+ * radius on the disc — and the ticks are whatever the measure says are the
+ * numbers worth marking.
+ *
+ * The five holes in the message export are not part of it — they are a fact
+ * about the message record and belong only to the date axis, so `holeRings`
+ * builds them separately and the room appends them only where the sheath is
+ * drawn. Reading them against a word count would be drawing a fact about the
+ * message record onto a picture that is not of the message record.
+ */
+function rule(projection: Projection) {
+  const { axis, shape } = projection
+  const out: number[] = []
+  const mm: number[] = []
+
+  const push = (
+    x0: number, y0: number, z0: number, m0: number,
+    x1: number, y1: number, z1: number, m1: number,
+  ) => {
+    out.push(x0, y0, z0, x1, y1, z1)
+    mm.push(m0, m1)
+  }
+
+  // Segments by circumference, not a constant: 24 is plenty around an 11-unit
+  // tick on the column and a visible decagon around the disc's 930-unit rim.
+  const circle = (t: number, radius: number, height: number, cx: number, cz: number) => {
+    if (radius < 0.5) return
+    // Segments by circumference, not a constant: 24 is plenty around an
+    // 11-unit tick on the column and a visible decagon around the disc's rim.
+    const segments = Math.max(24, Math.min(96, Math.round(radius / 7)))
+    for (let k = 0; k < segments; k++) {
+      const a0 = (k / segments) * Math.PI * 2
+      const a1 = ((k + 1) / segments) * Math.PI * 2
+      push(
+        cx + Math.sin(a0) * radius, height, cz + Math.cos(a0) * radius, t,
+        cx + Math.sin(a1) * radius, height, cz + Math.cos(a1) * radius, t,
+      )
+    }
+  }
+
+  const a = shape.ring(0)
+  const b = shape.ring(1)
+  for (const [cx, cz] of shape.centres(projection.groups.length)) {
+    // The spine, tessellated rather than drawn as one line, so the scrub window
+    // fades along it instead of switching the whole thing on and off.
+    if (Math.abs(b.y - a.y) > 1) {
+      const steps = 40
+      for (let k = 0; k < steps; k++) {
+        const t0 = k / steps
+        const t1 = (k + 1) / steps
+        push(cx, a.y + (b.y - a.y) * t0, cz, t0, cx, a.y + (b.y - a.y) * t1, cz, t1)
+      }
+    }
+    for (const tick of axis.ticks) {
+      const r = shape.ring(tick.t)
+      circle(tick.t, r.r, r.y, cx, cz)
+    }
+  }
+
+  return { pos: new Float32Array(out), m: new Float32Array(mm) }
+}
+
+/**
+ * The rings the message export does not cover, at their true height.
+ *
+ * Built separately from the ruling because the holes come from the clock and
+ * the ruling comes from the structure, and only one of the two is available at
+ * the moment the layout is solved.
+ */
+export function holeRings(sheath: Sheath) {
+  const out: number[] = []
+  const mm: number[] = []
+  for (const hole of sheath.holes) {
+    for (const t of [hole.from, hole.to]) {
+      const height = (t - 0.5) * HEIGHT
+      for (let k = 0; k < RING_SEGMENTS; k++) {
+        const a0 = (k / RING_SEGMENTS) * Math.PI * 2
+        const a1 = ((k + 1) / RING_SEGMENTS) * Math.PI * 2
+        out.push(
+          Math.sin(a0) * SHEATH_R, height, Math.cos(a0) * SHEATH_R,
+          Math.sin(a1) * SHEATH_R, height, Math.cos(a1) * SHEATH_R,
+        )
+        mm.push(t, t)
+      }
+    }
+  }
+  return { pos: new Float32Array(out), m: new Float32Array(mm) }
 }
 
 /* ==========================================================================

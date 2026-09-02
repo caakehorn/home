@@ -203,6 +203,35 @@
   flex-wrap: wrap;
 }
 
+/*
+ * The word that says what a row of chips is choosing.
+ *
+ * SHAPE and MEASURE are the two controls that change what the picture *means*,
+ * as against the eight that change what is shown in it, and an unlabelled row
+ * of chips does not distinguish the two.
+ */
+.core__legend {
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  color: var(--glow, var(--n4));
+  padding-right: 0.2rem;
+}
+
+/* The sentence under the two rows: what this arrangement is, and what it is not. */
+.core__axis-say {
+  max-width: 78ch;
+  margin: 0.1rem 0 0.35rem;
+}
+
+.core__axis-say b {
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  color: var(--spot);
+}
+
+
 .core__search {
   flex: 0 1 14rem;
   min-width: 8rem;

@@ -1543,9 +1543,10 @@ MESSAGE** is counted from the last message to the day the page loaded.
 npm run core            # reads public/wiki + public/leviathan, writes public/core/
 ```
 
-The whole corpus as one body, at `/core`, with time running up the middle of it.
-Hand-written WebGL2 — no three.js, no new dependency, `package.json` is still at
-four.
+The whole corpus as one body, at `/core`. Arrange it by any of eight measures —
+the date is the default, with time running up the middle of it — in any of five
+shapes. Hand-written WebGL2: no three.js, no new dependency, `package.json` is
+still at four.
 
 ### What is drawn
 
@@ -1567,14 +1568,69 @@ bearing is the minute. The 38 months no export covers are drawn as rings the
 light does not fill, at their true height, and the sheath visibly breaks in half
 across the 28-month hole from 2020-08 to 2022-11.
 
+### The measure and the shape
+
+The room drew one picture for its first life: a column, with the date running up
+the middle of it. The date is still the default and still the best axis this
+corpus has, but it was never the only quantity on a page — and the geometry had
+it welded in, in four places. The arrangement is now two independent choices,
+both of them in the reader's hands.
+
+**A measure** is what the structure is arranged *by*. Eight of them, and every
+one is a count, a date or a length taken over the whole corpus with nothing
+excluded and nothing weighted: the date, length in words, argued degree (typed
+edges in and out), backlinks, outlinks, declared gaps, distinct raw corpora
+cited, and the length of the page's documented date range. There is no measure
+of quality and there will not be one — the corpus *does* carry an `importance`
+field, and it is somebody's opinion typed into front-matter, so it filters the
+picture and never positions it.
+
+Beside them, a **linear / rank** switch. Linear is the value against its true
+range, outliers and all: the median page is 744 words and the longest is 113,514,
+so a linear word axis really is one dot at the top and everything else in a
+stripe at the bottom. That stripe is a true reading and it is the default, for
+the same reason the date axis draws the empty century at its true height. Rank
+is not a transform of the value — it is a different count, the number of distinct
+values in the corpus at or below this page — so it passes the rule on its own
+terms, ties share a ring, and the room labels which one is on because the two
+pictures look nothing alike.
+
+**A shape** is how that arrangement is drawn. COLUMN is the original. HELIX winds
+the same axis, so the measure turns the bearing as well as raising the height.
+SPHERE reads the measure as latitude, DISC reads it outward from the hub, and
+RINGS stands one column per domain in a circle so the same measure can be read
+ten times side by side. The force relaxation is identical in all five — it runs
+in the column's own coordinates and each shape reads its answer afterwards as a
+bearing and a depth — which means COLUMN on the date axis is exactly the picture
+the room has always drawn, to the unit, and switching shape *re-poses* the
+settled structure rather than re-settling it, so a page keeps its neighbours
+across the change.
+
+`src/core/axes.ts` holds both registries and the reasoning behind each entry.
+
+Two things the switch is not allowed to break. **The sheath is drawn on the date
+axis, linear, in the column, and nowhere else** — it is 134,348 messages placed
+by the date they were sent, not a layer that can be carried onto a word count,
+and its switch reads NOT THIS AXIS with the reason under the controls. And **the
+window is set in the measure's own units** — 2015 to 2020, or 60 to 100
+backlinks — and closes itself when the measure changes, because a range of dates
+carried silently onto a word count is a range nobody asked for.
+
 ### The one rule the geometry obeys
 
-**Vertical is data and is never simulated. Horizontal is a drawing.**
+**The measure is data and is never simulated. Everything else is a drawing.**
 
-A page hangs at the date the record gives it and nothing moves it. Where it sits
-on its own ring of time was chosen by a force relaxation over the typed edges and
-means nothing at all. That split is the difference between a diagram and a mood,
-and the room prints it on its own masthead.
+A page sits where the measure puts it and nothing moves it. Where it sits on its
+own ring — the bearing, the depth, how many turns a helix takes — was chosen by a
+force relaxation or by whoever drew the shape, and means nothing at all. That
+split is the difference between a diagram and a mood, and the room prints the
+current one on its own masthead rather than leaving a reader to assume the old
+sentence still holds.
+
+A page with **no value** for a measure rests at the floor and is counted there,
+in the line under the title and in the panel: 6 pages the record dates nowhere,
+312 with no documented range. A page at the bottom of the span axis has no
+recorded span — it does not have a short one.
 
 Because the record does not date everything equally, the fallback is recorded
 rather than hidden. 160 pages are placed by a documented `date_range`; 8 by a
@@ -1597,12 +1653,21 @@ ninth path draws the nodes again into an offscreen target with their index as
 their colour, so hovering asks the GPU what is under the cursor rather than
 searching on the CPU.
 
-**Nothing on screen is changed by rebuilding geometry.** Every edge and node
-carries its index as a vertex attribute and reads a one-byte lookup texture to
-find out whether it is hidden, dimmed, lit or selected. A filter is a
-two-kilobyte `texSubImage2D`; retessellating 67,000 vertices on every click would
-hitch. Those two LUTs are the entire interaction surface between React and the
-GPU.
+**Nothing on screen is changed by rebuilding geometry** — with one deliberate
+exception. Every edge and node carries its index as a vertex attribute and reads
+a one-byte lookup texture to find out whether it is hidden, dimmed, lit or
+selected. A filter is a two-kilobyte `texSubImage2D`; retessellating 67,000
+vertices on every click would hitch. Those two LUTs are the entire interaction
+surface between React and the GPU.
+
+The exception is the measure and the shape, which genuinely move every vertex, so
+`Scene.setLayout()` genuinely rebuilds four buffers — about 1.6 MB, once per
+change. The programs, the lookup textures and the sheath survive it, which is the
+difference between this and throwing the scene away: no shader is recompiled and
+134,348 marks are not re-uploaded in order to draw a word count. The scrub window
+moved into the same rebuild: every vertex now carries its own position on the
+axis, because a window read off world height is only a window on the measure
+while the measure is the date and the shape is the column.
 
 The GPU is here for the sheath and the compositing and not much else — 519 nodes
 and 2,398 edges would run fine on canvas 2D, and `src/core/Fallback2D.tsx` draws

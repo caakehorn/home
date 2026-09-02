@@ -80,7 +80,7 @@ export const SECTIONS: Section[] = [
     title: 'THE CORE',
     kana: '核心',
     blurb:
-      'The whole corpus as one body, with time running up the middle of it. 519 pages hung at the dates the record gives them, 2,398 argued edges between them — nineteen kinds of claim, each one carrying the sentence that says why it was made — and 134,348 messages wrapped around the axis as the mass it all rests on. Fly through it, pick anything, and read the argument in the wiki\u2019s own words.',
+      'The whole corpus as one body. Every page hung at the date the record gives it — or by its length, its argued degree, its backlinks, its declared gaps, whatever you set the axis to — with 2,398 argued edges between them, nineteen kinds of claim, each carrying the sentence that says why it was made, and 134,348 messages wrapped around the axis as the mass it all rests on. Five shapes: column, helix, sphere, disc, or one column per domain stood in a circle. Fly through it, pick anything, and read the argument in the wiki\u2019s own words.',
     status: 'LIVE',
     accent: 4,
     chant: banner('core'),

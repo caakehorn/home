@@ -60,37 +60,47 @@ export function Fallback2D({
       ctx.fillStyle = ink('--void', '#04040a')
       ctx.fillRect(0, 0, w, h)
 
-      // Orthographic: x across, the measure up. No camera, because a fallback
-      // that needs to be flown is not a fallback.
-      let minX = Infinity
-      let maxX = -Infinity
-      let minY = Infinity
-      let maxY = -Infinity
+      /*
+       * Orthographic, with no camera, because a fallback that needs to be flown
+       * is not a fallback — which leaves one decision: which two of the three
+       * world axes to keep.
+       *
+       * It used to be x and y always, which is right for a column and useless
+       * for a disc: a disc is a plane at y ≈ 0, so x-and-y renders it edge-on
+       * as a 20-pixel stripe. The rule is the two widest axes, measured off the
+       * layout itself. y wins the vertical whenever it is one of them, so the
+       * column, the helix and the rings still read measure-up; a flat shape
+       * falls through to x-and-z, which is a disc seen from above.
+       */
+      const lo = [Infinity, Infinity, Infinity]
+      const hi = [-Infinity, -Infinity, -Infinity]
       for (let i = 0; i < structure.nodes.length; i++) {
-        const x = layout.pos[i * 3]
-        const y = layout.pos[i * 3 + 1]
-        if (x < minX) minX = x
-        if (x > maxX) maxX = x
-        if (y < minY) minY = y
-        if (y > maxY) maxY = y
+        for (let d = 0; d < 3; d++) {
+          const v = layout.pos[i * 3 + d]
+          if (v < lo[d]) lo[d] = v
+          if (v > hi[d]) hi[d] = v
+        }
       }
+      const span = [hi[0] - lo[0] || 1, hi[1] - lo[1] || 1, hi[2] - lo[2] || 1]
+      const widest = [0, 1, 2].sort((a, b) => span[b] - span[a]).slice(0, 2)
+      const up = widest.includes(1) ? 1 : 2
+      const across = widest.find((d) => d !== up) ?? 0
+
       const pad = 40
-      const spanX = maxX - minX || 1
-      const spanY = maxY - minY || 1
       // One scale for both axes, so the shape keeps its proportions — a disc
-      // fitted independently in x and y is an ellipse, which is a different
-      // drawing.
-      const k = Math.min((w - pad * 2) / spanX, (h - pad * 2) / spanY)
-      const sx = (x: number) => w / 2 + (x - (minX + maxX) / 2) * k
-      const sy = (y: number) => h / 2 - (y - (minY + maxY) / 2) * k
+      // fitted independently in each is an ellipse, which is a different drawing.
+      const k = Math.min((w - pad * 2) / span[across], (h - pad * 2) / span[up])
+      const sx = (i: number) =>
+        w / 2 + (layout.pos[i * 3 + across] - (lo[across] + hi[across]) / 2) * k
+      const sy = (i: number) => h / 2 - (layout.pos[i * 3 + up] - (lo[up] + hi[up]) / 2) * k
 
       ctx.strokeStyle = ink('--text-dim', '#7f9470')
       ctx.globalAlpha = 0.16
       ctx.lineWidth = 1
       ctx.beginPath()
       for (const [from, to] of structure.typed) {
-        ctx.moveTo(sx(layout.pos[from * 3]), sy(layout.pos[from * 3 + 1]))
-        ctx.lineTo(sx(layout.pos[to * 3]), sy(layout.pos[to * 3 + 1]))
+        ctx.moveTo(sx(from), sy(from))
+        ctx.lineTo(sx(to), sy(to))
       }
       ctx.stroke()
 
@@ -99,8 +109,8 @@ export function Fallback2D({
       const accents = ['--n1', '--n2', '--n3', '--n4', '--n5']
       structure.nodes.forEach((n, i) => {
         const d = structure.domains.findIndex((x) => x.id === n.d)
-        const x = sx(layout.pos[i * 3])
-        const y = sy(layout.pos[i * 3 + 1])
+        const x = sx(i)
+        const y = sy(i)
         const r = 1.6 + Math.sqrt(n.w) / 26
         hit.current.push({ x, y, i, r: Math.max(6, r) })
         ctx.fillStyle = ink(accents[d % 5], '#b026ff')

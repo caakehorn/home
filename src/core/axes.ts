@@ -77,6 +77,14 @@ export type Measure = {
   says: string
   /** What a page with no value is missing — printed where the floor is named. */
   absent: string
+  /**
+   * A fixed range to place against, where the corpus's own min and max are not
+   * the honest bounds. Only the date has one: the column has been ruled 1892 →
+   * 2027 since the room was built, the 134,348-mark sheath is placed against
+   * exactly that ruling, and re-fitting the axis to the data would shift every
+   * page a few units off the record it is drawn beside.
+   */
+  domain?: [number, number]
   of: (n: CoreNode, d: Derived) => number | null
   format: (v: number) => string
 }
@@ -99,6 +107,7 @@ export const MEASURES: Measure[] = [
     absent: 'the record dates it nowhere',
     of: (n) => n.t,
     format: yearLabel,
+    domain: [1892, 2027],
   },
   {
     id: 'words',
@@ -222,8 +231,8 @@ export function buildAxis(structure: Structure, id: MeasureId, scale: Scale, d: 
   const N = nodes.length
   const value = nodes.map((n) => measure.of(n, d))
   const present = value.filter((v): v is number => v !== null)
-  const lo = present.length ? Math.min(...present) : 0
-  const hi = present.length ? Math.max(...present) : 1
+  const lo = measure.domain ? measure.domain[0] : present.length ? Math.min(...present) : 0
+  const hi = measure.domain ? measure.domain[1] : present.length ? Math.max(...present) : 1
   const t = new Float64Array(N)
   const ticks: { t: number; label: string }[] = []
 
@@ -276,6 +285,7 @@ export type Seat = {
   /** The measure, 0 → 1. The only part of this that is data. */ t: number
   /** Bearing chosen by the solver, radians. */ angle: number
   /** Depth chosen by the solver, 0 → 1. */ depth: number
+  /** The solver's radius in world units, before the band was normalised. */ radius: number
   /** Which facet group the page is in, and how many groups there are. */
   group: number
   groups: number
@@ -304,8 +314,8 @@ export type Shape = {
 /** The column's height, unchanged — 1892 to 2027 at 1,900 units, as it was. */
 export const HEIGHT = 1900
 /** Where the solver's depth band sits, in world units, on the column. */
-const NEAR = 66
-const FAR = 232
+export const NEAR = 66
+export const FAR = 232
 
 const TURNS = 3.5
 
@@ -318,10 +328,13 @@ export const SHAPES: Shape[] = [
     home: { height: 0, distance: 2350 },
     vertical: true,
     grouped: false,
-    place: ({ t, angle, depth }) => {
-      const r = NEAR + depth * (FAR - NEAR)
-      return [Math.sin(angle) * r, (t - 0.5) * HEIGHT, Math.cos(angle) * r]
-    },
+    // The one shape that reads the solver's radius raw rather than the
+    // normalised band, so this stays the picture the room has always drawn.
+    place: ({ t, angle, radius }) => [
+      Math.sin(angle) * radius,
+      (t - 0.5) * HEIGHT,
+      Math.cos(angle) * radius,
+    ],
     ring: (t) => ({ y: (t - 0.5) * HEIGHT, r: 11 }),
     bow: 'axis',
   },

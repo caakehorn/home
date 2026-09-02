@@ -12,11 +12,13 @@ import {
   AXIS,
   adjacency,
   flyTo,
+  groupsOf,
   load,
   solve,
   unpackSheath,
   yearToY,
 } from '../core/data'
+import { buildAxis, derive, shapeById } from '../core/axes'
 import type { Adjacency, Clock, Layout, Sheath, Structure } from '../core/data'
 import { STATE, Scene } from '../core/scene'
 import type { Palette, Visible } from '../core/scene'
@@ -181,7 +183,12 @@ export function CoreRoute() {
       .then(([structure, clock]) => {
         if (!live) return
         const sheath = unpackSheath(clock)
-        const layout = solve(structure)
+        const layout = solve(structure, {
+          axis: buildAxis(structure, 'year', 'linear', derive(structure)),
+          shape: shapeById('column'),
+          groups: groupsOf(structure),
+          sheath: true,
+        })
         setData({ structure, sheath, layout, adj: adjacency(structure) })
       })
       .catch((e: Error) => live && setError(e.message))

@@ -524,34 +524,40 @@ function rule(projection: Projection) {
     mm.push(m0, m1)
   }
 
-  const circle = (t: number, radius: number, height: number, segments = 24) => {
+  // Segments by circumference, not a constant: 24 is plenty around an 11-unit
+  // tick on the column and a visible decagon around the disc's 930-unit rim.
+  const circle = (t: number, radius: number, height: number, cx: number, cz: number) => {
     if (radius < 0.5) return
+    // Segments by circumference, not a constant: 24 is plenty around an
+    // 11-unit tick on the column and a visible decagon around the disc's rim.
+    const segments = Math.max(24, Math.min(96, Math.round(radius / 7)))
     for (let k = 0; k < segments; k++) {
       const a0 = (k / segments) * Math.PI * 2
       const a1 = ((k + 1) / segments) * Math.PI * 2
       push(
-        Math.sin(a0) * radius, height, Math.cos(a0) * radius, t,
-        Math.sin(a1) * radius, height, Math.cos(a1) * radius, t,
+        cx + Math.sin(a0) * radius, height, cz + Math.cos(a0) * radius, t,
+        cx + Math.sin(a1) * radius, height, cz + Math.cos(a1) * radius, t,
       )
     }
   }
 
-  // The spine, tessellated rather than drawn as one line, so the scrub window
-  // fades along it instead of switching the whole thing on and off.
   const a = shape.ring(0)
   const b = shape.ring(1)
-  if (Math.abs(b.y - a.y) > 1) {
-    const steps = 40
-    for (let k = 0; k < steps; k++) {
-      const t0 = k / steps
-      const t1 = (k + 1) / steps
-      push(0, a.y + (b.y - a.y) * t0, 0, t0, 0, a.y + (b.y - a.y) * t1, 0, t1)
+  for (const [cx, cz] of shape.centres(projection.groups.length)) {
+    // The spine, tessellated rather than drawn as one line, so the scrub window
+    // fades along it instead of switching the whole thing on and off.
+    if (Math.abs(b.y - a.y) > 1) {
+      const steps = 40
+      for (let k = 0; k < steps; k++) {
+        const t0 = k / steps
+        const t1 = (k + 1) / steps
+        push(cx, a.y + (b.y - a.y) * t0, cz, t0, cx, a.y + (b.y - a.y) * t1, cz, t1)
+      }
     }
-  }
-
-  for (const tick of axis.ticks) {
-    const r = shape.ring(tick.t)
-    circle(tick.t, r.r, r.y)
+    for (const tick of axis.ticks) {
+      const r = shape.ring(tick.t)
+      circle(tick.t, r.r, r.y, cx, cz)
+    }
   }
 
   return { pos: new Float32Array(out), m: new Float32Array(mm) }

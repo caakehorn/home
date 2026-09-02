@@ -207,6 +207,16 @@ export type Axis = {
   missing: number
   /** Where to draw a reference ring, and what to call it. */
   ticks: { t: number; label: string }[]
+  /**
+   * A value in the measure's own units to a position on the axis.
+   *
+   * The scrub window is set in real units — 2015 to 2020, 900 words to 4,000 —
+   * because a slider labelled `0.42` is not a control anybody can use. Under
+   * `linear` this is the obvious arithmetic; under `rank` it interpolates
+   * along the ladder of values the corpus actually contains, which is the same
+   * placement a page with that value would get.
+   */
+  at: (v: number) => number
 }
 
 /** A 1 / 2 / 5 ladder, so a count axis is ticked at numbers people say. */
@@ -236,20 +246,37 @@ export function buildAxis(structure: Structure, id: MeasureId, scale: Scale, d: 
   const t = new Float64Array(N)
   const ticks: { t: number; label: string }[] = []
 
+  let at: (v: number) => number
+
   if (scale === 'rank') {
     // Rank by value, ties sharing a position. The denominator is the number of
     // *distinct* values, so the axis is the ladder of values the corpus
     // actually contains rather than a queue of pages.
     const distinct = [...new Set(present)].sort((a, b) => a - b)
-    const at = new Map(distinct.map((v, i) => [v, distinct.length > 1 ? i / (distinct.length - 1) : 0]))
-    for (let i = 0; i < N; i++) t[i] = value[i] === null ? 0 : at.get(value[i] as number)!
+    const rank = new Map(distinct.map((v, i) => [v, distinct.length > 1 ? i / (distinct.length - 1) : 0]))
+    for (let i = 0; i < N; i++) t[i] = value[i] === null ? 0 : rank.get(value[i] as number)!
+    at = (v) => {
+      if (distinct.length < 2) return 0
+      let lo_ = 0
+      let hi_ = distinct.length - 1
+      if (v <= distinct[0]) return 0
+      if (v >= distinct[hi_]) return 1
+      while (hi_ - lo_ > 1) {
+        const mid = (lo_ + hi_) >> 1
+        if (distinct[mid] <= v) lo_ = mid
+        else hi_ = mid
+      }
+      const f = (v - distinct[lo_]) / (distinct[hi_] - distinct[lo_] || 1)
+      return (lo_ + f) / (distinct.length - 1)
+    }
     const want = Math.min(8, distinct.length)
     for (let k = 0; k < want; k++) {
       const idx = Math.round((k / Math.max(1, want - 1)) * (distinct.length - 1))
-      ticks.push({ t: at.get(distinct[idx])!, label: measure.format(distinct[idx]) })
+      ticks.push({ t: rank.get(distinct[idx])!, label: measure.format(distinct[idx]) })
     }
   } else {
     const span = hi - lo || 1
+    at = (v) => Math.max(0, Math.min(1, (v - lo) / span))
     for (let i = 0; i < N; i++) t[i] = value[i] === null ? 0 : ((value[i] as number) - lo) / span
     if (id === 'year') {
       // Decades, the way the column has always been ruled.
@@ -271,6 +298,7 @@ export function buildAxis(structure: Structure, id: MeasureId, scale: Scale, d: 
     hi,
     missing: N - present.length,
     ticks: ticks.filter((k) => k.t >= 0 && k.t <= 1),
+    at,
   }
 }
 
@@ -307,6 +335,15 @@ export type Shape = {
   place: (s: Seat) => [number, number, number]
   /** A reference ring at axis position `t`: its height and its radius. */
   ring: (t: number) => { y: number; r: number }
+  /**
+   * Where the ruling stands, in xz.
+   *
+   * One place for every shape that is one object. RINGS is ten objects, and a
+   * single enclosing cage around all of them reads as a cylinder rather than as
+   * ten columns — so it rules each column separately, which is the whole point
+   * of the shape.
+   */
+  centres: (groups: number) => [number, number][]
   /** What an edge bows away from: the vertical axis, or the centre of the world. */
   bow: 'axis' | 'centre'
 }
@@ -336,6 +373,7 @@ export const SHAPES: Shape[] = [
       Math.cos(angle) * radius,
     ],
     ring: (t) => ({ y: (t - 0.5) * HEIGHT, r: 11 }),
+    centres: () => [[0, 0]],
     bow: 'axis',
   },
   {
@@ -352,6 +390,7 @@ export const SHAPES: Shape[] = [
       return [Math.sin(a) * r, (t - 0.5) * HEIGHT, Math.cos(a) * r]
     },
     ring: (t) => ({ y: (t - 0.5) * HEIGHT, r: 14 }),
+    centres: () => [[0, 0]],
     bow: 'axis',
   },
   {
@@ -359,7 +398,7 @@ export const SHAPES: Shape[] = [
     label: 'SPHERE',
     says: 'the measure is latitude — the floor is the south pole and the ceiling is the north',
     drawing: 'bearing and altitude are the solver’s; a crowded pole is a crowded measure',
-    home: { height: 0, distance: 2100 },
+    home: { height: 0, distance: 2600 },
     vertical: false,
     grouped: false,
     place: ({ t, angle, depth }) => {
@@ -372,6 +411,7 @@ export const SHAPES: Shape[] = [
       const phi = (t - 0.5) * Math.PI
       return { y: Math.sin(phi) * 770, r: Math.cos(phi) * 770 }
     },
+    centres: () => [[0, 0]],
     bow: 'centre',
   },
   {
@@ -379,7 +419,7 @@ export const SHAPES: Shape[] = [
     label: 'DISC',
     says: 'the measure reads outward — the floor is the hub and the ceiling is the rim',
     drawing: 'bearing is the solver’s; the slight thickness is its depth, so the disc is not one plane',
-    home: { height: 0, distance: 2000 },
+    home: { height: 0, distance: 2200 },
     vertical: false,
     grouped: false,
     place: ({ t, angle, depth }) => {
@@ -387,6 +427,7 @@ export const SHAPES: Shape[] = [
       return [Math.sin(angle) * rr, (depth - 0.5) * 110, Math.cos(angle) * rr]
     },
     ring: (t) => ({ y: 0, r: 130 + t * 800 }),
+    centres: () => [[0, 0]],
     bow: 'centre',
   },
   {
@@ -394,7 +435,7 @@ export const SHAPES: Shape[] = [
     label: 'RINGS',
     says: 'one column per domain, stood in a circle — the same measure, ten times, side by side',
     drawing: 'which domain stands where is alphabetical; the bearing inside a column is the solver’s',
-    home: { height: 0, distance: 2500 },
+    home: { height: 0, distance: 2900 },
     vertical: true,
     grouped: true,
     place: ({ t, angle, depth, group, groups }) => {
@@ -404,7 +445,12 @@ export const SHAPES: Shape[] = [
       const r = 34 + depth * 62
       return [cx + Math.sin(angle) * r, (t - 0.5) * HEIGHT * 0.82, cz + Math.cos(angle) * r]
     },
-    ring: (t) => ({ y: (t - 0.5) * HEIGHT * 0.82, r: 680 }),
+    ring: (t) => ({ y: (t - 0.5) * HEIGHT * 0.82, r: 112 }),
+    centres: (groups) =>
+      Array.from({ length: Math.max(1, groups) }, (_, i) => {
+        const a = (i / Math.max(1, groups)) * Math.PI * 2
+        return [Math.sin(a) * 560, Math.cos(a) * 560] as [number, number]
+      }),
     bow: 'axis',
   },
 ]

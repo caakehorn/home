@@ -16,6 +16,13 @@ import type { Layout, Structure } from './data'
  * points is exactly the thing 2D cannot do, and pretending otherwise with a
  * sample of them would be quietly showing a different corpus. It says which
  * layer is missing instead.
+ *
+ * It follows the measure and the shape, because it is handed the same solved
+ * layout the GPU is. The one thing it had to stop assuming is that the picture
+ * is a tall column: it fitted x to a fixed ±170 and y to the data, which is a
+ * flat disc squashed into a stripe and a sphere cropped at the sides. Both axes
+ * are fitted to the layout's own bounds now, and the aspect is held so a sphere
+ * is round rather than an ellipse.
  */
 export function Fallback2D({
   structure,
@@ -53,18 +60,29 @@ export function Fallback2D({
       ctx.fillStyle = ink('--void', '#04040a')
       ctx.fillRect(0, 0, w, h)
 
-      // Orthographic: x across, time down. No camera, because a fallback that
-      // needs to be flown is not a fallback.
+      // Orthographic: x across, the measure up. No camera, because a fallback
+      // that needs to be flown is not a fallback.
+      let minX = Infinity
+      let maxX = -Infinity
       let minY = Infinity
       let maxY = -Infinity
       for (let i = 0; i < structure.nodes.length; i++) {
+        const x = layout.pos[i * 3]
         const y = layout.pos[i * 3 + 1]
+        if (x < minX) minX = x
+        if (x > maxX) maxX = x
         if (y < minY) minY = y
         if (y > maxY) maxY = y
       }
       const pad = 40
-      const sx = (x: number) => w / 2 + x * ((w - pad * 2) / 340)
-      const sy = (y: number) => h - pad - ((y - minY) / (maxY - minY || 1)) * (h - pad * 2)
+      const spanX = maxX - minX || 1
+      const spanY = maxY - minY || 1
+      // One scale for both axes, so the shape keeps its proportions — a disc
+      // fitted independently in x and y is an ellipse, which is a different
+      // drawing.
+      const k = Math.min((w - pad * 2) / spanX, (h - pad * 2) / spanY)
+      const sx = (x: number) => w / 2 + (x - (minX + maxX) / 2) * k
+      const sy = (y: number) => h / 2 - (y - (minY + maxY) / 2) * k
 
       ctx.strokeStyle = ink('--text-dim', '#7f9470')
       ctx.globalAlpha = 0.16

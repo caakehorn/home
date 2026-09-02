@@ -9,7 +9,6 @@ import { usePortal } from '../state/usePortal'
 import { Camera } from '../core/camera'
 import { Fallback2D } from '../core/Fallback2D'
 import {
-  AXIS,
   adjacency,
   flyTo,
   groupsOf,
@@ -18,8 +17,9 @@ import {
   unpackSheath,
   yearToY,
 } from '../core/data'
-import { buildAxis, derive, shapeById } from '../core/axes'
-import type { Adjacency, Clock, Layout, Sheath, Structure } from '../core/data'
+import { MEASURES, SHAPES, buildAxis, derive, shapeById } from '../core/axes'
+import type { MeasureId, Scale, ShapeId } from '../core/axes'
+import type { Clock, Layout, Sheath, Structure } from '../core/data'
 import { STATE, Scene } from '../core/scene'
 import type { Palette, Visible } from '../core/scene'
 import './core.css'
@@ -49,18 +49,35 @@ import './core.css'
  * fill, at their true height, because a hole in an archive is not a quiet
  * stretch.
  *
- * ---- what the axis means, and what it does not ------------------------------
+ * ---- the axis is a choice now, and the room says which one ------------------
  *
- * Vertical is data. A page's height is the date the record gives it, and
- * nothing in the simulation is allowed to move it. Horizontal is a drawing:
- * pages are settled around their own ring of time by a force solver, and where
- * a page sits on that ring means nothing at all.
+ * The room used to draw one picture: a column, with the date running up the
+ * middle of it. The date is still the default and still the best axis this
+ * corpus has, but it was never the only quantity on a page, and the geometry
+ * had it welded in. It is now two independent choices — a **measure**, which is
+ * what the structure is arranged by, and a **shape**, which is how that
+ * arrangement is drawn. `src/core/axes.ts` holds both registries and the
+ * reasoning behind them.
  *
- * Because 256 of the 519 pages have no documented range and are placed by the
- * earliest date their prose happens to name, and 89 by nothing better than when
- * the file was created, every node carries which rule placed it and the panel
- * says so out loud. A page floating at 1900 because it mentions a grandparent's
- * birth is not making the same claim as one with a date range on it.
+ * What did not change is which half is evidence. The measure is data: a count,
+ * a date or a length, over the whole corpus. Everything the measure did not
+ * decide — a bearing, a depth, how many turns a helix takes — is a drawing
+ * decision, and the room prints the current one under the title rather than
+ * leaving a reader to assume the old sentence still holds.
+ *
+ * Two things the axis switch is not allowed to quietly break:
+ *
+ * The **sheath** is 134,348 messages placed by the date they were sent. It is
+ * drawn on the date axis, linear, in the column — the one arrangement it is
+ * actually on — and switched off everywhere else with the reason stated. The
+ * alternative is 134,000 marks floating against a word count, which would look
+ * exactly like data.
+ *
+ * A page with **no value** for a measure rests at the floor and is counted
+ * there. 6 pages the record dates nowhere; 312 with no documented range. A page
+ * at the bottom of the span axis has no recorded span — it does not have a
+ * short one — and the room says which, the same way it has always said whether
+ * a date came from a documented range or from the day the file was made.
  */
 
 const section = sectionBySlug('core')!
@@ -150,15 +167,15 @@ export function CoreRoute() {
   const navigate = useNavigate()
   const { motion, vibe } = usePortal()
 
-  const [data, setData] = useState<{
-    structure: Structure
-    sheath: Sheath
-    layout: Layout
-    adj: Adjacency
-  } | null>(null)
+  const [source, setSource] = useState<{ structure: Structure; sheath: Sheath } | null>(null)
   const [claims, setClaims] = useState<string[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [noGl, setNoGl] = useState(false)
+
+  /** What the structure is arranged by, and how that arrangement is drawn. */
+  const [measure, setMeasure] = useState<MeasureId>('year')
+  const [scale, setScale] = useState<Scale>('linear')
+  const [shapeId, setShapeId] = useState<ShapeId>('column')
 
   const [selected, setSelected] = useState<number | null>(null)
   const [edge, setEdge] = useState<number | null>(null)
@@ -182,14 +199,7 @@ export function CoreRoute() {
     Promise.all([load<Structure>('core/structure.json'), load<Clock>('leviathan/clock.json')])
       .then(([structure, clock]) => {
         if (!live) return
-        const sheath = unpackSheath(clock)
-        const layout = solve(structure, {
-          axis: buildAxis(structure, 'year', 'linear', derive(structure)),
-          shape: shapeById('column'),
-          groups: groupsOf(structure),
-          sheath: true,
-        })
-        setData({ structure, sheath, layout, adj: adjacency(structure) })
+        setSource({ structure, sheath: unpackSheath(clock) })
       })
       .catch((e: Error) => live && setError(e.message))
     return () => {
@@ -205,6 +215,63 @@ export function CoreRoute() {
       .then((c) => setClaims(c.claims))
       .catch(() => setClaims([]))
   }, [edge, claims])
+
+  /* ---- the arrangement --------------------------------------------------- */
+
+  /**
+   * Re-solve when the measure or the shape changes, and only then.
+   *
+   * The force relaxation is 190 passes over 120,000 pairs, which is a couple of
+   * hundred milliseconds — cheap enough to do on a deliberate control press and
+   * far too expensive to do on a hover. Everything else the room can change —
+   * a filter, a search, a selection, the window — is a lookup-texture write and
+   * never comes near this.
+   */
+  const derived = useMemo(() => (source ? derive(source.structure) : null), [source])
+
+  const axis = useMemo(
+    () =>
+      source && derived ? buildAxis(source.structure, measure, scale, derived) : null,
+    [source, derived, measure, scale],
+  )
+
+  const shape = shapeById(shapeId)
+
+  /**
+   * Whether the message record belongs on this axis at all.
+   *
+   * It is 134,348 marks placed by the date they were sent, on the ruling the
+   * column has always had. That is one arrangement, not a layer that can be
+   * carried onto any other, so this is an `&&` of all three and the room says
+   * so where the switch is.
+   */
+  const sheathFits = measure === 'year' && scale === 'linear' && shapeId === 'column'
+
+  const layout = useMemo(
+    () =>
+      source && axis
+        ? solve(source.structure, {
+            axis,
+            shape,
+            groups: groupsOf(source.structure),
+            sheath: sheathFits,
+          })
+        : null,
+    [source, axis, shape, sheathFits],
+  )
+
+  const data = useMemo(
+    () =>
+      source && layout
+        ? {
+            structure: source.structure,
+            sheath: source.sheath,
+            layout,
+            adj: adjacency(source.structure),
+          }
+        : null,
+    [source, layout],
+  )
 
   /* ---- the deep link ----------------------------------------------------- */
 
@@ -269,8 +336,22 @@ export function CoreRoute() {
 
   const sceneRef = useRef<Scene | null>(null)
   const cameraRef = useRef(new Camera())
-  const liveRef = useRef({ layers, bloom, win, motion, hover, selected, edge, fraction })
-  liveRef.current = { layers, bloom, win, motion, hover, selected, edge, fraction }
+  /**
+   * The layout the GL scene should be built with.
+   *
+   * A ref rather than an effect dependency: the scene must be constructed with
+   * *a* layout, and must not be torn down and rebuilt every time one changes.
+   */
+  const startLayout = useRef<Layout | null>(null)
+  startLayout.current = layout
+  const liveRef = useRef({
+    layers, bloom, win, motion, hover, selected, edge, fraction,
+    sheathFits, at: axis?.at ?? null,
+  })
+  liveRef.current = {
+    layers, bloom, win, motion, hover, selected, edge, fraction,
+    sheathFits, at: axis?.at ?? null,
+  }
 
   /** Push node and edge states into the lookup textures. */
   useEffect(() => {
@@ -315,7 +396,7 @@ export function CoreRoute() {
   const canvas = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
-    if (!data || noGl) return
+    if (!source || !startLayout.current || noGl) return
     const el = canvas.current
     if (!el) return
     const gl = el.getContext('webgl2', {
@@ -331,7 +412,7 @@ export function CoreRoute() {
 
     let scene: Scene
     try {
-      scene = new Scene(gl, data.structure, data.layout, data.sheath)
+      scene = new Scene(gl, source.structure, startLayout.current, source.sheath)
     } catch (e) {
       console.error(e)
       setNoGl(true)
@@ -420,19 +501,17 @@ export function CoreRoute() {
       }
 
       const vis: Visible = {
-        sheath: live.layers.sheath,
+        // The message record is drawn where it belongs and nowhere else.
+        sheath: live.layers.sheath && live.sheathFits,
         typed: live.layers.typed,
         untyped: live.layers.untyped,
         axis: live.layers.axis,
         bloom: live.bloom,
         sheathAlpha: live.selected === null ? 0.5 : 0.24,
         sheathFraction: live.fraction,
-        window: live.win
-          ? [
-              (live.win[0] - AXIS.from) / (AXIS.to - AXIS.from),
-              (live.win[1] - AXIS.from) / (AXIS.to - AXIS.from),
-            ]
-          : null,
+        // The window is set in the measure's own units and placed by the axis,
+        // which is the only thing that knows how a rank ladder is spaced.
+        window: live.win && live.at ? [live.at(live.win[0]), live.at(live.win[1])] : null,
       }
       scene.draw(camera, w, h, palette, vis, live.motion ? dt : 0)
 
@@ -475,23 +554,78 @@ export function CoreRoute() {
       el.removeEventListener('webglcontextlost', lost)
       sceneRef.current = null
     }
-  }, [data, noGl, vibe])
+    // Deliberately not keyed on the layout: a change of measure or shape swaps
+    // the geometry through `setLayout` below rather than throwing away eight
+    // compiled programs and re-uploading 134,348 marks.
+  }, [source, noGl, vibe])
+
+  /**
+   * The layout the scene was built with, and every one after it.
+   *
+   * A ref rather than a dependency because the constructor needs *a* layout and
+   * the effect above must not re-run when it changes — the effect below is what
+   * changes it.
+   */
+  useEffect(() => {
+    const scene = sceneRef.current
+    if (!scene || !data) return
+    scene.setLayout(data.structure, data.layout, sheathFits)
+  }, [data, sheathFits, ready])
+
+  /**
+   * Stand the camera back far enough to see whatever shape this is.
+   *
+   * On a *change* only. Firing on mount as well would throw away the room's
+   * opening framing — close in on the message record, where the corpus actually
+   * is — and replace it with the whole column seen from 2,350 units away.
+   *
+   * The measure counts as a change too, and it has to. A height on the date
+   * axis is a year; the same height on the word axis is nothing at all, and
+   * every one of these distributions is skewed enough that the camera would
+   * frequently end up parked in empty space above a stripe of 490 pages. The
+   * whole of the new axis is the only framing that is meaningful in every case.
+   */
+  const framed = useRef(false)
+  useEffect(() => {
+    if (!framed.current) {
+      framed.current = true
+      return
+    }
+    const c = cameraRef.current
+    c.goal.height = shape.home.height
+    c.goal.distance = shape.home.distance
+  }, [shape, measure, scale])
 
   /* ---- the time sweep ---------------------------------------------------- */
 
   useEffect(() => {
-    if (!playing || !motion) return
+    if (!playing || !motion || !axis) return
+    // A fixed number of steps end to end rather than a fixed number of years,
+    // so a sweep takes the same time whatever the axis is measuring.
+    const stride = (axis.hi - axis.lo) / 245
     const id = window.setInterval(() => {
       setWin((w) => {
         if (!w) return w
         const width = w[1] - w[0]
-        const next = w[1] + 0.55
-        if (next > AXIS.to) return [AXIS.from, AXIS.from + width]
+        const next = w[1] + stride
+        if (next > axis.hi) return [axis.lo, axis.lo + width]
         return [next - width, next]
       })
     }, 60)
     return () => window.clearInterval(id)
-  }, [playing, motion])
+  }, [playing, motion, axis])
+
+  /**
+   * A window set on one axis means nothing on the next one.
+   *
+   * 2015 → 2020 is a range of dates; carried onto a word count it would be a
+   * range of words that nobody asked for, silently, and the sliders would still
+   * read as if somebody had. Closing it is the only honest thing to do.
+   */
+  useEffect(() => {
+    setWin(null)
+    setPlaying(false)
+  }, [measure, scale])
 
   useEffect(() => {
     if (!motion) setPlaying(false)
@@ -645,14 +779,14 @@ export function CoreRoute() {
       </Room>
     )
 
-  if (!data || !structure)
+  if (!data || !structure || !axis)
     return (
       <Room>
         <p className="core__state">
           <span className="jp" aria-hidden="true">
             構築中
           </span>{' '}
-          SETTLING 519 PAGES AND 134,348 MESSAGES…
+          SETTLING THE PAGES AND 134,348 MESSAGES…
         </p>
       </Room>
     )
@@ -680,10 +814,21 @@ export function CoreRoute() {
         </span>
         <p className="core__note">{section.blurb}</p>
         <p className="core__rule">
-          <b>VERTICAL IS DATA. HORIZONTAL IS A DRAWING.</b> A page&apos;s height is the date the
-          record gives it and nothing moves it. Where it sits on its own ring of time was chosen by
-          a force solver and means nothing — {c.nodes} pages settled around{' '}
-          {c.typed.toLocaleString()} argued edges.
+          <b>
+            {axis.measure.label} IS DATA. THE REST IS A DRAWING.
+          </b>{' '}
+          Every page is placed by {axis.measure.says} — {axis.measure.kind}, taken over the whole
+          corpus with nothing excluded and nothing weighted. {shape.drawing}. {c.nodes} pages
+          settled around {c.typed.toLocaleString()} argued edges.
+          {axis.missing > 0 && (
+            <>
+              {' '}
+              <i>
+                {axis.missing} {axis.missing === 1 ? 'page has' : 'pages have'} no value here and
+                rest at the floor — {axis.measure.absent}. The floor is not a low reading.
+              </i>
+            </>
+          )}
         </p>
       </header>
 
@@ -775,13 +920,79 @@ export function CoreRoute() {
             <div className="core__tip">
               <b>{tipped.n}</b>
               <span>
-                {tipped.d} · {tipped.t === null ? 'undated' : year(tipped.t)}
+                {tipped.d} ·{' '}
+                {axis.value[tipped.i] === null
+                  ? `no ${axis.measure.label.toLowerCase()}`
+                  : axis.measure.format(axis.value[tipped.i] as number)}
               </span>
             </div>
           )}
         </div>
 
         <div className="core__controls">
+          <div className="core__row core__row--wrap">
+            <span className="core__legend">SHAPE</span>
+            {SHAPES.map((sh) => (
+              <button
+                key={sh.id}
+                type="button"
+                className={`core__chip${shapeId === sh.id ? ' core__chip--on' : ''}`}
+                aria-pressed={shapeId === sh.id}
+                title={sh.says}
+                onClick={() => setShapeId(sh.id)}
+              >
+                {sh.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="core__row core__row--wrap">
+            <span className="core__legend">MEASURE</span>
+            {MEASURES.map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                className={`core__chip${measure === m.id ? ' core__chip--on' : ''}`}
+                aria-pressed={measure === m.id}
+                title={`${m.says} — ${m.kind}`}
+                onClick={() => setMeasure(m.id)}
+              >
+                {m.label}
+              </button>
+            ))}
+            {(['linear', 'rank'] as const).map((sc) => (
+              <button
+                key={sc}
+                type="button"
+                className={`core__chip${scale === sc ? ' core__chip--on' : ''}`}
+                aria-pressed={scale === sc}
+                title={
+                  sc === 'linear'
+                    ? 'the value against its true range, outliers and all'
+                    : 'position in the ladder of values the corpus contains — a different count, not a transform'
+                }
+                onClick={() => setScale(sc)}
+              >
+                {sc === 'linear' ? '↕ LINEAR' : '↕ RANK'}
+              </button>
+            ))}
+          </div>
+
+          <p className="core__say core__axis-say">
+            {shape.says}. {axis.scale === 'linear'
+              ? `Linear, ${axis.measure.format(axis.lo)} to ${axis.measure.format(axis.hi)} evenly — the emptiness is part of the reading.`
+              : `Ranked: a page's place is how many of the corpus's distinct values sit at or below it, so ties share a ring.`}
+            {!sheathFits && (
+              <>
+                {' '}
+                <b>THE SHEATH IS OFF.</b> It is 134,348 messages placed by the date they were
+                sent, on the date axis, linear, in the column. Drawing it against{' '}
+                {measure === 'year' ? 'this arrangement' : axis.measure.label.toLowerCase()} would
+                be 134,000 marks floating over a picture they are not on.
+              </>
+            )}
+          </p>
+
           <div className="core__row">
             <input
               type="search"
@@ -791,17 +1002,34 @@ export function CoreRoute() {
               onChange={(e) => setQuery(e.target.value)}
               aria-label="Find a page"
             />
-            {(['sheath', 'typed', 'untyped', 'axis'] as const).map((k) => (
-              <button
-                key={k}
-                type="button"
-                className={`core__chip${layers[k] ? ' core__chip--on' : ''}`}
-                aria-pressed={layers[k]}
-                onClick={() => setLayers((l) => ({ ...l, [k]: !l[k] }))}
-              >
-                {k === 'sheath' ? 'THE SHEATH' : k === 'typed' ? 'THE ARGUMENT' : k === 'untyped' ? 'WIKILINKS' : 'AXIS'}
-              </button>
-            ))}
+            {(['sheath', 'typed', 'untyped', 'axis'] as const).map((k) => {
+              const off = k === 'sheath' && !sheathFits
+              return (
+                <button
+                  key={k}
+                  type="button"
+                  className={`core__chip${layers[k] && !off ? ' core__chip--on' : ''}`}
+                  aria-pressed={layers[k] && !off}
+                  disabled={off}
+                  title={
+                    off
+                      ? 'the message record is placed by date — it is drawn on the date axis, linear, in the column'
+                      : undefined
+                  }
+                  onClick={() => setLayers((l) => ({ ...l, [k]: !l[k] }))}
+                >
+                  {k === 'sheath'
+                    ? off
+                      ? 'THE SHEATH — NOT THIS AXIS'
+                      : 'THE SHEATH'
+                    : k === 'typed'
+                      ? 'THE ARGUMENT'
+                      : k === 'untyped'
+                        ? 'WIKILINKS'
+                        : 'THE RULING'}
+                </button>
+              )
+            })}
             <label className="core__slider">
               GLOW
               <input
@@ -847,34 +1075,44 @@ export function CoreRoute() {
               type="button"
               className={`core__chip${win ? ' core__chip--on' : ''}`}
               aria-pressed={!!win}
-              onClick={() => setWin((w) => (w ? null : [2015, 2020]))}
+              onClick={() =>
+                setWin((w) =>
+                  w
+                    ? null
+                    : // A quarter of the axis, in the middle of it — a starting
+                      // position, not a claim about where anything interesting is.
+                      [
+                        axis.lo + (axis.hi - axis.lo) * 0.375,
+                        axis.lo + (axis.hi - axis.lo) * 0.625,
+                      ],
+                )
+              }
             >
-              TIME WINDOW
+              WINDOW
             </button>
             {win && (
               <>
-                <label className="core__slider">
-                  {year(win[0])}
-                  <input
-                    type="range"
-                    min={AXIS.from}
-                    max={AXIS.to}
-                    step={0.25}
-                    value={win[0]}
-                    onChange={(e) => setWin([Math.min(Number(e.target.value), win[1] - 0.5), win[1]])}
-                  />
-                </label>
-                <label className="core__slider">
-                  {year(win[1])}
-                  <input
-                    type="range"
-                    min={AXIS.from}
-                    max={AXIS.to}
-                    step={0.25}
-                    value={win[1]}
-                    onChange={(e) => setWin([win[0], Math.max(Number(e.target.value), win[0] + 0.5)])}
-                  />
-                </label>
+                {([0, 1] as const).map((end) => (
+                  <label className="core__slider" key={end}>
+                    {axis.measure.format(win[end])}
+                    <input
+                      type="range"
+                      min={axis.lo}
+                      max={axis.hi}
+                      step={(axis.hi - axis.lo) / 400}
+                      value={win[end]}
+                      onChange={(e) => {
+                        const v = Number(e.target.value)
+                        const gap = (axis.hi - axis.lo) / 400
+                        setWin(
+                          end === 0
+                            ? [Math.min(v, win[1] - gap), win[1]]
+                            : [win[0], Math.max(v, win[0] + gap)],
+                        )
+                      }}
+                    />
+                  </label>
+                ))}
                 <button
                   type="button"
                   className={`core__chip${playing ? ' core__chip--on' : ''}`}
@@ -891,25 +1129,27 @@ export function CoreRoute() {
               className="core__chip"
               onClick={() => {
                 const c = cameraRef.current
-                // 1,900 units of column at a 0.9 rad field needs about this much
-                // room, plus a margin so 1892 and 2027 are both inside the frame.
-                c.goal.height = 0
-                c.goal.distance = 2350
+                // Whatever this shape needs to sit inside a 0.9 rad field, with
+                // a margin, so both ends of the axis are in the frame.
+                c.goal.height = shape.home.height
+                c.goal.distance = shape.home.distance
               }}
             >
-              ⤢ THE WHOLE COLUMN
+              ⤢ THE WHOLE OF IT
             </button>
-            <button
-              type="button"
-              className="core__chip"
-              onClick={() => {
-                const c = cameraRef.current
-                c.goal.height = yearToY(2016)
-                c.goal.distance = 560
-              }}
-            >
-              ⌖ THE RECORD
-            </button>
+            {sheathFits && (
+              <button
+                type="button"
+                className="core__chip"
+                onClick={() => {
+                  const c = cameraRef.current
+                  c.goal.height = yearToY(2016)
+                  c.goal.distance = 560
+                }}
+              >
+                ⌖ THE RECORD
+              </button>
+            )}
             <button type="button" className="core__chip" onClick={() => pick(null)}>
               ⟲ CLEAR
             </button>
@@ -979,8 +1219,10 @@ export function CoreRoute() {
               from the list. Its argued edges light up and every claim it makes becomes readable
               below.{' '}
               {COARSE
-                ? 'Drag to orbit, pinch to close in, two fingers to travel the years. The pad on the picture does the same thing with buttons.'
-                : 'Drag to orbit, shift-drag to travel up the years, scroll to close in.'}
+                ? 'Drag to orbit, pinch to close in, two fingers to travel the axis. The pad on the picture does the same thing with buttons.'
+                : 'Drag to orbit, shift-drag to travel up the axis, scroll to close in.'}{' '}
+              SHAPE and MEASURE above change what the structure is arranged by and how it is drawn;
+              the pages keep their neighbours across the change.
             </p>
           )}
           {node && (
@@ -993,6 +1235,25 @@ export function CoreRoute() {
                 </div>
                 <div>
                   <dt>PLACED AT</dt>
+                  <dd>
+                    {axis.value[node.i] === null ? (
+                      <>
+                        the floor — {axis.measure.absent}
+                        <i> not a low reading; no reading</i>
+                      </>
+                    ) : (
+                      <>
+                        {axis.measure.format(axis.value[node.i] as number)}{' '}
+                        <i>
+                          on {axis.measure.label.toLowerCase()}, {axis.measure.kind}
+                          {axis.scale === 'rank' && ', ranked'}
+                        </i>
+                      </>
+                    )}
+                  </dd>
+                </div>
+                <div>
+                  <dt>DATED</dt>
                   <dd>
                     {node.t === null ? 'nowhere — the record gives no date' : year(node.t)}{' '}
                     <i>
@@ -1115,15 +1376,26 @@ export function CoreRoute() {
           {c.untyped.toLocaleString()} untyped wikilinks are the haze behind it, off by default. The
           mass is 134,348 messages, one mark each, at the height of their day and the bearing of
           their minute — and the 38 months no export covers are rings the sheath does not fill,
-          at their true height, because a hole in an archive is not a quiet stretch.
+          at their true height, because a hole in an archive is not a quiet stretch. It is drawn on
+          the date axis, linear, in the column, and nowhere else: it is the message record placed by
+          date, not a layer that can be carried onto a word count.
         </p>
         <p className="core__method">
-          <b>WHAT IS NOT A MEASUREMENT</b> Only the vertical. 160 pages are placed by a documented
-          date range; 256 by the earliest date their prose happens to name; 89 by nothing better
-          than when the file was created; 6 by nothing at all, and they rest at the floor. Every
-          page says which of those placed it. The horizontal placement is a force solver&apos;s
-          opinion and encodes nothing. The bend in an edge is drawing, not direction — direction is
-          the brightness running along it.
+          <b>WHAT THE MEASURE IS</b> {axis.measure.label} — {axis.measure.says}, which is{' '}
+          {axis.measure.kind}. Eight measures are offered and every one of them is a count, a date
+          or a length over the whole corpus. There is no measure of quality and there will not be
+          one: the corpus does carry an importance field, and it is somebody&apos;s opinion typed
+          into front-matter, so it filters this picture and never positions it.{' '}
+          {axis.missing > 0 &&
+            `${axis.missing} of ${c.nodes} pages have no value here — ${axis.measure.absent} — and they rest at the floor, counted rather than dropped.`}
+        </p>
+        <p className="core__method">
+          <b>WHAT IS NOT A MEASUREMENT</b> Everything the measure did not decide. {shape.drawing}.
+          The bend in an edge is drawing, not direction — direction is the brightness running along
+          it. A dot&apos;s size is the length of its page in words, in every arrangement. On the
+          date axis: 160 pages are placed by a documented range; 256 by the earliest date their
+          prose happens to name; 89 by nothing better than when the file was created; 6 by nothing
+          at all. Every page says which of those placed it, in the panel above.
         </p>
         <p className="core__rule-line">
           Every number here is a count, a date or a length, taken over the whole corpus with

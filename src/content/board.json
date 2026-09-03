@@ -48,7 +48,7 @@
     "void-1": "bedkissrb"
   },
   "pools": {
-    "wiki": [
+    "blog": [
       "kiss-neon",
       "kiss-close",
       "kiss-window",
@@ -57,9 +57,21 @@
       "kiss-butterfly",
       "kiss-mirror",
       "kiss-uniform",
-      "kiss-garden",
       "bedkissrb",
+      "makeoutbed",
       "centralpark"
+    ],
+    "wiki": [
+      "kiss-neon",
+      "kiss-close",
+      "kiss-window",
+      "kiss-dark",
+      "kiss-butterfly",
+      "kiss-mirror",
+      "kiss-uniform",
+      "bedkissrb",
+      "centralpark",
+      "makeoutbed"
     ]
   }
 }

@@ -6,7 +6,7 @@
  * `scripts/build-wiki-history.mjs` already proves one thing before it writes:
  * folding its own chain with its own applier reproduces every revision. That is
  * necessary and it is not sufficient — it proves the two halves of one program
- * agree, which they would even if both were wrong in the same direction. Two
+ * agree, which they would even if both were wrong in the same direction. Three
  * claims are left over, and they are the ones a reader would be misled by:
  *
  *   1. The SHIPPED dataset, on disk, reproduces the blobs git holds — checked
@@ -16,10 +16,20 @@
  *      `changesIn` inverts a reverse patch to say what a commit ADDED, and an
  *      inversion that is backwards renders a plausible, readable, exactly wrong
  *      account of what changed. Checked against the dataset's own counts for
- *      every revision of every page, and against `git show --numstat` on a
- *      sample — the sample is enough for that one because the property is
- *      global: an inversion cannot be backwards on one page and right on the
- *      next.
+ *      every revision of every page, and then exactly: the lines the panel
+ *      would NOT strike through must reconstruct the newer snapshot, and the
+ *      ones it would not mark as added must reconstruct the older one. A
+ *      backwards inversion swaps the two and fails both. Those snapshots are
+ *      the dataset's own — claim 1 is what ties them to the blobs in git, and
+ *      the two together are what make this a statement about the record rather
+ *      than about the dataset's internal consistency.
+ *   3. The version the dataset calls a revision's PREDECESSOR is the version
+ *      that preceded it on `main`. Claims 1 and 2 both hold on a chain whose
+ *      links are in the wrong order — every snapshot is a real file and every
+ *      diff is a correct diff, of the wrong pair. This is the one that broke on
+ *      2026-09-02, on 197 of 3,087 revisions, and the one a reader cannot catch
+ *      unaided, because they opened the history precisely because they do not
+ *      know what the page used to say.
  *
  * Runs twice, deliberately. In the wiki sync, where the source repository is
  * checked out, it does all of it. In the deploy, where it is not, it does the
@@ -142,8 +152,8 @@ if (!existsSync(join(SOURCE, 'wiki'))) {
   process.exit(failures ? 1 : 0)
 }
 
-const git = (...args) =>
-  execFileSync('git', ['-C', SOURCE, ...args], { encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 })
+/** Where git keeps the text of one revision — the path it had at that commit. */
+const blobKey = (history, rev) => `${rev.sha}:wiki/${rev.path ?? history.slug}.md`
 
 /* ---- 1. every snapshot against the blob git holds --------------------------
  *
@@ -155,7 +165,7 @@ const git = (...args) =>
 const specs = []
 for (const history of histories) {
   if (history.head === null) continue
-  for (const rev of history.revisions) specs.push(`${rev.sha}:wiki/${rev.path ?? history.slug}.md`)
+  for (const rev of history.revisions) specs.push(blobKey(history, rev))
 }
 const buf = execFileSync('git', ['-C', SOURCE, 'cat-file', '--batch'], {
   input: specs.join('\n'),
@@ -183,7 +193,7 @@ for (const history of histories) {
   for (const [i, rev] of history.revisions.entries()) {
     if (i > 0) lines = applyOps(lines, history.patches[i - 1])
     revisions++
-    const blob = blobs.get(`${rev.sha}:wiki/${rev.path ?? history.slug}.md`)
+    const blob = blobs.get(blobKey(history, rev))
     if (blob === undefined) continue
     if (lines.join('\n') !== blob) {
       fail(`${history.slug} @ ${rev.sha}: the shipped chain does not reproduce the file`)

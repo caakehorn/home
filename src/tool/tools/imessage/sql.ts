@@ -86,10 +86,20 @@ const SQL_DIGITS = (col: string) =>
   [`'+'`, `'-'`, `' '`, `'('`, `')'`, `'.'`, `' '`]
     .reduce((expr, ch) => `replace(${expr}, ${ch}, '')`, col)
 
-/** One target, as a predicate over a handle table alias. */
-function handleMatches(alias: string, target: Target): string {
+/**
+ * One target, as a predicate over a column holding a handle-ish string.
+ *
+ * `column` is `id` on the handle table and `chat_identifier` on the chat table.
+ * Both hold the same kind of value — a phone number or an email — written the
+ * same inconsistent ways, so they take the same matcher.
+ */
+function handleMatches(alias: string, target: Target, column = 'id'): string {
   const value = target.handle.trim()
-  if (isEmail(value)) return `lower(${alias}.id) = ${sq(value.toLowerCase())}`
+  const col = `${alias}.${column}`
+  // An email is matched by containment rather than equality: a group thread's
+  // chat_identifier is a semicolon-joined list of participants, and an exact
+  // comparison finds the one-to-one thread and none of the groups.
+  if (isEmail(value)) return `lower(${col}) LIKE ${sq(`%${value.toLowerCase()}%`)}`
 
   const tail = matchTail(value)
   // A target with no digits and no @ cannot match anything. Emitting `0` rather
@@ -97,11 +107,11 @@ function handleMatches(alias: string, target: Target): string {
   // targets, so a typo produces an empty export rather than silently widening
   // the query to everybody.
   if (!tail) return '0'
-  return `${SQL_DIGITS(`${alias}.id`)} LIKE ${sq(`%${tail}`)}`
+  return `${SQL_DIGITS(col)} LIKE ${sq(`%${tail}%`)}`
 }
 
-const anyTarget = (alias: string, targets: Target[]) =>
-  targets.map((t) => handleMatches(alias, t)).join(' OR ')
+const anyTarget = (alias: string, targets: Target[], column = 'id') =>
+  targets.map((t) => handleMatches(alias, t, column)).join(' OR ')
 
 /* ==========================================================================
    THE WINDOW
@@ -116,8 +126,15 @@ const anyTarget = (alias: string, targets: Target[]) =>
 function windowPredicate(range: Range, ts: string): string | null {
   if (range.kind === 'all') return null
   if (range.kind === 'relative') {
-    return `${ts} >= strftime('%s', 'now', ${sq(`-${range.n} ${range.unit}`)})`
+    // CAST is not decoration. `strftime` returns TEXT, and SQLite's type
+    // ordering puts every INTEGER before every TEXT value — so an unCAST
+    // `<number> >= strftime(...)` is not "sometimes wrong", it is ALWAYS
+    // FALSE, and every relative window comes back empty. It shipped that way
+    // once. See the note in `buildCount` about why the gate did not catch it.
+    return `${ts} >= CAST(strftime('%s', 'now', ${sq(`-${range.n} ${range.unit}`)}) AS INTEGER)`
   }
+  // Both sides are TEXT here — `date()` returns a 'YYYY-MM-DD' string and the
+  // bounds are strings — so this comparison is between like types and is sound.
   return `date(${ts}, 'unixepoch', 'localtime') BETWEEN ${sq(range.from)} AND ${sq(range.to)}`
 }
 
@@ -164,17 +181,44 @@ export function buildQuery(plan: QueryPlan, withBody: boolean): string {
       // The whole conversation: any chat this message is in that has the target
       // as a participant. This is what picks up group threads, and what a
       // reader asking for "my messages with X" almost always means.
-      // `hh` rather than `h`: the outer query already joins `handle h`, and
-      // while an inner `h` would correctly shadow it, this script is one the
+      // Three ways to the same person, OR-ed, because a database in the wild
+      // does not reliably offer all three.
+      //
+      //   1. chat.chat_identifier — the thread's own name. For a thread that
+      //      exists only against an Apple ID this is the email, and it is the
+      //      most dependable of the three: it is on the chat row itself and
+      //      needs no join table to be populated.
+      //   2. chat_handle_join -> handle.id — the participants. Right for
+      //      groups, and the only way to catch somebody in a thread named
+      //      after somebody else.
+      //   3. message.handle_id — the message's own other party, which catches
+      //      anything orphaned from its chat.
+      //
+      // Any one of them alone loses messages. (1) was missing in the first
+      // version, and an Apple-ID-only thread whose chat_handle_join row was
+      // absent came back empty.
+      //
+      // `hh`/`c2` rather than `h`/`c`: the outer query already joins both, and
+      // while the inner names would correctly shadow, this is a script the
       // reader is told to read before running. A predicate whose meaning turns
       // on a shadowing rule is one they cannot check.
-      where.push(`EXISTS (
-    SELECT 1
-      FROM chat_message_join j
-      JOIN chat_handle_join chj ON chj.chat_id = j.chat_id
-      JOIN handle hh ON hh.ROWID = chj.handle_id
-     WHERE j.message_id = m.ROWID
-       AND (${anyTarget('hh', plan.targets)})
+      where.push(`(
+    EXISTS (
+      SELECT 1
+        FROM chat_message_join j
+        JOIN chat c2 ON c2.ROWID = j.chat_id
+       WHERE j.message_id = m.ROWID
+         AND (${anyTarget('c2', plan.targets, 'chat_identifier')})
+    )
+    OR EXISTS (
+      SELECT 1
+        FROM chat_message_join j
+        JOIN chat_handle_join chj ON chj.chat_id = j.chat_id
+        JOIN handle hh ON hh.ROWID = chj.handle_id
+       WHERE j.message_id = m.ROWID
+         AND (${anyTarget('hh', plan.targets)})
+    )
+    OR (${predicate})
   )`)
     }
   }

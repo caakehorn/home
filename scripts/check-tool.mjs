@@ -42,6 +42,7 @@ import { execFileSync, spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { bundle } from './build-tool-entry.mjs'
+import { smoke } from './tool-smoke.mjs'
 
 const ROOT = process.cwd()
 const GOLDEN = join(ROOT, 'scripts', 'fixtures', 'tool')
@@ -114,13 +115,20 @@ const FIXTURES = [
     answers: {
       home: '$HOME',
       target: 'everyone',
-      window: 'rel:30:days',
+      window: 'rel:90:days',
       format: 'csv',
     },
-    // The fixture messages are all years old, so a 30-day window ending
-    // whenever this runs must return none of them — which is also what proves
-    // the window is resolved at run time rather than baked in.
-    expect: { rows: 0 },
+    // Chat 5 holds three messages dated 2, 5 and 10 days before the moment
+    // this runs; everything else in the fixture is years old. So a 90-day
+    // window must return exactly those three.
+    //
+    // This expectation used to be ZERO, and it passed, and the predicate was
+    // broken the whole time: `strftime` returns TEXT, SQLite orders every
+    // INTEGER before every TEXT, and so an unCAST `epoch >= strftime(...)` is
+    // ALWAYS FALSE. Every relative window came back empty and this check said
+    // green, because zero was also the right answer for the wrong reason.
+    // An expectation of nothing tests nothing.
+    expect: { rows: 3 },
   },
   {
     name: 'imessage-named-target',
@@ -139,11 +147,53 @@ const FIXTURES = [
     expect: { rows: 8, named: 'Annie Example' },
   },
   {
+    name: 'imessage-everyone-week',
+    tool: 'imessage',
+    why: 'A tighter window has to actually exclude — not just be non-empty.',
+    answers: { home: '$HOME', target: 'everyone', window: 'rel:7:days', format: 'csv' },
+    // Of the three recent messages, the one from ten days ago falls outside.
+    // A window that returned all three would be a window that is not filtering.
+    expect: { rows: 2 },
+  },
+  {
+    name: 'imessage-appleid-only-thread',
+    tool: 'imessage',
+    why: 'A thread that exists only against an Apple ID, with no participant rows.',
+    answers: {
+      home: '$HOME',
+      target: 'appleid',
+      handle: 'recent@example.com',
+      scope: 'conversation',
+      window: 'all',
+      format: 'csv',
+    },
+    // All three messages in chat 5 — including the one whose handle_id points
+    // nowhere, which is reachable ONLY through chat.chat_identifier.
+    expect: { rows: 3 },
+  },
+  {
+    name: 'imessage-appleid-only-handle-scope',
+    tool: 'imessage',
+    why: 'The same thread by handle alone, which cannot see the orphaned message.',
+    answers: {
+      home: '$HOME',
+      target: 'appleid',
+      handle: 'recent@example.com',
+      scope: 'handle',
+      window: 'all',
+      format: 'csv',
+    },
+    // Two, not three: this scope reads message.handle_id, and message 13 has
+    // none. The gap between this and the fixture above is exactly what the
+    // chat_identifier path adds.
+    expect: { rows: 2 },
+  },
+  {
     name: 'imessage-everyone-all-txt',
     tool: 'imessage',
     why: 'Every message, as a transcript. The widest query the tool can emit.',
     answers: { home: '$HOME', target: 'everyone', window: 'all', format: 'txt' },
-    expect: { rows: 10 },
+    expect: { rows: 13 },
   },
 ]
 
@@ -579,6 +629,16 @@ async function main() {
     }
   }
 
+  /* ---- 6. run three of them, whole ---------------------------------------
+     Everything above checks a PART of the deliverable, and all of it passed
+     while the tool was writing exports containing zero messages. The only
+     check that could not have missed that is the one that runs the command and
+     reads the file that lands, so that is what this does — a temporary HOME
+     with a Messages database under it, macOS's absolute paths shimmed, and the
+     emitted script executed exactly as a reader would paste it. See
+     scripts/tool-smoke.mjs for what is shimmed and what that costs. */
+  for (const lines of await smoke()) fail.push(lines)
+
   /* ---- report ----------------------------------------------------------- */
   if (fail.length) {
     console.error('')
@@ -594,6 +654,7 @@ async function main() {
   console.log('  attributedBody recovered exactly, including >127 bytes and emoji')
   console.log('  contacts parsed from Google CSV and vCard, quoting and folding included')
   console.log('  each script reconciles to its own row count, and bash parses it silently')
+  console.log('  and three commands ran whole, against a real database, and wrote real files')
 }
 
 main()

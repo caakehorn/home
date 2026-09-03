@@ -29,7 +29,7 @@
 import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { join, resolve } from 'node:path'
-import { applyOps, changesIn, splitSnapshot } from '../src/wiki/history.ts'
+import { applyOps, changesIn, snapshotAt, splitSnapshot } from '../src/wiki/history.ts'
 
 const SOURCE = resolve(process.argv[2] ?? process.env.WIKI_BRAIN ?? '../wiki-brain')
 const DIR = resolve('public/wiki/history')
@@ -119,6 +119,17 @@ for (const history of histories) {
           `the dataset says +${rev.added}/−${rev.removed}`,
       )
     }
+    // And the inversion, exactly rather than by its totals. The lines the panel
+    // paints green must rebuild this revision's text and nothing else; the ones
+    // it paints red must rebuild its predecessor's. A `changesIn` that inverted
+    // the wrong way agrees with every count above and fails here, which is the
+    // whole reason this is a separate assertion and not a tidier one.
+    const newer = snapshotAt(history, i)
+    const older = snapshotAt(history, i + 1)
+    const keptAdd = shown.filter((l) => l.kind !== 'del').map((l) => l.text).join('\n')
+    const keptDel = shown.filter((l) => l.kind !== 'add').map((l) => l.text).join('\n')
+    if (keptAdd !== newer) fail(`${history.slug} @ ${rev.sha}: the added side is not this revision`)
+    if (keptDel !== older) fail(`${history.slug} @ ${rev.sha}: the removed side is not its predecessor`)
     diffs++
   }
 }
@@ -181,43 +192,76 @@ for (const history of histories) {
   }
 }
 
-/* ---- the diff's direction, against git ------------------------------------
+/* ---- the lineage, against git ---------------------------------------------
  *
- * The check above proves the panel agrees with the dataset. This proves the
- * dataset agrees with git, on a sample rather than all 3,587 — `git diff` is a
- * process spawn each time, and the property being checked (that the inversion
- * is not backwards) is global: it cannot be wrong on one page and right on the
- * next. A stride rather than a random pick, so the sample is the same on every
- * run and a failure reproduces.
+ * The check above proves the panel agrees with the dataset and that its
+ * inversion runs the right way. Neither of them asks the question that actually
+ * broke on 2026-09-02: whether the version this dataset calls a revision's
+ * PREDECESSOR is the version that preceded it on `main`.
+ *
+ * It was not, for 197 of 3,087 revisions. The build walked `git log
+ * --no-merges` and treated the flat list as a lineage, so two branches that
+ * both touched a page were interleaved by date and the chain ran through
+ * versions that were never consecutive — a readable, plausible, wrong account
+ * of what a commit did, which is the one failure a reader cannot catch, because
+ * they came here precisely because they do not know what the page used to say.
+ *
+ * So this asks it directly, for every revision of every page rather than a
+ * sample: the blob at the revision's FIRST PARENT must be the snapshot the
+ * dataset ships as its predecessor. It replaced a `git show --numstat` sample
+ * that compared line counts, which could not be exact — git's diff and this
+ * build's Myers disagree by a line or two on 4% of revisions without either
+ * being wrong, and a check that has to be approximate is a check that gets
+ * loosened until it passes. This one is bytes, so it does not.
+ *
+ * A missing blob is skipped rather than failed: a page deleted and later
+ * recreated under the same name has a revision whose first parent genuinely
+ * does not hold it, and that gap is in git, not in the dataset.
  */
-let sampled = 0
-for (let f = 0; f < histories.length; f += 17) {
-  const history = histories[f]
-  if (history.head === null || history.revisions.length < 2) continue
-  const i = 0
-  const rev = history.revisions[i]
-  if (rev.renamedFrom || rev.path) continue
-  const shown = changesIn(history, i)
-  const numstat = git(
-    'show', '--format=', '--numstat', rev.sha, '--', `wiki/${history.slug}.md`,
-  ).trim().split('\t')
-  if (numstat.length < 2) continue
-  const [gitAdded, gitRemoved] = [Number(numstat[0]), Number(numstat[1])]
-  const added = shown.filter((l) => l.kind === 'add').length
-  const removed = shown.filter((l) => l.kind === 'del').length
-  if (added !== gitAdded || removed !== gitRemoved) {
+const lineage = []
+for (const history of histories) {
+  if (history.head === null) continue
+  for (let i = 0; i < history.revisions.length - 1; i++) {
+    const before = history.revisions[i + 1]
+    lineage.push({
+      history,
+      i,
+      spec: `${history.revisions[i].sha}^:wiki/${before.path ?? history.slug}.md`,
+    })
+  }
+}
+const parentBuf = execFileSync('git', ['-C', SOURCE, 'cat-file', '--batch'], {
+  input: lineage.map((l) => l.spec).join('\n'),
+  maxBuffer: 512 * 1024 * 1024,
+})
+let seat = 0
+let lineages = 0
+let ungrafted = 0
+for (const { history, i, spec } of lineage) {
+  const nl = parentBuf.indexOf(0x0a, seat)
+  const header = parentBuf.toString('utf8', seat, nl)
+  if (header.endsWith(' missing')) {
+    ungrafted++
+    seat = nl + 1
+    continue
+  }
+  const size = Number(header.split(' ')[2])
+  const blob = parentBuf.toString('utf8', nl + 1, nl + 1 + size)
+  seat = nl + 1 + size + 1
+  lineages++
+  if (snapshotAt(history, i + 1) !== blob) {
     fail(
-      `${history.slug} @ ${rev.sha}: git says +${gitAdded}/−${gitRemoved}, ` +
-        `this dataset says +${added}/−${removed}`,
+      `${history.slug} @ ${history.revisions[i].sha}: the version this dataset calls its ` +
+        `predecessor is not what ${spec} holds`,
     )
   }
-  sampled++
 }
 
 console.log(
   failures
     ? `check-history: ${failures} failure${failures === 1 ? '' : 's'}.`
     : `check-history: ${files.length} pages · ${revisions} snapshots reproduced · ` +
-      `${diffs} diffs agree · ${sampled} checked against git directly.`,
+      `${diffs} diffs agree and invert the right way · ${lineages} predecessors are the ` +
+      `first parent git holds${ungrafted ? ` · ${ungrafted} not in git at that path` : ''}.`,
 )
 process.exit(failures ? 1 : 0)

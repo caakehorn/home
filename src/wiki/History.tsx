@@ -111,6 +111,10 @@ export function History({ history, selected, onSelect, onClose }: Props) {
                       out, straight off the patch this page is built from. */}
                   {rev.added > 0 && <i className="hist__add">+{rev.added}</i>}
                   {rev.removed > 0 && <i className="hist__del">&minus;{rev.removed}</i>}
+                  {/* One row is one landing on main. Say when it carried more
+                      than one commit rather than letting the newest subject
+                      speak for the rest. */}
+                  {rev.commits && <i className="hist__folded">({rev.commits} commits)</i>}
                   <i className="hist__by">{rev.author}</i>
                 </span>
                 {rev.renamedFrom && (

@@ -190,6 +190,12 @@
   color: var(--n2);
 }
 
+/* Not a count of anything the reader can click through to — it says the row
+   stands for more work than its one subject line. Muted for that reason. */
+.hist__folded {
+  color: var(--n4);
+}
+
 .hist__by {
   margin-left: auto;
   overflow: hidden;

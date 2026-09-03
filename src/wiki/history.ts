@@ -31,6 +31,13 @@ export type Revision = {
   lines: number
   added: number
   removed: number
+  /**
+   * How many op-tagged commits this one landing on `main` folded in, when it
+   * was more than one. A revision is a state of `main`, so a pull request that
+   * ingested, then closed a gap, then linted arrives as one row: this says so
+   * rather than letting the row's single subject stand for all three.
+   */
+  commits?: number
   /** The oldest revision this history reaches. */
   created: boolean
   /** The slug this page had before this commit, if it was moved. */

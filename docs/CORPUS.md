@@ -52,7 +52,7 @@ strictness, it is whether the thing being asserted is still being written.
 
 ```
 public/wiki/          472 page JSONs + index + gaps + sage + lexicon + assets
-public/wiki/history/  473 per-page revision chains — every version ever, §1.5a
+public/wiki/history/  496 per-page revision chains — every version ever, §1.5a
 public/transcript/    index + 91 month files — 134,348 messages
 public/leviathan/     10 derived instrument datasets
 public/gallery/       manifest + 41 media files
@@ -339,7 +339,7 @@ and `raw/*` paths — a Q&A→page citation graph.
 **`lexicon.json`** (313 B) — a slang-capture queue with **1 entry**. Effectively
 empty; not worth reading.
 
-### 1.5a `history.json` + `history/*.json` — 473 files, 9.4 MB
+### 1.5a `history.json` + `history/*.json` — 496 files, 10.7 MB
 
 **The only dataset here with a time axis through the corpus itself.** Everything
 else in `public/wiki/` is the wiki as it stands; this is every version it has
@@ -357,7 +357,7 @@ only; it carries no page text.
 ```
 { slug, domain, title,
   revisions: [ { sha, date, author, subject, op, bytes, lines,
-                 added, removed, created, renamedFrom, path? } ],   // newest first
+                 added, removed, commits?, created, renamedFrom, path? } ], // newest first
   withheld: null,          // 'moratorium' if the text is deliberately absent
   head: "---\ntitle: …",   // the CURRENT file, verbatim
   patches: [ Ops, … ] }    // patches[i] turns revisions[i]'s text into revisions[i+1]'s
@@ -369,11 +369,25 @@ snapshot at revision *i* is `head` folded through `patches[0..i-1]`, and the
 drops from the newer text are the lines that revision added. `src/wiki/history.ts`
 has `applyOps`, `snapshotAt` and `changesIn`; use them rather than re-deriving.
 
-Shape as of 2026-09-01: **473 pages · 3,603 revisions · 499 commits**, spanning
-2026-07-11 to 2026-08-31. Median file 9 KB; `timeline__master-timeline.json` is
-1.1 MB and is the reason the panel fetches on open rather than on mount. Per-page
-distribution is long-tailed — `people/annie-ulmer` has 92 revisions, most pages
-have fewer than 10, 22 pages have more than 25. `op` is the `<op>:` prefix of the
+**A revision is a state of `main`, not a commit.** The chain walks the
+first-parent spine, so `sha` is the commit that landed the change on the default
+branch and its diff against `sha^` is exactly what this revision shows. `date`,
+`author` and `subject` come from the newest op-tagged commit that landing folded
+in — a merge's own subject says nothing — and `commits` says how many there were
+when it was more than one, absent otherwise. Before 2026-09-02 this walked
+`git log --no-merges` and treated the flat list as a lineage; two branches that
+touched the same page were interleaved by date, and 197 of 3,087 revisions
+carried a diff against a version that never preceded them. If you are tempted
+back to that walk, `npm run history:check` is what will stop you.
+
+Shape as of 2026-09-02: **496 pages · 3,229 revisions · 259 commits**, spanning
+2026-07-11 to 2026-09-02. (The revision count fell from 3,603 on 2026-09-01
+because the first-parent walk above collapses a branch's intermediate commits
+into the one landing that published them — states that existed in a working tree
+and never on this site.) Median file 10 KB; `timeline__master-timeline.json` is
+1.3 MB and is the reason the panel fetches on open rather than on mount. Per-page
+distribution is long-tailed — `people/annie-ulmer` has 70 revisions, 401 of 496
+pages have fewer than 10, 15 have more than 25. `op` is the `<op>:` prefix of the
 commit subject where there is one (`ingest`, `climb`, `close`, `answer`,
 `translate`, `constitution-pass`, …) and null otherwise.
 
@@ -399,9 +413,13 @@ Traps:
   will not resolve for those; use `rev.path ?? slug`.
 - `renamedFrom` marks the commit that did the move, `path` marks the revisions
   affected by it. They are not the same field and both are needed.
-- Every claim above is checked by `npm run history:check`, which folds all 3,603
-  chains through the client's own applier and compares them to git. If you change
-  the format, that is what tells you it broke.
+- Every claim above is checked by `npm run history:check`, which folds every
+  chain through the client's own applier and compares the result to the blob git
+  holds, proves the panel's diff inverts the right way, and proves each
+  revision's stored predecessor is the version at its first parent. It runs in
+  the wiki sync with the source checked out and again in the deploy without it,
+  doing the half that needs no git. If you change the format, that is what tells
+  you it broke.
 
 ### 1.6 `assets/` — 6 files, 654 KB
 

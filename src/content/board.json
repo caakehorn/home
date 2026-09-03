@@ -39,6 +39,7 @@
     }
   ],
   "walls": {
+    "door-left": "kiss-butterfly",
     "room:arcade": "centralpark",
     "room:blog": "bedkissrb",
     "room:brain": "makeoutbed",

@@ -61,6 +61,9 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       changed: ${{ steps.commit.outputs.changed }}
+      # The commit this run actually pushed. The deploy below builds THIS,
+      # not the SHA that fired the run — see deploy.yml's `ref` input.
+      sha: ${{ steps.commit.outputs.sha }}
     steps:
       - uses: actions/checkout@v4
 
@@ -213,6 +216,9 @@ jobs:
           for attempt in 1 2 3; do
             if git push; then
               echo 'changed=true' >> "$GITHUB_OUTPUT"
+              # The deploy builds this SHA rather than the one that fired the
+              # run, which is an ancestor of it and has no snapshot in it.
+              echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
               exit 0
             fi
             echo "::notice::push rejected (attempt $attempt) — main moved; planting this snapshot on it"
@@ -237,6 +243,8 @@ jobs:
     needs: sync
     if: needs.sync.outputs.changed == 'true'
     uses: ./.github/workflows/deploy.yml
+    with:
+      ref: ${{ needs.sync.outputs.sha }}
     permissions:
       contents: read
       pages: write

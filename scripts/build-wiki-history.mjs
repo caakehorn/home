@@ -127,30 +127,129 @@ const gitBuffer = (args, input) =>
 // ---------------------------------------------------------------------------
 // The log
 //
-// One pass over `wiki/`, with rename detection on, giving every commit that
-// touched a page and what it did to it. `--name-status -M` reports a rename as
-// `R<score>\told\tnew`, which is how a page keeps its history across a move —
-// `--follow` would be one invocation per page and cannot see two pages that
-// swapped names.
+// ---- why this walks the first-parent spine, and not every commit ----------
+//
+// This used to be one `git log --no-merges -- wiki/` pass, treating the flat
+// list it returns as a page's lineage. That is wrong whenever two branches
+// touched the same page and both were merged, which in this repository is
+// often: the flat list interleaves them by date, so the chain it built ran
+// through two versions that were never one after the other, and the diff drawn
+// beside a commit was the diff against a version that commit never saw.
+//
+// It was not a small effect. On 2026-09-02, 197 of 3,087 shipped revisions
+// across 105 of 491 pages carried a diff that misattributed what the commit
+// did — `close: ally-and-dan-love-as-destiny` was drawn as +1/-1 where git says
+// that commit added 17 lines and removed 2. The panel's whole claim is that it
+// attributes the right lines to the right revision, so this is the one bug in
+// it that matters, and it is what `npm run history:check` caught.
+//
+// The fix is to publish the history of `main`, which is the only linear history
+// there is: each first-parent step is a state the site actually served, and its
+// diff against the previous step is exactly what changed when it landed. A
+// merge commit's subject is "Merge pull request #245 from ...", which says
+// nothing, so each step is LABELLED from the op-tagged commits it brought in —
+// the newest one that touched this page, plus a count when there was more than
+// one. The revision is main's; the words are the author's.
+//
+// What this deliberately gives up: the intermediate states inside a branch. A
+// PR that ingested, then closed a gap, then linted is one revision here rather
+// than three. Those states existed in somebody's working tree and never on the
+// site, and a history view of a published wiki should show what was published.
+//
+// `--name-status -M` reports a rename as `R<score>\told\tnew`, which is how a
+// page keeps its history across a move — `--follow` would be one invocation per
+// page and cannot see two pages that swapped names.
 
 /**
- * @returns {{ commits: Map<string, {sha,date,author,subject}>, touched: Map<string, {sha,status,from}[]> }}
- *   `touched` is keyed by the page's CURRENT path and ordered newest first.
+ * @returns {{ commitCount: number, touched: Map<string, object[]> }}
+ *   `touched` is keyed by the page's CURRENT path, ordered newest first, and
+ *   each entry carries its label already resolved.
  */
 function readLog() {
   const SEP = ''
-  const raw = git(
-    'log',
-    '--no-merges',
-    '--name-status',
-    '-M',
-    `--format=@@${['%H', '%aI', '%an', '%s'].join(SEP)}`,
-    '--',
-    'wiki/',
-  )
 
-  const commits = new Map()
-  /** current path -> [{ sha, status, path, from }], newest first */
+  /* The commit graph, and the first-parent spine through it. */
+  const lines = git('rev-list', '--parents', 'HEAD').trim().split('\n')
+  const parents = new Map()
+  for (const line of lines) {
+    const [sha, ...ps] = line.split(' ')
+    parents.set(sha, ps)
+  }
+  const spine = []
+  for (let s = lines[0].split(' ')[0]; s; s = parents.get(s)?.[0]) spine.push(s)
+  const stepOf = new Map(spine.map((s, i) => [s, i]))
+
+  /**
+   * Which spine step first put each commit on this branch.
+   *
+   * Walked oldest step first, so when the walk from step i reaches step i + 1 —
+   * its own first parent — that commit is already claimed and the walk stops
+   * there. What is left unclaimed below step i is exactly what step i merged in.
+   */
+  const owner = new Map()
+  for (let i = spine.length - 1; i >= 0; i--) {
+    const stack = [spine[i]]
+    while (stack.length) {
+      const s = stack.pop()
+      if (owner.has(s)) continue
+      owner.set(s, i)
+      for (const p of parents.get(s) ?? []) if (!owner.has(p)) stack.push(p)
+    }
+  }
+
+  /** One `git log` pass over `wiki/`, as commits with the paths they touched. */
+  const pass = (...args) => {
+    const raw = git(
+      'log',
+      `--format=@@${['%H', '%aI', '%an', '%s'].join(SEP)}`,
+      '--name-status',
+      '-M',
+      ...args,
+      '--',
+      'wiki/',
+    )
+    const out = []
+    let current = null
+    for (const line of raw.split('\n')) {
+      if (line.startsWith('@@')) {
+        const [sha, date, author, subject] = line.slice(2).split(SEP)
+        current = { sha, date, author, subject, files: [] }
+        out.push(current)
+        continue
+      }
+      if (!line.trim() || !current) continue
+      const [status, a, b] = line.split('\t')
+      const code = status[0]
+      const path = code === 'R' ? b : a
+      if (!path?.startsWith('wiki/') || !path.endsWith('.md')) continue
+      current.files.push({ code, path, from: code === 'R' ? a : null })
+    }
+    return out
+  }
+
+  // The chain: every state of `main`, each diffed against the one before it.
+  // `--first-parent` is what makes `--name-status` on a merge mean "what this
+  // merge changed on main" rather than nothing at all.
+  const mainline = pass('--first-parent')
+  // The labels: the op-tagged commits, wherever they were written.
+  const authored = pass('--no-merges')
+
+  /** step -> path -> { commit, n } — the newest authoring commit, and how many. */
+  const credit = new Map()
+  for (const commit of authored) {
+    const i = owner.get(commit.sha)
+    if (i === undefined) continue
+    let byPath = credit.get(i)
+    if (!byPath) credit.set(i, (byPath = new Map()))
+    for (const file of commit.files) {
+      const seen = byPath.get(file.path)
+      // `authored` is newest first, so the first one seen is the one to show.
+      if (seen) seen.n++
+      else byPath.set(file.path, { commit, n: 1 })
+    }
+  }
+
+  /** current path -> [{ sha, status, path, from, date, author, subject, folded }] */
   const touched = new Map()
   /**
    * Walking newest-first, `alias` maps the name a page had at the commit being
@@ -160,31 +259,36 @@ function readLog() {
    */
   const alias = new Map()
   const today = (path) => alias.get(path) ?? path
+  const moved = new Set()
 
-  let sha = null
-  for (const line of raw.split('\n')) {
-    if (line.startsWith('@@')) {
-      const [id, date, author, subject] = line.slice(2).split(SEP)
-      sha = id
-      commits.set(sha, { sha, date, author, subject })
-      continue
+  for (const commit of mainline) {
+    const byPath = credit.get(stepOf.get(commit.sha))
+    for (const file of commit.files) {
+      const current = today(file.path)
+      // The merge brought the work in; the commit inside it did the work and
+      // said what it was. Fall back to the merge's own subject when nothing it
+      // merged touched this page — a conflict resolved in the merge itself.
+      const credited = byPath?.get(file.path) ?? (file.from ? byPath?.get(file.from) : undefined)
+      const label = credited?.commit ?? commit
+      if (!touched.has(current)) touched.set(current, [])
+      touched.get(current).push({
+        sha: commit.sha,
+        status: file.code,
+        path: file.path,
+        from: file.from,
+        date: label.date,
+        author: label.author,
+        subject: label.subject,
+        folded: credited?.n ?? 1,
+      })
+      moved.add(commit.sha)
+
+      // Older commits know this page by its old name.
+      if (file.code === 'R' && file.from?.endsWith('.md')) alias.set(file.from, current)
     }
-    if (!line.trim() || !sha) continue
-
-    const [status, a, b] = line.split('\t')
-    const code = status[0]
-    const path = code === 'R' ? b : a
-    if (!path?.startsWith('wiki/') || !path.endsWith('.md')) continue
-
-    const current = today(path)
-    if (!touched.has(current)) touched.set(current, [])
-    touched.get(current).push({ sha, status: code, path, from: code === 'R' ? a : null })
-
-    // Older commits know this page by its old name.
-    if (code === 'R' && a.endsWith('.md')) alias.set(a, current)
   }
 
-  return { commits, touched }
+  return { commitCount: moved.size, touched }
 }
 
 // ---------------------------------------------------------------------------
@@ -373,7 +477,7 @@ const index = JSON.parse(readFileSync(join(OUT, 'index.json'), 'utf8'))
 const sealed = new Set(index.pages.filter((p) => p.locked).map((p) => p.slug))
 for (const slug of readManifest().locked) sealed.add(slug)
 
-const { commits, touched } = readLog()
+const { commitCount, touched } = readLog()
 
 // Every blob this build needs, in one batch. 3,487 lazy reads is four minutes;
 // one batch is four seconds.
@@ -410,8 +514,8 @@ for (const entry of index.pages) {
       domain: entry.domain,
       sealed: true,
       revisions: revs.length,
-      created: commits.get(revs[revs.length - 1].sha).date,
-      updated: commits.get(revs[0].sha).date,
+      created: revs[revs.length - 1].date,
+      updated: revs[0].date,
     })
     continue
   }
@@ -423,19 +527,21 @@ for (const entry of index.pages) {
   }
 
   const revisions = revs.map((rev, i) => {
-    const meta = commits.get(rev.sha)
     const previous = texts[i + 1]
     const [added, removed] = previous === undefined
       ? [texts[i].split('\n').length, 0]
       : countChanges(previous, texts[i])
     return {
       sha: rev.sha.slice(0, 10),
-      date: meta.date,
-      author: meta.author,
-      subject: meta.subject,
+      date: rev.date,
+      author: rev.author,
+      subject: rev.subject,
       // The operation, when the commit message follows the convention
       // CLAUDE.md sets: `<op>: <short description>`.
-      op: /^([a-z-]+)(\([^)]*\))?:/.exec(meta.subject)?.[1] ?? null,
+      op: /^([a-z-]+)(\([^)]*\))?:/.exec(rev.subject)?.[1] ?? null,
+      // How many op commits this one mainline step folded in, when it was more
+      // than one. Absent on the ordinary revision, which is exactly one.
+      commits: rev.folded > 1 ? rev.folded : undefined,
       bytes: Buffer.byteLength(texts[i]),
       lines: texts[i].split('\n').length,
       added,
@@ -588,7 +694,7 @@ writeFileSync(
     counts: {
       pages: summary.length,
       revisions: revisionCount,
-      commits: commits.size,
+      commits: commitCount,
       sealed: summary.filter((p) => p.sealed).length,
       withheld: held,
     },

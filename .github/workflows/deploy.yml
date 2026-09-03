@@ -6,7 +6,29 @@ on:
   workflow_dispatch:
   # Callable, so the wiki sync can deploy what it just committed — a push made
   # with GITHUB_TOKEN never triggers a workflow of its own.
+  #
+  # `ref` is what makes that sentence true, and it was missing until
+  # 2026-09-03. A called workflow runs at the CALLER's commit: `github.sha` is
+  # the SHA that fired the caller, not whatever the caller has pushed since. So
+  # the sync job would derive the snapshot, commit it, call this — and this
+  # would check out the commit from BEFORE the snapshot and publish that. The
+  # site was only ever brought up to date by the next unrelated push to main,
+  # which is why it could sit a day behind while every workflow showed green.
+  #
+  # On 2026-09-03 the run that proved it: sync committed db6f891 (snapshot
+  # generated 00:24:53) at 00:25:02, this deploy checked out its caller's
+  # 1ff5807 at 00:25:11, and the site served 04:46:56 — the previous day's
+  # snapshot — from a deploy that reported success.
+  #
+  # Empty (the default) keeps the old behaviour for `push`, `workflow_dispatch`
+  # and `repository_dispatch`, where the event's own SHA is the right thing.
   workflow_call:
+    inputs:
+      ref:
+        description: 'Commit or branch to build. Empty means the event SHA.'
+        type: string
+        required: false
+        default: ''
   # `src/blog/publish-blog.ts` has fired this at the repository since the blog
   # editor shipped, and nothing listened: the handler was never written. It was
   # harmless only by luck — the contents-API commit that precedes it is made
@@ -37,7 +59,12 @@ jobs:
     env:
       HOME_PASSPHRASE: ${{ secrets.HOME_PASSPHRASE }}
     steps:
+      # `inputs.ref` is empty on every trigger but `workflow_call`, and an empty
+      # `ref` is exactly checkout's default — so this is a no-op everywhere
+      # except the sync, which passes the snapshot commit it just pushed.
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
 
       - uses: actions/setup-node@v4
         with:

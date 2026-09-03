@@ -16,10 +16,10 @@
  *      `changesIn` inverts a reverse patch to say what a commit ADDED, and an
  *      inversion that is backwards renders a plausible, readable, exactly wrong
  *      account of what changed. Checked against the dataset's own counts for
- *      every revision of every page, and against `git show --numstat` on a
- *      sample — the sample is enough for that one because the property is
- *      global: an inversion cannot be backwards on one page and right on the
- *      next.
+ *      every revision of every page, and then against the git blobs themselves:
+ *      the lines the panel would NOT strike through must reconstruct the newer
+ *      file exactly, and the lines it would not mark as added must reconstruct
+ *      the older one. A backwards inversion swaps the two and fails both.
  *
  * Runs twice, deliberately. In the wiki sync, where the source repository is
  * checked out, it does all of it. In the deploy, where it is not, it does the
@@ -131,8 +131,8 @@ if (!existsSync(join(SOURCE, 'wiki'))) {
   process.exit(failures ? 1 : 0)
 }
 
-const git = (...args) =>
-  execFileSync('git', ['-C', SOURCE, ...args], { encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 })
+/** Where git keeps the text of one revision — the path it had at that commit. */
+const blobKey = (history, rev) => `${rev.sha}:wiki/${rev.path ?? history.slug}.md`
 
 /* ---- 1. every snapshot against the blob git holds --------------------------
  *
@@ -144,7 +144,7 @@ const git = (...args) =>
 const specs = []
 for (const history of histories) {
   if (history.head === null) continue
-  for (const rev of history.revisions) specs.push(`${rev.sha}:wiki/${rev.path ?? history.slug}.md`)
+  for (const rev of history.revisions) specs.push(blobKey(history, rev))
 }
 const buf = execFileSync('git', ['-C', SOURCE, 'cat-file', '--batch'], {
   input: specs.join('\n'),
@@ -172,7 +172,7 @@ for (const history of histories) {
   for (const [i, rev] of history.revisions.entries()) {
     if (i > 0) lines = applyOps(lines, history.patches[i - 1])
     revisions++
-    const blob = blobs.get(`${rev.sha}:wiki/${rev.path ?? history.slug}.md`)
+    const blob = blobs.get(blobKey(history, rev))
     if (blob === undefined) continue
     if (lines.join('\n') !== blob) {
       fail(`${history.slug} @ ${rev.sha}: the shipped chain does not reproduce the file`)
@@ -184,40 +184,72 @@ for (const history of histories) {
 /* ---- the diff's direction, against git ------------------------------------
  *
  * The check above proves the panel agrees with the dataset. This proves the
- * dataset agrees with git, on a sample rather than all 3,587 — `git diff` is a
- * process spawn each time, and the property being checked (that the inversion
- * is not backwards) is global: it cannot be wrong on one page and right on the
- * next. A stride rather than a random pick, so the sample is the same on every
- * run and a failure reproduces.
+ * dataset agrees with GIT, and it asks the question in the only form that has
+ * a single right answer: strip the strike-through lines from what the panel
+ * would draw and you must be left with the newer file, exactly; strip the
+ * added ones and you must be left with the older file, exactly. A backwards
+ * inversion swaps the two and fails both halves at once.
+ *
+ * It used to ask a weaker question — did `git show --numstat` report the same
+ * +added/−removed as the dataset, on a stride sample of pages — and that
+ * question has two wrong answers built into it, both of which went red on
+ * 2026-09-02 and stopped the portal syncing for a day:
+ *
+ *   - `git show <sha>` diffs a commit against its PARENT. The dataset's
+ *     previous revision is the previous commit that touched the PAGE, and in a
+ *     branchy history those are not the same commit. Worse, a single-file
+ *     `git log -- <path>` prunes commits by history simplification that a
+ *     whole-directory `git log -- wiki/` keeps, so the dataset legitimately
+ *     holds revisions the naive comparison cannot see at all. That is the
+ *     `self/concepts/ally-and-dan-love-as-destiny` case: git said +17/−2
+ *     against the parent, the dataset said +1/−1 against the real previous
+ *     revision, and the dataset was right.
+ *   - Line counts are not a diff invariant. Two minimal edit scripts can
+ *     align the same pair of files differently and both be correct — git's
+ *     alignment and this build's Myers differed by 15 lines on each side of
+ *     `work/tech/max-framework/overview`, and by one line on two others. Both
+ *     reproduce the file byte for byte, which is the property that matters.
+ *
+ * So the counts are gone and the reconstruction is checked instead. It is
+ * exact rather than sampled — every revision of every page, not one in
+ * seventeen — and it costs nothing extra, because the blobs are already in
+ * memory from the check above and it spawns no git at all.
  */
-let sampled = 0
-for (let f = 0; f < histories.length; f += 17) {
-  const history = histories[f]
-  if (history.head === null || history.revisions.length < 2) continue
-  const i = 0
-  const rev = history.revisions[i]
-  if (rev.renamedFrom || rev.path) continue
-  const shown = changesIn(history, i)
-  const numstat = git(
-    'show', '--format=', '--numstat', rev.sha, '--', `wiki/${history.slug}.md`,
-  ).trim().split('\t')
-  if (numstat.length < 2) continue
-  const [gitAdded, gitRemoved] = [Number(numstat[0]), Number(numstat[1])]
-  const added = shown.filter((l) => l.kind === 'add').length
-  const removed = shown.filter((l) => l.kind === 'del').length
-  if (added !== gitAdded || removed !== gitRemoved) {
-    fail(
-      `${history.slug} @ ${rev.sha}: git says +${gitAdded}/−${gitRemoved}, ` +
-        `this dataset says +${added}/−${removed}`,
-    )
+let directions = 0
+for (const history of histories) {
+  if (history.head === null) continue
+  for (let i = 0; i < history.revisions.length - 1; i++) {
+    const rev = history.revisions[i]
+    const shown = changesIn(history, i)
+    if (!shown) continue
+    const newerBlob = blobs.get(blobKey(history, rev))
+    const olderBlob = blobs.get(blobKey(history, history.revisions[i + 1]))
+    if (newerBlob === undefined || olderBlob === undefined) continue
+    const newer = shown.filter((l) => l.kind !== 'del').map((l) => l.text).join('\n')
+    const older = shown.filter((l) => l.kind !== 'add').map((l) => l.text).join('\n')
+    // Correctness first, and only then the diagnosis. A commit that touched the
+    // page without changing a byte — a rename, or content restored to what it
+    // already was — leaves the two blobs identical, and every one of the tests
+    // below is then true at once. Asking "is it inverted" before "is it right"
+    // reported seventeen such revisions as swapped when they were fine.
+    if (newer === newerBlob && older === olderBlob) {
+      directions++
+      continue
+    }
+    if (newer === olderBlob && older === newerBlob) {
+      fail(`${history.slug} @ ${rev.sha}: the diff is inverted — adds and deletes are swapped`)
+    } else if (newer !== newerBlob) {
+      fail(`${history.slug} @ ${rev.sha}: the lines drawn as kept and added are not this revision`)
+    } else if (older !== olderBlob) {
+      fail(`${history.slug} @ ${rev.sha}: the lines drawn as kept and removed are not the previous revision`)
+    }
   }
-  sampled++
 }
 
 console.log(
   failures
     ? `check-history: ${failures} failure${failures === 1 ? '' : 's'}.`
     : `check-history: ${files.length} pages · ${revisions} snapshots reproduced · ` +
-      `${diffs} diffs agree · ${sampled} checked against git directly.`,
+      `${diffs} diffs agree · ${directions} checked against git directly.`,
 )
 process.exit(failures ? 1 : 0)

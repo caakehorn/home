@@ -20,6 +20,17 @@ Small, and every row is there to catch something specific:
   * A message in TWO chats, because the join multiplies rows and a duplicated
     export looks exactly like a correct one.
   * A message with TWO attachments, for the same reason.
+  * RECENT messages, dated against the wall clock at fixture time. Without
+    them every relative-window fixture expects zero rows, and an expectation of
+    zero cannot tell "correctly filtered everything out" from "the predicate is
+    always false". That is not hypothetical: `strftime` returns TEXT and SQLite
+    orders every INTEGER before every TEXT, so an unCAST `epoch >= strftime(..)`
+    is always FALSE — and this gate passed it, green, because the only fixture
+    that exercised it expected nothing back.
+  * An APPLE-ID-ONLY THREAD (chat 5) with no chat_handle_join row at all, and
+    one message in it whose handle_id points nowhere. It is reachable only
+    through chat.chat_identifier. A scope predicate that goes solely through
+    the participants table returns nothing for it.
   * Three messages with a NULL text column and the words in attributedBody:
     one short and ASCII, one over 127 bytes, and one with an emoji. The last
     two are the ones that catch a length prefix read at the wrong byte width —
@@ -35,6 +46,7 @@ import os
 import sqlite3
 import sys
 import tempfile
+import time
 
 os.environ['TZ'] = 'UTC'
 
@@ -49,6 +61,17 @@ def ns(unix_seconds):
 def secs(unix_seconds):
     """A pre-High-Sierra Apple-epoch timestamp: seconds since 2001-01-01."""
     return unix_seconds - APPLE
+
+
+# Dated against the wall clock on purpose: a relative window is resolved by
+# sqlite at run time, so the only way to test one is with rows that are
+# genuinely recent right now.
+NOW = int(time.time())
+DAY = 86400
+
+
+def days_ago(n):
+    return ns(NOW - n * DAY)
 
 
 def attributed(text):
@@ -91,6 +114,13 @@ MESSAGES = [
     (9, 1, [1], 1, ns(1659312000), None, attributed(EMOJI)),           # 2022-08-01
     # In two chats at once. One row out, not two.
     (10, 1, [1, 2], 0, ns(1661990400), 'in two chats', None),          # 2022-09-01
+    # Chat 5: the Apple-ID-only thread, and recent, so it exercises both the
+    # chat_identifier path and every relative window at once.
+    (11, 5, [5], 0, days_ago(2), 'two days ago', None),
+    (12, 5, [5], 1, days_ago(10), 'ten days ago', None),
+    # handle_id 0 — orphaned from any handle row. Only chat.chat_identifier can
+    # find this one.
+    (13, 0, [5], 0, days_ago(5), 'five days ago, no handle', None),
 ]
 
 HANDLES = [
@@ -98,14 +128,20 @@ HANDLES = [
     (2, '5550104477', 'SMS'),
     (3, 'someone@icloud.com', 'iMessage'),
     (4, '+447700900123', 'iMessage'),
+    (5, 'recent@example.com', 'iMessage'),
 ]
 
 CHATS = [
     (1, '+15550104477', '', 45, 'iMessage'),
     (2, 'chat909090', 'THE GROUP', 43, 'iMessage'),
     (4, '+447700900123', '', 45, 'iMessage'),
+    # An Apple ID thread, and deliberately NOT in CHAT_HANDLES below.
+    (5, 'recent@example.com', '', 45, 'iMessage'),
 ]
 
+# Note chat 5 is absent. Real databases have threads whose participant rows
+# never got written, and a scope predicate that only reads this table loses
+# every message in them.
 CHAT_HANDLES = [(1, 1), (1, 2), (2, 1), (2, 3), (4, 4)]
 
 ATTACHMENTS = [(1, 'IMG_0001.HEIC', 'image/heic'), (2, 'note.pdf', 'application/pdf')]
@@ -200,6 +236,16 @@ def decode_run(work, db, sql_path, py_path):
 
 
 def main():
+    # `--write <path>` builds the fixture database somewhere durable, for the
+    # end-to-end smoke test to point a generated command at.
+    if sys.argv[1:2] == ['--write']:
+        target = sys.argv[2]
+        if os.path.exists(target):
+            os.remove(target)
+        make(target).close()
+        print(target)
+        return
+
     with tempfile.TemporaryDirectory() as work:
         db = make(os.path.join(work, 'chat.db'))
         if sys.argv[1:2] == ['--decode']:

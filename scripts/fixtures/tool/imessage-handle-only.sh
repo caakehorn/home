@@ -127,7 +127,7 @@ LEFT JOIN handle h ON h.ROWID = m.handle_id
 LEFT JOIN chat c ON c.ROWID = (
   SELECT min(j2.chat_id) FROM chat_message_join j2 WHERE j2.message_id = m.ROWID
 )
-WHERE (replace(replace(replace(replace(replace(replace(replace(h.id, '+', ''), '-', ''), ' ', ''), '(', ''), ')', ''), '.', ''), ' ', '') LIKE '%5550104477')
+WHERE (replace(replace(replace(replace(replace(replace(replace(h.id, '+', ''), '-', ''), ' ', ''), '(', ''), ')', ''), '.', ''), ' ', '') LIKE '%5550104477%')
 ORDER BY sent_epoch ASC, m.ROWID ASC;
 SQL_HEX
 
@@ -313,7 +313,7 @@ LEFT JOIN handle h ON h.ROWID = m.handle_id
 LEFT JOIN chat c ON c.ROWID = (
   SELECT min(j2.chat_id) FROM chat_message_join j2 WHERE j2.message_id = m.ROWID
 )
-WHERE (replace(replace(replace(replace(replace(replace(replace(h.id, '+', ''), '-', ''), ' ', ''), '(', ''), ')', ''), '.', ''), ' ', '') LIKE '%5550104477')
+WHERE (replace(replace(replace(replace(replace(replace(replace(h.id, '+', ''), '-', ''), ' ', ''), '(', ''), ')', ''), '.', ''), ' ', '') LIKE '%5550104477%')
 ORDER BY sent_epoch ASC, m.ROWID ASC;
 SQL_PLAIN
 fi
@@ -332,7 +332,7 @@ LEFT JOIN handle h ON h.ROWID = m.handle_id
 LEFT JOIN chat c ON c.ROWID = (
   SELECT min(j2.chat_id) FROM chat_message_join j2 WHERE j2.message_id = m.ROWID
 )
-WHERE (replace(replace(replace(replace(replace(replace(replace(h.id, '+', ''), '-', ''), ' ', ''), '(', ''), ')', ''), '.', ''), ' ', '') LIKE '%5550104477'));
+WHERE (replace(replace(replace(replace(replace(replace(replace(h.id, '+', ''), '-', ''), ' ', ''), '(', ''), ')', ''), '.', ''), ' ', '') LIKE '%5550104477%'));
 SQL_COUNT
 )"
 

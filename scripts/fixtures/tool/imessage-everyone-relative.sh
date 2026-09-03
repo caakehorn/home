@@ -127,7 +127,7 @@ LEFT JOIN handle h ON h.ROWID = m.handle_id
 LEFT JOIN chat c ON c.ROWID = (
   SELECT min(j2.chat_id) FROM chat_message_join j2 WHERE j2.message_id = m.ROWID
 )
-WHERE (CASE WHEN m.date > 1000000000000 THEN m.date / 1000000000 ELSE m.date END + 978307200) >= strftime('%s', 'now', '-30 days')
+WHERE (CASE WHEN m.date > 1000000000000 THEN m.date / 1000000000 ELSE m.date END + 978307200) >= CAST(strftime('%s', 'now', '-90 days') AS INTEGER)
 ORDER BY sent_epoch ASC, m.ROWID ASC;
 SQL_HEX
 
@@ -313,7 +313,7 @@ LEFT JOIN handle h ON h.ROWID = m.handle_id
 LEFT JOIN chat c ON c.ROWID = (
   SELECT min(j2.chat_id) FROM chat_message_join j2 WHERE j2.message_id = m.ROWID
 )
-WHERE (CASE WHEN m.date > 1000000000000 THEN m.date / 1000000000 ELSE m.date END + 978307200) >= strftime('%s', 'now', '-30 days')
+WHERE (CASE WHEN m.date > 1000000000000 THEN m.date / 1000000000 ELSE m.date END + 978307200) >= CAST(strftime('%s', 'now', '-90 days') AS INTEGER)
 ORDER BY sent_epoch ASC, m.ROWID ASC;
 SQL_PLAIN
 fi
@@ -332,7 +332,7 @@ LEFT JOIN handle h ON h.ROWID = m.handle_id
 LEFT JOIN chat c ON c.ROWID = (
   SELECT min(j2.chat_id) FROM chat_message_join j2 WHERE j2.message_id = m.ROWID
 )
-WHERE (CASE WHEN m.date > 1000000000000 THEN m.date / 1000000000 ELSE m.date END + 978307200) >= strftime('%s', 'now', '-30 days'));
+WHERE (CASE WHEN m.date > 1000000000000 THEN m.date / 1000000000 ELSE m.date END + 978307200) >= CAST(strftime('%s', 'now', '-90 days') AS INTEGER));
 SQL_COUNT
 )"
 
@@ -361,7 +361,7 @@ fi
   say "messages       $WROTE"
   say "who            everybody in the database"
   say "scope          whole conversations, including group threads"
-  say "window         the last 30 days"
+  say "window         the last 90 days"
   say "text recovery  $RECOVERY"
   say ""
   say "Timestamps are this Mac's local time. sent_epoch is seconds since 1970."

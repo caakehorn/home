@@ -11,8 +11,8 @@ HOME_DIR="$HOME"
 DB="$HOME_DIR/Library/Messages/chat.db"
 DESK="$HOME_DIR/Desktop"
 STAMP="$(date +%Y%m%d-%H%M%S)"
-OUT="$DESK/imessage-annie-example-$STAMP.csv"
-MANIFEST="$DESK/imessage-annie-example-$STAMP.manifest.txt"
+OUT="$DESK/imessage-recent-example-com-$STAMP.csv"
+MANIFEST="$DESK/imessage-recent-example-com-$STAMP.manifest.txt"
 
 say() { printf '%s\n' "$*"; }
 
@@ -91,10 +91,7 @@ SELECT
   (CASE WHEN m.date > 1000000000000 THEN m.date / 1000000000 ELSE m.date END + 978307200) AS sent_epoch,
   CASE m.is_from_me WHEN 1 THEN 'SENT' ELSE 'RECEIVED' END AS direction,
   COALESCE(h.id, '') AS counterparty,
-  CASE
-    WHEN replace(replace(replace(replace(replace(replace(replace(h.id, '+', ''), '-', ''), ' ', ''), '(', ''), ')', ''), '.', ''), ' ', '') LIKE '%5550104477%' THEN 'Annie Example'
-    ELSE ''
-  END AS contact_name,
+  '' AS contact_name,
   COALESCE(h.service, m.service, '') AS service,
   COALESCE(c.chat_identifier, '') AS chat_id,
   COALESCE(c.display_name, '') AS chat_name,
@@ -130,7 +127,24 @@ LEFT JOIN handle h ON h.ROWID = m.handle_id
 LEFT JOIN chat c ON c.ROWID = (
   SELECT min(j2.chat_id) FROM chat_message_join j2 WHERE j2.message_id = m.ROWID
 )
-WHERE (replace(replace(replace(replace(replace(replace(replace(h.id, '+', ''), '-', ''), ' ', ''), '(', ''), ')', ''), '.', ''), ' ', '') LIKE '%5550104477%')
+WHERE (
+    EXISTS (
+      SELECT 1
+        FROM chat_message_join j
+        JOIN chat c2 ON c2.ROWID = j.chat_id
+       WHERE j.message_id = m.ROWID
+         AND (lower(c2.chat_identifier) LIKE '%recent@example.com%')
+    )
+    OR EXISTS (
+      SELECT 1
+        FROM chat_message_join j
+        JOIN chat_handle_join chj ON chj.chat_id = j.chat_id
+        JOIN handle hh ON hh.ROWID = chj.handle_id
+       WHERE j.message_id = m.ROWID
+         AND (lower(hh.id) LIKE '%recent@example.com%')
+    )
+    OR (lower(h.id) LIKE '%recent@example.com%')
+  )
 ORDER BY sent_epoch ASC, m.ROWID ASC;
 SQL_HEX
 
@@ -265,10 +279,7 @@ SELECT
   (CASE WHEN m.date > 1000000000000 THEN m.date / 1000000000 ELSE m.date END + 978307200) AS sent_epoch,
   CASE m.is_from_me WHEN 1 THEN 'SENT' ELSE 'RECEIVED' END AS direction,
   COALESCE(h.id, '') AS counterparty,
-  CASE
-    WHEN replace(replace(replace(replace(replace(replace(replace(h.id, '+', ''), '-', ''), ' ', ''), '(', ''), ')', ''), '.', ''), ' ', '') LIKE '%5550104477%' THEN 'Annie Example'
-    ELSE ''
-  END AS contact_name,
+  '' AS contact_name,
   COALESCE(h.service, m.service, '') AS service,
   COALESCE(c.chat_identifier, '') AS chat_id,
   COALESCE(c.display_name, '') AS chat_name,
@@ -319,7 +330,24 @@ LEFT JOIN handle h ON h.ROWID = m.handle_id
 LEFT JOIN chat c ON c.ROWID = (
   SELECT min(j2.chat_id) FROM chat_message_join j2 WHERE j2.message_id = m.ROWID
 )
-WHERE (replace(replace(replace(replace(replace(replace(replace(h.id, '+', ''), '-', ''), ' ', ''), '(', ''), ')', ''), '.', ''), ' ', '') LIKE '%5550104477%')
+WHERE (
+    EXISTS (
+      SELECT 1
+        FROM chat_message_join j
+        JOIN chat c2 ON c2.ROWID = j.chat_id
+       WHERE j.message_id = m.ROWID
+         AND (lower(c2.chat_identifier) LIKE '%recent@example.com%')
+    )
+    OR EXISTS (
+      SELECT 1
+        FROM chat_message_join j
+        JOIN chat_handle_join chj ON chj.chat_id = j.chat_id
+        JOIN handle hh ON hh.ROWID = chj.handle_id
+       WHERE j.message_id = m.ROWID
+         AND (lower(hh.id) LIKE '%recent@example.com%')
+    )
+    OR (lower(h.id) LIKE '%recent@example.com%')
+  )
 ORDER BY sent_epoch ASC, m.ROWID ASC;
 SQL_PLAIN
 fi
@@ -338,7 +366,24 @@ LEFT JOIN handle h ON h.ROWID = m.handle_id
 LEFT JOIN chat c ON c.ROWID = (
   SELECT min(j2.chat_id) FROM chat_message_join j2 WHERE j2.message_id = m.ROWID
 )
-WHERE (replace(replace(replace(replace(replace(replace(replace(h.id, '+', ''), '-', ''), ' ', ''), '(', ''), ')', ''), '.', ''), ' ', '') LIKE '%5550104477%'));
+WHERE (
+    EXISTS (
+      SELECT 1
+        FROM chat_message_join j
+        JOIN chat c2 ON c2.ROWID = j.chat_id
+       WHERE j.message_id = m.ROWID
+         AND (lower(c2.chat_identifier) LIKE '%recent@example.com%')
+    )
+    OR EXISTS (
+      SELECT 1
+        FROM chat_message_join j
+        JOIN chat_handle_join chj ON chj.chat_id = j.chat_id
+        JOIN handle hh ON hh.ROWID = chj.handle_id
+       WHERE j.message_id = m.ROWID
+         AND (lower(hh.id) LIKE '%recent@example.com%')
+    )
+    OR (lower(h.id) LIKE '%recent@example.com%')
+  ));
 SQL_COUNT
 )"
 
@@ -365,8 +410,8 @@ fi
   say "taken          $(date '+%Y-%m-%d %H:%M:%S %z')"
   say "from           $DB"
   say "messages       $WROTE"
-  say "who            Annie Example <+1 555 010 4477>"
-  say "scope          messages to and from that handle only"
+  say "who            recent@example.com"
+  say "scope          whole conversations, including group threads"
   say "window         everything in the database"
   say "text recovery  $RECOVERY"
   say ""

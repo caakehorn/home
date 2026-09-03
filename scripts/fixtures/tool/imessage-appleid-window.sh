@@ -127,13 +127,23 @@ LEFT JOIN handle h ON h.ROWID = m.handle_id
 LEFT JOIN chat c ON c.ROWID = (
   SELECT min(j2.chat_id) FROM chat_message_join j2 WHERE j2.message_id = m.ROWID
 )
-WHERE EXISTS (
-    SELECT 1
-      FROM chat_message_join j
-      JOIN chat_handle_join chj ON chj.chat_id = j.chat_id
-      JOIN handle hh ON hh.ROWID = chj.handle_id
-     WHERE j.message_id = m.ROWID
-       AND (lower(hh.id) = 'someone@icloud.com')
+WHERE (
+    EXISTS (
+      SELECT 1
+        FROM chat_message_join j
+        JOIN chat c2 ON c2.ROWID = j.chat_id
+       WHERE j.message_id = m.ROWID
+         AND (lower(c2.chat_identifier) LIKE '%someone@icloud.com%')
+    )
+    OR EXISTS (
+      SELECT 1
+        FROM chat_message_join j
+        JOIN chat_handle_join chj ON chj.chat_id = j.chat_id
+        JOIN handle hh ON hh.ROWID = chj.handle_id
+       WHERE j.message_id = m.ROWID
+         AND (lower(hh.id) LIKE '%someone@icloud.com%')
+    )
+    OR (lower(h.id) LIKE '%someone@icloud.com%')
   )
   AND date((CASE WHEN m.date > 1000000000000 THEN m.date / 1000000000 ELSE m.date END + 978307200), 'unixepoch', 'localtime') BETWEEN '2020-01-01' AND '2020-12-31'
 ORDER BY sent_epoch ASC, m.ROWID ASC;
@@ -322,13 +332,23 @@ LEFT JOIN handle h ON h.ROWID = m.handle_id
 LEFT JOIN chat c ON c.ROWID = (
   SELECT min(j2.chat_id) FROM chat_message_join j2 WHERE j2.message_id = m.ROWID
 )
-WHERE EXISTS (
-    SELECT 1
-      FROM chat_message_join j
-      JOIN chat_handle_join chj ON chj.chat_id = j.chat_id
-      JOIN handle hh ON hh.ROWID = chj.handle_id
-     WHERE j.message_id = m.ROWID
-       AND (lower(hh.id) = 'someone@icloud.com')
+WHERE (
+    EXISTS (
+      SELECT 1
+        FROM chat_message_join j
+        JOIN chat c2 ON c2.ROWID = j.chat_id
+       WHERE j.message_id = m.ROWID
+         AND (lower(c2.chat_identifier) LIKE '%someone@icloud.com%')
+    )
+    OR EXISTS (
+      SELECT 1
+        FROM chat_message_join j
+        JOIN chat_handle_join chj ON chj.chat_id = j.chat_id
+        JOIN handle hh ON hh.ROWID = chj.handle_id
+       WHERE j.message_id = m.ROWID
+         AND (lower(hh.id) LIKE '%someone@icloud.com%')
+    )
+    OR (lower(h.id) LIKE '%someone@icloud.com%')
   )
   AND date((CASE WHEN m.date > 1000000000000 THEN m.date / 1000000000 ELSE m.date END + 978307200), 'unixepoch', 'localtime') BETWEEN '2020-01-01' AND '2020-12-31'
 ORDER BY sent_epoch ASC, m.ROWID ASC
@@ -361,13 +381,23 @@ LEFT JOIN handle h ON h.ROWID = m.handle_id
 LEFT JOIN chat c ON c.ROWID = (
   SELECT min(j2.chat_id) FROM chat_message_join j2 WHERE j2.message_id = m.ROWID
 )
-WHERE EXISTS (
-    SELECT 1
-      FROM chat_message_join j
-      JOIN chat_handle_join chj ON chj.chat_id = j.chat_id
-      JOIN handle hh ON hh.ROWID = chj.handle_id
-     WHERE j.message_id = m.ROWID
-       AND (lower(hh.id) = 'someone@icloud.com')
+WHERE (
+    EXISTS (
+      SELECT 1
+        FROM chat_message_join j
+        JOIN chat c2 ON c2.ROWID = j.chat_id
+       WHERE j.message_id = m.ROWID
+         AND (lower(c2.chat_identifier) LIKE '%someone@icloud.com%')
+    )
+    OR EXISTS (
+      SELECT 1
+        FROM chat_message_join j
+        JOIN chat_handle_join chj ON chj.chat_id = j.chat_id
+        JOIN handle hh ON hh.ROWID = chj.handle_id
+       WHERE j.message_id = m.ROWID
+         AND (lower(hh.id) LIKE '%someone@icloud.com%')
+    )
+    OR (lower(h.id) LIKE '%someone@icloud.com%')
   )
   AND date((CASE WHEN m.date > 1000000000000 THEN m.date / 1000000000 ELSE m.date END + 978307200), 'unixepoch', 'localtime') BETWEEN '2020-01-01' AND '2020-12-31');
 SQL_COUNT

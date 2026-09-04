@@ -36,10 +36,21 @@
       "added": "2026-09-01",
       "from": "IMG_2890.jpeg",
       "bytes": 70254
+    },
+    {
+      "id": "showeralpha",
+      "file": "showeralpha.png",
+      "w": 1280,
+      "h": 953,
+      "alt": "Sh",
+      "kana": "接吻",
+      "tone": 5,
+      "added": "2026-09-04",
+      "from": "0D537F98-DE3C-44DC-996C-FD60D2710AD8.png",
+      "bytes": 1739820
     }
   ],
   "walls": {
-    "door-left": "kiss-butterfly",
     "room:arcade": "centralpark",
     "room:blog": "bedkissrb",
     "room:brain": "makeoutbed",

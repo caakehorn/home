@@ -48,6 +48,18 @@
       "added": "2026-09-04",
       "from": "0D537F98-DE3C-44DC-996C-FD60D2710AD8.png",
       "bytes": 1739820
+    },
+    {
+      "id": "bedalpha",
+      "file": "bedalpha.png",
+      "w": 1280,
+      "h": 1280,
+      "alt": "bed",
+      "kana": "接吻",
+      "tone": 3,
+      "added": "2026-09-04",
+      "from": "6007CCB3-EC9B-4B39-B93B-E73447629031.png",
+      "bytes": 2226575
     }
   ],
   "walls": {

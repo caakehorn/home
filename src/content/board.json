@@ -63,6 +63,7 @@
     }
   ],
   "walls": {
+    "mast": "0d537f98-de3c-44dc-996c-fd60d2710ad8",
     "room:arcade": "centralpark",
     "room:blog": "bedkissrb",
     "room:brain": "makeoutbed",

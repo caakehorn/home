@@ -706,11 +706,13 @@ const section = sectionBySlug('slug')!
 <div className="x" style={{ ['--glow' as string]: `var(--n${section.accent})` }}>
   <Nav />
   <SectionArt slug="slug" />
-  <Marquee text={section.chant} duration={20} tone={section.accent}
-           size="clamp(0.75rem, 1.6vw, 1.05rem)" />
   <header className="wrap x__masthead">…</header>
 </div>
 ```
+
+A `<Marquee text={section.chant}>` used to sit between the plate and the
+masthead in every one of these; it is gone from all of them, and `chant` now
+only feeds the card on the home page.
 
 Rooms with sub-routes factor that into a local `<Wing>`/`<Floor>` wrapper — see
 `Leviathan.tsx` and `Arcade.tsx`. `Transcript.tsx` (56 lines) is the cleanest

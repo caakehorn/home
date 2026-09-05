@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Crown } from '../components/Crown'
 import { Logo } from '../components/Logo'
-import { Marquee } from '../components/Marquee'
 import { Plate } from '../components/Plate'
 import { hangs } from '../content/slates'
-import { banner } from '../content/slogans'
 import { usePortal, useRig } from '../state/usePortal'
 import { useWikiIndex } from '../wiki/data'
 import './splash.css'
@@ -221,10 +219,6 @@ export function Splash() {
         <span className="splash__hint">
           click, or hit ENTER / SPACE
         </span>
-      </div>
-
-      <div className="splash__ticker">
-        <Marquee text={banner('splash')} duration={26} tone={3} size="clamp(0.7rem, 1.4vw, 1rem)" />
       </div>
     </div>
   )

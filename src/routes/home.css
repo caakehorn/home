@@ -216,9 +216,10 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr));
   gap: clamp(1rem, 2.4vw, 1.8rem);
-  /* Eight cards, each with its own marquee running inside it. Below the fold
-     they are neither laid out nor animated until they are close enough to
-     matter. */
+  /* One card per room, each with its own chant running inside it — the last
+     marquees on the site, and the reason this grid still animates at all.
+     Below the fold they are neither laid out nor animated until they are
+     close enough to matter. */
   content-visibility: auto;
   contain-intrinsic-size: auto 20rem;
 }

@@ -1,8 +1,6 @@
 import { useState } from 'react'
-import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
 import { SectionArt } from '../components/SectionArt'
-import { banner } from '../content/slogans'
 import { SubHead } from '../components/Wordmark'
 import { Dossier } from '../lineage/Dossier'
 import { Lattice } from '../lineage/Lattice'
@@ -40,13 +38,6 @@ export function LineageRoute() {
     <div className="lin">
       <Nav />
       <SectionArt slug="lineage" />
-      <Marquee
-        text={banner('lattice')}
-        duration={24}
-        tone={1}
-        size="clamp(0.72rem, 1.5vw, 1rem)"
-      />
-
       <header className="wrap lin__mast">
         <h1 className="lin__title">
           <SubHead>THE LATTICE</SubHead>

@@ -9,7 +9,8 @@ export type Section = {
   blurb: string
   status: 'LIVE' | 'WIRING' | 'DARK'
   accent: 1 | 2 | 3 | 4 | 5
-  /** Marquee text on the card and across the room's own header. */
+  /** Marquee text inside the room's card on the home page. It ran across the
+      room's own header too until that band was removed. */
   chant: string
 }
 

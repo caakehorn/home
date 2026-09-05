@@ -1,10 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
 import { SectionArt } from '../components/SectionArt'
 import { SubHead } from '../components/Wordmark'
-import { banner } from '../content/slogans'
 import { BriefDeck } from '../wiki/BriefDeck'
 import { SyncLight } from '../wiki/SyncLight'
 import { Cortex } from '../wiki/Cortex'
@@ -209,13 +207,6 @@ export function WikiIndexRoute() {
     <div className="wiki">
       <Nav />
       <SectionArt slug="brain" />
-      <Marquee
-        text={banner('wiki')}
-        duration={20}
-        tone={3}
-        size="clamp(0.75rem, 1.6vw, 1.05rem)"
-      />
-
       <header className="wrap wiki__masthead">
         <h1 className="wiki__mast-title">
           <SubHead>WIKI-BRAIN</SubHead>

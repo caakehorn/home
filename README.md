@@ -879,10 +879,12 @@ Two banners fixed to the viewport, on every page behind the gate: **THE RATIO**
 along the top travelling left, **JET FUEL** along the bottom travelling right.
 The two travel in opposite directions on purpose — a pair going the same way
 reads as one long strip that happens to be broken in the middle.
-The marquees inside a page are furniture you walk past; these are furniture you
-live with, which is why they get the loudest treatment on the site short of the
-masthead — a hazard bar on each outer edge and every node cut out of a
-different sheet. The sticky nav parks under the top bar rather than sliding
+They are also, now, the only scrolling copy on the site: a band of it used to
+run across the top of every room, furniture you walked past on the way in, and
+that band is gone from all of them. What survives is these two and the chant
+inside each room card on the home page. Which makes the treatment they already
+had the right one — the loudest on the site short of the masthead, a hazard bar
+on each outer edge and every node cut out of a different sheet. The sticky nav parks under the top bar rather than sliding
 beneath it, and `body` takes matching padding on both sides.
 
 **The reader drives them.** They creep at 12–56 px/s (off `--chaos`, like

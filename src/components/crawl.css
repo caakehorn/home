@@ -1,10 +1,12 @@
 /* ==========================================================================
    THE CRAWLS — the two banners pinned to the edges of the viewport
 
-   Fixed, so they never scroll away: the marquees inside the page are furniture
-   you pass, and these are furniture you live with. They get the loudest
-   treatment on the site short of the masthead — a hazard bar on the outer
-   edge, and every node cut out of a different sheet.
+   Fixed, so they never scroll away. They used to be the two loud things you
+   lived with while a band of scrolling copy sat in the page of every room —
+   furniture you walked past. Those bands are gone and these two are the whole
+   of the scrolling copy on the site now, which makes the treatment they
+   already had the right one: a hazard bar on the outer edge, and every node
+   cut out of a different sheet.
 
    The nodes reuse the ransom scrap idea rather than the marquee idea, because
    they are individually separate things being stacked up at you. A single

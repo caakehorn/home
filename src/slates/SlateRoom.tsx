@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
 import { SectionArt } from '../components/SectionArt'
 import { SubHead } from '../components/Wordmark'
-import { banner } from '../content/slogans'
 import { BOARD, WALLS, type Board, type Uploaded } from '../content/slates'
 import { ready } from '../wiki/keyring'
 import { BoardPane } from './BoardPane'
@@ -212,8 +210,6 @@ export function SlateRoom() {
           renders. The registry in `content/slates.ts` is explicit that a
           dashboard offering a dead wall is a dashboard that lies. */}
       <SectionArt slug="slates" />
-      <Marquee text={banner('slates')} duration={26} tone={3} size="clamp(0.72rem, 1.5vw, 1rem)" />
-
       <header className="wrap sl__mast">
         <h1 className="sl__title">
           <SubHead>THE SLATE ROOM</SubHead>

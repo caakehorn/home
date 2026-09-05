@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
 import { SectionArt } from '../components/SectionArt'
 import { SubHead } from '../components/Wordmark'
@@ -1411,12 +1410,6 @@ function Room({ children }: { children: React.ReactNode }) {
     <div className="core" style={{ ['--glow' as string]: `var(--n${section.accent})` }}>
       <Nav />
       <SectionArt slug="core" />
-      <Marquee
-        text={section.chant}
-        duration={20}
-        tone={section.accent}
-        size="clamp(0.75rem, 1.6vw, 1.05rem)"
-      />
       {children}
     </div>
   )

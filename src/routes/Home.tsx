@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Crown } from '../components/Crown'
 import { Kiss } from '../components/Kiss'
-import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
 import { PortalCard } from '../components/PortalCard'
 import { Plate } from '../components/Plate'
@@ -105,8 +104,6 @@ export function Home() {
       {/* ---- the brain ------------------------------------------------- */}
       <BrainConsole />
 
-      <Marquee text={MISSION} duration={30} tone={3} size="clamp(0.8rem, 1.8vw, 1.3rem)" />
-
       {/* ---- the rooms ------------------------------------------------- */}
       <section className="wrap section" aria-labelledby="rooms-title">
         <div className="section__head">
@@ -130,15 +127,6 @@ export function Home() {
           ))}
         </div>
       </section>
-
-      <Marquee
-        text={banner('rooms')}
-        duration={20}
-        reverse
-        tone={2}
-        size="clamp(0.75rem, 1.6vw, 1.1rem)"
-        lean={-0.6}
-      />
 
       {/* ---- the two of them ------------------------------------------ */}
       <section className="void-band" aria-labelledby="void-title">
@@ -266,7 +254,6 @@ export function Home() {
 
       {/* ---- footer --------------------------------------------------- */}
       <footer className="foot">
-        <Marquee text={banner('foot')} duration={24} tone={1} size="clamp(0.7rem, 1.5vw, 1rem)" />
         <div className="wrap foot__inner">
           <Logo size="clamp(1.1rem, 3vw, 1.9rem)" />
           <p className="foot__note">

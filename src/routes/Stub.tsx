@@ -1,5 +1,4 @@
 import { Link, useParams } from 'react-router-dom'
-import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
 import { SubHead } from '../components/Wordmark'
 import { sectionBySlug } from '../content/sections'
@@ -37,8 +36,6 @@ export function Stub() {
   return (
     <div className="stub" style={{ ['--glow' as string]: `var(--n${section.accent})` }}>
       <Nav />
-      <Marquee text={section.chant} duration={20} tone={section.accent} size="clamp(0.75rem, 1.6vw, 1.1rem)" />
-
       <main className="wrap stub__inner">
         <span className="stub__kana jp" aria-hidden="true">
           {section.kana}

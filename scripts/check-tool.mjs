@@ -449,12 +449,22 @@ async function main() {
       const path = join(GOLDEN, `.${fx.name}.${marker}.sql`)
       writeFileSync(path, sql)
       queryFiles.push(path)
-      // The count query returns ONE row holding the number the row queries
-      // must produce — it is the script's own reconciliation, and it was
-      // previously skipped here, which meant the check that makes a truncated
-      // export loud was itself unchecked.
+      // A count query returns ONE row holding the number the row queries must
+      // produce — it is the script's own reconciliation, and it was previously
+      // skipped here, which meant the check that makes a truncated export loud
+      // was itself unchecked.
+      //
+      // Matched on the marker's shape, not on one literal name. This read
+      // `marker === 'SQL_COUNT'` until the script split its reconciliation into
+      // a source count and a snapshot count taken either side of the copy. Both
+      // new markers fell through to the row-query branch, where a
+      // `SELECT COUNT(*)` was asked for nine rows and a contact_name column and
+      // could only fail — twenty problems on six fixtures, none of them real,
+      // and a red gate that held every deploy for three days. A gate keyed to a
+      // list of the names it knows is a gate with an expiry date on it: every
+      // count block the script can emit ends in COUNT, and no row query does.
       wanted.push(
-        marker === 'SQL_COUNT'
+        /COUNT$/.test(marker)
           ? { fixture: fx.name, marker, rows: 1, counts: fx.expect.rows }
           : { fixture: fx.name, marker, rows: fx.expect.rows, named: fx.expect.named },
       )

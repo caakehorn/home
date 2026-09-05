@@ -1,0 +1,54 @@
+name: Verify
+
+# The gate #112 never had to pass.
+#
+# Nothing in this repository ran on a pull request until 2026-09-05. deploy.yml
+# holds every check worth having, but it runs on push to main — so the first
+# time a gate saw a change was after that change had already merged. #112
+# merged a one-line mismatch in check-tool.mjs, `npm run tool:check` went red on
+# main, and every Pages deploy failed behind it for three days while the sync
+# kept reporting success and the site kept serving a snapshot from before it.
+#
+# A check that only runs after merge cannot stop anything. This is the same set
+# of gates, run where they can: on the pull request, before the merge button.
+# No Pages deployment, no secrets, no writes — the deploy still owns publishing.
+#
+# The list is not restated here. `npm run verify` is the list, and
+# `npm run gates:check` — the first thing verify runs — fails if it drifts from
+# what deploy.yml actually blocks on. Adding a gate to the deploy adds it here.
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A new push supersedes the run in flight; only the head commit's answer matters.
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Run every gate the deploy blocks on
+        run: npm run verify
+
+      # The build is a gate too, and the one most likely to fail only in CI:
+      # BASE_PATH is what makes every asset URL resolve under /home/, and
+      # `import.meta.env.BASE_URL` is not exercised by a bare `vite build`.
+      # Taken from GITHUB_REPOSITORY, exactly as deploy.yml does it.
+      - run: echo "BASE_PATH=/${GITHUB_REPOSITORY#*/}/" >> "$GITHUB_ENV"
+
+      - run: npm run build

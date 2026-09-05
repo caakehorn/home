@@ -31,8 +31,9 @@ on:
   # This is affordable because a run that finds nothing costs only runner time,
   # which is free on a public repository. The churn guard below restores the
   # snapshot when only `generatedAt` moved, `git diff --cached --quiet` then
-  # exits before committing, and the deploy job is gated on `changed == 'true'`
-  # — so 288 runs a day produce exactly as many deploys as 24 did. At ~75s a run
+  # exits before committing, and the deploy job is gated on `deploy == 'true'`
+  # — so 288 runs a day produce exactly as many deploys as 24 did, plus a retry
+  # on any run that finds the site behind main (see the `published` step). At ~75s a run
   # against a 300s interval, and with `concurrency` serialising them (a new
   # dispatch cancelling an in-flight one), they cannot pile up either.
   schedule:
@@ -61,9 +62,14 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       changed: ${{ steps.commit.outputs.changed }}
-      # The commit this run actually pushed. The deploy below builds THIS,
-      # not the SHA that fired the run — see deploy.yml's `ref` input.
-      sha: ${{ steps.commit.outputs.sha }}
+      # Whether anything needs publishing. NOT the same question as whether
+      # main moved — see the `published` step for why that distinction is the
+      # whole point of it.
+      deploy: ${{ steps.decide.outputs.deploy }}
+      # The commit the deploy builds: either the snapshot this run pushed or,
+      # when an earlier deploy failed, whatever main holds now. Never the SHA
+      # that fired the run, which is an ancestor with no snapshot in it.
+      sha: ${{ steps.decide.outputs.sha }}
     steps:
       - uses: actions/checkout@v4
 
@@ -237,11 +243,41 @@ jobs:
           echo '::error::could not push the resynced snapshot after three attempts'
           exit 1
 
+      # ---- is the SITE current? a different question from "did main move" ---
+      #
+      # `changed` answers whether main moved. It does not answer whether that
+      # reached anybody, and the deploy was gated on `changed` alone. So a
+      # deploy that failed left main holding a snapshot the site did not have;
+      # every later sync re-derived it, found it current, reported
+      # changed=false, skipped the deploy — and the gap became permanent,
+      # silent, and invisible behind a column of green runs. `npm run
+      # tool:check` began failing on 2026-09-03 at 02:16 UTC and the site
+      # served the 00:48 snapshot for three days: main at 498 pages and 972,352
+      # words, the published index.json at 496 and 894,408. The SYNC BEHIND
+      # banner was the only thing that noticed, and it named this workflow as
+      # the thing that closes the gap while this workflow was skipping the only
+      # step that could.
+      #
+      # So the published snapshot is asked directly, keyed on the wiki-brain
+      # commit it was derived from rather than on when it was built.
+      #
+      # The decision is scripts/reconcile-deploy.mjs rather than shell here, so
+      # that it can be tested instead of reasoned about: `npm run
+      # reconcile:check` runs it over every state this job can reach, including
+      # the one that caused the outage. A workflow `if:` is the last place in
+      # this repository where being wrong stays invisible until it matters.
+      - id: decide
+        name: What the site should be serving
+        run: node scripts/reconcile-deploy.mjs
+        env:
+          CHANGED: ${{ steps.commit.outputs.changed }}
+          PUSHED_SHA: ${{ steps.commit.outputs.sha }}
+
   # A push made with GITHUB_TOKEN does not trigger other workflows, so the
   # deploy is called rather than waited for.
   deploy:
     needs: sync
-    if: needs.sync.outputs.changed == 'true'
+    if: needs.sync.outputs.deploy == 'true'
     uses: ./.github/workflows/deploy.yml
     with:
       ref: ${{ needs.sync.outputs.sha }}

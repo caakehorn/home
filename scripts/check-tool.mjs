@@ -189,6 +189,39 @@ function sqlBlocks(script) {
   return out
 }
 
+/**
+ * What each SQL block an emitted script can carry is FOR.
+ *
+ * Written down rather than inferred, because inferring it is exactly what
+ * broke. This gate used to find the reconciliation query by testing
+ * `marker === 'SQL_COUNT'`. When the script split that count in two — one
+ * before the copy and one after, so a snapshot that lost rows to a live
+ * Messages.app is caught — neither new name matched, both fell through to the
+ * row-query branch, and a `SELECT count(*)` was asked to return nine rows and
+ * a contact_name column. Twenty problems, not one of them real, and a red gate
+ * that held every deploy for three days while the site quietly served a
+ * fossil.
+ *
+ * Matching `/COUNT$/` instead would have fixed those two names and left the
+ * shape of the bug intact: a naming convention standing in for a contract,
+ * checked by nobody, waiting for the next marker that does not read the way
+ * this file guesses. So the contract is declared, and a marker absent from
+ * this table is a hard failure that names itself — one line to add here, and
+ * an error message that says so — rather than a block silently checked against
+ * the wrong expectations.
+ *
+ *   count — one row, one column, holding the number of rows the export must
+ *           carry. The script's own reconciliation; see section 5 of the
+ *           emitted command.
+ *   rows  — a query that produces the export itself.
+ */
+const SQL_CONTRACT = {
+  SQL_SOURCE_COUNT: 'count',
+  SQL_SNAPSHOT_COUNT: 'count',
+  SQL_HEX: 'rows',
+  SQL_PLAIN: 'rows',
+}
+
 async function main() {
   const entryPath = await bundle()
   const {
@@ -444,19 +477,63 @@ async function main() {
       }
     }
 
-    // Collect the SQL for the run against a real database.
+    // Collect the SQL for the run against a real database, each block against
+    // the contract its marker declares.
+    const seen = { count: 0, rows: 0 }
     for (const { marker, sql } of sqlBlocks(a.script)) {
+      const contract = SQL_CONTRACT[marker]
+      if (!contract) {
+        note(
+          `"${fx.name}" emits ${marker}, which this gate has no contract for.`,
+          '  Add it to SQL_CONTRACT near the top of this file: "count" for a one-row',
+          '  reconciliation query, "rows" for one that produces the export.',
+          '  Refusing to guess it from the name — guessing from the name is the bug',
+          '  that table exists to prevent.',
+        )
+        continue
+      }
+      seen[contract]++
       const path = join(GOLDEN, `.${fx.name}.${marker}.sql`)
       writeFileSync(path, sql)
       queryFiles.push(path)
-      // The count query returns ONE row holding the number the row queries
-      // must produce — it is the script's own reconciliation, and it was
-      // previously skipped here, which meant the check that makes a truncated
-      // export loud was itself unchecked.
+      // A count block returns ONE row holding the number the row blocks must
+      // produce. It was skipped here entirely until 2026-09-01, which meant the
+      // check that makes a truncated export loud was itself unchecked.
       wanted.push(
-        marker === 'SQL_COUNT'
-          ? { fixture: fx.name, marker, rows: 1, counts: fx.expect.rows }
-          : { fixture: fx.name, marker, rows: fx.expect.rows, named: fx.expect.named },
+        contract === 'count'
+          ? { fixture: fx.name, marker, contract, rows: 1, counts: fx.expect.rows }
+          : { fixture: fx.name, marker, contract, rows: fx.expect.rows, named: fx.expect.named },
+      )
+    }
+
+    // The shape of the emitted script, asserted rather than assumed: every
+    // command reconciles twice — against the live database and against the
+    // snapshot — and carries both an export query and its no-python fallback.
+    //
+    // This is the line that would have caught the outage in one sentence.
+    // Under `marker === 'SQL_COUNT'` the count total here was 0 on all six
+    // fixtures; under `/COUNT$/` with a marker named SQL_VERIFY it would be 1.
+    // Either way this says which, instead of leaving six fixtures to complain
+    // about a contact_name column that a count query was never going to have.
+    if (seen.count !== 2 || seen.rows !== 2) {
+      note(
+        `"${fx.name}" emitted ${seen.count} count block(s) and ${seen.rows} row block(s), wanted 2 and 2.`,
+        '  Either the script changed what it emits, or SQL_CONTRACT is classifying a',
+        '  block as the wrong kind. Both are real failures; neither is a golden diff.',
+      )
+    }
+  }
+
+  // The other direction: a contract nothing emits any more is a line the next
+  // reader will believe and no run will check. The table is four entries long
+  // and there is no excuse for it drifting either way.
+  const emittedMarkers = new Set(wanted.map((w) => w.marker))
+  for (const marker of Object.keys(SQL_CONTRACT)) {
+    if (!emittedMarkers.has(marker)) {
+      note(
+        `SQL_CONTRACT declares ${marker}, but no fixture emits it.`,
+        '  Either the fixture covering it was removed, or the generator stopped',
+        '  emitting it and this entry now describes nothing. Cover it or drop it.',
       )
     }
   }
@@ -487,6 +564,19 @@ async function main() {
         '  Usually a column that is not in chat.db. See src/tool/tools/imessage/schema.ts.',
       )
       return
+    }
+    // The declared contract, checked against what sqlite actually handed back.
+    // A count query returns one column; a block declared "count" that comes
+    // back wider is mis-declared, and saying so beats reporting its row count
+    // as wrong by six.
+    if (want.contract === 'count') {
+      const cols = result.columns?.length ?? 0
+      if (cols !== 1) {
+        note(
+          `${want.fixture} / ${want.marker}: SQL_CONTRACT calls this a count block, but it returned ${cols} columns.`,
+          '  Either the query is not a count, or the contract names the wrong kind.',
+        )
+      }
     }
     if (result.rows !== want.rows) {
       note(

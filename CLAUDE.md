@@ -220,3 +220,33 @@ and what decision it embodies — not what the code does. Read the top of
 `src/leviathan/core.ts`, `scripts/build-clock.mjs` or `scripts/build-atlas.mjs`
 before writing one. Match the register: plain, specific, and willing to say what
 a thing cannot do.
+
+---
+
+## 9. Work in flight runs in lanes, and the lanes are enforced
+
+The charts overhaul is built by several sessions at once, on separate branches,
+sometimes under different models, none of which can see the others. Two things
+make that safe, and neither is etiquette:
+
+**One command answers "what should I do".** `node scripts/charts-work.mjs`
+prints every lane and whether it is done, held, blocked or open; `next` names
+one and says why. Nothing in it is a checkbox — every lane's *done* is a
+predicate recomputed against the working tree, because a list that can be ticked
+independently of the thing it describes is a list that can lie. Claims live in
+`.charts/lanes.jsonl`, append-only for the reason wiki-brain's ledgers are: two
+sessions appending merge as a set union, where one mutable file would make every
+concurrent push a conflict whose loser is dropped silently.
+
+**Each lane owns a disjoint set of paths, and `charts-work.mjs check` fails if
+a branch writes outside its own.** It reads the branch's diff against
+`origin/main`, so the guard fires before the push, where the fix is to split a
+commit, rather than after it, where the fix is a merge.
+
+Claim a lane and push the claim **before** writing code. Release it if you stop
+part-way, and say in the PR what is stubbed: a half-lane pushed and released is
+recoverable by anyone, and a half-lane held by a dead session blocks it.
+
+`docs/CHARTS.md` is the full account — what was wrong with the old charts, with
+the numbers, and what each lane builds. `AGENTS.md` is the same entry point for
+an agent that does not read this file.

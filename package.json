@@ -39,7 +39,9 @@
     "gates:check": "node scripts/check-gates.mjs",
     "verify": "npm run gates:check && npm run sage:check && npm run ledger:check && npm run history:check && npm run slates:check && npm run tool:check && npm run reconcile:check && npm run typecheck",
     "charts:audit": "node scripts/audit-charts.mjs",
-    "charts:check": "node scripts/audit-charts.mjs --check"
+    "charts:check": "node scripts/audit-charts.mjs --check",
+    "charts:work": "node scripts/charts-work.mjs",
+    "charts:doctor": "node scripts/charts-work.mjs doctor"
   },
   "dependencies": {
     "marked": "^18.0.9",

@@ -124,19 +124,22 @@ The precedent for closing all three is `docs/CORPUS.md` and wiki-brain's
 
 ## 2. The rebuild
 
-Six checkpoints. Every one leaves `npx tsc -b --noEmit` and `npm run build`
-clean, per `CLAUDE.md` §1.
+Eight lanes, meant to run as several sessions at once. Every lane leaves
+`npx tsc -b --noEmit` and `npm run build` clean, per `CLAUDE.md` §1. §3 is how
+the lanes stay out of each other's way; this section is what they contain.
 
-| # | checkpoint | what it closes |
-|---|---|---|
-| 1 | the audit, as a rerunnable gate | §1 is a number, not an impression |
-| 2 | refuse-first analyzer · opt-in directive | §1.1 |
-| 3 | THE RULE applied to the renderer | §1.3 |
-| 4 | unseal — YouTube, then location, then AI sessions | §1.5, §1.6 |
-| 5 | new instruments on the unsealed corpora | §1.6 |
-| 6 | re-wing the rack · one chart kit · the gates | §1.4 |
+| lane | what it closes |
+|---|---|
+| `foundation` | the three shared files every new instrument has to edit |
+| `analyzer` | §1.1 |
+| `brief` | §1.3 |
+| `youtube` · `location` · `sessions` | §1.5, §1.6 |
+| `rewing` | §1.4 |
+| `directive` | §1.1, in wiki-brain |
 
-### Checkpoint 2 — the analyzer refuses by default
+`node scripts/charts-work.mjs` prints which of them are done, held and open.
+
+### `analyzer` — the analyzer refuses by default
 
 `analyzeTable` is rewritten to ask whether a chart is *true*, and a table is
 rendered as a table unless it passes. The rules, each one a defect from §1.1:
@@ -161,7 +164,7 @@ Buried" to `Chart`'s TABLE face, "and drew birth years as bar lengths besides".
 That was worked around by turning charts off in the Reader's Digest edition.
 This checkpoint fixes the cause instead, so the workaround can go.
 
-### Checkpoints 4–5 — the order the corpora land in
+### `youtube` → `location` → `sessions` — the order the corpora land in
 
 **YouTube first** (19,068 watches, sixteen years): volume by month against the
 coverage gaps, hour-of-day by year, distinct channels and top-channel share per
@@ -176,7 +179,7 @@ conversation, and the hour-of-day profile of the sessions set against the
 message record's own — two counts on one axis, which is the only kind of
 comparison this site is allowed to draw.
 
-### Checkpoint 6 — what every chart owes
+### `foundation` — what every chart owes
 
 One primitive, and it refuses rather than warns: a unit per series or it does
 not draw; the `n` printed on every rate; a method note in the frame the way
@@ -184,3 +187,130 @@ not draw; the `n` printed on every rate; a method note in the frame the way
 per `CLAUDE.md` §5. `scripts/audit-charts.mjs --check` joins `npm run
 gates:check`, and every new payload asserts its published totals and
 `process.exit(1)`s on drift, per `build-atlas.mjs`.
+
+
+---
+
+## 3. Running this as parallel sessions
+
+Nothing below is etiquette. Every rule is a command that fails.
+
+### 3.1 What a session does, in order
+
+```
+node scripts/charts-work.mjs          # what is done, held and open
+node scripts/charts-work.mjs next     # the lane to take, and why
+node scripts/charts-work.mjs claim <lane> --as "<your model>"
+git commit -am "Claim the <lane> lane" && git push   # before writing any code
+```
+
+A claim nobody else can see is not a claim. Push it first, on a branch named
+for the lane, and the next session to run `next` will route around you.
+
+Before every push, and again before opening the PR:
+
+```
+node scripts/charts-work.mjs check    # did this branch write another lane's files?
+node scripts/audit-charts.mjs --check # did any chart defect count go up?
+npx tsc -b --noEmit && npm run build
+```
+
+`--as` is not decoration. It is how a session that finds a stale claim twelve
+hours from now can tell whether the session holding it was its own.
+
+### 3.2 Why `foundation` runs alone and first
+
+Adding one instrument today edits three shared files — the `INSTRUMENTS` array
+in `src/leviathan/core.ts`, and an import plus a `BUILT` entry in
+`src/routes/Leviathan.tsx`. Three sessions adding three instruments collide
+twice each, in files where a bad merge silently drops an instrument rather than
+failing to compile.
+
+`foundation` removes the collision instead of scheduling around it. An
+instrument becomes one self-contained directory:
+
+```
+src/leviathan/instruments/signal/
+  entry.ts        the registry record — id, wing, corpus, method, status
+  Signal.tsx      the component
+  signal.css
+```
+
+discovered with `import.meta.glob`, so **adding an instrument is a new
+directory and never an edit to a shared file.** `scripts/build-all.mjs` does
+the same for the payload builders, so a new one is a new script rather than a
+line in `package.json`. After that lands, five lanes can run at once with a
+disjoint file set each.
+
+`brief` does not wait, because it touches nothing anyone else touches.
+
+### 3.3 How two sessions are kept apart
+
+Each lane declares the paths it **owns** in `scripts/charts-work.mjs`.
+`charts-work.mjs check` reads the branch's own diff against `origin/main` and
+exits 1 if it writes a path another lane owns, so the guard fires **before**
+the push, where the fix is to split a commit, rather than after it, where the
+fix is a merge. Communal and exempt: `docs/`, `.charts/`, the two work tools,
+`package.json`, `CLAUDE.md` and `AGENTS.md`.
+
+Two patterns can match one path — `foundation` owns every instrument's
+`entry.ts`, because splitting the registry is what that lane *does*, while
+`youtube` owns everything under its own instrument directory. The more
+specific pattern wins, specificity being how far a pattern commits to a path
+before its first wildcard. `charts-work.mjs doctor` probes every tracked file
+plus the paths the unbuilt lanes will create, and **exits 1 if any path is
+matched by two lanes at equal specificity** — so "disjoint by construction" is
+a thing the tool proves on demand rather than a thing this document asserts.
+It caught a real overlap the first time it ran.
+
+### 3.4 The claim ledger is append-only, on purpose
+
+`.charts/lanes.jsonl`. One JSON object per line — `claim`, `release`,
+`complete` — and the state is projected from the log rather than stored.
+
+This is the shape wiki-brain uses for `intake/`, `testimony/` and
+`skills/registry/`, for the reason given there: several sessions push from
+several branches, and two appends merge as a set union, where one mutable file
+would make every concurrent push a conflict whose loser is dropped silently.
+Delete the file and nothing but the claims is lost; every lane's *done* state
+is recomputed from the tree.
+
+A claim with no `release` after twelve hours reads as **stale and
+reclaimable** — a session whose container was reclaimed leaves no release
+behind, and would otherwise hold a lane forever.
+
+### 3.5 What a session owes the next one
+
+There is no `done` command, deliberately. A lane leaves the list when the thing
+it describes is true — `signal.json` exists and the instrument's own `entry.ts`
+says `LIVE` — not when somebody says so. So the handoff is not a status report:
+
+- **Push the branch and open the PR at the first checkpoint**, per `CLAUDE.md`
+  §1, with the lane named in the title. An unpushed branch is work nobody can
+  find.
+- **Release the lane if you stop mid-way** (`charts-work.mjs release <lane>`),
+  and say in the PR what is stubbed. A half-lane pushed and released is
+  recoverable; a half-lane held by a dead session blocks it.
+- **Leave the numbers checkable.** A payload asserts its published totals and
+  `process.exit(1)`s on drift, per `build-atlas.mjs`; `audit-charts.mjs`'s
+  `BASELINE` is lowered as counts actually fall, and never raised to go green.
+- **Write down what cost you an hour**, in this file. §1.2 exists because the
+  first pass of the audit lost twenty minutes to a defect that was not real.
+
+### 3.6 For a model that is not Claude Code
+
+Nothing here needs a particular vendor's skills, plugins or harness. The whole
+protocol is six commands and a JSONL file:
+
+| command | what it answers |
+|---|---|
+| `charts-work.mjs` | what is done, held, blocked, open |
+| `charts-work.mjs next` | which lane to take, and why |
+| `charts-work.mjs claim <lane> --as "<model>"` | take it |
+| `charts-work.mjs release <lane>` | hand it back |
+| `charts-work.mjs check` | did this branch write outside its lane? |
+| `charts-work.mjs doctor` | is lane ownership still decidable? |
+
+`AGENTS.md` at the repo root is the entry point for an agent that does not load
+`CLAUDE.md` automatically; `CLAUDE.md` §9 points here for one that does. Both
+say the same four things, so it does not matter which one a session finds.

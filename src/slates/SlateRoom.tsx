@@ -22,6 +22,17 @@ import './slate-room.css'
    This is where those become decisions, and where a picture off a phone
    becomes a plate in `public/art/` without a terminal.
 
+   ---- and it is a room like the others now ---------------------------------
+
+   It used to be unlisted, on the reasoning `/ledger` is unlisted by: not in
+   SECTIONS, no chip in the nav bar, reached by typing the URL. That reasoning
+   is real for a substance tracker and imaginary for a picture dashboard — all
+   it bought was a room nobody could find. So `slates` is a row in SECTIONS,
+   which is also what makes `room:slates` a wall, which is why the banner below
+   is a `<SectionArt>` like every other room's. The room is inside its own
+   registry: the wall you are standing under is one of the walls THE BOARD
+   offers, and it can be re-hung from in here.
+
    ---- it says HUNG BY HAND on the frame ------------------------------------
 
    THE RULE at the top of `src/leviathan/core.ts` binds the instruments: every

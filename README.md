@@ -109,8 +109,11 @@ weather is doing — and its classes are namespaced `arc-*` so nothing in
 
 ### The slate room
 
-`/slates` is the other room with no chip in the nav bar, and it is about the
-building's own pictures. Every plate on this site is hung by a rule — a room
+`/slates` is a chip in the nav bar like every other room, and it is about the
+building's own pictures. It was unlisted once, on the same reasoning as
+`/ledger` below; a dashboard for the wallpaper does not need that protection
+and the omission only made it hard to find. Every plate on this site is hung by
+a rule — a room
 takes the plate its index lands on in `SCENES`, the front door opens on
 whichever is third in the array — and none of that was ever a decision about
 *this* picture on *that* wall. The room makes it one, and it does the other
@@ -120,7 +123,10 @@ into `public/art/` with its manifest row in the same commit.
 
 Three surfaces. **INTAKE** converts and commits, previewing the result as a
 real `<Plate>` — cut, screened and washed in the current palette — because the
-only question worth asking of a new picture is whether it works that way.
+only question worth asking of a new picture is whether it works that way. One
+field is required and it is the alt text: several plates are the largest object
+on their page. The kana lit in the corner of the frame is optional, and a plate
+without one is drawn with an empty corner rather than a placeholder.
 **THE BOARD** lists every wall the site reads and what is on it; the two pools
 (every wiki page, every transmission) get toggles instead, since 486 pages
 hashing over a set is a different question from one wall holding one plate.
@@ -143,7 +149,7 @@ pictures are on.
 
 ### The intake ledger
 
-`/ledger` is the tenth room and the only one with no chip in the nav bar. It is
+`/ledger` is the one room with no chip in the nav bar, and now the only one. It is
 behind the same door as everything else; it is simply not advertised on the
 front page, because a building that lists this beside the arcade is a different
 building from one that holds it. The URL is the affordance — on a phone it goes
@@ -727,12 +733,14 @@ one real person: a drawing of two people at four in the morning is about the
 hour, not about anybody. They are the only thing here that is not an argument
 about the record.
 
-`SectionArt` (`src/components/SectionArt.tsx`) assigns each of the eight named
-rooms one scene by fixed position — there are exactly eight of each, so no two
-rooms on the nav bar ever open on the same picture — and falls back to hashing
-the path for anything else, which is how 486 wiki pages and an open-ended
-number of blog posts each get a stable plate out of the same eight without a
-lookup table to keep in sync.
+`SectionArt` (`src/components/SectionArt.tsx`) assigns each named room one
+scene by fixed position. That was eight of each when it was written, with no
+two rooms on the nav bar opening on the same picture; there are fourteen rooms
+and twelve scenes now, so the last two wrap onto the first two's plates until
+more are cut — or until the board overrules it by name, which is what
+`/slates` is for. Anything that is not a named room falls back to hashing the
+path, which is how 486 wiki pages and an open-ended number of blog posts each
+get a stable plate without a lookup table to keep in sync.
 
 **Five photographs of Ally Lubin** (`public/ally/`, `ALLY` in the same file),
 in a section of their own on the main floor with the date, the line and a door

@@ -1,0 +1,44 @@
+/* The pad. Lifted from `.core__pad` in src/routes/core.css so the three lanes
+ * that ship a drawn instrument do not each re-derive it — `CLAUDE.md` §5 names
+ * that file as the reference and says to copy from it rather than re-derive.
+ *
+ * `touch-action: none` on the keys themselves is deliberate and is the one
+ * place in this kit it appears: it stops a hold-to-repeat press from being
+ * stolen by the page's own scroll halfway through the hold. The canvas the pad
+ * sits over is the caller's, and the pad is what that canvas owes the reader
+ * for claiming the gesture. */
+
+.ckpad {
+  position: absolute;
+  right: 0.55rem;
+  bottom: 0.55rem;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.ckpad__btn {
+  display: grid;
+  place-items: center;
+  /* 40px: a finger, not a cursor. §5 — a pick target is measured in fingers. */
+  width: 40px;
+  height: 40px;
+  font-family: var(--f-mono);
+  font-size: 0.9rem;
+  line-height: 1;
+  color: color-mix(in srgb, var(--paper) 80%, transparent);
+  background: color-mix(in srgb, #03030a 74%, transparent);
+  border: var(--staple) solid color-mix(in srgb, var(--paper) 24%, transparent);
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+}
+
+.ckpad__btn--break {
+  margin-bottom: 0.3rem;
+}
+
+.ckpad__btn:hover,
+.ckpad__btn:focus-visible {
+  color: var(--glow, var(--n4));
+  border-color: var(--glow, var(--n4));
+}

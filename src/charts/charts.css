@@ -1,0 +1,219 @@
+/* The chart kit.
+ *
+ * Two constraints shape all of it, and neither is decoration.
+ *
+ * The label column wraps rather than truncating, which is the whole reason
+ * this is a grid of real elements instead of a canvas — `docs/CHARTS.md` §1.1,
+ * `truncated-labels`, 131 tables cut at fifteen characters.
+ *
+ * Nothing here sets `touch-action`. `CLAUDE.md` §5: a view that takes the
+ * browser's own pan and pinch away owes the reader a replacement, and the
+ * cheapest way to owe nothing is to never claim the gesture. The page scrolls
+ * under a finger over a chart exactly as it does over a paragraph.
+ *
+ * Colour comes from the accent ramp through --glow, which every room already
+ * sets. Two of five palettes collapse that ramp (griptape has --n1 === --n5;
+ * riot has --n1 === --n4 and inverts besides), so nothing here separates two
+ * things by hue alone — series are separated by being in different blocks with
+ * their own headings, which survives all five.
+ */
+
+.ck {
+  margin: 1.4rem 0;
+  padding: 0.8rem 0.9rem 0.7rem;
+  background: var(--void-2);
+  border: var(--rule) solid var(--edge);
+  box-shadow: 6px 6px 0 var(--edge);
+}
+
+.ck__cap {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.6rem;
+  font-family: var(--f-head);
+  font-size: var(--step-0);
+  line-height: 1.2;
+  color: var(--text);
+}
+
+/* The unit, stated once, where it governs. Never repeated onto every bar. */
+.ck__unit {
+  flex: none;
+  padding: 0.1rem 0.4rem;
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--on-glow);
+  background: var(--glow, var(--n4));
+}
+
+.ck__unit--refused {
+  color: var(--text);
+  background: transparent;
+  border: var(--staple) solid currentColor;
+}
+
+.ck__series + .ck__series {
+  margin-top: 1rem;
+  padding-top: 0.8rem;
+  border-top: var(--staple) solid color-mix(in srgb, var(--text) 22%, transparent);
+}
+
+.ck__series-label {
+  margin: 0 0 0.4rem;
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.ck__bars {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.28rem;
+}
+
+/* label | track | value.
+ *
+ * The label column is capped by `minmax` rather than fixed, so a long category
+ * wraps onto a second line and takes the row's height with it. That is the
+ * truncation defect made unreachable: there is no width at which the text has
+ * to be cut, because the row grows instead. */
+.ck__row {
+  display: grid;
+  grid-template-columns: minmax(6rem, 14rem) 1fr auto;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.ck__label {
+  font-size: 0.82rem;
+  line-height: 1.25;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.ck__track {
+  position: relative;
+  height: 0.85rem;
+  min-width: 0;
+  background: color-mix(in srgb, var(--text) 10%, transparent);
+}
+
+.ck__bar {
+  display: block;
+  height: 100%;
+  background: var(--glow, var(--n4));
+}
+
+/* A hole in the record, hatched at its true width and never drawn as a zero.
+ * `CLAUDE.md` §2 — "a hole in an archive is not a silence". */
+.ck__gap {
+  display: block;
+  height: 100%;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    color-mix(in srgb, var(--text) 26%, transparent) 0 3px,
+    transparent 3px 7px
+  );
+}
+
+.ck__value {
+  font-family: var(--f-mono);
+  font-size: 0.76rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.ck__none {
+  font-style: normal;
+  color: var(--text-dim);
+}
+
+/* The n on a rate. Printed, never a tooltip: a denominator behind a hover is a
+ * denominator that does not exist on a touchscreen. */
+.ck__n {
+  margin: 0.45rem 0 0;
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+
+.ck__note {
+  margin: 0.6rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--text-dim);
+}
+
+/* -- a refusal -------------------------------------------------------------
+   Deliberately not styled as an error. Nothing has gone wrong: the site has
+   declined to draw something it could not draw truthfully, and it is saying
+   so. Red would tell the reader to expect a fix. */
+
+.ck--refused {
+  border-style: dashed;
+  box-shadow: none;
+}
+
+.ck__refusals {
+  margin: 0 0 0.2rem;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.ck__refusals li {
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.ck__refusal-code {
+  display: inline-block;
+  margin-right: 0.45rem;
+  padding: 0.05rem 0.35rem;
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  border: var(--staple) solid color-mix(in srgb, var(--text) 30%, transparent);
+}
+
+/* The figures the chart was going to be drawn from, kept rather than dropped. */
+.ck__plain {
+  margin: 0.5rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.ck__plain ul {
+  margin: 0.2rem 0 0.5rem;
+  padding-left: 1rem;
+  color: var(--text-dim);
+}
+
+/* Narrow: the value drops under the bar rather than squeezing the label into
+   the truncation this kit exists to prevent. */
+@media (max-width: 34rem) {
+  .ck__row {
+    grid-template-columns: 1fr auto;
+    grid-template-areas: 'label value' 'track track';
+    gap: 0.2rem 0.6rem;
+  }
+  .ck__label { grid-area: label; }
+  .ck__value { grid-area: value; }
+  .ck__track { grid-area: track; }
+}

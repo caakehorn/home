@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
+import { SectionArt } from '../components/SectionArt'
 import { SubHead } from '../components/Wordmark'
-import { banner } from '../content/slogans'
 import { BOARD, WALLS, type Board, type Uploaded } from '../content/slates'
 import { ready } from '../wiki/keyring'
 import { BoardPane } from './BoardPane'
@@ -20,6 +19,17 @@ import './slate-room.css'
    and none of that was anybody's decision about *this picture on that wall*.
    This is where those become decisions, and where a picture off a phone
    becomes a plate in `public/art/` without a terminal.
+
+   ---- and it is a room like the others now ---------------------------------
+
+   It used to be unlisted, on the reasoning `/ledger` is unlisted by: not in
+   SECTIONS, no chip in the nav bar, reached by typing the URL. That reasoning
+   is real for a substance tracker and imaginary for a picture dashboard — all
+   it bought was a room nobody could find. So `slates` is a row in SECTIONS,
+   which is also what makes `room:slates` a wall, which is why the banner below
+   is a `<SectionArt>` like every other room's. The room is inside its own
+   registry: the wall you are standing under is one of the walls THE BOARD
+   offers, and it can be re-hung from in here.
 
    ---- it says HUNG BY HAND on the frame ------------------------------------
 
@@ -194,8 +204,12 @@ export function SlateRoom() {
   return (
     <div className="sl">
       <Nav />
-      <Marquee text={banner('slates')} duration={26} tone={3} size="clamp(0.72rem, 1.5vw, 1rem)" />
-
+      {/* The room is a room like any other now, and it takes the banner every
+          other room takes — which also means `room:slates` is a wall the site
+          actually reads, rather than a row the board offers and nothing
+          renders. The registry in `content/slates.ts` is explicit that a
+          dashboard offering a dead wall is a dashboard that lies. */}
+      <SectionArt slug="slates" />
       <header className="wrap sl__mast">
         <h1 className="sl__title">
           <SubHead>THE SLATE ROOM</SubHead>

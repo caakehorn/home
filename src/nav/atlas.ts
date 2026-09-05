@@ -3,12 +3,12 @@
 
    The header used to be eleven chips off SECTIONS, every room a peer of every
    other room, and that bar was the whole of the wayfinding on all eighteen
-   routes. The building is not eleven things. It is forty-five: twenty-three
+   routes. The building is not eleven things. It is forty-eight: twenty-three
    built LEVIATHAN instruments behind /leviathan/:id, four arcade cabinets
    behind /arcade/:cab, five ways of reading the wiki behind ?view=, the core,
-   the lattice, the sage, the net, the docket, the desk. None of them was
-   reachable in one jump from anywhere, and a reader two clicks into THE ATLAS
-   had the wordmark and nothing else.
+   the lattice, the sage, the net, the docket, the desk, the slate room. None
+   of them was reachable in one jump from anywhere, and a reader two clicks
+   into THE ATLAS had the wordmark and nothing else.
 
    A switchboard is where every line in a building terminates and where you
    patch one to another. This file is the jack field. Three surfaces read it and
@@ -108,7 +108,7 @@ export const BANKS: {
     kana: '館内',
     numeral: 'IV',
     accent: 2,
-    note: 'Built here, about the people here. The arcade and its four cabinets, the transmissions, the desk they are written at, the front door and this board.',
+    note: 'Built here, about the people here. The arcade and its four cabinets, the transmissions, the desk they are written at, the shop that counts the building itself, the bench of terminals, the room where the pictures get hung, the front door and this board.',
   },
 ]
 
@@ -371,6 +371,35 @@ const ROOMS: Destination[] = [
     title: 'THE DESK',
     kana: '執筆',
     blurb: 'Where the transmissions get written. Drafts live in this browser and nowhere else.',
+  },
+  {
+    id: 'minimart',
+    bank: 'ROOMS',
+    to: '/minimart',
+    title: "JERAD'S METRIC MINIMART",
+    short: 'MINIMART',
+    kana: '計数',
+    blurb: fromSection('minimart'),
+    from: 'section',
+  },
+  {
+    id: 'tool',
+    bank: 'ROOMS',
+    to: '/tool',
+    title: 'THE TOOL',
+    kana: '工具',
+    blurb: fromSection('tool'),
+    from: 'section',
+  },
+  {
+    id: 'slates',
+    bank: 'ROOMS',
+    to: '/slates',
+    title: 'THE SLATE ROOM',
+    short: 'THE SLATES',
+    kana: '掲示',
+    blurb: fromSection('slates'),
+    from: 'section',
   },
 ]
 

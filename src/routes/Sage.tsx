@@ -1,10 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
 import { SectionArt } from '../components/SectionArt'
 import { SubHead } from '../components/Wordmark'
-import { banner } from '../content/slogans'
 import { Ask } from '../sage/Ask'
 import { Log } from '../sage/Log'
 import { invalidate, loadSage, type SageLog } from '../sage/log'
@@ -40,13 +38,6 @@ export function SageRoute() {
     <div className="sage">
       <Nav />
       <SectionArt slug="sage" />
-      <Marquee
-        text={banner('sage')}
-        duration={20}
-        tone={4}
-        size="clamp(0.75rem, 1.6vw, 1.05rem)"
-      />
-
       <header className="wrap sage__masthead">
         <h1 className="sage__mast-title">
           <SubHead>THE SAGE</SubHead>

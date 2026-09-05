@@ -1,10 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
 import { SectionArt } from '../components/SectionArt'
 import { SubHead } from '../components/Wordmark'
-import { banner } from '../content/slogans'
 import { Catch } from '../lexicon/Catch'
 import { forget, loadWords, type WordEntry, type WordLog } from '../lexicon/log'
 import { Markdown } from '../wiki/Markdown'
@@ -65,13 +63,6 @@ export function WordsRoute() {
     <div className="lex">
       <Nav />
       <SectionArt slug="words" />
-      <Marquee
-        text={banner('brain')}
-        duration={20}
-        tone={2}
-        size="clamp(0.75rem, 1.6vw, 1.05rem)"
-      />
-
       <header className="wrap lex__masthead">
         <h1 className="lex__mast-title">
           <SubHead>THE NET</SubHead>

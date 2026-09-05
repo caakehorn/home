@@ -1,10 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
 import { SectionArt } from '../components/SectionArt'
 import { SubHead } from '../components/Wordmark'
-import { banner } from '../content/slogans'
 import { Board } from '../docket/Board'
 import { Collisions } from '../docket/Collisions'
 import { Field } from '../docket/Field'
@@ -49,8 +47,6 @@ export function DocketRoute() {
     <div className="dk">
       <Nav />
       <SectionArt slug="docket" />
-      <Marquee text={banner('docket')} duration={26} tone={4} size="clamp(0.72rem, 1.5vw, 1rem)" />
-
       <header className="wrap dk__mast">
         <h1 className="dk__title">
           <SubHead>THE DOCKET</SubHead>

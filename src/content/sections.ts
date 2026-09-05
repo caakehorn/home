@@ -9,7 +9,8 @@ export type Section = {
   blurb: string
   status: 'LIVE' | 'WIRING' | 'DARK'
   accent: 1 | 2 | 3 | 4 | 5
-  /** Marquee text on the card and across the room's own header. */
+  /** Marquee text inside the room's card on the home page. It ran across the
+      room's own header too until that band was removed. */
   chant: string
 }
 
@@ -146,6 +147,17 @@ export const SECTIONS: Section[] = [
     status: 'LIVE',
     accent: 1,
     chant: banner('tool'),
+  },
+  {
+    slug: 'slates',
+    title: 'THE SLATE ROOM',
+    short: 'THE SLATES',
+    kana: '掲示',
+    blurb:
+      'The room whose subject is this building’s own pictures. Everywhere else a plate is hung by a rule — the front door opens on whatever is third in an array, a room takes the plate its index lands on — and none of that was anybody’s decision about this picture on that wall. Here it becomes one, and a photograph off a phone becomes a plate in public/art/ without a terminal. It says HUNG BY HAND on the frame, for the reason THE ATLAS says the map is drawn by hand.',
+    status: 'LIVE',
+    accent: 3,
+    chant: banner('slates'),
   },
 ]
 

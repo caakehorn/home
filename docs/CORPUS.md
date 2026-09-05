@@ -606,12 +606,15 @@ one overrules the first:
   `scripts/build-art.mjs`, each `{ id, src, w, h, alt, kana, tone }`. Two more
   files (`face-back`, `face-front`) are not scenes: they fill the silhouettes
   in `src/components/Kiss.tsx` and are reached through `KISS_FACES`.
-  **Twelve sections ↔ twelve scenes, mapped by array index — a thirteenth
-  section wraps onto `brain`'s plate unless a thirteenth scene is added.**
+  **Fourteen sections ↔ twelve scenes, mapped by array index, so it now
+  wraps: `tool` lands on `brain`'s plate and `slates` on `sage`'s, and every
+  further section wraps too until more scenes are cut.** The board overrules
+  any of it by name.
 - `src/content/board.json` — the hand-assignment, written by THE SLATE ROOM at
   `/slates`. `{ note?, plates[], walls{}, pools{} }`: `plates` are pictures
-  uploaded through the room (`{ id, file, w, h, alt, kana, tone, added, from?,
-  bytes? }`, files sitting beside the cut ones in `public/art/`), `walls` maps
+  uploaded through the room (`{ id, file, w, h, alt, kana?, tone, added, from?,
+  bytes? }` — `kana` is optional and `Plate` draws no corner without one; files
+  sit beside the cut ones in `public/art/`), `walls` maps
   a wall id to a plate id, `pools` maps `wiki`/`blog` to the plate ids their
   path hashes may draw from. **An empty board is the index rule above,
   exactly.** `src/content/slates.ts` is the registry of what is assignable and
@@ -623,8 +626,8 @@ one overrules the first:
 **`public/ally/`** — 5 JPEGs (~329 KB). Manifest is `ALLY` (5 entries) in the same
 file, each with a dated quote and a wiki deep link.
 
-**`src/content/`** — `sections.ts` (12 rooms), `art.ts` (`SCENES`, `ALLY`,
-`SCENE_ORDER`, `KISS_FACES`, `asset`), `slates.ts` (`WALLS` 18, `POOLS` 2, and
+**`src/content/`** — `sections.ts` (14 rooms), `art.ts` (`SCENES`, `ALLY`,
+`SCENE_ORDER`, `KISS_FACES`, `asset`), `slates.ts` (`WALLS` 20, `POOLS` 2, and
 the resolvers `hangsOn` / `poolOf` / `drawsFrom`), `board.json` (the
 assignment), `crawls.ts` (`RATIO` 165 entries, `JET_FUEL` 17, both deduped),
 `slogans.ts` (~12 lines, shuffled per seed by `banner()`).
@@ -703,11 +706,13 @@ const section = sectionBySlug('slug')!
 <div className="x" style={{ ['--glow' as string]: `var(--n${section.accent})` }}>
   <Nav />
   <SectionArt slug="slug" />
-  <Marquee text={section.chant} duration={20} tone={section.accent}
-           size="clamp(0.75rem, 1.6vw, 1.05rem)" />
   <header className="wrap x__masthead">…</header>
 </div>
 ```
+
+A `<Marquee text={section.chant}>` used to sit between the plate and the
+masthead in every one of these; it is gone from all of them, and `chant` now
+only feeds the card on the home page.
 
 Rooms with sub-routes factor that into a local `<Wing>`/`<Floor>` wrapper — see
 `Leviathan.tsx` and `Arcade.tsx`. `Transcript.tsx` (56 lines) is the cleanest

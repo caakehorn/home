@@ -2,7 +2,7 @@
 /* ==========================================================================
    CHECK THE SWITCHBOARD.
 
-   src/nav/atlas.ts writes out the identity of forty-five destinations instead
+   src/nav/atlas.ts writes out the identity of forty-eight destinations instead
    of importing the registries they come from, and it does that for a real
    reason — the header is on the critical path of every route on this site, and
    importing src/leviathan/core.ts (48 kB) and src/arcade/content.ts (22 kB) to
@@ -210,7 +210,7 @@ if (jacks.some((j) => j.to.startsWith('/ledger'))) {
 const perBank = {}
 for (const jack of jacks) perBank[jack.bank] = (perBank[jack.bank] ?? 0) + 1
 
-const EXPECTED = { BRAIN: 8, INSTRUMENTS: 26, RECORD: 2, ROOMS: 9 }
+const EXPECTED = { BRAIN: 8, INSTRUMENTS: 26, RECORD: 2, ROOMS: 12 }
 for (const [bank, n] of Object.entries(EXPECTED)) {
   if (perBank[bank] !== n) {
     fail(`bank ${bank} holds ${perBank[bank] ?? 0} jacks; this check was written against ${n}. If the change is intended, update EXPECTED in scripts/check-atlas.mjs and the count printed on the board.`)

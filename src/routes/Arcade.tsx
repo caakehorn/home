@@ -1,5 +1,4 @@
 import { Link, useParams } from 'react-router-dom'
-import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
 import { SectionArt } from '../components/SectionArt'
 import { CABS, PLAQUE, PRIZES, cabById } from '../arcade/content'
@@ -114,13 +113,6 @@ function Lobby() {
           </p>
         </div>
       </header>
-
-      <Marquee
-        text="ALU · aluuuu · ALEXANDRA · CANCER SUN · EDGAR + SYLVIA · CHARLOTTE NC · PEAKED IN 2008 · OBJECT OF FIXATION · "
-        duration={26}
-        tone={2}
-        size="clamp(0.75rem, 1.7vw, 1.15rem)"
-      />
 
       <ol className="wrap arc__row">
         {CABS.map((c) => (

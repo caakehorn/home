@@ -64,7 +64,7 @@ export function Roster({ board, onTakeDown, busy, canCommit }: Props) {
               />
               <div className="sl__card-say">
                 <b className="sl__wall-name">
-                  {plate.id} <span className="jp">{plate.kana}</span>
+                  {plate.id} {plate.kana && <span className="jp">{plate.kana}</span>}
                 </b>
                 <p className="sl__meta">
                   {plate.w}×{plate.h}

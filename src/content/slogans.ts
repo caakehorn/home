@@ -1,8 +1,11 @@
 /**
- * The banner. Every marquee on the site runs this list.
+ * The banner. Every crawl and every marquee on the site runs this list.
  *
  * Add or pull a line here and it lands everywhere at once — nothing else in
- * the codebase holds banner copy any more.
+ * the codebase holds banner copy any more. "Everywhere" is smaller than it
+ * was: the band that ran across the top of every room is gone, so what is
+ * left is the two crawls pinned to the viewport and the chant inside each
+ * room card on the home page.
  */
 export const SLOGANS = [
   'GET FUCKED',
@@ -20,7 +23,7 @@ export const SLOGANS = [
 ]
 
 /**
- * The same lines in a different order per banner, so two marquees on one
+ * The same lines in a different order per banner, so two banners on one
  * screen never read as the same strip scrolling twice.
  *
  * Seeded rather than random: a given banner has one order for the life of the

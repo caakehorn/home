@@ -1,8 +1,6 @@
 import { Nav } from '../components/Nav'
 import { SectionArt } from '../components/SectionArt'
 import { SubHead } from '../components/Wordmark'
-import { Marquee } from '../components/Marquee'
-import { banner } from '../content/slogans'
 import { useMinimart, type RepoStats } from '../minimart/core'
 import './minimart.css'
 
@@ -45,8 +43,6 @@ export function MinimartRoute() {
     <div className="mm">
       <Nav />
       <SectionArt slug="minimart" />
-      <Marquee text={banner('minimart')} duration={24} tone={2} size="clamp(0.72rem, 1.5vw, 1rem)" />
-
       <header className="wrap mm__mast">
         <h1 className="mm__title">
           <SubHead>JERAD'S METRIC MINIMART</SubHead>

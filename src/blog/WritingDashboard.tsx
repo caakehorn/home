@@ -11,12 +11,10 @@
  */
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Marquee } from '../components/Marquee'
 import { Markdown } from '../wiki/Markdown'
 import { configured, ready, unlock } from '../wiki/keyring'
 import { publishPost, slugify, toMarkdown } from './publish-blog'
 import { type Post } from './posts'
-import { banner } from '../content/slogans'
 import './writing-dashboard.css'
 
 type Meta = {
@@ -201,8 +199,6 @@ export function WritingDashboard({ post }: Props) {
 
   return (
     <div className="wd">
-      <Marquee text={banner('blog')} duration={19} tone={5} size="clamp(0.75rem, 1.6vw, 1.1rem)" />
-
       <header className="wrap wd__head">
         <Ransom as="h1" className="wd__title">
           THE DESK

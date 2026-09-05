@@ -1,4 +1,3 @@
-import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
 import { SectionArt } from '../components/SectionArt'
 import { SubHead } from '../components/Wordmark'
@@ -23,13 +22,6 @@ export function TranscriptRoute() {
     <div className="tsw" style={{ ['--glow' as string]: `var(--n${section.accent})` }}>
       <Nav />
       <SectionArt slug="transcript" />
-      <Marquee
-        text={section.chant}
-        duration={20}
-        tone={section.accent}
-        size="clamp(0.75rem, 1.6vw, 1.05rem)"
-      />
-
       <header className="wrap tsw__masthead">
         <h1 className="tsw__title">
           <SubHead>THE TRANSCRIPT</SubHead>

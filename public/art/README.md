@@ -16,9 +16,9 @@ somewhere else*, at the bottom of this file.
 | `kiss-neon.webp`      | pink and blonde, sparkles | the front door, right |
 | `kiss-water.webp`     | blonde and black, green suits, on the water | the void band, the big one |
 | `kiss-close.webp`     | the same two as `kiss-neon`, much nearer | the void band |
-| `kiss-butterfly.webp` | teal and pink, butterfly-wing headphones | one of the nine section rooms |
-| `kiss-mirror.webp`    | one holding a mirror, the other a makeup brush | one of the nine section rooms |
-| `kiss-blush.webp`     | two in uniform, hands clasped, both blushing | one of the nine section rooms |
+| `kiss-butterfly.webp` | teal and pink, butterfly-wing headphones | one of the section rooms |
+| `kiss-mirror.webp`    | one holding a mirror, the other a makeup brush | one of the section rooms |
+| `kiss-blush.webp`     | two in uniform, hands clasped, both blushing | one of the section rooms |
 | `kiss-dark.webp`      | dark-haired and blonde, both with their eyes shut | the void band |
 | `kiss-uniform.webp`   | two in uniform, knocked out of white | the masthead — the only one with a real alpha channel |
 | `face-back.webp`      | the pink one's face, from `src-01` | inside THE KISS, filling the figure behind |
@@ -28,14 +28,16 @@ somewhere else*, at the bottom of this file.
 something bigger — it arrived that small and clean, with nothing to crop out,
 and upscaling it would only have softened it.
 
-`SectionArt` assigns each of the nine named rooms (`SECTIONS` in
-`src/content/sections.ts`) one scene by fixed position, so no two rooms on the
-nav bar ever open on the same picture — nine rooms, nine scenes, no wrap. A
-wiki page or a blog post — anything outside those nine slugs — falls back to
-a hash of its own path instead,
-which is why the assignment there does not need a matching row here: there
-are 486 wiki pages and eight pictures, and nothing stops two pages sharing a
-plate the way two *rooms* never do. See `src/components/SectionArt.tsx`.
+`SectionArt` assigns each named room (`SECTIONS` in
+`src/content/sections.ts`) one scene by fixed position. That was nine rooms and
+nine scenes with no wrap when it was written; it is fourteen rooms and twelve
+scenes now, so the last two wrap onto the first two's pictures — `tool` onto
+`brain`'s, `slates` onto `sage`'s — until more are cut or the board is told
+otherwise by name. A wiki page or a blog post — anything outside those slugs —
+falls back to a hash of its own path instead, which is why the assignment there
+does not need a matching row here: there are 486 wiki pages and twelve
+pictures, and nothing stops two pages sharing a plate the way two *rooms* were
+once guaranteed not to. See `src/components/SectionArt.tsx`.
 
 The last two are not hung anywhere. `src/components/Kiss.tsx` draws two
 profiles as flat silhouettes and these fill them, clipped to the exact paths

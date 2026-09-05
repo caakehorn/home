@@ -67,9 +67,14 @@ export function Plate({ plate, cut = 'torn', className = '', tone, eager = false
         />
         <span className="plate__screen" aria-hidden="true" />
         <span className="plate__wash" aria-hidden="true" />
-        <span className="plate__kana jp" aria-hidden="true">
-          {plate.kana}
-        </span>
+        {/* No kana is a real answer — see the field note in `art.ts`. An
+            absent corner reads as a picture nobody had a word for; a
+            placeholder in it reads as a bug. */}
+        {plate.kana && (
+          <span className="plate__kana jp" aria-hidden="true">
+            {plate.kana}
+          </span>
+        )}
       </span>
     </figure>
   )

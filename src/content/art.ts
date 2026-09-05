@@ -14,7 +14,16 @@ export type Plate = {
   w: number
   h: number
   alt: string
-  kana: string
+  /**
+   * The mark lit in the corner of the frame. Optional, and optional on
+   * purpose: all twelve cut below carry one because they were named in a
+   * batch by somebody who had the whole set in front of him, and a picture
+   * arriving one at a time through THE SLATE ROOM often has no obvious
+   * character for what is in it. `Plate` draws no corner when there is none,
+   * which is a plate with nothing in the corner rather than a plate with a
+   * placeholder in it. `alt` is the field that is not optional.
+   */
+  kana?: string
   tone: 1 | 2 | 3 | 4 | 5
 }
 

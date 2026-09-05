@@ -15,7 +15,10 @@
  *   1. Every plate id the board names exists — in `SCENES`, or in the board's
  *      own `plates`.
  *   2. Every uploaded plate has a real file under `public/art/`, a positive
- *      pixel size, a tone in 1–5, and alt text.
+ *      pixel size, a tone in 1–5, and alt text. Not a kana: that field is
+ *      optional and `Plate` draws no corner without one. A `kana` key that is
+ *      present and empty is still caught, because that is a form writing a
+ *      blank rather than a picture that has no word.
  *   3. Every wall the board assigns is a wall the registry knows, and every
  *      wall the registry offers is one the site actually reads. A dashboard
  *      that hangs a picture on a wall no component looks at is a dashboard
@@ -175,7 +178,12 @@ for (const plate of plates) {
         'reader handed nothing for one of those has been lied to.',
     )
   }
-  if (!plate.kana || !plate.kana.trim()) fail(`${at}: no kana`)
+  if ('kana' in plate && (typeof plate.kana !== 'string' || !plate.kana.trim())) {
+    fail(
+      `${at}: kana is present and empty. A plate with no kana leaves the key out — ` +
+        'see the field note in src/content/art.ts.',
+    )
+  }
 }
 
 /* ---- what the board assigns --------------------------------------------- */

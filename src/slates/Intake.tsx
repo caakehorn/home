@@ -6,13 +6,21 @@ import { EDGES, HEAVY_BYTES, convert, slugify, toBase64, weigh, type Converted }
 /* ==========================================================================
    INTAKE — a file off the machine becomes a plate in `public/art/`
 
-   The form is four fields and a picture, and three of the fields are the ones
-   `public/art/README.md` says a plate needs: alt text, because several plates
-   are the largest object on their page and a screen reader handed nothing for
-   one of those has been lied to; a kana, because `Plate` lights one in the
-   corner of every frame; and a tone, because the halftone and the wash follow
-   `--n1`…`--n5` and a plate with no tone would take whichever one it was
-   given by accident.
+   The form is four fields and a picture, and exactly one of the four is
+   required. ID is the filename, so there has to be one and it has to be free.
+   ALT TEXT is the required one: several plates are the largest object on
+   their page, and a screen reader handed nothing for one of those has been
+   lied to. TONE has a real default — the halftone and the wash follow
+   `--n1`…`--n5`, and 3 is the middle of the ramp rather than an accident.
+
+   KANA is optional, and used to be the fourth thing that blocked the button.
+   That was wrong. The twelve cut plates all carry one because they were named
+   in a batch by somebody with the whole set in front of him; a photograph
+   arriving on its own at midnight often has no obvious character for what is
+   in it, and the room's answer to that was to hold the picture hostage until
+   one was invented. `Plate` now draws no corner when there is no kana, which
+   is a picture nobody had a word for rather than a picture with a placeholder
+   stuck on it.
 
    ---- why the preview is a real `<Plate>` ----------------------------------
 
@@ -23,7 +31,9 @@ import { EDGES, HEAVY_BYTES, convert, slugify, toBase64, weigh, type Converted }
    before the commit is what lands on the wall after it.
    ========================================================================== */
 
-const KANA_HINT = '接吻 · 朝 · 水 · 密 · 蝶 — one or two characters, lit in the corner of the frame'
+const KANA_HINT =
+  '接吻 · 朝 · 水 · 密 · 蝶 — one or two characters, lit in the corner of the frame. ' +
+  'Leave it empty and the corner stays empty.'
 
 type Props = {
   board: Board
@@ -95,7 +105,9 @@ export function Intake({ board, onPublish, canCommit, busy }: Props) {
 
   const taken = id ? roster.some((p) => p.id === id) : false
   const badId = id !== '' && !/^[a-z0-9][a-z0-9-]*$/.test(id)
-  const ready = !!shot && !!id && !taken && !badId && alt.trim() !== '' && kana.trim() !== ''
+  // Four fields, one gate: a picture, a free and legal id, and alt text.
+  // Kana is not in here on purpose — see the note at the top of the file.
+  const ready = !!shot && !!id && !taken && !badId && alt.trim() !== ''
 
   async function publish() {
     if (!shot || !ready) return
@@ -105,7 +117,9 @@ export function Intake({ board, onPublish, canCommit, busy }: Props) {
       w: shot.w,
       h: shot.h,
       alt: alt.trim(),
-      kana: kana.trim(),
+      // Absent rather than empty: `JSON.stringify` drops an undefined key, so
+      // a plate with no kana has no kana line in `board.json` at all.
+      kana: kana.trim() || undefined,
       tone,
       added: new Date().toISOString().slice(0, 10),
       from: shot.from,
@@ -310,7 +324,7 @@ export function Intake({ board, onPublish, canCommit, busy }: Props) {
             <div className="sl__row sl__row--split">
               <div>
                 <label className="sl__label" htmlFor="sl-kana">
-                  KANA
+                  KANA · OPTIONAL
                 </label>
                 <input
                   id="sl-kana"
@@ -354,7 +368,9 @@ export function Intake({ board, onPublish, canCommit, busy }: Props) {
                   w: shot.w,
                   h: shot.h,
                   alt: alt || 'The picture being added, not yet described',
-                  kana: kana || '？',
+                  // Not a placeholder: the preview shows the empty corner the
+                  // site will actually draw.
+                  kana: kana.trim() || undefined,
                   tone,
                 }}
                 cut="torn"

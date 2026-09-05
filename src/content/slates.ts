@@ -57,7 +57,10 @@ export type Uploaded = {
   w: number
   h: number
   alt: string
-  kana: string
+  /** Optional, the way it is on `Plate` — a picture arriving one at a time
+      often has no obvious character for what is in it, and an absent corner
+      is the honest version of that. `alt` is the one that is required. */
+  kana?: string
   tone: 1 | 2 | 3 | 4 | 5
   /** ISO date the room committed it. Recorded, never sorted on. */
   added: string

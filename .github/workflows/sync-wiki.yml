@@ -248,88 +248,30 @@ jobs:
       # `changed` answers whether main moved. It does not answer whether that
       # reached anybody, and the deploy was gated on `changed` alone. So a
       # deploy that failed left main holding a snapshot the site did not have;
-      # every later sync re-derived that same snapshot, found it already
-      # current, reported changed=false and skipped the deploy — and the
-      # failure became permanent, silent, and invisible to every green run.
+      # every later sync re-derived it, found it current, reported
+      # changed=false, skipped the deploy — and the gap became permanent,
+      # silent, and invisible behind a column of green runs. `npm run
+      # tool:check` began failing on 2026-09-03 at 02:16 UTC and the site
+      # served the 00:48 snapshot for three days: main at 498 pages and 972,352
+      # words, the published index.json at 496 and 894,408. The SYNC BEHIND
+      # banner was the only thing that noticed, and it named this workflow as
+      # the thing that closes the gap while this workflow was skipping the only
+      # step that could.
       #
-      # Not hypothetical. `npm run tool:check` began failing on 2026-09-03 at
-      # 02:16 UTC and the site served the 00:48 snapshot for three days while
-      # every scheduled sync here reported success. main stood at 498 pages and
-      # 972,352 words; the published index.json at 496 and 894,408. The SYNC
-      # BEHIND banner was the only thing that noticed, and it named this
-      # workflow as the thing that closes the gap while this workflow was
-      # skipping the only step that could close it.
+      # So the published snapshot is asked directly, keyed on the wiki-brain
+      # commit it was derived from rather than on when it was built.
       #
-      # So the published snapshot is asked directly, and compared against
-      # origin/main rather than the checkout, which may be behind it. A
-      # repository state and a deployment state are two different facts, and
-      # only one of them is what a reader sees. "Nothing changed" must never
-      # again mean "nothing needs deploying".
-      #
-      # The failure mode in the other direction is a deploy that re-fails on
-      # every scheduled run until somebody fixes it. That is the intended
-      # trade: on a public repository runner time is free, and loud and stale
-      # beats silent and stale.
-      - id: published
-        name: Is the live site serving what is on main?
-        if: steps.commit.outputs.changed != 'true'
-        run: |
-          set -uo pipefail
-          git fetch --quiet origin main
-          SITE="https://${GITHUB_REPOSITORY%%/*}.github.io/${GITHUB_REPOSITORY#*/}/wiki/index.json"
-          generated_at() { node -p 'JSON.parse(require("fs").readFileSync(0,"utf8")).generatedAt' 2>/dev/null; }
-
-          ON_MAIN="$(git show origin/main:public/wiki/index.json | generated_at || true)"
-          ON_SITE="$(curl -fsS --max-time 30 "$SITE" | generated_at || true)"
-
-          echo "  on main   ${ON_MAIN:-<unreadable>}"
-          echo "  on site   ${ON_SITE:-<unreachable>}"
-
-          # Unreachable is not stale: a network blip must not queue a deploy on
-          # every run, and `changed` still publishes real movement either way.
-          #
-          # But a comparison that can never be made is a recovery that never
-          # happens, which is the failure this step exists to end — so the two
-          # halves are reported separately. An unreadable blob means the shallow
-          # checkout did not fetch it and this step needs fixing; an unreachable
-          # site is the network, or Pages being down.
-          if [ -z "$ON_MAIN" ]; then
-            echo '::warning::could not read public/wiki/index.json at origin/main — this step cannot detect a stale site'
-            echo 'stale=false' >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          if [ -z "$ON_SITE" ]; then
-            echo "::warning::could not reach $SITE — not forcing a deploy this run"
-            echo 'stale=false' >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          if [ "$ON_MAIN" = "$ON_SITE" ]; then
-            echo 'stale=false' >> "$GITHUB_OUTPUT"
-            echo 'The site is serving the snapshot on main.'
-            exit 0
-          fi
-          echo "::notice::main holds a snapshot the site never got ($ON_MAIN vs $ON_SITE) — deploying it"
-          echo 'stale=true' >> "$GITHUB_OUTPUT"
-          echo "sha=$(git rev-parse origin/main)" >> "$GITHUB_OUTPUT"
-
-      # One answer, so the deploy's `if:` and its `ref` cannot disagree about
-      # whether to ship or about which commit is being shipped.
+      # The decision is scripts/reconcile-deploy.mjs rather than shell here, so
+      # that it can be tested instead of reasoned about: `npm run
+      # reconcile:check` runs it over every state this job can reach, including
+      # the one that caused the outage. A workflow `if:` is the last place in
+      # this repository where being wrong stays invisible until it matters.
       - id: decide
-        name: Deploy, and what
-        run: |
-          set -euo pipefail
-          if [ '${{ steps.commit.outputs.changed }}' = 'true' ]; then
-            echo 'deploy=true' >> "$GITHUB_OUTPUT"
-            echo 'sha=${{ steps.commit.outputs.sha }}' >> "$GITHUB_OUTPUT"
-            echo 'Deploying the snapshot this run pushed.'
-          elif [ '${{ steps.published.outputs.stale }}' = 'true' ]; then
-            echo 'deploy=true' >> "$GITHUB_OUTPUT"
-            echo 'sha=${{ steps.published.outputs.sha }}' >> "$GITHUB_OUTPUT"
-            echo 'Nothing to derive, but the site is behind main. Deploying main.'
-          else
-            echo 'deploy=false' >> "$GITHUB_OUTPUT"
-            echo 'Snapshot current, and the site has it. Nothing to do.'
-          fi
+        name: What the site should be serving
+        run: node scripts/reconcile-deploy.mjs
+        env:
+          CHANGED: ${{ steps.commit.outputs.changed }}
+          PUSHED_SHA: ${{ steps.commit.outputs.sha }}
 
   # A push made with GITHUB_TOKEN does not trigger other workflows, so the
   # deploy is called rather than waited for.

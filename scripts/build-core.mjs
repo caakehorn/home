@@ -7,9 +7,8 @@
  *
  * The instrument's premise is the **typed** graph: 2,398 connections, each one
  * `{page, type, claim}`, where the claim is a sentence of prose asserting why
- * the edge exists. Nineteen relationship types, six of them in inverse pairs
- * whose counts match almost exactly — which is the tell that this graph is
- * maintained deliberately rather than accumulated.
+ * the edge exists. Relationship types are grouped into drawing families so
+ * the renderer can represent new semantic edges without silently dropping them.
  *
  * That graph is not `index.json.edges`. Those 3,851 edges are the *untyped*
  * wikilink graph — a different, larger, flatter object. It ships too, as the
@@ -108,19 +107,22 @@ const COLLAPSE = { fraction: 0.85, floor: 25 }
 const TRACKED = ['nodes', 'words', 'typed', 'untyped', 'gaps', 'gapPages']
 
 /**
- * The nineteen relationship types, grouped by what kind of assertion they make.
- * The family decides how an edge is drawn; it is a grouping of the names the
- * corpus already uses, not a judgement about which edges matter.
+ * Relationship types grouped by what kind of assertion they make.
+ * The family decides how an edge is drawn. Keep this list synchronized with
+ * the relationship vocabulary emitted by wiki-brain; an unknown type must
+ * still fail loudly rather than render as an unclassified edge.
  */
 const FAMILY = {
   causes: 'causal', 'caused-by': 'causal', precedes: 'causal', follows: 'causal',
-  escalates: 'causal', resolves: 'causal',
+  escalates: 'causal', resolves: 'causal', operationalizes: 'causal',
   contains: 'structural', 'component-of': 'structural',
-  instantiates: 'structural', 'instance-of': 'structural',
+  instantiates: 'structural', 'instance-of': 'structural', extends: 'structural',
   evidences: 'evidential', 'evidenced-by': 'evidential', contextualizes: 'evidential',
-  supplies: 'evidential', 'supplied-by': 'evidential',
+  supplies: 'evidential', 'supplied-by': 'evidential', interprets: 'evidential',
+  reframes: 'evidential', synthesizes: 'structural',
   'co-occurs': 'affinity', parallels: 'affinity', mirrors: 'affinity',
-  contradicts: 'tension',
+  'converges-with': 'affinity', deepens: 'affinity',
+  contradicts: 'tension', distinguishes: 'tension',
 }
 
 /** Which type undoes which. Symmetric types are their own inverse. */
@@ -257,7 +259,7 @@ for (const file of readdirSync(join(WIKI, 'pages')).sort()) {
 const T_SRC = ['range', 'start', 'mention', 'created', 'none']
 
 const yearOf = (iso) => {
-  const m = String(iso).match(/^(\d{4})-(\d{2})(?:-(\d{2}))?/)
+  const m = String(iso).match(/^(\d{4})-(\d{2})(?:-(\d{2}))?/) 
   if (!m) return null
   return +m[1] + (+m[2] - 1) / 12 + (m[3] ? (+m[3] - 1) / 365 : 0)
 }

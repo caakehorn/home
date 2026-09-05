@@ -15,10 +15,10 @@
  * be named individually before the analyzer can be taught to refuse them.
  *
  * It reads the published snapshot rather than wiki-brain, so it measures what
- * a reader actually gets, and it tokenises with the same `marked` the renderer
- * uses rather than a second parser of its own — the column-shift defect below
- * is invisible to any reader that splits on `|` more carefully than the app
- * does.
+ * a reader actually gets, and it runs the same `preprocess` → `marked.lexer`
+ * the renderer runs rather than a parser of its own. That order matters: skip
+ * `preprocess` and the `|` inside `[[path|label]]` splits 43 rows an extra
+ * column wide, which looks exactly like a rendering defect and is not one.
  *
  *   node scripts/audit-charts.mjs            # the tally
  *   node scripts/audit-charts.mjs --detail   # every offending table, named
@@ -39,12 +39,11 @@ const PAGES = path.join(HERE, '..', 'public', 'wiki', 'pages')
  * Lower these as the defects are actually fixed; never raise one to go green.
  */
 const BASELINE = {
-  'truncated-labels': 130,
-  'kv-list': 53,
-  'column-shift': 43,
+  'truncated-labels': 131,
+  'kv-list': 54,
   'tiny': 39,
   'blank-header': 36,
-  'year-as-value': 25,
+  'year-as-value': 27,
   'mixed-magnitude': 18,
   'unit-contamination': 16,
   'judgement-column': 12,
@@ -109,11 +108,7 @@ function analyzeTable({ headers, rows }) {
 // ---------------------------------------------------------------------------
 // The eight defects, each one a rule the analyzer will have to learn to refuse
 
-/** A cell that opened a wikilink and never closed it: `marked` split on its pipe. */
-const openOnly = (t) => t.includes('[[') && !t.includes(']]')
-const closeOnly = (t) => t.includes(']]') && !t.includes('[[')
-
-function defectsOf(spec, table) {
+function defectsOf(spec) {
   const found = []
   const heads = spec.series.map((s) => s.name)
 
@@ -156,13 +151,20 @@ function defectsOf(spec, table) {
   // `Chart.tsx` cuts a bar's category at 15 characters and appends an ellipsis.
   if (spec.form === 'bar' && spec.labels.some((l) => l.length > 16)) found.push('truncated-labels')
 
-  const cells = [table.headers, ...table.rows].flat()
-  if (cells.some(openOnly) && cells.some(closeOnly)) found.push('column-shift')
-
   return found
 }
 
 // ---------------------------------------------------------------------------
+
+/**
+ * `src/wiki/inline.tsx`. Wikilinks become ordinary markdown links before the
+ * lexer ever sees them, which is why their pipes do not shatter a table row.
+ */
+const preprocess = (md) =>
+  md.replace(/\[\[([^\]|]+)(?:\|([^\]]*))?\]\]/g, (_all, target, label) => {
+    const slug = target.trim().replace(/^wiki\//, '').replace(/\.md$/, '')
+    return `[${(label ?? slug).trim()}](/wiki/${slug})`
+  })
 
 const tablesOf = (body) => {
   const out = []
@@ -173,7 +175,7 @@ const tablesOf = (body) => {
       if (t.tokens) walk(t.tokens)
     }
   }
-  walk(marked.lexer(body))
+  walk(marked.lexer(preprocess(body)))
   return out
 }
 
@@ -189,14 +191,10 @@ for (const file of fs.readdirSync(PAGES).sort()) {
   const page = JSON.parse(fs.readFileSync(path.join(PAGES, file), 'utf8'))
   for (const table of tablesOf(page.body)) {
     tables++
-    // The column shift corrupts the rendered table whether or not it is drawn,
-    // so it is counted over every table rather than only the charted ones.
-    const cells = [table.headers, ...table.rows].flat()
-    const shifted = cells.some(openOnly) && cells.some(closeOnly)
     const spec = analyzeTable(table)
-    if (!spec && !shifted) continue
-    if (spec) charted++
-    const defects = spec ? defectsOf(spec, table) : ['column-shift']
+    if (!spec) continue
+    charted++
+    const defects = defectsOf(spec)
     if (!defects.length) continue
     for (const d of new Set(defects)) tally[d] = (tally[d] ?? 0) + 1
     offenders.push({ slug: page.slug, headers: table.headers, defects: [...new Set(defects)], spec })
@@ -217,9 +215,8 @@ if (detail) {
   for (const o of offenders) {
     console.log(`${o.slug}  [${o.defects.join(', ')}]`)
     console.log(`    ${o.headers.join(' | ')}`)
-    if (o.spec)
-      for (const s of o.spec.series)
-        console.log(`    ${s.name} → ${JSON.stringify(s.values.slice(0, 5))}  raw ${JSON.stringify(s.cells.slice(0, 3))}`)
+    for (const s of o.spec.series)
+      console.log(`    ${s.name} → ${JSON.stringify(s.values.slice(0, 5))}  raw ${JSON.stringify(s.cells.slice(0, 3))}`)
   }
 }
 

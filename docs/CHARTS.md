@@ -12,22 +12,21 @@ rises, so this document cannot quietly go stale.
 
 ## 1. What is actually wrong
 
-### 1.1 The auto-charter — 224 of 236 drawn tables carry a hard defect
+### 1.1 The auto-charter — 194 of 239 drawn tables carry a hard defect
 
 `src/wiki/Markdown.tsx:123` defaults to `tables = 'chart'`, so
 `src/wiki/table.ts:analyzeTable` gets a vote on every table in the corpus and
 draws whichever one it can find a numeric column in. Over the snapshot:
 
-**663 tables → 236 auto-charted → 224 carrying at least one named defect.**
+**663 tables → 239 auto-charted → 194 carrying at least one named defect.**
 
 | defect | n | what the reader is shown |
 |---|---|---|
-| `truncated-labels` | 130 | `Chart.tsx:143` cuts a bar's category at 15 characters |
-| `kv-list` | 53 | a `Metric \| Value` list flattened onto one shared axis |
-| `column-shift` | 43 | every column shifted right by one — §1.2 |
+| `truncated-labels` | 131 | `Chart.tsx:143` cuts a bar's category at 15 characters |
+| `kv-list` | 54 | a `Metric \| Value` list flattened onto one shared axis |
 | `tiny` | 39 | a two- or three-row chart |
 | `blank-header` | 36 | no axis name, no series name |
-| `year-as-value` | 25 | a year scraped from a prose cell, drawn as a magnitude |
+| `year-as-value` | 27 | a year scraped from a prose cell, drawn as a magnitude |
 | `mixed-magnitude` | 18 | series ≥100× apart sharing one axis |
 | `unit-contamination` | 16 | `%` sniffed from one column, printed on all of them |
 | `judgement-column` | 12 | a Score, Rating, Percentile or Gini charted |
@@ -36,9 +35,8 @@ Four that show the mechanism:
 
 - **`health/cocaine`** — the table is `Node | Era | Role | Product specificity`.
   `parseNumber` takes the leading integer of `"2015–16"`, so the chart draws a
-  bar 2,015 units tall and labels it with a person's page. It asserts that
-  somebody's *era* is a quantity, and — see §1.2 — it reads it out of the wrong
-  column.
+  bar 2,015 units tall and labels it with a person's page. A span of years is
+  an axis; drawn as a magnitude it asserts that somebody's era is a quantity.
 - **`health/intake-ledger`** — the `When` column holds `2026-08-30 20:05`,
   which parses to `2026` and stands twenty thousand times taller than the
   `Quantity` bars beside it (`0.1 g`). Every category label reads `#1`.
@@ -53,23 +51,19 @@ Four that show the mechanism:
 The common cause is that `analyzeTable` is written to say yes. It asks whether
 a chart is *possible*, never whether it is *true*.
 
-### 1.2 A wikilink pipe shifts every column right by one — 43 tables, 40 pages
-
-This one is not a chart bug. It corrupts the rendered table for every reader.
+### 1.2 One defect that is *not* here, recorded so it is not re-found
 
 `marked` splits a table row on unescaped `|`, and the wiki's link syntax is
-`[[path|label]]`. So a row whose first cell is a wikilink parses as two cells,
-and everything after it lands one column left of its own header:
+`[[path|label]]` — which reads like 43 tables rendering a column right of where
+they belong. It is not: `src/wiki/Markdown.tsx:116` runs `preprocess` before
+`marked.lexer`, and `src/wiki/inline.tsx:15` has already turned every wikilink
+into `[label](/wiki/slug)` by the time the lexer sees the row. The columns
+align.
 
-```
-header cells: ["Title", "Author",       "My Rating",   "Date Read"]
-row cells   : ["Rubicon: The Last Years of the [[wiki/interests/roman-republic",
-               "Roman Republic]]", "Holland, Tom", "★★★★★"]
-```
-
-Tom Holland is displayed under **My Rating**; the star rating is displayed
-under **Date Read**. `interests/favorites/books`, `health/cocaine`, and every
-artist page with a linked show context is affected — 43 tables on 40 pages.
+It is written down because the first pass of this audit lexed the page bodies
+raw, "found" the shift, and had it for twenty minutes. Any tool that reads
+`public/wiki/pages/*.json` must run `preprocess` first or it is measuring a
+corpus the site never renders.
 
 ### 1.3 THE RULE is enforced on the rack and not on the renderer
 
@@ -136,7 +130,7 @@ clean, per `CLAUDE.md` §1.
 | # | checkpoint | what it closes |
 |---|---|---|
 | 1 | the audit, as a rerunnable gate | §1 is a number, not an impression |
-| 2 | refuse-first analyzer · column-shift fix · opt-in directive | §1.1, §1.2 |
+| 2 | refuse-first analyzer · opt-in directive | §1.1 |
 | 3 | THE RULE applied to the renderer | §1.3 |
 | 4 | unseal — YouTube, then location, then AI sessions | §1.5, §1.6 |
 | 5 | new instruments on the unsealed corpora | §1.6 |
@@ -159,9 +153,13 @@ rendered as a table unless it passes. The rules, each one a defect from §1.1:
 - labels wrap; nothing is truncated
 
 Wiki-brain pages opt a table in with a directive above it, so a chart is
-something a page **asked for**. The column shift is fixed by escaping pipes
-inside `[[…]]` before tokenising — one pass, 43 tables repaired site-wide,
-tables and charts both.
+something a page **asked for** rather than something that happened to it.
+
+`Markdown.tsx:11`'s own comment already records a third instance of this class:
+the generation table on `fayette-return` "lost Who, Left for, Ended up and
+Buried" to `Chart`'s TABLE face, "and drew birth years as bar lengths besides".
+That was worked around by turning charts off in the Reader's Digest edition.
+This checkpoint fixes the cause instead, so the workaround can go.
 
 ### Checkpoints 4–5 — the order the corpora land in
 

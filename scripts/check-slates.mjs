@@ -116,7 +116,8 @@ for (const wall of FIXED) {
   }
 }
 // The room walls are read generically, by SectionArt building the id from the
-// slug. One call covers all twelve; check the call rather than the twelve.
+// slug. One call covers every room there is, however many that is today; check
+// the call rather than counting them.
 if (!readers.includes('hangs(`room:${slug}`)')) {
   fail('SectionArt no longer reads room walls — every per-room assignment is dead')
 }

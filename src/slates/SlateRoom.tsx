@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Marquee } from '../components/Marquee'
 import { Nav } from '../components/Nav'
+import { SectionArt } from '../components/SectionArt'
 import { SubHead } from '../components/Wordmark'
 import { banner } from '../content/slogans'
 import { BOARD, WALLS, type Board, type Uploaded } from '../content/slates'
@@ -194,6 +195,12 @@ export function SlateRoom() {
   return (
     <div className="sl">
       <Nav />
+      {/* The room is a room like any other now, and it takes the banner every
+          other room takes — which also means `room:slates` is a wall the site
+          actually reads, rather than a row the board offers and nothing
+          renders. The registry in `content/slates.ts` is explicit that a
+          dashboard offering a dead wall is a dashboard that lies. */}
+      <SectionArt slug="slates" />
       <Marquee text={banner('slates')} duration={26} tone={3} size="clamp(0.72rem, 1.5vw, 1rem)" />
 
       <header className="wrap sl__mast">
